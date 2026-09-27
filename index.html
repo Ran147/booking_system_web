@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking System</title>
+    <script>
+      // Applies the stored theme before React loads so the page does not
+      // flash (theming-standards §4). Keys match STORAGE_KEY.THEME and
+      // THEME_MODE.
+      (function () {
+        try {
+          var themeMode = localStorage.getItem("booking.theme");
+          var prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          if (themeMode === "dark" || (themeMode !== "light" && prefersDark)) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (error) {
+          // Storage can be blocked; the ThemeProvider applies the theme later.
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

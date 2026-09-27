@@ -1,0 +1,9 @@
+{
+  "emailInvalid": "Enter a valid email.",
+  "outOfRange": "The value is out of the allowed range.",
+  "passwordTooWeak": "The password does not meet the requirements.",
+  "recaptchaRequired": "Confirm you are not a robot.",
+  "required": "This field is required.",
+  "tooLong": "The text is too long.",
+  "tooShort": "The text is too short."
+}

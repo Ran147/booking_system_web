@@ -1,0 +1,9 @@
+{
+  "layout": {
+    "title": "Administración"
+  },
+  "placeholder": {
+    "description": "Aquí se gestionarán los negocios, los planes y los tickets de soporte.",
+    "title": "Panel de administración"
+  }
+}

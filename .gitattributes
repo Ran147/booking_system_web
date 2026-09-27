@@ -1,0 +1,16 @@
+# Normalize line endings: LF in the repo for everyone (Windows, macOS, Linux)
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.xlsx binary
+*.pdf binary
+
+# Jira exports come from Excel/Jira and may use CRLF; keep them untouched
+docs/backlog/*.csv -text

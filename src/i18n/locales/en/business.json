@@ -1,0 +1,9 @@
+{
+  "layout": {
+    "title": "Business portal"
+  },
+  "placeholder": {
+    "description": "This is where you will manage your business's services, schedule and customers.",
+    "title": "Business dashboard"
+  }
+}

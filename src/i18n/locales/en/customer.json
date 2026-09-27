@@ -1,0 +1,9 @@
+{
+  "layout": {
+    "title": "Customer portal"
+  },
+  "placeholder": {
+    "description": "This is where you will book services and manage your bookings.",
+    "title": "Your bookings"
+  }
+}

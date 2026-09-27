@@ -1,0 +1,65 @@
+rules_version = '2';
+
+// The security boundary (auth-and-roles §4). Anything not matched below is
+// denied. Literals must match USER_ROLE, FIRESTORE_COLLECTION and the status
+// constants in src/shared/domain. Nothing here covers a BLOCKED decision
+// (docs/decisions/open-questions.md).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
+    function isSuperAdmin() {
+      return hasRole('super_admin');
+    }
+
+    // Tenant check: a subscriber's business comes from the businessId custom
+    // claim, never from the request path alone.
+    function ownsBusiness(businessId) {
+      return hasRole('subscriber') && request.auth.token.businessId == businessId;
+    }
+
+    // inactive and suspended businesses are read-only (KAN-49).
+    function businessIsWritable(businessId) {
+      return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
+    }
+
+    match /businesses/{businessId} {
+      allow read: if true; // public profile (KAN-112)
+      allow update: if ownsBusiness(businessId)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+             .hasAny(['status', 'ownerUserId']); // status changes only via functions
+
+      match /services/{serviceId} {
+        allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin();
+        allow create, update: if ownsBusiness(businessId) && businessIsWritable(businessId);
+        allow delete: if false; // via the deleteService function (KAN-59)
+      }
+
+      match /bookings/{bookingId} {
+        allow read: if ownsBusiness(businessId)
+          || (hasRole('customer') && resource.data.customerUserId == request.auth.uid);
+        allow write: if false; // only via booking functions
+      }
+
+      match /customers/{customerId} {
+        allow read, write: if ownsBusiness(businessId) && businessIsWritable(businessId);
+      }
+    }
+
+    match /auditLog/{auditLogEntryId} {
+      allow read: if isSuperAdmin();
+      allow write: if false; // functions only
+    }
+
+    // Deny by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

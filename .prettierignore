@@ -1,0 +1,9 @@
+dist
+coverage
+functions/lib
+node_modules
+src/shared/components/ui
+docs/backlog/*.csv
+
+# Hand-written Markdown (skills, specs, docs) keeps its compact tables
+*.md

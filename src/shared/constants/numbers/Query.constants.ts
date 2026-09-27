@@ -1,0 +1,5 @@
+export const QUERY_DEFAULTS = {
+  GARBAGE_COLLECTION_TIME_MS: 300_000,
+  RETRY_COUNT: 1,
+  STALE_TIME_MS: 30_000,
+} as const;

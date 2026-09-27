@@ -1,0 +1,9 @@
+{
+  "layout": {
+    "title": "Portal del negocio"
+  },
+  "placeholder": {
+    "description": "Aquí gestionarás los servicios, la agenda y los clientes de tu negocio.",
+    "title": "Panel del negocio"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "layout": {
+    "title": "Administration"
+  },
+  "placeholder": {
+    "description": "This is where businesses, plans and support tickets will be managed.",
+    "title": "Administration dashboard"
+  }
+}

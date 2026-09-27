@@ -1,0 +1,9 @@
+{
+  "layout": {
+    "title": "Portal del cliente"
+  },
+  "placeholder": {
+    "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
+    "title": "Tus reservas"
+  }
+}
