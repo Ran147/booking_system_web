@@ -5,8 +5,8 @@
 | Portal | business |
 | Feature folder | `src/portals/business/layout/` |
 | Stories | KAN-39, KAN-40, KAN-41, KAN-42 |
-| Status | BLOCKED (partially) |
-| Depends on | KAN-28 (subscriber sign-in and session); KAN-38 (idle logout); KAN-32 (subscription data, payment page KAN-45, read-only KAN-49); KAN-182 (`PlatformSettings`); Q5 for the `past_due` countdown |
+| Status | Draft |
+| Depends on | KAN-28 (subscriber sign-in and session); KAN-38 (idle logout); KAN-32 (subscription data, payment page KAN-45, read-only KAN-49); KAN-182 (`PlatformSettings`); Q5 decided 2026-09-28 (no renewal retries in the MVP, so the `past_due` countdown follows the grace days only) |
 
 ## Intent
 Every screen of the business portal shows a sidebar that tells the subscriber which business they are managing, the state of their subscription, and warns them before the subscription runs out. From the sidebar the subscriber can sign out to protect their account when they finish.
@@ -29,12 +29,13 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 - Idle logout (KAN-38, auth spec) — only referenced.
 - Paying, upgrading or cancelling (KAN-44, KAN-45, KAN-47 in the subscription spec); the banners only link there.
 - Internal alerts "subscription about to end" (KAN-101, notifications epic).
-- Retry schedule of failed renewals (KAN-48, Q5).
+- Retry schedule of failed renewals (KAN-48): deferred, out of MVP (Q5).
 
 ## Data
 - `Business` (`domain-glossary` §3): `name`, `status` (`active`, `inactive`, `suspended`), `timeZone`. **Logo field:** not defined in the glossary; this spec reads a Nullable `logoUrl` (name to confirm; see Backlog issues).
 - `Subscription` at `businesses/{businessId}/subscription/current`: `status` (`active`, `past_due`, `expired`, `cancelled`), `planId`, `currentPeriodEndsAt`, `cancelAtPeriodEnd` (`domain-glossary` §4.2).
 - `Plan` (`plans/{planId}`): `name`.
+- `PlatformSettings` (`platformSettings/current`): `gracePeriodDays` (KAN-182), for the `past_due` countdown.
 - No field is written by this spec.
 
 ## Acceptance criteria
@@ -57,11 +58,13 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 
 ### KAN-41 — Warning banner when the subscription is about to end
 - [ ] **AC-KAN-41-01** · happy · Given an `active` subscription with `cancelAtPeriodEnd` true and `currentPeriodEndsAt` within the warning window, when the subscriber opens any business-portal screen, then a warning banner `business:layout.expiryWarning.message` with the remaining days and the end date (business `timeZone`) and a link to the subscription page is shown. See AS-4. [KAN-41]
-- [ ] **AC-KAN-41-02** · happy · Given a subscription that is `past_due`, when any business-portal screen is shown, then a warning banner `business:layout.expiryWarning.pastDue` with a link to pay (KAN-45) is shown, without a countdown (see BLOCKED). [KAN-41]
+- [ ] ~~**AC-KAN-41-02** · happy · Given a subscription that is `past_due`, when any business-portal screen is shown, then a warning banner `business:layout.expiryWarning.pastDue` with a link to pay (KAN-45) is shown, without a countdown (see BLOCKED). [KAN-41]~~ Replaced by AC-KAN-41-07 after Q5 was decided.
 - [ ] **AC-KAN-41-03** · error · Given the subscription cannot be loaded, when the screen is shown, then no warning banner with guessed dates is shown; only the load error of AC-KAN-40-05 appears. [KAN-41]
 - [ ] **AC-KAN-41-04** · edge · Given an `active` subscription with `cancelAtPeriodEnd` false, when `currentPeriodEndsAt` is near, then no warning is shown, because it renews automatically. See AS-5. [KAN-41]
 - [ ] **AC-KAN-41-05** · edge · Given the end date is exactly at the edge of the window or "today" in the business `timeZone` but "tomorrow" in the browser's time zone, when the remaining days are computed, then they are counted in the business `timeZone`, and the last day reads `business:layout.expiryWarning.endsToday`. [KAN-41]
 - [ ] **AC-KAN-41-06** · edge · Given the subscriber dismisses the warning banner, when they move to another screen in the same session, then it stays hidden; it is shown again in a new session. See AS-6. [KAN-41]
+- [ ] **AC-KAN-41-07** · happy · Given a subscription that is `past_due`, when any business-portal screen is shown, then a warning banner `business:layout.expiryWarning.pastDue` shows the days left before it becomes `expired` and that date (business `timeZone`), with a link to pay (KAN-45). See AS-9. [KAN-41, KAN-182]
+- [ ] **AC-KAN-41-08** · error · Given a `past_due` subscription and `PlatformSettings` cannot be loaded, when the banner is shown, then it shows `business:layout.expiryWarning.pastDue` with the link to pay but without days left or a date (never a guessed date). [KAN-41]
 
 ### KAN-42 — Sign out from the sidebar
 - [ ] **AC-KAN-42-01** · happy · Given a signed-in subscriber, when they choose sign out in the sidebar, then the session ends, the cached data of their business is cleared and they land on the sign-in page. [KAN-42]
@@ -75,7 +78,7 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| KAN-41 (days left before a `past_due` subscription becomes `expired`) | Q5 — simulated gateway renewals | The countdown for `past_due` depends on the retry count and interval. Only the generic `past_due` warning (AC-KAN-41-02) is specified. |
+| — | — | None. Q5 was decided on 2026-09-28: there are no renewal retries in the MVP, so the `past_due` countdown is specified (AC-KAN-41-07, AC-KAN-41-08). |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -88,6 +91,7 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 | AS-6 | The warning can be dismissed for the current session only; the `past_due` warning cannot be dismissed. | AC-KAN-41-06 |
 | AS-7 | Sign-out always clears the local session even if the server call fails, so a subscriber is never stuck signed in. | AC-KAN-42-03 |
 | AS-8 | Unsaved-changes confirmation on sign-out applies to forms of the business portal that track unsaved changes. | AC-KAN-42-04 |
+| AS-9 | A `past_due` subscription becomes `expired` at `currentPeriodEndsAt` plus `PlatformSettings.gracePeriodDays` (fallback: the default of the admin plans spec, AS-6 there), counted in the business `timeZone`. No retry changes that date in the MVP (Q5). | AC-KAN-41-07 |
 
 ## Backlog issues
 - No story in the business portal lets the subscriber set or change the business name and logo shown here (KAN-39); the logo field is not in `domain-glossary` either. It may belong to sign-up (KAN-26) or a missing business-profile story. `logoUrl` is used as a proposed name.
@@ -109,6 +113,5 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 | --- | --- | --- |
 | KAN-39 | AC-KAN-39-01 … AC-KAN-39-05 | `tests/BusinessSidebar.test.tsx` |
 | KAN-40 | AC-KAN-40-01 … AC-KAN-40-07 | `tests/SubscriptionBanner.test.tsx` |
-| KAN-41 | AC-KAN-41-01 … AC-KAN-41-06 | `tests/ExpiryWarningBanner.test.tsx` |
-| KAN-41 (past_due countdown) | BLOCKED (Q5) | — |
+| KAN-41 | AC-KAN-41-01, AC-KAN-41-03 … AC-KAN-41-08 (AC-KAN-41-02 replaced) | `tests/ExpiryWarningBanner.test.tsx` |
 | KAN-42 | AC-KAN-42-01 … AC-KAN-42-07 | `tests/BusinessSidebar.test.tsx` |

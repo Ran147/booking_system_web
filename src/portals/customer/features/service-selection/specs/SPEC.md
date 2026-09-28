@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/customer/features/service-selection/` |
 | Stories | KAN-135, KAN-136, KAN-137, KAN-138 |
 | Status | BLOCKED (partially) |
-| Depends on | Q1 (collaborator); Q4 (how a business page is reached); Q6 (booking without an account, for how a visitor enters the flow); `business-home` spec (KAN-111, KAN-116); `availability` spec (KAN-139) |
+| Depends on | Q1 (collaborator); Q4 decided 2026-09-28 (the flow lives under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory; the flow is private); `business-home` spec (KAN-111, KAN-116); `availability` spec (KAN-139) |
 
 ## Intent
 A signed-in customer on a business's pages chooses the service they want as the first step of a booking, so that availability can be looked up for that service. Choosing a collaborator is part of this epic but waits on Q1.
@@ -15,17 +15,17 @@ A signed-in customer on a business's pages chooses the service they want as the 
 | Actor | Can |
 | --- | --- |
 | customer | Choose one `active` service of the business to start a booking |
-| visitor | Not specified here; how a visitor enters the booking flow depends on Q6 (KAN-116) |
+| visitor | Cannot open the booking flow: is sent to sign in or sign up and comes back to this step (Q6, KAN-116) |
 
 ## In scope
 - Choosing one service to book, including arriving with a service already chosen from the business home page (KAN-116).
 - Moving on to the availability step with the chosen service.
+- Visitor entry: sign in or sign up first, then back to this step (Q6).
 
 ## Out of scope
 - Everything about collaborators (KAN-136, KAN-137, KAN-138) while Q1 is open.
-- Visitor entry into the flow (Q6).
 - Date and time slot choice (KAN-139), summary and confirmation (KAN-145).
-- The URL form of a business page (Q4).
+- Booking without an account: not offered (Q6).
 
 ## Data
 - `Service` (read, `active` only): `name`, `priceInCents`, `durationMinutes`, `status`, `discounts`.
@@ -45,6 +45,8 @@ A signed-in customer on a business's pages chooses the service they want as the 
 - [ ] **AC-KAN-135-08** · edge · Given the business has no `active` services, when the step opens, then `customer:serviceSelection.list.empty` is shown and there is no continue action. [KAN-135]
 - [ ] **AC-KAN-135-09** · edge · Given a customer who goes back from the availability step, when this step is shown again, then their chosen service is still selected. [KAN-135]
 - [ ] **AC-KAN-135-10** · edge · Given a customer who changes the chosen service after having picked a date or time slot, when they continue, then the previous date and time slot are cleared. [KAN-135, KAN-140]
+- [ ] **AC-KAN-135-11** · happy · Given a visitor who chose to book a service (KAN-116) and then signed in, or signed up and signed in, as a `customer`, when they return, then this step opens for the same business with that service already selected and they can continue to availability. [KAN-135, KAN-116]
+- [ ] **AC-KAN-135-12** · error · Given a visitor who is not signed in, when they open this step directly (for example from a shared link under `/<businessSlug>`), then no service list is shown and they are sent to sign-in with this step as `redirectTo`. See AS-5. [KAN-135]
 
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
@@ -52,7 +54,6 @@ A signed-in customer on a business's pages chooses the service they want as the 
 | KAN-136 | Q1 — collaborator | Listing the collaborators who can serve the chosen service. |
 | KAN-137 | Q1 — collaborator | Choosing a specific collaborator when the business allows it (setting from KAN-61, also blocked). |
 | KAN-138 | Q1 — collaborator | Continuing without a collaborator so that an available one is assigned. |
-| KAN-135 (visitor entry) | Q6 — booking without an account | How a visitor reaches this step (see KAN-116 in `business-home`). |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -61,6 +62,7 @@ A signed-in customer on a business's pages chooses the service they want as the 
 | AS-2 | The progress of the booking flow (chosen service, date, slot) lives only in the customer's current session in the browser; nothing is saved until the booking is confirmed (KAN-148). | Data, AC-KAN-135-09 |
 | AS-3 | An `inactive` or `suspended` business accepts no new bookings from customers (same assumption as in the `business-home` spec). | AC-KAN-135-07 |
 | AS-4 | Only one service can be booked per booking; booking several services at once is not supported. | AC-KAN-135-01 |
+| AS-5 | Every step of the booking flow is a private customer page (`RequireRole` for `customer`), following Q6. | AC-KAN-135-12 |
 
 ## Backlog issues
 - KAN-135 overlaps KAN-116 (start booking from a service) and KAN-113 (catalog). Here it is the selection step inside the booking flow.
@@ -76,7 +78,7 @@ A signed-in customer on a business's pages chooses the service they want as the 
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-135 | AC-KAN-135-01 … AC-KAN-135-10 | `tests/ServiceSelectionPage.test.tsx` |
+| KAN-135 | AC-KAN-135-01 … AC-KAN-135-12 | `tests/ServiceSelectionPage.test.tsx` |
 | KAN-136 | — (BLOCKED, Q1) | — |
 | KAN-137 | — (BLOCKED, Q1) | — |
 | KAN-138 | — (BLOCKED, Q1) | — |

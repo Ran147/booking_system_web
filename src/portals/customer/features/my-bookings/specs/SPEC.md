@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/customer/features/my-bookings/` |
 | Stories | KAN-151, KAN-152, KAN-153, KAN-154 |
 | Status | BLOCKED (partially) |
-| Depends on | KAN-145 booking checkout (bookings exist), KAN-96 navbar (KAN-108 entry point), KAN-155 booking changes (actions launched from the detail), KAN-128 customer sign-in; Q1 (collaborator); Q4 (link back to a business's pages) |
+| Depends on | KAN-145 booking checkout (bookings exist), KAN-96 navbar (KAN-108 entry point), KAN-155 booking changes (actions launched from the detail), KAN-128 customer sign-in; Q1 (collaborator); Q4 decided 2026-09-28 (a link back to a business's pages goes to `/<businessSlug>`) |
 
 ## Intent
 A signed-in `customer` sees their upcoming bookings, their past bookings as a history, and the details of any one booking, and can filter the list to find a specific booking quickly.

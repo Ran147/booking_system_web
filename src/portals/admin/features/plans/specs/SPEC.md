@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/admin/features/plans/` |
 | Stories | KAN-181, KAN-182, KAN-183, KAN-184, KAN-185 |
 | Status | BLOCKED (partially) |
-| Depends on | Q1 (collaborator limit in plans), Q5 (how grace days and new prices apply on renewal); KAN-1 home (plan catalog KAN-7), KAN-20 plan details (KAN-21), KAN-32 subscription spec; `features/auth` spec (idle logout KAN-38) |
+| Depends on | Q1 (collaborator limit in plans), Q5 decided 2026-09-28 (no renewal retries in the MVP; grace days alone decide when `past_due` becomes `expired`); KAN-1 home (plan catalog KAN-7), KAN-20 plan details (KAN-21), KAN-32 subscription spec; `features/auth` spec (idle logout KAN-38) |
 
 ## Intent
 The super admin defines the commercial offer: which plans exist, what they cost, what they include and which are sold. From the same admin area they also set the platform-wide parameters (idle timeout, grace days, maximum bookings per business) that the other portals read.
@@ -28,7 +28,7 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 ## Out of scope
 - The collaborator limit on a plan (KAN-181): BLOCKED, Q1.
 - Deleting a plan (no story; deactivation replaces it).
-- How grace days drive `past_due` → `expired` and whether a new price applies at renewal: Q5 and the KAN-32 spec.
+- Running the `past_due` → `expired` change after the grace days and whether a new price applies at renewal: the KAN-32 subscription spec. There are no renewal retries in the MVP (Q5).
 - Enforcing the booking limits when a booking is created (booking specs KAN-63 / KAN-145).
 - Plan change by a subscriber (KAN-44).
 - Which plan edits are written to the audit log (KAN-194, Q3).
@@ -110,7 +110,7 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 | AS-5 | Plan names are unique, compared without case and accents. | AC-KAN-181-07, AC-KAN-183-05 |
 | AS-6 | Ranges: `idleTimeoutMinutes` 5–240; `gracePeriodDays` 0–30; `maxBookingsPerBusiness` 1–100,000. Defaults: 30 minutes, 7 days, 1,000 bookings. | AC-KAN-182-01, AC-KAN-182-05 |
 | AS-7 | A new idle timeout applies from each user's next sign-in or page load, not to sessions already open. | AC-KAN-182-03 |
-| AS-8 | A price change applies to new subscriptions; existing subscriptions keep their current period price. What happens at their next renewal waits on Q5 / KAN-32. | AC-KAN-183-03 |
+| AS-8 | A price change applies to new subscriptions; existing subscriptions keep their current period price. What price applies at their next renewal is not decided by any story (Q5 covered only retries); see Backlog issues. | AC-KAN-183-03 |
 | AS-9 | Concurrent edits are detected with the plan's `updatedAt`; last write does not silently win. | AC-KAN-183-06 |
 | AS-10 | Deactivating the last `active` plan is allowed after a warning; the catalog then shows its empty state. | AC-KAN-184-04 |
 | AS-11 | The plans list is not paginated: the number of plans is small. | AC-KAN-185-01 |
@@ -119,7 +119,8 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 ## Backlog issues
 - KAN-182 (platform settings) sits in the plans epic but is not about plans. Specified here, in `src/portals/admin/features/plans`, as the backlog places it; the team may move it to its own folder (for example `src/portals/admin/features/platform-settings`) in `epic-map.md`.
 - KAN-182 "límite máximo de reservas por negocio" overlaps with KAN-181 plan limit "reservas máximas". Which one wins when both apply is not stated (for example the lower of the two). Needs a decision before the booking specs enforce limits.
-- KAN-182 grace days interact with `past_due` → `expired` (glossary §4.2), whose retry behavior is Q5.
+- KAN-182 grace days decide when `past_due` becomes `expired` (glossary §4.2); since Q5 deferred renewal retries (out of MVP), nothing else changes that date.
+- No story says whether a plan price change applies to existing subscriptions at their next renewal (AS-8).
 - KAN-181 mentions a collaborator limit ("número de colaboradores"), which depends on Q1.
 - KAN-183 says "duración" for monthly/annual; it is the billing period, not a length of time. It does not say whether limits can be edited (AS-12).
 - KAN-184 "manteniendo activos a los negocios" matches the glossary rule for `Plan` (inactive plans keep their subscribers).

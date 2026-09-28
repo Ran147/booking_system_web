@@ -5,8 +5,8 @@
 | Portal | business |
 | Feature folder | `src/portals/business/features/subscription/` |
 | Stories | KAN-43, KAN-44, KAN-45, KAN-46, KAN-47, KAN-48, KAN-49, KAN-50 |
-| Status | BLOCKED (partially) |
-| Depends on | KAN-28 (subscriber sign-in); KAN-180 epic (plans, `limits`, active / inactive plans KAN-184); KAN-182 (`PlatformSettings`, grace days); KAN-20 epic and Q7 (how the first subscription starts); Q5 (automatic renewals); KAN-29 (sidebar banners) |
+| Status | Draft |
+| Depends on | KAN-28 (subscriber sign-in); KAN-180 epic (plans, `limits`, active / inactive plans KAN-184); KAN-182 (`PlatformSettings`, grace days); KAN-20 epic and Q7 (how the first subscription starts); Q5 decided 2026-09-28 (the simulated gateway only fakes a successful or a failed payment; renewal retries deferred, out of MVP); KAN-29 (sidebar banners) |
 
 ## Intent
 The subscriber sees the state of their subscription, compares plans and upgrades, pays through the simulated gateway and downloads receipts, reviews their payment history, and cancels renewal while keeping access until the end of the paid period. When the subscription is `expired` or `cancelled`, the business becomes read-only until a new payment.
@@ -29,7 +29,7 @@ The subscriber sees the state of their subscription, compares plans and upgrades
 
 ## Out of scope
 - First plan purchase / checkout from the landing page (KAN-20 epic, KAN-22–24, KAN-176, Q7).
-- Automatic renewal retries and their notifications (KAN-48, KAN-50, Q5).
+- Automatic renewal retries and their notifications (KAN-48, KAN-50): deferred, out of MVP (Q5 decided 2026-09-28). See "Deferred (out of MVP)".
 - Downgrading to a lower plan (not in the backlog; see Backlog issues).
 - Undoing a cancellation before the period ends (not in the backlog; see Backlog issues).
 - Enforcing plan limits (KAN-181) and super admin suspension (KAN-179).
@@ -41,7 +41,7 @@ The subscriber sees the state of their subscription, compares plans and upgrades
 - `Payment` at `businesses/{businessId}/payments/{paymentId}` (simulated gateway). **Fields used (names to confirm, not defined in the glossary):** `createdAt`, `amountInCents`, `planId`, a result of the attempt (succeeded / declined), and the reference used for the receipt.
 - `PaymentReceipt` (generated file, KAN-45).
 - `Business.status` (`active`, `inactive`, `suspended`, §4.3) follows the subscription: `expired` / `cancelled` → `inactive` (KAN-49); a new payment → `active` (KAN-45).
-- Nothing is added for Q5 (retry count or interval) or Q7 (initial activation).
+- Nothing is added for renewal retries (no retry count, interval or per-attempt notification; deferred by Q5) or for Q7 (initial activation). The simulated gateway returns only a successful or a failed payment.
 
 ## Acceptance criteria
 
@@ -105,8 +105,15 @@ The subscriber sees the state of their subscription, compares plans and upgrades
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| KAN-48 | Q5 — simulated gateway on automatic renewals | Retry count and interval, a notification per attempt, and when `past_due` becomes `expired`. No criteria. |
-| KAN-50 | Q5 — simulated gateway on automatic renewals (duplicate of KAN-48) | Same as KAN-48. |
+| — | — | None. Q5 was decided on 2026-09-28; KAN-48 and KAN-50 moved to "Deferred (out of MVP)". |
+
+## Deferred (out of MVP)
+Not criteria. These stories wait until the project is further along (Q5, decided 2026-09-28).
+
+| Story | Why | Note |
+| --- | --- | --- |
+| KAN-48 | Q5: the simulated gateway only fakes a successful or a failed payment; automatic renewal retries are deferred | No retry count, interval or per-attempt notification is built. A failed renewal leaves the subscription `past_due`; it becomes `active` again only by a manual payment (KAN-45) or `expired` after the grace days (KAN-182). |
+| KAN-50 | Duplicate of KAN-48 | Same as KAN-48. |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -117,7 +124,7 @@ The subscriber sees the state of their subscription, compares plans and upgrades
 | AS-4 | A `past_due` subscription must be paid before upgrading. | AC-KAN-44-09 |
 | AS-5 | The manual pay action is offered only when the subscription is `past_due`, `expired` or `cancelled`; a paid `active` subscription renews automatically. A successful payment starts a new full period from the payment date. | AC-KAN-45-01, AC-KAN-45-09 |
 | AS-6 | The receipt is a PDF generated on the server in the subscriber's `User.language`. | AC-KAN-45-02 |
-| AS-7 | A `past_due` subscription cannot be cancelled; it follows the renewal flow (Q5). | AC-KAN-47-07 |
+| AS-7 | A `past_due` subscription cannot be cancelled; it leaves `past_due` by a manual payment (KAN-45) or by expiring after the grace days (KAN-182). There are no automatic retries in the MVP (Q5). | AC-KAN-47-07 |
 | AS-8 | While a business is `inactive`, customers cannot create new bookings with it, and existing bookings are neither cancelled nor changed automatically. The customer-facing message belongs to the customer booking spec. | AC-KAN-49-04, AC-KAN-49-08 |
 
 ## Backlog issues
@@ -127,7 +134,8 @@ The subscriber sees the state of their subscription, compares plans and upgrades
 - KAN-45 "pagar mi suscripción" does not say when a manual payment is possible (AS-5), nor how it relates to the first checkout (KAN-22, Q7).
 - KAN-49 restricts "nuevas reservas ni servicios" but the read-only rule applies to every write of the business portal (customers, schedule, discounts); stated here as the general rule.
 - `Payment` fields (amount, result, reference) are not defined in `domain-glossary`; they are listed in Data as names to confirm.
-- KAN-182 (grace days after expiry) sits in the admin plans epic but decides when `past_due` becomes `expired`, together with Q5.
+- KAN-182 (grace days after expiry) sits in the admin plans epic but decides when `past_due` becomes `expired`; with no retries in the MVP (Q5), the grace days alone decide it.
+- KAN-48 / KAN-50 are deferred (out of MVP) by Q5; they stay open in Jira for later.
 
 ## Non-functional
 - i18n keys (new prefixes): `business:subscription.overview.*`, `business:subscription.upgrade.*`, `business:subscription.payment.*`, `business:subscription.receipt.*`, `business:subscription.history.*`, `business:subscription.cancel.*`, `business:subscription.readOnly.*`. Reused: `validation:required`, `common:errors.network`, `business:errors.readOnly`. Receipts use the notification locales in `functions/`.
@@ -149,7 +157,7 @@ The subscriber sees the state of their subscription, compares plans and upgrades
 | KAN-46 | AC-KAN-46-01 … AC-KAN-46-06 | `tests/PaymentHistoryPage.test.tsx` |
 | KAN-47 | AC-KAN-47-01, AC-KAN-47-03 … AC-KAN-47-07 | `tests/SubscriptionPage.test.tsx` |
 | KAN-47 | AC-KAN-47-02 | `functions/src/subscriptions/tests/endSubscriptionPeriod.test.ts` |
-| KAN-48 | BLOCKED (Q5) | — |
+| KAN-48 | Deferred, out of MVP (Q5) | — |
 | KAN-49 | AC-KAN-49-01, AC-KAN-49-02, AC-KAN-49-05 … AC-KAN-49-07 | `tests/ReadOnlyBusinessNotice.test.tsx` |
 | KAN-49 | AC-KAN-49-03, AC-KAN-49-04, AC-KAN-49-08 | `functions/src/subscriptions/tests/readOnlyBusiness.test.ts` |
-| KAN-50 | BLOCKED (Q5, duplicate of KAN-48) | — |
+| KAN-50 | Deferred, out of MVP (Q5, duplicate of KAN-48) | — |

@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/customer/layout/` |
 | Stories | KAN-107, KAN-108, KAN-109, KAN-110 (epic KAN-96 — Navbar); KAN-118, KAN-119, KAN-120, KAN-121 (epic KAN-117 — Footer) |
 | Status | Draft |
-| Depends on | Q4 (how a business page is reached); KAN-128 sign-in (`src/features/auth`); KAN-150 my bookings; KAN-168 profile; landing KAN-9 terms page |
+| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`, `Business.slug`); KAN-128 sign-in (`src/features/auth`); KAN-150 my bookings; KAN-168 profile; landing KAN-9 terms page |
 
 ## Intent
 A person on a business's pages in the customer portal always knows which business they are booking with, can reach their bookings and profile, and can sign in or out from the top of the page. At the bottom of every page they find the business's contact details, social networks and the terms that apply.
@@ -22,16 +22,17 @@ A person on a business's pages in the customer portal always knows which busines
 - Navbar shown on every page of a business in the customer portal: business name and logo, links to my bookings and profile, sign-in / sign-out action.
 - Footer shown on the same pages: business contact information (phone, email), logo, social network links when present, link to terms and conditions.
 - Behavior of these links for a visitor versus a signed-in customer.
+- Keeping every navbar link inside the business's slug (`/<businessSlug>/...`, Q4).
 
 ## Out of scope
-- The URL form of a business's pages (Q4). This spec only says "the customer is on a business's pages".
+- Creating or changing a business slug (set when the business is created, KAN-176 / Q7).
 - The sign-in form, password recovery and idle logout themselves (KAN-128, `src/features/auth`).
 - The content of the my-bookings (KAN-150) and profile (KAN-168) screens.
 - Language and theme switches (KAN-172, KAN-173 in the profile epic).
 - Editing the business's name, logo, contact data or social links (no business-portal story defines it; see Backlog issues).
 
 ## Data
-- `Business` (`businesses/{businessId}`, public read): `name`, `status`, plus the public profile fields below.
+- `Business` (`businesses/{businessId}`, public read, found by its `slug` from the URL): `name`, `status`, plus the public profile fields below.
 - New public profile fields on `Business`, proposed names to be added to `domain-glossary` §3 (AS-1): `logoUrl` (Nullable), `contactPhone` (Nullable), `contactEmail` (Nullable), `socialLinks` (list of `{ network, url }`, may be empty).
 - Session (`auth-and-roles` §2): `signed_out` or `signed_in` with role `customer`.
 - No writes.
@@ -45,6 +46,7 @@ A person on a business's pages in the customer portal always knows which busines
 - [ ] **AC-KAN-107-04** · edge · Given the business has no `logoUrl`, or the logo image fails to load, when the navbar renders, then only the business name is shown, with no broken image. [KAN-107]
 - [ ] **AC-KAN-107-05** · edge · Given a business name longer than the navbar can show on a phone-width screen, when the navbar renders, then the name is shortened visually and the full name stays available to assistive technology. See AS-2. [KAN-107]
 - [ ] **AC-KAN-107-06** · edge · Given a business whose status is `inactive` or `suspended`, when the customer opens its pages, then the navbar still identifies the business and the message `customer:layout.business.unavailable` is shown. See AS-3. [KAN-107, KAN-49]
+- [ ] **AC-KAN-107-07** · edge · Given a person on the pages of the business with slug `<businessSlug>`, when they use the navbar links (business home, my bookings, profile) or sign in and come back, then they stay under `/<businessSlug>/...` and the navbar keeps showing the same business. See AS-9. [KAN-107, KAN-108, KAN-109, KAN-110]
 
 ### KAN-108 — Go to my bookings from the navbar
 - [ ] **AC-KAN-108-01** · happy · Given a signed-in customer on a business's pages, when they choose the my-bookings link in the navbar, then the my-bookings screen (KAN-150) opens. [KAN-108]
@@ -87,7 +89,7 @@ A person on a business's pages in the customer portal always knows which busines
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| — (none fully blocked) | Q4 — business page URL | How the business is identified from the URL; this spec only assumes "the customer is on a business's pages". |
+| — | — | None. Q4 was decided on 2026-09-28: the business is identified by the slug in `/<businessSlug>`. |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -100,6 +102,7 @@ A person on a business's pages in the customer portal always knows which busines
 | AS-6 | "Terms and conditions related to the platform and bookings" means the platform terms page from landing KAN-9. The business's own booking policies (`BookingPolicy`) are shown in the booking flow (KAN-147, KAN-160), not in the footer. | AC-KAN-119-01 |
 | AS-7 | The terms open in a new tab so the booking flow is not interrupted. | AC-KAN-119-03 |
 | AS-8 | After sign-out the customer goes to the sign-in screen, as for every role (`auth-and-roles` §5), not back to the business page. | AC-KAN-110-02 |
+| AS-9 | My bookings and profile are reached under the business the customer is visiting (`/<businessSlug>/...`); which bookings they list is defined in their own specs. | AC-KAN-107-07 |
 
 ## Backlog issues
 - KAN-121 (phone, email and logo) overlaps KAN-118 (contact information) and, for the logo, KAN-107 (navbar). Kept as separate stories; KAN-121 only adds the logo in the footer.
@@ -117,7 +120,7 @@ A person on a business's pages in the customer portal always knows which busines
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-107 | AC-KAN-107-01 … AC-KAN-107-06 | `tests/CustomerNavbar.test.tsx` |
+| KAN-107 | AC-KAN-107-01 … AC-KAN-107-07 | `tests/CustomerNavbar.test.tsx` |
 | KAN-108 | AC-KAN-108-01, AC-KAN-108-02, AC-KAN-108-03 | `tests/CustomerNavbar.test.tsx` |
 | KAN-109 | AC-KAN-109-01, AC-KAN-109-02, AC-KAN-109-03 | `tests/CustomerNavbar.test.tsx` |
 | KAN-110 | AC-KAN-110-01 … AC-KAN-110-05 | `tests/CustomerNavbar.test.tsx` |

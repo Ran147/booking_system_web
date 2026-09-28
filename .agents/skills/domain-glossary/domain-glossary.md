@@ -21,7 +21,7 @@ Super administrador	super admin	super_admin	admin
 Suscriptor (dueño del negocio)	subscriber	subscriber	business
 Cliente (con cuenta)	customer	customer	customer
 Visitante (sin cuenta)	visitor	— (unauthenticated, not a role)	landing, customer (read-only)
-Colaborador	collaborator	BLOCKED — Q1	—
+Colaborador	collaborator	Confirmed as a fifth actor (Q1, 2026-09-28); details BLOCKED — Q1	—
 2. Portals
 Backlog (ES)	Code (EN)	Folder
 Landing	landing	src/portals/landing/
@@ -97,7 +97,7 @@ expired
 cancelled
 Cancelling (KAN-47) does not change the status immediately. It sets cancelAtPeriodEnd: true, and access stays full until currentPeriodEndsAt.
 expired and cancelled make the business read-only (KAN-49). Enforcement belongs to auth-and-roles.
-The number of retries and what the simulated gateway does on renewal: BLOCKED — Q5.
+The simulated gateway only returns a successful or a failed payment (Q5, 2026-09-28). Automatic renewal retries (KAN-48, KAN-50) are deferred (out of MVP); nothing in the MVP drives retries for past_due.
 4.3 Business
 first payment confirmed(KAN-176)
 subscription becomesexpired or cancelled(KAN-49)
@@ -109,7 +109,7 @@ active
 inactive
 suspended
 inactive is automatic (it follows the subscription). suspended is a manual super admin action.
-pending (KAN-175 filter): BLOCKED — Q2. Do not add it until the decision is recorded.
+pending (KAN-175 filter): exists (Q2, 2026-09-28) but its meaning is pending — BLOCKED — Q2. Do not add it until the decision is recorded.
 4.4 Support ticket
 subscriber creates it
 super admin replies(KAN-191)
@@ -240,12 +240,12 @@ The TransitionMap<BookingStatus> annotation makes tsc fail if a status is missin
 Source: docs/decisions/open-questions.md. While a question is open, do not invent names, statuses or fields for it. Specs that depend on it are marked BLOCKED by backlog-to-spec.
 
 Id	Question	What stays blocked here
-Q1	Is the collaborator a fifth actor? (KAN-78, 79, 84, 85, 86)	Collaborator entity, collaboratorId on Booking. Collaborators also appear in KAN-61, 67, 68, 81–83, 134–138 and 142.
-Q2	Does a pending business status exist? (KAN-175)	Business status pending
-Q3	Which "approvals" does KAN-194 audit?	AuditLogEntry.actionType values
-Q4	How is a business page reached: slug, subdomain or search?	Business.slug field and customer portal route segment
-Q5	What does the simulated gateway do on automatic renewals? (KAN-48)	Retry count and interval for past_due
-Q6	Can a visitor book without an account? (KAN-116)	Guest booking fields on Booking
+Q1	Is the collaborator a fifth actor? (KAN-78, 79, 84, 85, 86) — partially decided 2026-09-28: yes, details pending	Collaborator entity, collaboratorId on Booking. Collaborators also appear in KAN-61, 67, 68, 81–83, 134–138 and 142.
+Q2	Does a pending business status exist? (KAN-175) — partially decided 2026-09-28: yes, meaning pending	Business status pending
+Q3	Which "approvals" does KAN-194 audit? — partially decided 2026-09-28: a simple approval flow, what is approved pending	AuditLogEntry.actionType values
+Q4	How is a business page reached? — decided 2026-09-28: slug in the path (/:businessSlug)	Nothing (Business.slug, reserved slugs: see SKILL.md §3)
+Q5	What does the simulated gateway do on automatic renewals? (KAN-48) — decided 2026-09-28: success or failure only, retries out of MVP	Nothing in the MVP
+Q6	Can a visitor book without an account? (KAN-116) — decided 2026-09-28: no, account mandatory	Nothing (no guest fields on Booking)
 Q7	Does the MVP include checkout, or start with a business created by hand?	Initial transition into Subscription.active and Business.active
 
 When a decision is recorded, update this section and the affected machine in the same PR.

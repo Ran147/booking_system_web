@@ -84,7 +84,7 @@ describe("canTransition for bookings", () => {
 });
 
 describe("canTransition for subscriptions", () => {
-  it("KAN-48: moves an active subscription to past_due when renewal fails", () => {
+  it("moves an active subscription to past_due when a renewal charge fails (Q5)", () => {
     expect(
       canTransition(
         SUBSCRIPTION_STATUS_TRANSITIONS,

@@ -32,8 +32,8 @@ If another skill's example uses a name that contradicts this glossary, the gloss
 | Super administrador | super admin | `super_admin` | `admin` |
 | Suscriptor (dueño del negocio) | subscriber | `subscriber` | `business` |
 | Cliente (con cuenta) | customer | `customer` | `customer` |
-| Visitante (sin cuenta) | visitor | — (unauthenticated, not a role) | `landing`, `customer` (read-only) |
-| Colaborador | collaborator | **BLOCKED — Q1** | — |
+| Visitante (sin cuenta) | visitor | — (unauthenticated, not a role) | `landing`, `customer` (read-only). Cannot book: signs in or signs up as a customer first (Q6) |
+| Colaborador | collaborator | Confirmed as a fifth actor (Q1, 2026-09-28); role, claims and details **BLOCKED — Q1** | — |
 
 ## 2. Portals
 
@@ -41,19 +41,19 @@ If another skill's example uses a name that contradicts this glossary, the gloss
 | --- | --- | --- |
 | Landing | landing | `src/portals/landing/` |
 | Negocio | business | `src/portals/business/` |
-| Cliente | customer | `src/portals/customer/` |
+| Cliente | customer | `src/portals/customer/` (routes under `/:businessSlug`, Q4) |
 | Admin | admin | `src/portals/admin/` |
 
 ## 3. Entities
 
 | Backlog (ES) | Code (EN) | Firestore path | Notes |
 | --- | --- | --- | --- |
-| Negocio | `Business` | `businesses/{businessId}` | The tenant. Owned by one subscriber (`ownerUserId`). |
-| Usuario / cuenta | `User` | `users/{userId}` | Platform-wide account (subscriber, customer or super admin). |
+| Negocio | `Business` | `businesses/{businessId}` | The tenant. Owned by one subscriber (`ownerUserId`). `slug`: unique, lowercase, URL-safe; the business page is `/<slug>` (Q4, see "Business slug" below). |
+| Usuario / cuenta | `User` | `users/{userId}` | Platform-wide account (subscriber, customer or super admin). A customer's `User` stores `fullName` and `phone` (both required, KAN-123, Q6); email and password live in Firebase Auth. |
 | Cliente del negocio | `Customer` | `businesses/{businessId}/customers/{customerId}` | Business-scoped record. `userId` is `Nullable` because a subscriber can add customers without an account (KAN-88). Blocking (KAN-93) and anonymizing (KAN-98) apply here only, never to `User`. |
 | Servicio | `Service` | `businesses/{businessId}/services/{serviceId}` | |
 | Descuento / promoción | `ServiceDiscount` | field `discounts` on `Service` | KAN-60 |
-| Reserva / reservación / cita | `Booking` | `businesses/{businessId}/bookings/{bookingId}` | Stores `serviceSnapshot` (name, price, duration at booking time, KAN-62). `customerUserId` is the customer's account, `Nullable` for bookings created by the subscriber for customers without an account (KAN-69). |
+| Reserva / reservación / cita | `Booking` | `businesses/{businessId}/bookings/{bookingId}` | Stores `serviceSnapshot` (name, price, duration at booking time, KAN-62). `customerUserId` is the customer's account, `Nullable` only for bookings created by the subscriber for customers without an account (KAN-69). No guest fields: a booking from the customer portal always has `customerUserId` (Q6). |
 | Horario de atención | `BusinessHours` | field on `Business` | KAN-64 |
 | Bloqueo de agenda / día bloqueado | `ScheduleBlock` | `businesses/{businessId}/scheduleBlocks/{scheduleBlockId}` | Partial (KAN-65) or full-day (KAN-66). |
 | Agenda | `Schedule` | — (view, not stored) | Bookings + schedule blocks in a calendar. |
@@ -78,6 +78,13 @@ If another skill's example uses a name that contradicts this glossary, the gloss
 - Prices are integers in minor units: `priceInCents`. Durations are integers with their unit: `durationMinutes`.
 - Dates are `Date` objects in domain models (`startsAt`, `endsAt`, `createdAt`). Converting from Firestore `Timestamp` belongs to the adapter in `api-query-standards`.
 - Every business stores its IANA `timeZone`. Never compute slots in the browser's time zone.
+
+### Business slug (Q4)
+
+- The customer portal lives under `/:businessSlug/...`, for example `/barberia-centro/...`. The slug identifies the business in the URL of the customer portal only; the business portal still takes `businessId` from the session (`auth-and-roles`).
+- `Business.slug` is unique across the platform, lowercase and URL-safe. The exact character rules and length are an assumption of the spec that creates the slug.
+- Static top-level routes (landing, auth, business, admin) win over the dynamic segment in React Router. Their segments are **reserved slugs**: `RESERVED_BUSINESS_SLUG` in `src/shared/domain/business/BusinessSlug.constants.ts`, checked with `isReservedBusinessSlug`. A business can never take one.
+- A new static top-level route adds its segment to `RESERVED_BUSINESS_SLUG` in the same PR (a unit test compares it with `ROUTE_PATH`).
 
 ---
 
@@ -112,9 +119,9 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
   [*] --> active: payment confirmed (KAN-22, KAN-176)
-  active --> past_due: renewal charge failed (KAN-48)
-  past_due --> active: retry or manual payment succeeds (KAN-45, KAN-48)
-  past_due --> expired: retries and grace days exhausted (KAN-48, KAN-182)
+  active --> past_due: renewal charge failed (simulated gateway, Q5)
+  past_due --> active: manual payment succeeds (KAN-45)
+  past_due --> expired: grace days exhausted (KAN-182)
   active --> cancelled: period ends with cancelAtPeriodEnd = true (KAN-47)
   expired --> active: new payment (KAN-45)
   cancelled --> active: new payment (KAN-45)
@@ -122,7 +129,8 @@ stateDiagram-v2
 
 - Cancelling (KAN-47) does **not** change the status immediately. It sets `cancelAtPeriodEnd: true`, and access stays full until `currentPeriodEndsAt`.
 - `expired` and `cancelled` make the business read-only (KAN-49). Enforcement belongs to `auth-and-roles`.
-- The number of retries and what the simulated gateway does on renewal: **BLOCKED — Q5**.
+- The simulated gateway only returns a successful or a failed payment (Q5, 2026-09-28). A failed renewal charge moves the subscription to `past_due`.
+- `past_due` stays in the machine, but **nothing in the MVP drives retries**: automatic renewal retries (KAN-48, duplicate KAN-50) are deferred (out of MVP). A `past_due` subscription leaves that status by a manual payment (KAN-45) or becomes `expired` when the grace days run out (KAN-182). Do not add retry counters, intervals or per-attempt notifications.
 
 ### 4.3 Business
 
@@ -137,7 +145,7 @@ stateDiagram-v2
 ```
 
 - `inactive` is automatic (it follows the subscription). `suspended` is a manual super admin action.
-- `pending` (KAN-175 filter): **BLOCKED — Q2**. Do not add it until the decision is recorded.
+- `pending` (KAN-175 filter): the team confirmed it exists (Q2, 2026-09-28), but what it means is still pending: **BLOCKED — Q2**. Do not add it until its meaning is recorded.
 
 ### 4.4 Support ticket
 
@@ -285,17 +293,17 @@ The `TransitionMap<BookingStatus>` annotation makes `tsc` fail if a status is mi
 
 Source: `docs/decisions/open-questions.md`. While a question is open, **do not** invent names, statuses or fields for it. Specs that depend on it are marked `BLOCKED` by `backlog-to-spec`.
 
-| Id | Question | What stays blocked here |
-| --- | --- | --- |
-| Q1 | Is the collaborator a fifth actor? (KAN-78, 79, 84, 85, 86) | `Collaborator` entity, `collaboratorId` on `Booking`. Collaborators also appear in KAN-61, 67, 68, 81–83, 134–138 and 142. |
-| Q2 | Does a `pending` business status exist? (KAN-175) | Business status `pending` |
-| Q3 | Which "approvals" does KAN-194 audit? | `AuditLogEntry.actionType` values |
-| Q4 | How is a business page reached: slug, subdomain or search? | `Business.slug` field and customer portal route segment |
-| Q5 | What does the simulated gateway do on automatic renewals? (KAN-48) | Retry count and interval for `past_due` |
-| Q6 | Can a visitor book without an account? (KAN-116) | Guest booking fields on `Booking` |
-| Q7 | Does the MVP include checkout, or start with a business created by hand? | Initial transition into `Subscription.active` and `Business.active` |
+| Id | Question | Status | What stays blocked here |
+| --- | --- | --- | --- |
+| Q1 | Is the collaborator a fifth actor? (KAN-78, 79, 84, 85, 86) | Partially decided (2026-09-28): confirmed as a fifth actor, details pending | `Collaborator` entity, its role and claims, `collaboratorId` on `Booking`. Collaborators also appear in KAN-61, 67, 68, 81–83, 134–138 and 142. |
+| Q2 | Does a `pending` business status exist? (KAN-175) | Partially decided (2026-09-28): it exists, its meaning is pending | Business status `pending` and its transitions (not added to §4.3 yet) |
+| Q3 | Which "approvals" does KAN-194 audit? | Partially decided (2026-09-28): a simple approval flow will be created, what is approved is pending | `AuditLogEntry.actionType` values and the approval flow |
+| Q4 | How is a business page reached: slug, subdomain or search? | Decided (2026-09-28): slug in the path | Nothing. `Business.slug` and the `/:businessSlug` segment are in §2 and §3. |
+| Q5 | What does the simulated gateway do on automatic renewals? (KAN-48) | Decided (2026-09-28): success or failure only; retries deferred (out of MVP) | Nothing in the MVP. Retry count, interval and per-attempt notifications are out of MVP, not blocked (§4.2). |
+| Q6 | Can a visitor book without an account? (KAN-116) | Decided (2026-09-28): no, a customer account is mandatory | Nothing. `Booking` has no guest fields; the customer's `User` has `fullName` and `phone` (§3). |
+| Q7 | Does the MVP include checkout, or start with a business created by hand? | Voting | Initial transition into `Subscription.active` and `Business.active` |
 
-When a decision is recorded, update this section and the affected machine **in the same PR**.
+When a decision is recorded, update this section and the affected machine **in the same PR**. A partially decided question stays BLOCKED for everything not yet decided.
 
 ---
 
@@ -308,6 +316,7 @@ When a decision is recorded, update this section and the affected machine **in t
 | Alphabetical keys in status objects | ESLint `sort-keys` (see `constants-standards`) |
 | Forbidden transitions rejected on the server | `firestore.rules` (see `auth-and-roles`) |
 | `Customer` over `Client` | Code review only (no lint rule, because `queryClient` is legitimate) |
+| Reserved slugs cover every static top-level route | Unit test `src/shared/domain/tests/isReservedBusinessSlug.test.ts` against `ROUTE_PATH` |
 
 ## 7. Checklist
 
@@ -315,6 +324,7 @@ When a decision is recorded, update this section and the affected machine **in t
 - [ ] The tenant key is `businessId`.
 - [ ] Status values come from `<ENTITY>_STATUS` constants. No string literals such as `"confirmed"`.
 - [ ] Status changes go through `canTransition` with the entity's transition map.
-- [ ] No status, field or entity was added for an open question in §5.
+- [ ] No status, field or entity was added for an open question in §5 (including the pending part of a partially decided one).
+- [ ] A new static top-level route has its segment in `RESERVED_BUSINESS_SLUG`.
 - [ ] Visible labels for statuses come from `i18n-standards`, never from these constants.
 - [ ] Money uses `priceInCents`, durations use `durationMinutes`, dates are `Date` in domain models.

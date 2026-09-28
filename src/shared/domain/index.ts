@@ -1,7 +1,9 @@
 export type * from "./booking/Booking.interface";
 export * from "./booking/BookingStatus.constants";
 export * from "./booking/BookingStatusTone.constants";
+export * from "./business/BusinessSlug.constants";
 export * from "./business/BusinessStatus.constants";
+export * from "./business/isReservedBusinessSlug";
 export * from "./customer/CustomerStatus.constants";
 export * from "./plan/PlanStatus.constants";
 export * from "./service/ServiceStatus.constants";

@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/business/features/customers/` |
 | Stories | KAN-88, KAN-89, KAN-90, KAN-91, KAN-92, KAN-93, KAN-94, KAN-95, KAN-97, KAN-98 |
 | Status | Draft |
-| Depends on | KAN-63 schedule (bookings, KAN-69 manual booking, KAN-73/KAN-74 statuses); KAN-145 booking checkout (enforces blocking); KAN-122 customer sign-up (invitation target); KAN-32 subscription (KAN-49 read-only); KAN-28 auth; Q4 (only the URL form of the invitation link) |
+| Depends on | KAN-63 schedule (bookings, KAN-69 manual booking, KAN-73/KAN-74 statuses); KAN-145 booking checkout (enforces blocking); KAN-122 customer sign-up (invitation target); KAN-32 subscription (KAN-49 read-only); KAN-28 auth; Q4 decided 2026-09-28 (the invitation link goes to the customer sign-up under the business's `/<businessSlug>`) |
 
 ## Intent
 For the subscriber who needs one place to know and look after the people who book with their business. They can add customers without an account, find them quickly, see each one's history and metrics, keep private notes, block or unblock them for their own business, invite them to create an account, and delete or anonymize a record, always without touching the customer's platform account or other businesses.
@@ -121,6 +121,7 @@ The business always comes from the signed-in subscriber's session, never from th
 - [ ] **AC-KAN-97-06** · error · Given the email cannot be sent (network or server failure), when the subscriber invites, then `invitedAt` does not change and `common:errors.network` or `common:errors.unknown` is shown. [KAN-97]
 - [ ] **AC-KAN-97-07** · edge · Given an invitation was sent recently, when the subscriber sends it again within the waiting time, then no email is sent and `business:customers.invite.tooSoonError` is shown. See AS-12. [KAN-97]
 - [ ] **AC-KAN-97-08** · edge · Given a `blocked` customer, when the subscriber opens the profile, then the invite action is not available. See AS-13. [KAN-97, KAN-93]
+- [ ] **AC-KAN-97-09** · edge · Given an invitation email, when the customer opens its link, then the customer sign-up opens under the business's slug (`/<businessSlug>/...`) and, after sign-up and sign-in, they land on that business's pages (KAN-127). [KAN-97, KAN-127]
 
 ### KAN-98 — Delete or anonymize a registered customer's data on request
 - [ ] **AC-KAN-98-01** · happy · Given a customer with bookings in the business, when the subscriber anonymizes them and confirms, then the name, phone, email, internal notes and status notes are removed from this business's record, the record shows `business:customers.anonymized.label` in lists and bookings, `anonymizedAt` is set and the bookings are kept so reports and metrics still count them. [KAN-98]
@@ -134,7 +135,7 @@ The business always comes from the signed-in subscriber's session, never from th
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| — | — | No story of this epic depends on Q1–Q7. Only the URL form of the invitation link (KAN-97) follows Q4; the criteria do not describe it. |
+| — | — | No story of this epic depends on an open question. The URL form of the invitation link (KAN-97) follows Q4, decided on 2026-09-28 (AC-KAN-97-09). |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -184,5 +185,5 @@ The business always comes from the signed-in subscriber's session, never from th
 | KAN-93 | AC-KAN-93-01 … AC-KAN-93-07 | `tests/CustomerProfileScreen.test.tsx` |
 | KAN-94 | AC-KAN-94-01 … AC-KAN-94-05 | `tests/CustomerProfileScreen.test.tsx` |
 | KAN-95 | AC-KAN-95-01 … AC-KAN-95-06 | `tests/CustomerProfileScreen.test.tsx` |
-| KAN-97 | AC-KAN-97-01 … AC-KAN-97-08 | `tests/CustomerProfileScreen.test.tsx`, `functions/src/customers/tests/inviteCustomer.test.ts` |
+| KAN-97 | AC-KAN-97-01 … AC-KAN-97-09 | `tests/CustomerProfileScreen.test.tsx`, `functions/src/customers/tests/inviteCustomer.test.ts` |
 | KAN-98 | AC-KAN-98-01 … AC-KAN-98-07 | `tests/CustomerProfileScreen.test.tsx`, `functions/src/customers/tests/anonymizeCustomer.test.ts` |

@@ -1,4 +1,5 @@
 import { ROUTE_PATH } from "@/shared/constants";
+import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
 import {
   CUSTOMER_SESSION,
@@ -9,6 +10,8 @@ import {
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { appRoutes } from "../appRoutes";
 import { createAppRoutesPage } from "./AppRoutes.page";
+
+const BUSINESS_PAGE_PATH = "/barberia-centro";
 
 describe("app routes", () => {
   it("shows the landing portal to a visitor", async () => {
@@ -25,9 +28,9 @@ describe("app routes", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the customer portal shell without signing in", async () => {
+  it("KAN-112: shows the customer portal of a business slug without signing in", async () => {
     renderRoutesWithProviders(appRoutes, {
-      initialPath: ROUTE_PATH.CUSTOMER.ROOT,
+      initialPath: BUSINESS_PAGE_PATH,
       session: SIGNED_OUT_SESSION,
     });
     const appRoutesPage = createAppRoutesPage();
@@ -95,9 +98,23 @@ describe("app routes", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the not found page for an unknown path", async () => {
+  it("KAN-112: keeps a reserved segment on its static portal instead of a business", async () => {
     renderRoutesWithProviders(appRoutes, {
-      initialPath: "/unknown-path",
+      initialPath: `/${RESERVED_BUSINESS_SLUG.ADMIN}`,
+      session: SUPER_ADMIN_SESSION,
+    });
+    const appRoutesPage = createAppRoutesPage();
+
+    expect(
+      await appRoutesPage.findPageHeading(
+        testI18n.t("admin:placeholder.title"),
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the not found page for an unknown path under a business slug", async () => {
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: `${BUSINESS_PAGE_PATH}/unknown-path`,
       session: SIGNED_OUT_SESSION,
     });
     const appRoutesPage = createAppRoutesPage();

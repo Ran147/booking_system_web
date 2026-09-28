@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/admin/features/dashboard/` |
 | Stories | KAN-187, KAN-188 |
 | Status | Draft |
-| Depends on | KAN-174 businesses spec (business profile link), KAN-32 subscription spec (`Payment`, `Subscription`), KAN-180 plans spec (`PlatformSettings.gracePeriodDays`); Q5 affects only how `past_due` ends (see AS-6) |
+| Depends on | KAN-174 businesses spec (business profile link), KAN-32 subscription spec (`Payment`, `Subscription`), KAN-180 plans spec (`PlatformSettings.gracePeriodDays`); Q5 decided 2026-09-28 (no renewal retries in the MVP) |
 
 ## Intent
 The super admin lands on a dashboard that shows how the SaaS is doing (active businesses, simulated subscription revenue, total bookings) and which businesses are about to lose their subscription, so they can follow up before it happens.
@@ -57,7 +57,7 @@ The super admin lands on a dashboard that shows how the SaaS is doing (active bu
 - [ ] **AC-KAN-188-07** · error · Given the alerts request fails, when the dashboard loads, then the alerts area shows `common:errors.network` with a retry action while the metric tiles still show their own result. [KAN-188]
 
 ## BLOCKED
-None. KAN-187 and KAN-188 do not depend on an open question. Only the exact date a `past_due` subscription becomes `expired` depends on Q5, so it is not shown (AS-6).
+None. KAN-187 and KAN-188 do not depend on an open question. Q5 (2026-09-28) deferred renewal retries, so a `past_due` subscription becomes `expired` only after the grace days; the date is still not shown here (AS-6).
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -67,14 +67,14 @@ None. KAN-187 and KAN-188 do not depend on an open question. Only the exact date
 | AS-3 | "Reservas globales" counts every `Booking` in every status, including `cancelled` and `no_show`. | AC-KAN-187-01, AC-KAN-187-04 |
 | AS-4 | Metrics may be up to 5 minutes old (cached or pre-aggregated); the dashboard shows when they were computed. | AC-KAN-187-02 |
 | AS-5 | "A punto de vencer" means `currentPeriodEndsAt` within the next 7 days. Alerts are shown only on the dashboard: no `Notification` document and no email. | AC-KAN-188-01 |
-| AS-6 | `past_due` subscriptions are listed as at risk without a date: when they become `expired` depends on retries (Q5) and `PlatformSettings.gracePeriodDays`. | AC-KAN-188-02 |
+| AS-6 | `past_due` subscriptions are listed as at risk without a date. When they become `expired` depends only on `PlatformSettings.gracePeriodDays` (no retries in the MVP, Q5); showing that date is left for later. | AC-KAN-188-02 |
 | AS-7 | Subscriptions that renew automatically are not "about to expire". | AC-KAN-188-04 |
 | AS-8 | The alerts list shows 5 items and a paginated view with `PAGINATION.DEFAULT_PAGE_SIZE` for the rest. | AC-KAN-188-06 |
 
 ## Backlog issues
 - KAN-187 "ingresos simulados" does not say whether failed or refunded simulated payments count; AS-3/AS-1 cover the proposal (successful payments only).
 - KAN-188 says "notificaciones o alertas"; `Notification` in the glossary is a user inbox (KAN-101). Treated as a dashboard list (AS-5) to avoid a new notification type.
-- KAN-188 overlaps with the renewal behavior in KAN-48 / KAN-50 (Q5) for `past_due` subscriptions.
+- KAN-188 overlaps with the renewal behavior in KAN-48 / KAN-50 for `past_due` subscriptions; those stories are deferred (out of MVP, Q5).
 
 ## Non-functional
 - i18n: new keys under `admin:dashboard.metrics.*`, `admin:dashboard.alerts.*`. Reused: `common:errors.network`, `common:errors.permissionDenied`.

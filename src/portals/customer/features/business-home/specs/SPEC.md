@@ -5,16 +5,16 @@
 | Portal | customer |
 | Feature folder | `src/portals/customer/features/business-home/` |
 | Stories | KAN-112, KAN-113, KAN-114, KAN-115, KAN-116 |
-| Status | BLOCKED (partially) |
-| Depends on | Q4 (how a business page is reached); Q6 (booking without an account); KAN-30 service management (catalog data, discounts KAN-60); KAN-64 business hours; `service-selection` spec (KAN-134); customer layout spec (KAN-96, KAN-117) |
+| Status | Draft |
+| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`, `Business.slug`); Q6 decided 2026-09-28 (a customer account is mandatory to book); customer sign-up spec (KAN-122) and customer sign-in (KAN-128, `src/features/auth`) for the visitor path of KAN-116; KAN-30 service management (catalog data, discounts KAN-60); KAN-64 business hours; `service-selection` spec (KAN-134); customer layout spec (KAN-96, KAN-117) |
 
 ## Intent
-A person who opens a business's page in the customer portal learns what the business is and what it offers: general information, the catalog of active services with their details and current promotions. A signed-in customer can start a booking directly from the service they want.
+A person who opens a business's page in the customer portal learns what the business is and what it offers: general information, the catalog of active services with their details and current promotions. A signed-in customer can start a booking directly from the service they want; a visitor who tries to book is asked to sign in or sign up first and then continues at the same service (Q6).
 
 ## Actors and permissions
 | Actor | Can |
 | --- | --- |
-| visitor (not signed in) | See the business information, catalog, service details and discounts (public, read-only) |
+| visitor (not signed in) | See the business information, catalog, service details and discounts (public, read-only). Choosing to book sends them to sign in or sign up (Q6) |
 | customer | Everything a visitor can, plus start a booking from a service |
 
 ## In scope
@@ -23,16 +23,19 @@ A person who opens a business's page in the customer portal learns what the busi
 - Service detail: name, description, price, duration.
 - Current discounts on services.
 - Starting the booking flow from a service for a signed-in customer.
+- Identifying the business from the slug in the URL (`/<businessSlug>`, Q4).
+- The visitor path of KAN-116: sign in or sign up, then return to the booking flow at the same service (Q6).
 
 ## Out of scope
-- The URL form of a business page (Q4). This spec says "the customer is on a business's pages".
-- Starting a booking as a visitor without an account (Q6).
+- Booking without an account: not offered (Q6 decided: a customer account is mandatory).
+- The sign-in and sign-up screens themselves (KAN-128, KAN-122); this spec only sends the visitor there and defines where they return.
+- Creating or changing a business slug (set when the business is created, KAN-176 / Q7).
 - The booking steps after the service is chosen (KAN-134, KAN-139, KAN-145).
 - Search or filters in the catalog (no story asks for them).
 - How the subscriber enters the business profile or services (KAN-30).
 
 ## Data
-- `Business` (public read): `name`, `status`, `timeZone`, `currency` (AS-1), `BusinessHours` (KAN-64), and the public profile fields `logoUrl`, `description` (AS-1).
+- `Business` (public read): `slug` (looked up from the URL, `domain-glossary` §3), `name`, `status`, `timeZone`, `currency` (AS-1), `BusinessHours` (KAN-64), and the public profile fields `logoUrl`, `description` (AS-1).
 - `Service` (`businesses/{businessId}/services/{serviceId}`, public read when `active`): `name`, `description`, `priceInCents`, `durationMinutes`, `status`, `discounts` (`ServiceDiscount`, KAN-60), image (AS-5).
 - `Customer` (`businesses/{businessId}/customers/{customerId}`): its `blocked` status is checked on the server (customers cannot read this collection) to decide whether a booking can start (AS-8).
 - No writes.
@@ -46,6 +49,9 @@ A person who opens a business's page in the customer portal learns what the busi
 - [ ] **AC-KAN-112-04** · edge · Given a customer whose device is in a different time zone from the business, when business hours are shown, then they are shown in the business `timeZone` and that time zone is indicated. [KAN-112]
 - [ ] **AC-KAN-112-05** · edge · Given a business with no `description` or no logo, when the page loads, then the missing parts are hidden without empty placeholders. [KAN-112]
 - [ ] **AC-KAN-112-06** · edge · Given a business whose status is `inactive` or `suspended`, when the customer opens its home page, then `customer:businessHome.business.unavailable` is shown and no booking can be started. See AS-2. [KAN-112, KAN-49]
+- [ ] **AC-KAN-112-07** · happy · Given a business whose `slug` is `<businessSlug>`, when a visitor or customer opens `/<businessSlug>`, then the home page of that business loads, and every page of the customer portal for that business stays under `/<businessSlug>/...`. [KAN-112]
+- [ ] **AC-KAN-112-08** · edge · Given a URL whose slug differs from an existing business's `slug` only in letter case, when it is opened, then the person is redirected to the lowercase URL of that business. See AS-10. [KAN-112]
+- [ ] **AC-KAN-112-09** · edge · Given a top-level segment that is a reserved slug (`RESERVED_BUSINESS_SLUG`, for example the business or admin portal), when it is opened, then the matching static page opens and never a business home page. [KAN-112]
 
 ### KAN-113 — Browse the catalog of available services
 - [ ] **AC-KAN-113-01** · happy · Given a business with `active` services, when the customer is on its home page, then the catalog lists only its `active` services, each with name, price (from `priceInCents` in the business currency) and `durationMinutes`. [KAN-113]
@@ -73,12 +79,16 @@ A person who opens a business's page in the customer portal learns what the busi
 - [ ] **AC-KAN-116-02** · error · Given the service was deactivated after the page was loaded, when the customer chooses to book it, then the booking flow does not open, `customer:businessHome.booking.serviceUnavailable` is shown and the catalog is refreshed. [KAN-116, KAN-58]
 - [ ] **AC-KAN-116-03** · error · Given a signed-in customer whose `Customer` record at this business is `blocked` (KAN-93), when they choose to book a service, then the booking flow does not open and `customer:businessHome.booking.customerBlocked` is shown. See AS-8. [KAN-116, KAN-93]
 - [ ] **AC-KAN-116-04** · error · Given a business whose status is `inactive` or `suspended`, when the customer is on its pages, then no book action is offered. See AS-2. [KAN-116, KAN-49]
+- [ ] **AC-KAN-116-05** · happy · Given a visitor (not signed in) on a business's pages and an `active` service, when they choose to book that service, then the booking flow does not open, they are sent to sign-in with `customer:businessHome.booking.signInRequired` and an action to sign up instead, and, after signing in as a `customer`, they return to the booking flow of the same business with that service already selected (KAN-135). See AS-11. [KAN-116, KAN-128, KAN-135]
+- [ ] **AC-KAN-116-06** · happy · Given a visitor without an account who chose to book a service and then chose to sign up, when they finish sign-up (KAN-123) and sign in (KAN-127), then they return to the booking flow of the same business with that service already selected. See AS-12. [KAN-116, KAN-123, KAN-127]
+- [ ] **AC-KAN-116-07** · error · Given a visitor sent to sign-in from a book action, when they sign in with an account whose role is not `customer` (`subscriber` or `super_admin`), then the booking flow does not open and they go to their own portal (`auth-and-roles` §3). [KAN-116]
+- [ ] **AC-KAN-116-08** · error · Given a visitor chose to book a service that is deactivated while they sign in or sign up, when they return, then the booking flow does not open with that service, `customer:businessHome.booking.serviceUnavailable` is shown and the catalog is refreshed. [KAN-116, KAN-58]
+- [ ] **AC-KAN-116-09** · edge · Given a visitor sent to sign-in from a book action, when they cancel and go back, then they are on the same business's pages, still signed out, and nothing was stored. [KAN-116]
 
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| KAN-116 (book without an account) | Q6 — can a visitor book without an account? | What a visitor sees when choosing to book: whether they must sign in / sign up first or can continue as a guest. No book action behavior is specified for visitors. |
-| All stories (URL only) | Q4 — business page URL | How the business is identified from the URL. |
+| — | — | None. Q4 (URL `/<businessSlug>`) and Q6 (account mandatory; visitor path AC-KAN-116-05 … AC-KAN-116-09) were decided on 2026-09-28. |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -92,6 +102,9 @@ A person who opens a business's page in the customer portal learns what the busi
 | AS-7 | When several discounts are current, the one giving the lowest price is shown. Discounts of the "reservas" type in KAN-60 are not shown until that type is clarified (see Backlog issues). | AC-KAN-115-01, AC-KAN-115-05 |
 | AS-8 | Blocking (KAN-93) is checked when the customer starts a booking, as a courtesy; the binding check is at confirmation (KAN-148). | AC-KAN-116-03 |
 | AS-9 | Discounts shown here are informational; the price applied to the booking is decided in the booking flow (KAN-145, KAN-62). | AC-KAN-115-01 |
+| AS-10 | Slug lookups ignore letter case and redirect to the stored lowercase `slug`; the slug character rules and length are defined where the slug is created (KAN-176, Q7). | AC-KAN-112-08 |
+| AS-11 | The return destination is the booking flow URL of the same business with the chosen service (`redirectTo`); nothing is stored before the customer confirms (KAN-148). | AC-KAN-116-05 |
+| AS-12 | The sign-in screen's link to sign-up keeps the same return destination, so the visitor comes back to the booking flow after signing in (sign-up itself ends on sign-in, KAN-127). | AC-KAN-116-06 |
 
 ## Backlog issues
 - KAN-112 says "general information … to know the services it offers", which overlaps KAN-113 (catalog). KAN-112 is treated as the business information block only.
@@ -100,10 +113,11 @@ A person who opens a business's page in the customer portal learns what the busi
 - KAN-114 lists name, description, price and duration, but KAN-54 also defines an image; the image is optional here (AS-5).
 - No business-portal story lets the subscriber write the business description, logo or currency shown on this page.
 - KAN-93 (subscriber blocks a customer) does not say what the customer sees when blocked.
+- KAN-116 does not say what a visitor sees when choosing to book. Q6 (2026-09-28) decided that an account is mandatory; AC-KAN-116-05 to AC-KAN-116-09 specify the visitor path.
 
 ## Non-functional
-- i18n prefixes (new): `customer:businessHome.business.*`, `customer:businessHome.catalog.*`, `customer:businessHome.discount.*`, `customer:businessHome.booking.*`. Reused: `common:errors.network`, `common:errors.notFound`.
-- Public page: no guard, no reCAPTCHA. Reads only `active` services (Firestore rules, `auth-and-roles` §4).
+- i18n prefixes (new): `customer:businessHome.business.*`, `customer:businessHome.catalog.*`, `customer:businessHome.discount.*`, `customer:businessHome.booking.*` (including `customer:businessHome.booking.signInRequired`). Reused: `common:errors.network`, `common:errors.notFound`.
+- Public page under `/:businessSlug`: no guard, no reCAPTCHA. Reads only `active` services (Firestore rules, `auth-and-roles` §4). The booking flow it opens is private (`RequireRole` for `customer`).
 - Money is shown from `priceInCents` in the business currency; times in the business `timeZone`, formatted for the active language.
 - Catalog pagination follows `api-query-standards` §5 (cursor pages, never the whole collection).
 - Accessibility: struck-through original prices are announced as "original price" and "discounted price", not only by style; service cards are keyboard reachable; images have alternative text; works at phone width.
@@ -111,8 +125,8 @@ A person who opens a business's page in the customer portal learns what the busi
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-112 | AC-KAN-112-01 … AC-KAN-112-06 | `tests/BusinessHomePage.test.tsx` |
+| KAN-112 | AC-KAN-112-01 … AC-KAN-112-09 | `tests/BusinessHomePage.test.tsx` |
 | KAN-113 | AC-KAN-113-01 … AC-KAN-113-05 | `tests/BusinessHomePage.test.tsx` |
 | KAN-114 | AC-KAN-114-01 … AC-KAN-114-05 | `tests/ServiceDetails.test.tsx` |
 | KAN-115 | AC-KAN-115-01 … AC-KAN-115-05 | `tests/ServiceDetails.test.tsx`, `tests/BusinessHomePage.test.tsx` |
-| KAN-116 | AC-KAN-116-01 … AC-KAN-116-04 | `tests/BusinessHomePage.test.tsx` |
+| KAN-116 | AC-KAN-116-01 … AC-KAN-116-09 | `tests/BusinessHomePage.test.tsx` |

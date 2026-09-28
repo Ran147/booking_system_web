@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/customer/features/availability/` |
 | Stories | KAN-140, KAN-141, KAN-142, KAN-143, KAN-144 |
 | Status | BLOCKED (partially) |
-| Depends on | Q1 (collaborator); Q4 (how a business page is reached); Q6 (visitor entry into the booking flow); KAN-64 business hours; KAN-65 / KAN-66 schedule blocks; KAN-70 booking confirmation mode; `service-selection` spec (KAN-134); booking-checkout spec (KAN-145, KAN-148) |
+| Depends on | Q1 (collaborator); Q4 decided 2026-09-28 (the flow lives under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory; the flow is private); KAN-64 business hours; KAN-65 / KAN-66 schedule blocks; KAN-70 booking confirmation mode; `service-selection` spec (KAN-134); booking-checkout spec (KAN-145, KAN-148) |
 
 ## Intent
 After choosing a service, a customer picks a date and sees only the time slots in which the business can actually serve that service, in the business's time zone. Just before the booking is confirmed, the system checks again that the slot is still free so that two bookings never collide.
@@ -15,7 +15,7 @@ After choosing a service, a customer picks a date and sees only the time slots i
 | Actor | Can |
 | --- | --- |
 | customer | Pick a date and see the free time slots of the chosen service; pick one slot |
-| visitor | Availability is a public read (`auth-and-roles` §3); how a visitor enters the flow depends on Q6 |
+| visitor | Cannot reach or pass the slot step: the booking flow is private (Q6). A visitor is sent to sign in or sign up first (KAN-116) |
 | system (Cloud Functions) | Compute free `TimeSlot`s (`getAvailability` callable, returns free slots only) and re-check the slot when the booking is confirmed |
 
 ## In scope
@@ -27,7 +27,7 @@ After choosing a service, a customer picks a date and sees only the time slots i
 - Availability per collaborator (KAN-142) while Q1 is open.
 - The booking summary, policies and confirmation screens (KAN-146 to KAN-149).
 - Rescheduling (KAN-157, KAN-158), which reuses this availability in its own spec.
-- The URL form of a business page (Q4).
+- Booking without an account: a visitor never picks a slot (Q6).
 
 ## Data
 - `Business` (read): `timeZone`, `status`, `BusinessHours` (KAN-64).
@@ -48,6 +48,8 @@ After choosing a service, a customer picks a date and sees only the time slots i
 - [ ] **AC-KAN-140-06** · edge · Given the customer's device is in a different time zone from the business, when dates and slots are shown, then "today" and every time are in the business `timeZone`, and that time zone is indicated. [KAN-140]
 - [ ] **AC-KAN-140-07** · edge · Given the date picker opens, when no date has been picked yet, then the first date with at least one free slot is preselected. See AS-2. [KAN-140]
 - [ ] **AC-KAN-140-08** · edge · Given the customer picks another date while the previous date is still loading, when both answers arrive, then only the slots of the last picked date are shown. [KAN-140]
+- [ ] **AC-KAN-140-09** · error · Given a visitor who is not signed in, when they open the availability step directly (for example from a shared link under `/<businessSlug>`), then no dates or slots are shown and they are sent to sign-in with this step as `redirectTo`; after signing in as a `customer` they return to this step with the same service. See AS-8. [KAN-140]
+- [ ] **AC-KAN-140-10** · edge · Given a customer whose session ends (idle logout, KAN-133) after picking a slot, when they continue, then no slot is kept as chosen for a signed-out person and they are sent to sign-in; after signing in they return to this step with the same service. [KAN-140, KAN-133]
 
 ### KAN-141 — See only available time slots
 - [ ] **AC-KAN-141-01** · happy · Given a date with business hours and no bookings or blocks, when the slots load, then every slot fits entirely inside business hours for the service's `durationMinutes`, starting at the configured interval. See AS-3. [KAN-141]
@@ -80,7 +82,6 @@ After choosing a service, a customer picks a date and sees only the time slots i
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
 | KAN-142 | Q1 — collaborator | Availability for a chosen collaborator, collaborator absences (KAN-66 "ausencia de colaboradores") and per-collaborator capacity. |
-| All stories (visitor entry) | Q6 — booking without an account | Whether a visitor can continue past slot selection. Viewing slots is public; confirming is decided in KAN-116 / KAN-148. |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -92,6 +93,7 @@ After choosing a service, a customer picks a date and sees only the time slots i
 | AS-5 | There is no minimum notice: a slot for today is shown if it starts after the current time in the business `timeZone`. | AC-KAN-141-04 |
 | AS-6 | An `inactive` or `suspended` business accepts no new bookings (same assumption as in `business-home`). | AC-KAN-143-07 |
 | AS-7 | The re-check of KAN-144 runs inside the same server operation that creates the booking (KAN-148), so there is no gap between checking and writing. | AC-KAN-144-01, AC-KAN-144-05 |
+| AS-8 | Every step of the booking flow, including availability, is a private customer page (`RequireRole` for `customer`), following Q6 (2026-09-28). The `getAvailability` callable still returns free slots only. | AC-KAN-140-09, AC-KAN-140-10 |
 
 ## Backlog issues
 - KAN-144 (re-check before confirming) happens at confirmation, which belongs to KAN-148 in epic KAN-145. The re-check is specified here; the confirmation screen there.
@@ -110,7 +112,7 @@ After choosing a service, a customer picks a date and sees only the time slots i
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-140 | AC-KAN-140-01 … AC-KAN-140-08 | `tests/AvailabilityPage.test.tsx` |
+| KAN-140 | AC-KAN-140-01 … AC-KAN-140-10 | `tests/AvailabilityPage.test.tsx` |
 | KAN-141 | AC-KAN-141-01 … AC-KAN-141-08 | `tests/AvailabilityPage.test.tsx`; `functions/src/bookings/tests/getAvailability.test.ts` |
 | KAN-142 | — (BLOCKED, Q1) | — |
 | KAN-143 | AC-KAN-143-01 … AC-KAN-143-07 | `functions/src/bookings/tests/getAvailability.test.ts`; `tests/AvailabilityPage.test.tsx` |

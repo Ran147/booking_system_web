@@ -4,9 +4,12 @@ import { ROUTE_PATH } from "@/shared/constants";
 import { USER_ROLE } from "@/shared/domain";
 import { CustomerLayout } from "./layout/CustomerLayout";
 
-// Public business pages (catalog, availability) have no guard; their URL form
-// is BLOCKED on Q4. Private pages (my bookings, profile) go inside the
-// RequireRole branch.
+// The customer portal lives under the business slug: /:businessSlug/... (Q4).
+// Static top-level routes (landing, auth, business, admin) rank above this
+// dynamic segment in React Router, and their segments are reserved slugs
+// (RESERVED_BUSINESS_SLUG). Public business pages (home, catalog, service
+// details) have no guard. The booking flow, my bookings and profile go inside
+// the RequireRole branch: booking needs a customer account (Q6).
 export const customerRoutes: RouteObject[] = [
   {
     children: [

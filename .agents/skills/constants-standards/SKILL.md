@@ -195,7 +195,7 @@ export type I18nNamespace =
 
 ```ts
 // src/shared/constants/routes/RoutePath.constants.ts
-// Customer portal routes wait for Q4 (how a business page is reached).
+// The customer portal lives under the business slug (Q4).
 export const ROUTE_PATH = {
   ADMIN: {
     AUDIT_LOG: "audit-log",
@@ -218,6 +218,9 @@ export const ROUTE_PATH = {
     SERVICES: "services",
     SETTINGS: "settings",
     SUBSCRIPTION: "subscription",
+  },
+  CUSTOMER: {
+    ROOT: "/:businessSlug",
   },
   LANDING: {
     CONTACT: "/contact",

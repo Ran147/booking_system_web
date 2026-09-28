@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/customer/features/profile/` |
 | Stories | KAN-169, KAN-170, KAN-171, KAN-172, KAN-173 |
 | Status | Draft |
-| Depends on | KAN-122 customer sign-up (personal data fields captured at sign-up), KAN-128 customer sign-in and password recovery, KAN-96 navbar (KAN-109 entry point), `i18n-standards` (languages), `theming-standards` (theme modes) |
+| Depends on | KAN-122 customer sign-up (personal data fields captured at sign-up); Q6 decided 2026-09-28 (full name and phone are required), KAN-128 customer sign-in and password recovery, KAN-96 navbar (KAN-109 entry point), `i18n-standards` (languages), `theming-standards` (theme modes) |
 
 ## Intent
 A signed-in `customer` can check and update the personal data of their platform account, change their password, and choose the interface language (Spanish or English) and appearance (light or dark). Language and theme follow them across devices because they are saved on their account.
@@ -53,6 +53,7 @@ A signed-in `customer` can check and update the personal data of their platform 
 - [ ] **AC-KAN-170-04** · error · Given the save fails because of the network or permissions, when the customer saves, then the stored data is unchanged, the form keeps the typed values and `common:errors.network` or `common:errors.permissionDenied` is shown. [KAN-170]
 - [ ] **AC-KAN-170-05** · edge · Given the customer made no change, when they look at the form, then the save action is disabled; given they leave with unsaved changes, then they are asked to confirm discarding them. [KAN-170]
 - [ ] **AC-KAN-170-06** · edge · Given the email field, when the customer edits the profile, then the email is shown read-only. See AS-2. [KAN-170]
+- [ ] **AC-KAN-170-07** · error · Given a customer who clears their phone number, when they save, then nothing is saved and `validation:required` is shown on the phone field, because a customer account always has a phone (Q6). [KAN-170]
 
 ### KAN-171 — Change my password
 - [ ] **AC-KAN-171-01** · happy · Given the customer enters their current password, a new password that meets the strength rules and the same new password in the confirmation field, when they submit, then the password is changed, `customer:profile.password.changeSuccess` is shown and they stay signed in. [KAN-171]
@@ -86,7 +87,7 @@ A signed-in `customer` can check and update the personal data of their platform 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
 | --- | --- | --- |
-| AS-1 | Personal data = the fields captured at sign-up (KAN-123): full name and phone number, plus the account email. Name 2–100 characters; phone optional, in international format. | AC-KAN-169-01, AC-KAN-170-03 |
+| AS-1 | Personal data = the fields captured at sign-up (KAN-123): `fullName` and `phone`, plus the account email. Both are required (Q6, 2026-09-28) and follow the same length and format rules as the customer sign-up spec (AS-3 there). | AC-KAN-169-01, AC-KAN-170-03, AC-KAN-170-07 |
 | AS-2 | The email cannot be changed from the profile (it would need re-verification, KAN-126). | AC-KAN-170-06 |
 | AS-3 | Profile edits change only the `User`; the businesses' `Customer` records keep their own copy (KAN-91 lets the business edit it). | Out of scope |
 | AS-4 | The new password must differ from the current one; strength rules are those of sign-up (KAN-124). | AC-KAN-171-03, AC-KAN-171-06 |
@@ -113,7 +114,7 @@ A signed-in `customer` can check and update the personal data of their platform 
 | Story | Criteria | Test file |
 | --- | --- | --- |
 | KAN-169 | AC-KAN-169-01 … AC-KAN-169-04 | `tests/ProfilePage.test.tsx` |
-| KAN-170 | AC-KAN-170-01 … AC-KAN-170-06 | `tests/ProfilePage.test.tsx` |
+| KAN-170 | AC-KAN-170-01 … AC-KAN-170-07 | `tests/ProfilePage.test.tsx` |
 | KAN-171 | AC-KAN-171-01 … AC-KAN-171-08 | `tests/ChangePasswordForm.test.tsx` |
 | KAN-172 | AC-KAN-172-01 … AC-KAN-172-05 | `tests/PreferencesSection.test.tsx` |
 | KAN-173 | AC-KAN-173-01 … AC-KAN-173-05 | `tests/PreferencesSection.test.tsx` |

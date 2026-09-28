@@ -60,6 +60,7 @@ When two skills seem to disagree, the higher one wins:
 | `npm run test:run` | Unit and component tests |
 | `npm run test:rules` | `firestore.rules` tests against the emulator |
 | `npm run emulators` | Firebase Emulator Suite |
+| `npm run seed` | Test accounts and one business in the emulators only (`scripts/seed-emulator.ts`; needs `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST`) |
 
 Before finishing a task: `npm run lint && npm run typecheck && npm run test:run` must pass.
 

@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/customer/features/booking-checkout/` |
 | Stories | KAN-146, KAN-147, KAN-148, KAN-149 |
 | Status | Draft |
-| Depends on | KAN-134 service selection (`service-selection` spec), KAN-139 availability (`availability` spec, incl. the re-check of KAN-144), KAN-70 manual vs automatic confirmation, KAN-93 customer blocking, KAN-128 customer sign-in, KAN-163 confirmation email (`functions/src/notifications` spec); Q4 (how the business page is reached); Q6 (guest booking, KAN-116) |
+| Depends on | KAN-134 service selection (`service-selection` spec), KAN-139 availability (`availability` spec, incl. the re-check of KAN-144), KAN-70 manual vs automatic confirmation, KAN-93 customer blocking, KAN-128 customer sign-in, KAN-163 confirmation email (`functions/src/notifications` spec); Q4 decided 2026-09-28 (the flow lives under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory; no guest booking) |
 
 ## Intent
 A signed-in `customer` who has chosen a service and a free time slot on a business's pages reviews a summary of the booking and the business's booking policies, confirms it, and sees clearly that the `Booking` was registered and whether it is `pending` or `confirmed`.
@@ -15,7 +15,7 @@ A signed-in `customer` who has chosen a service and a free time slot on a busine
 | Actor | Can |
 | --- | --- |
 | `customer` (signed in) | Review the summary and policies, confirm a booking for themselves at a business, see the confirmation of their own booking |
-| visitor | Reach the summary only after signing in (the "book without an account" path is out of scope, Q6) |
+| visitor | Cannot book without an account (Q6): reaches the summary only after signing in as a `customer` |
 | `subscriber`, `super_admin` | Nothing in this feature (the subscriber creates bookings from the business portal, KAN-69) |
 
 ## In scope
@@ -27,14 +27,13 @@ A signed-in `customer` who has chosen a service and a free time slot on a busine
 ## Out of scope
 - Choosing the service and the time slot (KAN-134, KAN-139).
 - Choosing or showing a collaborator in the summary (Q1).
-- Booking without an account (Q6, KAN-116).
+- Booking without an account: not offered (Q6 decided 2026-09-28). The visitor path to sign in or sign up is in the `business-home` spec (KAN-116).
 - The confirmation email (KAN-164, `functions/src/notifications`).
-- How the customer reaches the business page (Q4): this spec says only "the customer is on a business's pages".
 - Online payment of the service: the platform does not charge customers.
 
 ## Data
-- `Booking` (`businesses/{businessId}/bookings/{bookingId}`): created with `status` `pending` or `confirmed` (KAN-70), `customerUserId` = the signed-in user, `customerId`, `serviceId`, `serviceSnapshot` (`name`, `priceInCents`, `durationMinutes`), `startsAt`, `endsAt`, `cancellation: null`. See `domain-glossary` §3 and §4.1.
-- `Customer` (`businesses/{businessId}/customers/{customerId}`): read to check `blocked`; created for the customer if it does not exist yet (see AS-4).
+- `Booking` (`businesses/{businessId}/bookings/{bookingId}`): created with `status` `pending` or `confirmed` (KAN-70), `customerUserId` = the signed-in user, `customerId`, `serviceId`, `serviceSnapshot` (`name`, `priceInCents`, `durationMinutes`), `startsAt`, `endsAt`, `cancellation: null`. No guest fields (Q6). See `domain-glossary` §3 and §4.1.
+- `Customer` (`businesses/{businessId}/customers/{customerId}`): read to check `blocked`; created for the customer if it does not exist yet, from the `fullName`, `phone` and email of their account (see AS-4).
 - `Business`: `timeZone`, currency, `status`, `BookingPolicy`, confirmation mode (KAN-70). Read only.
 - `Service`: `status` (`active` only), price, duration. Read only.
 - No new fields.
@@ -65,6 +64,8 @@ A signed-in `customer` who has chosen a service and a free time slot on a busine
 - [ ] **AC-KAN-148-07** · edge · Given the customer presses confirm several times quickly, when the requests are processed, then exactly one `Booking` is created and the action is disabled while the request is in progress. [KAN-148]
 - [ ] **AC-KAN-148-08** · edge · Given the service price or duration changed between opening the summary and confirming, when the customer confirms, then the booking is not created, `customer:bookingCheckout.confirm.serviceChangedError` is shown and the summary reloads with the new values for the customer to confirm again. See AS-6. [KAN-148, KAN-62]
 - [ ] **AC-KAN-148-09** · edge · Given a `customer` with no `Customer` record at this business yet, when they confirm, then the booking is created and a `Customer` record linked to their account (`userId`) exists for the business afterwards. See AS-4. [KAN-148]
+- [ ] **AC-KAN-148-10** · error · Given a request to create a booking without a signed-in `customer` (signed out, or another role), when it reaches the server, then it is rejected with `common:errors.permissionDenied` and no `Booking` is created; a booking from the customer portal is never stored without `customerUserId`. [KAN-148]
+- [ ] **AC-KAN-148-11** · edge · Given a `customer` with no `Customer` record at this business yet, when the record is created on their first booking, then it takes the `fullName`, `phone` and email of their account (Q6). See AS-4. [KAN-148, KAN-123]
 
 ### KAN-149 — See a confirmation once the booking is registered
 - [ ] **AC-KAN-149-01** · happy · Given a booking was created with `status` `confirmed`, when the request succeeds, then a confirmation screen shows `customer:bookingCheckout.success.confirmedTitle`, the business, service, date and times in the business `timeZone`, the price, and actions to go to "My bookings" (KAN-150) and back to the business's pages. [KAN-149]
@@ -75,15 +76,15 @@ A signed-in `customer` who has chosen a service and a free time slot on a busine
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| — | — | No story of this epic is blocked. The collaborator line in the summary (Q1) and the guest path (Q6, KAN-116) are out of scope. |
+| — | — | No story of this epic is blocked. The collaborator line in the summary (Q1) is out of scope. Q6 (2026-09-28): there is no guest path; a customer account is mandatory. |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
 | --- | --- | --- |
-| AS-1 | Checkout is a private customer page: signing in is required before the summary, and the selected service and time slot survive the sign-in redirect. | AC-KAN-146-03 |
+| AS-1 | Checkout is a private customer page (confirmed by Q6, 2026-09-28): signing in is required before the summary, and the selected service and time slot survive the sign-in redirect. | AC-KAN-146-03, AC-KAN-148-10 |
 | AS-2 | When a discount applies (KAN-60, KAN-115), the discounted price is the booked price and is what `serviceSnapshot.priceInCents` stores. | AC-KAN-146-06 |
 | AS-3 | The customer must explicitly acknowledge the policies (checkbox) before confirming; when the business has no policy, no acknowledgement is asked. | AC-KAN-147-02, AC-KAN-147-03 |
-| AS-4 | A `Customer` record is created by the server for a `customer` on their first booking at a business, linked through `userId`. | AC-KAN-148-09 |
+| AS-4 | A `Customer` record is created by the server for a `customer` on their first booking at a business, linked through `userId`, with the `fullName`, `phone` and email of the account. | AC-KAN-148-09, AC-KAN-148-11 |
 | AS-5 | Customers cannot book at a business that is `inactive` or `suspended` (its public pages may still show, but booking is rejected). | AC-KAN-148-05 |
 | AS-6 | If the service's price or duration changed since the summary was shown, the server rejects the booking instead of silently using new values. | AC-KAN-148-08 |
 
@@ -94,7 +95,7 @@ A signed-in `customer` who has chosen a service and a free time slot on a busine
 - No story says whether the customer can add a note to the booking; nothing is specified for it.
 
 ## Non-functional
-- i18n keys: new prefix `customer:bookingCheckout.*` (`summary.*`, `policies.*`, `confirm.*`, `success.*`); reused `common:errors.network`, `common:errors.notFound`, `common:errors.unknown`.
+- i18n keys: new prefix `customer:bookingCheckout.*` (`summary.*`, `policies.*`, `confirm.*`, `success.*`); reused `common:errors.network`, `common:errors.notFound`, `common:errors.permissionDenied`, `common:errors.unknown`.
 - Booking creation runs on the server (callable `createBooking`, transaction) with the availability re-check of KAN-144 (`api-mutation-standards` §1). The pre-confirm availability view may use realtime (`api-query-standards` §9).
 - Private page: `RequireRole` for `customer`; idle logout after `PlatformSettings.idleTimeoutMinutes` (KAN-133, KAN-182). App Check / reCAPTCHA Enterprise protects the callable (KAN-5, `auth-and-roles` §5).
 - Money from `priceInCents` in the business currency; dates and times in the business `timeZone`, formatted with `Intl` in the UI language.
@@ -105,5 +106,5 @@ A signed-in `customer` who has chosen a service and a free time slot on a busine
 | --- | --- | --- |
 | KAN-146 | AC-KAN-146-01 … AC-KAN-146-06 | `tests/BookingCheckoutPage.test.tsx` |
 | KAN-147 | AC-KAN-147-01 … AC-KAN-147-04 | `tests/BookingCheckoutPage.test.tsx` |
-| KAN-148 | AC-KAN-148-01 … AC-KAN-148-09 | `tests/BookingCheckoutPage.test.tsx`, `functions/src/bookings/tests/createBooking.test.ts` |
+| KAN-148 | AC-KAN-148-01 … AC-KAN-148-11 | `tests/BookingCheckoutPage.test.tsx`, `functions/src/bookings/tests/createBooking.test.ts` |
 | KAN-149 | AC-KAN-149-01 … AC-KAN-149-04 | `tests/BookingConfirmationPage.test.tsx` |

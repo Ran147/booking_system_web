@@ -27,7 +27,7 @@ For the subscriber who wants to decide how and when their customers are reminded
 - Sending and content of the reminder email itself (KAN-165, `functions/src/notifications`).
 - The customer's reminder opt-in control (no customer story defines it; see Backlog issues).
 - Where and how the subscriber reads the `Notification` list (no story defines the inbox; see Backlog issues).
-- Alerts for failed renewal charges and retries (KAN-48/KAN-50, blocked on Q5).
+- Alerts for failed renewal charges and retries (KAN-48/KAN-50): deferred, out of MVP (Q5 decided 2026-09-28).
 - Any alert or reminder for a collaborator (Q1).
 - Channels other than email for reminders, and email/push for internal alerts (AS-1, AS-5).
 
@@ -70,7 +70,7 @@ For the subscriber who wants to decide how and when their customers are reminded
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| — | — | No story of this epic depends on Q1–Q7. Alerts about renewal retries or `past_due` (KAN-48, Q5) are not part of KAN-101 and must not be added under its "etc." until Q5 is decided. |
+| — | — | No story of this epic depends on Q1–Q7. Alerts about renewal retries or `past_due` (KAN-48) are not part of KAN-101 and must not be added under its "etc.": Q5 (2026-09-28) deferred KAN-48 / KAN-50 (out of MVP). |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -88,7 +88,7 @@ For the subscriber who wants to decide how and when their customers are reminded
 - KAN-100 depends on a customer reminder opt-in ("si el cliente habilitó el recordatorio") that no customer story defines. KAN-165 only says the customer receives reminders, and KAN-168 (profile) has no setting for it. A customer story is needed (AS-4).
 - KAN-101 ends with "etc."; the full list of alert types is not defined (AS-5).
 - No story defines where the subscriber reads internal alerts (bell, inbox, mark as read). It probably belongs to the business layout (KAN-29).
-- KAN-101 "suscripción por vencer" overlaps KAN-48/KAN-50 (notify on each failed renewal attempt), which is blocked on Q5; KAN-48 and KAN-50 are also duplicates.
+- KAN-101 "suscripción por vencer" overlaps KAN-48/KAN-50 (notify on each failed renewal attempt), which is deferred (out of MVP, Q5); KAN-48 and KAN-50 are also duplicates.
 - KAN-100 overlaps KAN-165 (customer receives reminders): KAN-165 owns the email, this epic owns the business settings.
 
 ## Non-functional

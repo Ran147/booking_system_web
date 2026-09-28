@@ -1,6 +1,6 @@
-// The customer portal's public business pages wait for Q4 (how a business
-// page is reached). CUSTOMER.ROOT is a provisional prefix for the portal shell
-// until that decision is recorded.
+// The customer portal lives under the business slug, /<businessSlug>/... (Q4).
+// Static top-level paths win over that dynamic segment; each of their segments
+// is listed in RESERVED_BUSINESS_SLUG (src/shared/domain).
 export const ROUTE_PATH = {
   ADMIN: {
     AUDIT_LOG: "audit-log",
@@ -25,7 +25,7 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
-    ROOT: "/customer",
+    ROOT: "/:businessSlug",
   },
   LANDING: {
     CONTACT: "/contact",

@@ -27,8 +27,8 @@ Security is enforced on the server. Client checks only decide what to show.
 | `super_admin` | `admin` | `{ role: "super_admin" }` |
 | `subscriber` | `business` | `{ role: "subscriber", businessId }` |
 | `customer` | `customer` | `{ role: "customer" }` |
-| visitor | `landing`, public customer pages | not signed in |
-| collaborator | — | **BLOCKED — Q1** |
+| visitor | `landing`, public customer pages (cannot book, Q6) | not signed in |
+| collaborator | — | Fifth actor confirmed (Q1, 2026-09-28); claims **BLOCKED — Q1** |
 
 - Claims are set **only** by Cloud Functions: when the first payment is confirmed (subscriber, KAN-176), when a customer finishes sign-up (KAN-122), or by the `grantSuperAdmin` script for super admins.
 - After a claim changes, the client refreshes the token with `getIdToken(true)`.
@@ -166,8 +166,8 @@ Each portal's route tree is wrapped by `RequireRole` (a Decorator, `component-ar
 | Portal | Guard |
 | --- | --- |
 | `landing` | none |
-| `customer` public pages (business page, catalog, availability) | none |
-| `customer` private pages (my bookings, profile) | `RequireRole allowedRoles={[USER_ROLE.CUSTOMER]}` |
+| `customer` public pages under `/:businessSlug` (business page, catalog, service details) | none |
+| `customer` private pages (booking flow: service selection, availability, checkout; my bookings, profile) | `RequireRole allowedRoles={[USER_ROLE.CUSTOMER]}` — booking requires a customer account (Q6) |
 | `business` | `RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER]}` |
 | `admin` | `RequireRole allowedRoles={[USER_ROLE.SUPER_ADMIN]}` |
 | sign-in, sign-up | `GuestOnly` (redirects signed-in users to their portal) |
@@ -300,7 +300,8 @@ service cloud.firestore {
 
 Rules keep their literals: the rules language cannot import TypeScript constants. The values must match `USER_ROLE`, `FIRESTORE_COLLECTION` and the status constants.
 
-- Customers never read other customers' bookings. Availability for the public page (KAN-139 to KAN-144) comes from a callable `getAvailability` that returns free time slots only.
+- Customers never read other customers' bookings. Availability for the booking flow (KAN-139 to KAN-144) comes from a callable `getAvailability` that returns free time slots only.
+- The customer portal identifies the business by `Business.slug` from the URL (Q4). That is fine for public reads; every write still checks the caller's claims on the server, and the business portal never reads `businessId` from the URL.
 - An `inactive` or `suspended` business is read-only (KAN-49): rules deny writes and the UI shows an `Alert` and disables create actions.
 
 ## 5. Sign-in flow, reCAPTCHA and inactivity
@@ -374,7 +375,7 @@ export type { Session } from "./models/Session.types";
 | --- | --- |
 | Rules allow and deny what this skill says | `@firebase/rules-unit-testing` tests against the emulator |
 | `businessId` never read from the URL in the business portal | Code review; `useParams` is not used in `src/portals/business/**` for `businessId` |
-| Claims only set by functions | No client code imports `firebase-admin` (it is only in `functions/`) |
+| Claims only set by functions | No client code imports `firebase-admin` (it is only in `functions/` and in the emulator-only seed script `scripts/seed-emulator.ts`, which refuses to run outside the emulators) |
 | Sign-out clears the cache | Unit test of `useSignOut` |
 
 ## 7. Checklist

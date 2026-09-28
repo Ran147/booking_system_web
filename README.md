@@ -6,8 +6,10 @@ SaaS multi-tenant de reservas. Cada negocio (suscriptor) publica sus servicios y
 | --- | --- | --- |
 | `landing` | `/` | Visitantes: planes, contacto, alta de suscriptores |
 | `business` | `/business` | Suscriptor (dueño del negocio), rol `subscriber` |
-| `customer` | `/customer` (provisional, ver Q4) | Clientes del negocio, rol `customer` |
+| `customer` | `/<slug-del-negocio>` (por ejemplo `/barberia-centro/...`, Q4) | Clientes del negocio, rol `customer` |
 | `admin` | `/admin` | Super administrador, rol `super_admin` |
+
+Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/shared/domain`): ningún negocio puede usarlos.
 
 Este repositorio es el **esqueleto base**: configuración, fundamentos compartidos y los cuatro portales como carcasas vacías. Ninguna funcionalidad de las specs está implementada todavía; cada carpeta de feature solo contiene su `specs/SPEC.md`.
 
@@ -62,6 +64,22 @@ Este repositorio es el **esqueleto base**: configuración, fundamentos compartid
    npm run dev
    ```
 
+### Datos de prueba
+
+`npm run seed` (`scripts/seed-emulator.ts`) carga en los emuladores un super admin, un suscriptor dueño del negocio `active` «Barbería Centro» (slug `barberia-centro`, zona horaria, horario de atención y suscripción `active` al plan Pro), un cliente, dos planes y tres servicios, con los custom claims `role` y `businessId`. Se puede correr varias veces: siempre deja los mismos datos. Al terminar imprime las credenciales.
+
+Solo corre contra los emuladores: si faltan `FIRESTORE_EMULATOR_HOST` y `FIREBASE_AUTH_EMULATOR_HOST` se niega a ejecutarse. Dos formas:
+
+```bash
+# Con los emuladores ya levantados (npm run emulators) en otra terminal
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 npm run seed
+
+# O todo en un paso (levanta Auth y Firestore, carga los datos y los apaga)
+npx firebase emulators:exec --only auth,firestore --project demo-booking-system "npm run seed"
+```
+
+Los datos del emulador se borran al apagarlo; con `npm run emulators` hay que volver a correr el seed cada vez. Usuarios (contraseña de prueba `Emulator-Only-123!`, **solo para el emulador**): `admin@demo.test` (super admin), `suscriptor@demo.test` (suscriptor) y `cliente@demo.test` (cliente).
+
 ### Cloud Functions
 
 `functions/` es un paquete aparte (TypeScript, Node 22):
@@ -90,6 +108,7 @@ npm run build
 | `npm run test:coverage` | Tests con cobertura (mínimo 70 % de líneas en portales, features y dominio) |
 | `npm run test:rules` | Tests de `firestore.rules` contra el emulador (`tests/rules/`); no forman parte de `test:run` |
 | `npm run emulators` | Firebase Emulator Suite |
+| `npm run seed` | Carga datos de prueba en los emuladores (ver «Datos de prueba») |
 
 Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run`.
 
@@ -102,6 +121,7 @@ docs/backlog/          # export de Jira, mapa épica → carpeta, notas de revis
 docs/decisions/        # preguntas abiertas (Q1–Q7) y ADRs
 docs/setup/tooling.md  # dependencias y configuración de herramientas
 functions/             # Cloud Functions (paquete aparte)
+scripts/               # herramientas locales (seed de los emuladores)
 src/app/               # App, providers (Query, i18n, Theme, Auth) y router
 src/portals/<portal>/  # <portal>.routes.tsx, layout/, placeholder/ y features/
 src/features/auth/     # sesión, roles y guards compartidos por los portales
@@ -121,7 +141,7 @@ Los componentes de shadcn/ui se agregan con `npx shadcn@latest add <componente>`
 - **`AGENTS.md`** es el punto de entrada: dice qué skill cargar para cada tarea y cuál gana cuando dos se contradicen. Copilot, Antigravity y Claude Code lo leen.
 - **Skills:** `.agents/skills/<nombre>/SKILL.md` (estilo de código, constantes, i18n, theming, componentes, arquitectura, estado, queries, mutations, formularios, auth y roles, tests, glosario del dominio, backlog → spec).
 - **Specs:** cada feature tiene `specs/SPEC.md` en su carpeta, con criterios de aceptación citando la clave KAN. El mapa épica → carpeta está en `docs/backlog/epic-map.md`.
-- **Decisiones abiertas:** `docs/decisions/open-questions.md`. Lo marcado **BLOCKED** no se implementa ni se inventa (por ejemplo, colaboradores Q1 o la URL del negocio Q4).
+- **Decisiones abiertas:** `docs/decisions/open-questions.md`. Lo marcado **BLOCKED** no se implementa ni se inventa (por ejemplo, los detalles del colaborador, Q1). Las decisiones tomadas (Q4 URL por slug, Q5 sin reintentos de renovación en el MVP, Q6 cuenta de cliente obligatoria) ya están en las specs y en `domain-glossary`.
 
 ## Flujo de trabajo y pull requests
 

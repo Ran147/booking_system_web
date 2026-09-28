@@ -339,6 +339,14 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.vitest } },
   },
 
+  // Local tooling (npm run seed): Node globals; console output is the
+  // script's only interface, so no-console is off here and nowhere else
+  {
+    files: ["scripts/**/*.ts"],
+    languageOptions: { globals: { ...globals.node } },
+    rules: { "no-console": "off" },
+  },
+
   // Tool config files must use export default; typescript-eslint documents
   // its default import (`tseslint.configs`), which import-x warns about
   {

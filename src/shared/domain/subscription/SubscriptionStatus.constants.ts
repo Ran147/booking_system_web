@@ -1,8 +1,9 @@
 import type { TransitionMap } from "../stateMachine";
 
 // Cancelling (KAN-47) sets cancelAtPeriodEnd; the status changes to
-// cancelled only when the period ends. Retry count and interval for past_due
-// are BLOCKED on Q5.
+// cancelled only when the period ends. A failed renewal charge moves an active
+// subscription to past_due; automatic retries are out of MVP (Q5), so it
+// leaves past_due by a manual payment or by expiring after the grace days.
 export const SUBSCRIPTION_STATUS = {
   ACTIVE: "active",
   CANCELLED: "cancelled",
