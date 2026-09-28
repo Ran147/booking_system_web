@@ -24,7 +24,28 @@ service cloud.firestore {
       return hasRole('subscriber') && request.auth.token.businessId == businessId;
     }
 
-    // inactive and suspended businesses are read-only (KAN-49).
+    // Collaborator of the business (Q1): the businessId and collaboratorId
+    // claims must match, and the Collaborator record must be active, so a
+    // deactivated collaborator (KAN-81) loses access at once.
+    function collaboratorRecord(businessId) {
+      return get(/databases/$(database)/documents/businesses/$(businessId)/collaborators/$(request.auth.token.collaboratorId)).data;
+    }
+
+    function isCollaboratorOf(businessId) {
+      return hasRole('collaborator')
+        && request.auth.token.businessId == businessId
+        && request.auth.token.collaboratorId is string
+        && collaboratorRecord(businessId).status == 'active';
+    }
+
+    // Permission values match COLLABORATOR_PERMISSION (KAN-86).
+    function collaboratorCan(businessId, permission) {
+      return isCollaboratorOf(businessId)
+        && collaboratorRecord(businessId).permissions.hasAny([permission]);
+    }
+
+    // pending, rejected, inactive and suspended businesses are read-only
+    // (KAN-49, Q2).
     function businessIsWritable(businessId) {
       return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
     }
@@ -36,19 +57,32 @@ service cloud.firestore {
              .hasAny(['status', 'ownerUserId']); // status changes only via functions
 
       match /services/{serviceId} {
-        allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin();
+        allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
+          || isCollaboratorOf(businessId);
         allow create, update: if ownsBusiness(businessId) && businessIsWritable(businessId);
         allow delete: if false; // via the deleteService function (KAN-59)
       }
 
       match /bookings/{bookingId} {
         allow read: if ownsBusiness(businessId)
-          || (hasRole('customer') && resource.data.customerUserId == request.auth.uid);
+          || (hasRole('customer') && resource.data.customerUserId == request.auth.uid)
+          || (isCollaboratorOf(businessId)
+              && resource.data.collaboratorId == request.auth.token.collaboratorId)
+          || collaboratorCan(businessId, 'manage_bookings');
         allow write: if false; // only via booking functions
       }
 
       match /customers/{customerId} {
         allow read, write: if ownsBusiness(businessId) && businessIsWritable(businessId);
+        allow read: if collaboratorCan(businessId, 'manage_customers');
+      }
+
+      // Created, edited, deactivated and reactivated only by Cloud Functions
+      // (KAN-78 to KAN-86): they also change Firebase Auth claims.
+      match /collaborators/{collaboratorId} {
+        allow read: if ownsBusiness(businessId)
+          || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
+        allow write: if false;
       }
     }
 

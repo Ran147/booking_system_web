@@ -5,8 +5,8 @@
 | Portal | business |
 | Feature folder | `src/portals/business/features/services/` |
 | Stories | KAN-54, KAN-55, KAN-56, KAN-57, KAN-58, KAN-59, KAN-60, KAN-61, KAN-62 |
-| Status | BLOCKED (partially) |
-| Depends on | KAN-28 (subscriber sign-in, session and `businessId` claim); KAN-32 / KAN-49 (read-only business); KAN-63 (bookings used by KAN-59 and KAN-62); KAN-111 (public catalog KAN-113, discounts shown in KAN-115); KAN-77 (collaborators, Q1) |
+| Status | Draft |
+| Depends on | KAN-28 (subscriber sign-in, session and `businessId` claim); KAN-32 / KAN-49 (read-only business); KAN-63 (bookings used by KAN-59 and KAN-62); KAN-111 (public catalog KAN-113, discounts shown in KAN-115); KAN-77 collaborators (Q1 decided 2026-09-28: `Collaborator.serviceIds`; permission `manage_services`, KAN-86) |
 
 ## Intent
 The subscriber builds and maintains the catalog of services their business offers: creates, edits, lists, activates, deactivates and deletes services, and sets time-limited discounts. Bookings keep the price and duration that were valid when they were made, so later edits never change past bookings or revenue reports.
@@ -17,7 +17,7 @@ The subscriber builds and maintains the catalog of services their business offer
 | subscriber (own business only) | Create, list, search, edit, activate, deactivate and delete their own business's services, and manage their discounts, while the business is `active`. Only list and view while the business is `inactive` or `suspended` (KAN-49). |
 | customer / visitor | See only `active` services in the public catalog (KAN-113); not part of this spec. |
 | super admin | Not part of this spec. |
-| collaborator | BLOCKED — Q1. |
+| collaborator (own business, while `active`) | With `manage_services` (KAN-86): the same as the subscriber in this spec. Without it: nothing here. |
 
 The business always comes from the session, never from the URL. A subscriber never sees or changes another business's services.
 
@@ -27,9 +27,10 @@ The business always comes from the session, never from the URL. A subscriber nev
 - Status changes `active` ↔ `inactive`, and deletion of `inactive` services without `pending` or `confirmed` bookings.
 - Discounts on a service: percentage or fixed amount, with a validity date range.
 - Snapshot of name, price and duration on every booking (KAN-62).
+- Assigning collaborators to a service and choosing whether the customer picks one or the system assigns one (KAN-61).
 
 ## Out of scope
-- Assigning collaborators to a service and the "customer chooses / system assigns" option (KAN-61, BLOCKED — Q1).
+- Registering and managing collaborators (KAN-77 epic).
 - A discount type called "reservas" (see Backlog issues) until the team clarifies it.
 - Plan limits on the number of services (KAN-181, admin plans epic).
 - How customers see services and discounts (KAN-113 to KAN-115).
@@ -40,7 +41,7 @@ The business always comes from the session, never from the URL. A subscriber nev
 - **New fields (names to confirm in review):** `imageUrl` (Nullable, the service image), `features` (list of short text items for "more characteristics"). `ServiceDiscount`: `type` (`percentage` | `fixed_amount`), `value` (percent, or amount in cents), `startsAt`, `endsAt`.
 - `Booking.serviceSnapshot` (`name`, `priceInCents`, `durationMinutes`) — `domain-glossary` §3 and the `Booking` interface (KAN-62).
 - `Business` status (`active`, `inactive`, `suspended`) decides whether writes are allowed (KAN-49).
-- Nothing is added for collaborators (Q1).
+- **New field (KAN-61):** `collaboratorSelection` on `Service`: `customer_choice` | `automatic` (glossary §3). Which collaborators serve the service is `Collaborator.serviceIds` (collaborators spec); this screen edits it from the service side.
 
 ## Acceptance criteria
 
@@ -107,6 +108,15 @@ The business always comes from the session, never from the URL. A subscriber nev
 - [ ] **AC-KAN-60-09** · edge · Given a discount whose end date has passed, when the subscriber views the service, then the discount is shown as expired and is no longer applied to new bookings; dates are evaluated in the business `timeZone`, including the full end day. See AS-11. [KAN-60]
 - [ ] **AC-KAN-60-10** · edge · Given an `inactive` service, when it has a valid discount, then the discount is not shown to customers because the service is not in the public catalog. [KAN-60, KAN-58]
 
+### KAN-61 — Assign one or more collaborators to a service and decide whether the customer chooses or the system assigns one
+- [ ] **AC-KAN-61-01** · happy · Given a service and the business's `active` and `invited` collaborators, when the subscriber selects which collaborators serve it and saves, then each selected collaborator's `serviceIds` includes the service, each unselected one's does not, and the service detail lists them. [KAN-61]
+- [ ] **AC-KAN-61-02** · happy · Given a service with collaborators, when the subscriber chooses `business:services.collaborators.selection.customerChoice` or `business:services.collaborators.selection.automatic` and saves, then `collaboratorSelection` is stored as `customer_choice` or `automatic`, and the customer flow offers a collaborator choice only for `customer_choice` (KAN-137, KAN-138). [KAN-61]
+- [ ] **AC-KAN-61-03** · edge · Given a service with no collaborator selected, when it is saved, then it is served by the business as one resource (`Booking.collaboratorId` = `null`, glossary §3) and the selection option is hidden. [KAN-61]
+- [ ] **AC-KAN-61-04** · edge · Given a collaborator with future `pending` or `confirmed` bookings of the service, when the subscriber removes them from it, then those bookings are kept and `business:collaborators.edit.serviceHasBookingsWarning` shows their count (AC-KAN-80-04). [KAN-61, KAN-80]
+- [ ] **AC-KAN-61-05** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to change the collaborators or the selection mode, then nothing changes and `business:errors.readOnly` is shown. [KAN-61, KAN-49]
+- [ ] **AC-KAN-61-06** · error · Given the request fails because of the network, when the subscriber saves, then the service and the collaborators keep their previous values and `common:errors.network` is shown. [KAN-61]
+- [ ] **AC-KAN-61-07** · error · Given a collaborator without `manage_services`, when they open the service collaborators screen, then they are sent to the business portal home and a direct write is rejected with `common:errors.permissionDenied`. [KAN-61, KAN-86]
+
 ### KAN-62 — Keep price and duration as they were at booking time
 - [ ] **AC-KAN-62-01** · happy · Given a service with a name, price and duration, when a booking for it is created (by a customer or by the subscriber, KAN-69), then the booking stores a snapshot of the name, price (`priceInCents`) and duration (`durationMinutes`) valid at that moment. [KAN-62]
 - [ ] **AC-KAN-62-02** · happy · Given existing bookings of a service, when the subscriber later changes its name, price or duration, then those bookings and any revenue figure built from them (KAN-103) still show the values of their snapshot. [KAN-62]
@@ -115,9 +125,7 @@ The business always comes from the session, never from the URL. A subscriber nev
 - [ ] **AC-KAN-62-05** · edge · Given a booking whose service was later deleted (KAN-59), when it is shown in the agenda or history, then its name, price and duration come from the snapshot and no `common:errors.notFound` is shown. [KAN-62, KAN-59]
 
 ## BLOCKED
-| Story | Waiting on | What stays out until decided |
-| --- | --- | --- |
-| KAN-61 | Q1 — collaborator | Assigning one or more collaborators to a service and the option "customer chooses" vs "system assigns an available one". No criteria, no collaborator fields on `Service`. |
+None. Q1 was decided on 2026-09-28: KAN-61 is specified (AC-KAN-61-01 … AC-KAN-61-07).
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -133,17 +141,19 @@ The business always comes from the session, never from the URL. A subscriber nev
 | AS-9 | The booking snapshot `priceInCents` stores the final price after the discount. Whether the original price is also kept is for the team to decide. | AC-KAN-60-03 |
 | AS-10 | At most one discount is valid per service on a given day; overlapping ranges are rejected, discounts never stack. | AC-KAN-60-06 |
 | AS-11 | A discount is valid from 00:00 of its start date to 23:59 of its end date in the business `timeZone`, evaluated on the booking's creation time (not on the booking date). | AC-KAN-60-03, AC-KAN-60-09 |
+| AS-12 | The default `collaboratorSelection` is `customer_choice`; with `customer_choice` the customer may still choose "any available" (KAN-138). | AC-KAN-61-02 |
+| AS-13 | Assignments are stored on the collaborator side only (`Collaborator.serviceIds`); `Service` keeps no list of collaborators, so there is one source of truth. | AC-KAN-61-01 |
 
 ## Backlog issues
 - KAN-60 lists "reservas" as a discount type next to percentage and fixed amount. Its meaning is unclear (for example "N bookings for the price of M", or "a discount for the first N bookings"). Only percentage and fixed amount are specified; the product owner should clarify or remove it.
 - KAN-57 "activar servicios ya sean nuevos o desactivados" suggests new services start inactive, which conflicts with the usual create flow; recorded as AS-1.
 - KAN-54 writes "duración aproximada (imagen)", mixing the duration and the image in one phrase; read as two separate fields (AS-5).
-- KAN-61 (collaborator assignment) belongs to the collaborator topic (KAN-77 epic, Q1) but sits in this epic.
+- KAN-61 (collaborator assignment) belongs to the collaborator topic (KAN-77 epic) but sits in this epic; it edits the same `Collaborator.serviceIds` as KAN-78 / KAN-80.
 - KAN-62 is a system rule shared with booking creation (KAN-69, KAN-148); it is specified here and referenced from those specs to avoid duplicate criteria.
 - KAN-60 overlaps KAN-115 (customer sees discounts): this spec only covers how the subscriber sets them.
 
 ## Non-functional
-- i18n keys (new prefixes): `business:services.form.*`, `business:services.list.*`, `business:services.delete.*`, `business:services.discounts.*`, `business:services.snapshot.*`, `business:services.status.*` (activate / deactivate confirmation texts). Reused: `validation:required`, `validation:outOfRange`, `validation:tooLong`, `common:errors.network`, `common:errors.notFound`, `business:errors.readOnly`.
+- i18n keys (new prefixes): `business:services.form.*`, `business:services.list.*`, `business:services.delete.*`, `business:services.discounts.*`, `business:services.snapshot.*`, `business:services.status.*` (activate / deactivate confirmation texts), `business:services.collaborators.*`. Reused: `validation:required`, `validation:outOfRange`, `validation:tooLong`, `common:errors.network`, `common:errors.notFound`, `business:errors.readOnly`.
 - Pagination: cursor pagination with `PAGINATION.DEFAULT_PAGE_SIZE`, total count from the server, filters and search kept in the URL and reset to page one on change (`api-query-standards` §5–6). Search input debounced.
 - Delete runs through the `deleteService` callable so the booking check happens on the server; status toggles (KAN-57/58) may update optimistically with rollback (`api-mutation-standards`).
 - Snapshot (KAN-62) is written inside the booking transaction on the server.
@@ -164,6 +174,6 @@ The business always comes from the session, never from the URL. A subscriber nev
 | KAN-59 | AC-KAN-59-02, AC-KAN-59-06, AC-KAN-59-07 | `functions/src/services/tests/deleteService.test.ts` |
 | KAN-60 | AC-KAN-60-01, AC-KAN-60-02, AC-KAN-60-04 … AC-KAN-60-10 | `tests/ServiceDiscountsPage.test.tsx` |
 | KAN-60 | AC-KAN-60-03 | `functions/src/bookings/tests/createBooking.test.ts` |
-| KAN-61 | BLOCKED (Q1) | — |
+| KAN-61 | AC-KAN-61-01 … AC-KAN-61-07 | `tests/ServiceCollaboratorsPage.test.tsx` |
 | KAN-62 | AC-KAN-62-01, AC-KAN-62-03, AC-KAN-62-04 | `functions/src/bookings/tests/createBooking.test.ts` |
 | KAN-62 | AC-KAN-62-02, AC-KAN-62-05 | `tests/ServiceFormPage.test.tsx` |

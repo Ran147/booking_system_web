@@ -347,7 +347,7 @@ Problems: no providers or mocks (it would hit Firebase), hard-coded Spanish, raw
 
 | Rule | Tool |
 | --- | --- |
-| Tests pass | `npm run test:run` and `npm run test:rules` in CI and before every PR |
+| Tests pass | `npm run test:run` (and `npm run test:rules` when rules change) run locally before every PR; there is no CI for now, it can be re-enabled later |
 | Coverage | Vitest thresholds: 70 % lines for `src/portals/**`, `src/features/**`, `src/shared/domain/**` |
 | No `expect` in Page Objects | ESLint `no-restricted-syntax` on `CallExpression[callee.name="expect"]` in `**/*.page.ts` |
 | No snapshots | ESLint `no-restricted-properties` on `toMatchSnapshot` |

@@ -6,7 +6,7 @@ After:
 
 ## Stories
 
-KAN-
+KAN- (or PROP-n for a proposed story not in Jira yet)
 
 ## Checklist
 
@@ -16,4 +16,4 @@ KAN-
 - [ ] Checked in light and dark mode (`theming-standards`)
 - [ ] New queries have their index in `firestore.indexes.json`; rules changes have emulator tests (`auth-and-roles`)
 - [ ] Nothing was built for a BLOCKED decision
-- [ ] `npm run lint && npm run typecheck && npm run test:run` pass
+- [ ] Checks run locally before opening this PR (there is no CI for now): `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test:run` and `npm run build` pass; `npm run test:rules` too if `firestore.rules` changed

@@ -5,7 +5,7 @@ SaaS multi-tenant de reservas. Cada negocio (suscriptor) publica sus servicios y
 | Portal | Ruta | Quién lo usa |
 | --- | --- | --- |
 | `landing` | `/` | Visitantes: planes, contacto, alta de suscriptores |
-| `business` | `/business` | Suscriptor (dueño del negocio), rol `subscriber` |
+| `business` | `/business` | Suscriptor (dueño del negocio), rol `subscriber`; colaboradores del negocio, rol `collaborator`, con los permisos que el suscriptor les habilita (Q1) |
 | `customer` | `/<slug-del-negocio>` (por ejemplo `/barberia-centro/...`, Q4) | Clientes del negocio, rol `customer` |
 | `admin` | `/admin` | Super administrador, rol `super_admin` |
 
@@ -66,7 +66,7 @@ Este repositorio es el **esqueleto base**: configuración, fundamentos compartid
 
 ### Datos de prueba
 
-`npm run seed` (`scripts/seed-emulator.ts`) carga en los emuladores un super admin, un suscriptor dueño del negocio `active` «Barbería Centro» (slug `barberia-centro`, zona horaria, horario de atención y suscripción `active` al plan Pro), un cliente, dos planes y tres servicios, con los custom claims `role` y `businessId`. Se puede correr varias veces: siempre deja los mismos datos. Al terminar imprime las credenciales.
+`npm run seed` (`scripts/seed-emulator.ts`) carga en los emuladores un super admin; un suscriptor dueño del negocio `active` «Barbería Centro» (slug `barberia-centro`, zona horaria, horario de atención, suscripción `active` al plan Pro y tres servicios); un colaborador de ese negocio con permisos `manage_bookings` y `manage_schedule_blocks`; un segundo suscriptor dueño de «Estética Luna» (slug `estetica-luna`), negocio `pending` que pagó y espera la aprobación del super admin (sin suscripción todavía); un cliente y dos planes. Pone los custom claims `role`, `businessId` y, para el colaborador, `collaboratorId`. Se puede correr varias veces: siempre deja los mismos datos. Al terminar imprime las credenciales.
 
 Solo corre contra los emuladores: si faltan `FIRESTORE_EMULATOR_HOST` y `FIREBASE_AUTH_EMULATOR_HOST` se niega a ejecutarse. Dos formas:
 
@@ -78,7 +78,7 @@ FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:909
 npx firebase emulators:exec --only auth,firestore --project demo-booking-system "npm run seed"
 ```
 
-Los datos del emulador se borran al apagarlo; con `npm run emulators` hay que volver a correr el seed cada vez. Usuarios (contraseña de prueba `Emulator-Only-123!`, **solo para el emulador**): `admin@demo.test` (super admin), `suscriptor@demo.test` (suscriptor) y `cliente@demo.test` (cliente).
+Los datos del emulador se borran al apagarlo; con `npm run emulators` hay que volver a correr el seed cada vez. Usuarios (contraseña de prueba `Emulator-Only-123!`, **solo para el emulador**): `admin@demo.test` (super admin), `suscriptor@demo.test` (suscriptor de «Barbería Centro»), `colaborador@demo.test` (colaborador de «Barbería Centro»), `pendiente@demo.test` (suscriptor de «Estética Luna», pendiente de aprobación) y `cliente@demo.test` (cliente).
 
 ### Cloud Functions
 
@@ -110,13 +110,13 @@ npm run build
 | `npm run emulators` | Firebase Emulator Suite |
 | `npm run seed` | Carga datos de prueba en los emuladores (ver «Datos de prueba») |
 
-Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run`.
+Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run` (y `npm run test:rules` si cambió `firestore.rules`). No hay CI por ahora: estos chequeos se corren localmente.
 
 ## Estructura
 
 ```
 .agents/skills/        # skills para agentes de IA y personas (una por tema)
-.github/               # CI, plantilla de PR, instrucciones de Copilot
+.github/               # plantilla de PR, instrucciones de Copilot (sin CI por ahora)
 docs/backlog/          # export de Jira, mapa épica → carpeta, notas de revisión de specs
 docs/decisions/        # preguntas abiertas (Q1–Q7) y ADRs
 docs/setup/tooling.md  # dependencias y configuración de herramientas
@@ -141,7 +141,8 @@ Los componentes de shadcn/ui se agregan con `npx shadcn@latest add <componente>`
 - **`AGENTS.md`** es el punto de entrada: dice qué skill cargar para cada tarea y cuál gana cuando dos se contradicen. Copilot, Antigravity y Claude Code lo leen.
 - **Skills:** `.agents/skills/<nombre>/SKILL.md` (estilo de código, constantes, i18n, theming, componentes, arquitectura, estado, queries, mutations, formularios, auth y roles, tests, glosario del dominio, backlog → spec).
 - **Specs:** cada feature tiene `specs/SPEC.md` en su carpeta, con criterios de aceptación citando la clave KAN. El mapa épica → carpeta está en `docs/backlog/epic-map.md`.
-- **Decisiones abiertas:** `docs/decisions/open-questions.md`. Lo marcado **BLOCKED** no se implementa ni se inventa (por ejemplo, los detalles del colaborador, Q1). Las decisiones tomadas (Q4 URL por slug, Q5 sin reintentos de renovación en el MVP, Q6 cuenta de cliente obligatoria) ya están en las specs y en `domain-glossary`.
+- **Decisiones:** `docs/decisions/open-questions.md`. Q1–Q7 están decididas (2026-09-28) y ya están en las specs y en `domain-glossary`: Q1 colaborador como quinto actor, Q2 + Q3 aprobación de negocios nuevos por el super admin y tipos de acción de auditoría, Q4 URL por slug, Q5 sin reintentos de renovación en el MVP, Q6 cuenta de cliente obligatoria, Q7 contratación del plan desde la landing con la pasarela simulada. Si una pregunta nueva queda abierta, lo marcado **BLOCKED** no se implementa ni se inventa.
+- **Propuestas:** historias que faltan en Jira están en las specs con claves `PROP-n` («Proposed — not in Jira yet») hasta que se creen en Jira.
 
 ## Flujo de trabajo y pull requests
 
@@ -149,7 +150,7 @@ Los componentes de shadcn/ui se agregan con `npx shadcn@latest add <componente>`
 2. **Spec primero:** si la feature no tiene `specs/SPEC.md`, se crea con la skill `backlog-to-spec` antes de escribir código.
 3. **Commits pequeños** que mencionan la clave KAN.
 4. **Pull request contra `main`** usando la plantilla (`.github/pull_request_template.md`): qué cambia, historias KAN y el checklist (spec, tests con clave KAN, textos en `es` y `en`, modo claro y oscuro, reglas e índices, nada BLOCKED).
-5. **El CI debe estar en verde** (`.github/workflows/ci.yml`: `npm ci`, lint, format:check, typecheck, test:run y build en Node 22) y el PR necesita al menos una revisión antes de hacer merge.
+5. **Chequeos locales antes de cada PR:** no hay CI por ahora (el workflow se quitó en `main`). Quien abre el PR corre `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test:run` y `npm run build`, y lo indica en el checklist. El PR necesita al menos una revisión antes de hacer merge. El CI se puede volver a activar más adelante.
 6. Si cambian `firestore.rules`, se agregan sus tests en `tests/rules/` y se corre `npm run test:rules` localmente.
 
 ## Reglas que no se negocian

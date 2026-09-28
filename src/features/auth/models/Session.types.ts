@@ -4,6 +4,7 @@ import type { SESSION_STATUS } from "../constants/SessionStatus.constants";
 
 export interface SignedInSession {
   businessId: Nullable<string>;
+  collaboratorId: Nullable<string>;
   role: UserRole;
   status: typeof SESSION_STATUS.SIGNED_IN;
   userId: string;

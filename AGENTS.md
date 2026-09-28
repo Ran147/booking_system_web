@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guide for AI coding agents (GitHub Copilot, Google Antigravity, Claude Code and others) working in **booking_system_web**: a multi-tenant booking SaaS with four portals — `landing`, `business`, `customer` and `admin`.
+Guide for AI coding agents (GitHub Copilot, Google Antigravity, Claude Code and others) working in **booking_system_web**: a multi-tenant booking SaaS with four portals — `landing`, `business` (subscriber and collaborators), `customer` and `admin`.
 
 Stack: React + TypeScript (Vite, React Router) · Firebase (Auth, Firestore, Cloud Functions, App Check, Hosting) · TanStack Query + React Context · Tailwind CSS v4 + shadcn/ui · React Hook Form + Zod · react-i18next (es, en) · Vitest + Testing Library + Firebase Emulator.
 
@@ -8,7 +8,7 @@ Stack: React + TypeScript (Vite, React Router) · Firebase (Auth, Firestore, Clo
 
 1. **Find the spec.** Every feature has `specs/SPEC.md` in its folder. If it does not exist, create it first with the `backlog-to-spec` skill. Do not implement from a vague prompt.
 2. **Load the skills for the task** (table below). Each skill is `.agents/skills/<name>/SKILL.md`.
-3. **Respect open decisions.** Anything marked `BLOCKED` (see `docs/decisions/open-questions.md`) is not implemented or invented.
+3. **Respect decisions.** Q1–Q7 are decided (`docs/decisions/open-questions.md`). Anything still marked `BLOCKED` is not implemented or invented; stories under "Deferred (out of MVP)" are not built; `PROP-n` stories are proposals not yet in Jira: create the Jira story before implementing one.
 4. **Check your work** with the commands in §4 before saying you are done.
 
 ## 2. Which skills to load
@@ -60,16 +60,16 @@ When two skills seem to disagree, the higher one wins:
 | `npm run test:run` | Unit and component tests |
 | `npm run test:rules` | `firestore.rules` tests against the emulator |
 | `npm run emulators` | Firebase Emulator Suite |
-| `npm run seed` | Test accounts and one business in the emulators only (`scripts/seed-emulator.ts`; needs `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST`) |
+| `npm run seed` | Test accounts (super admin, subscriber, collaborator, customer, subscriber of a pending business), an active and a pending business in the emulators only (`scripts/seed-emulator.ts`; needs `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST`) |
 
-Before finishing a task: `npm run lint && npm run typecheck && npm run test:run` must pass.
+Before finishing a task: `npm run lint && npm run typecheck && npm run test:run` must pass (plus `npm run format:check`, `npm run build`, and `npm run test:rules` when `firestore.rules` changed). There is no CI for now: these checks are run locally before each PR. CI can be re-enabled later.
 
 ## 5. Repository map
 
 ```
 .agents/skills/          # the skills listed above
 docs/backlog/            # jira-export.csv, epic-map.md (epic → portal → folder)
-docs/decisions/          # open-questions.md (Q1–Q7) and ADRs
+docs/decisions/          # open-questions.md (Q1–Q7, all decided) and ADRs
 functions/               # Cloud Functions (emails, payments, bookings, exports, audit)
 src/app/                 # App, providers, router
 src/portals/<portal>/    # landing | business | customer | admin: routes, layout, features/

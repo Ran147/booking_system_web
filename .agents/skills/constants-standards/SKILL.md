@@ -15,7 +15,7 @@ This skill is the **single source of truth** for:
 | Topic | Owner |
 | --- | --- |
 | Text a user can read (labels, titles, messages, errors, emails) | `i18n-standards` — never a constant |
-| Domain status values and transitions (`BOOKING_STATUS`, …) | `domain-glossary` (they follow this skill's format) |
+| Domain status values and transitions (`BOOKING_STATUS`, …) and other domain value lists (`COLLABORATOR_PERMISSION`, `AUDIT_LOG_ACTION_TYPE`) | `domain-glossary` (they follow this skill's format) |
 | Values the super admin can change at runtime (idle timeout, grace days, limits) | Read from `PlatformSettings` (`api-query-standards`); only their fallback defaults are constants |
 | Colors, spacing, font sizes | `theming-standards` (design tokens, not TS constants) |
 | General naming and typing | `code-style-standards` |
@@ -108,6 +108,7 @@ The page size comes from the caller (`PAGINATION.DEFAULT_PAGE_SIZE`, see §7). C
 | --- | --- | --- |
 | Shared technical constants | `src/shared/constants/<domain>/<Name>.constants.ts` | `@/shared/constants` |
 | Domain statuses | `src/shared/domain/<entity>/<Entity>Status.constants.ts` | `@/shared/domain` |
+| Other domain value lists (permissions, audit action types) | `src/shared/domain/<entity>/<Entity><Concept>.constants.ts` | `@/shared/domain` |
 | Constants used by one feature only | `<feature>/constants/<Name>.constants.ts` | relative, inside the feature |
 | Cloud Functions | `functions/src/shared/constants/<Name>.constants.ts` | relative, inside `functions/` |
 
@@ -162,9 +163,11 @@ export const FIRESTORE_COLLECTION = {
   AUDIT_LOG: "auditLog",
   BOOKINGS: "bookings",
   BUSINESSES: "businesses",
+  COLLABORATORS: "collaborators",
   CUSTOMERS: "customers",
   NOTIFICATIONS: "notifications",
   PAYMENTS: "payments",
+  PLAN_CHECKOUTS: "planCheckouts",
   PLANS: "plans",
   PLATFORM_SETTINGS: "platformSettings",
   SCHEDULE_BLOCKS: "scheduleBlocks",

@@ -16,6 +16,10 @@ export const SEED_AUTH_ERROR_CODE = {
 
 export const SEED_DOCUMENT_ID = {
   BUSINESS: "seed-business-barberia-centro",
+  COLLABORATOR: "seed-collaborator-barber",
+  PENDING_BUSINESS: "seed-business-estetica-luna",
+  PENDING_BUSINESS_PAYMENT: "seed-payment-estetica-luna",
+  PENDING_PLAN_CHECKOUT: "seed-plan-checkout-estetica-luna",
   PLAN_BASIC: "seed-plan-basic",
   PLAN_PRO: "seed-plan-pro",
   SERVICE_BEARD: "seed-service-beard-trim",
@@ -26,12 +30,26 @@ export const SEED_DOCUMENT_ID = {
 
 // EMULATOR-ONLY credentials, printed by the script so the team can sign in.
 export const SEED_USER = {
+  COLLABORATOR: {
+    EMAIL: "colaborador@demo.test",
+    FULL_NAME: "Carlos Colaborador",
+    PASSWORD: "Emulator-Only-123!",
+    PHONE: "+52 55 1000 0004",
+    UID: "seed-collaborator",
+  },
   CUSTOMER: {
     EMAIL: "cliente@demo.test",
     FULL_NAME: "Carla Cliente",
     PASSWORD: "Emulator-Only-123!",
     PHONE: "+52 55 1000 0003",
     UID: "seed-customer",
+  },
+  PENDING_SUBSCRIBER: {
+    EMAIL: "pendiente@demo.test",
+    FULL_NAME: "Paula Pendiente",
+    PASSWORD: "Emulator-Only-123!",
+    PHONE: "+52 55 1000 0005",
+    UID: "seed-pending-subscriber",
   },
   SUBSCRIBER: {
     EMAIL: "suscriptor@demo.test",
@@ -54,6 +72,22 @@ export const SEED_BUSINESS = {
   NAME: "Barbería Centro",
   SLUG: "barberia-centro",
   TIME_ZONE: "America/Mexico_City",
+} as const;
+
+// A second business that paid and signed up but is still waiting for the
+// super admin's approval (business status pending, Q2 + Q3). It has no
+// Subscription yet: the subscription period starts at approval.
+export const SEED_PENDING_BUSINESS = {
+  CURRENCY: "MXN",
+  NAME: "Estética Luna",
+  SLUG: "estetica-luna",
+  TIME_ZONE: "America/Mexico_City",
+} as const;
+
+// Provisional values: Payment and PlanCheckout field names are proposals in
+// the plan-checkout and subscription specs, not glossary fields yet.
+export const SEED_PAYMENT_RESULT = {
+  SUCCEEDED: "succeeded",
 } as const;
 
 // Provisional shape: BusinessHours has no fields in domain-glossary yet
@@ -114,4 +148,9 @@ export const SEED_SERVICE = {
 export const SEED_SUBSCRIPTION_PERIOD = {
   DAYS: 30,
   MS_PER_DAY: 86_400_000,
+} as const;
+
+// Printed in the credentials table for accounts without a business.
+export const SEED_TABLE_CELL = {
+  NONE: "—",
 } as const;

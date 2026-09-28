@@ -1,5 +1,6 @@
-// Seeds the local Firebase Emulator Suite with test accounts and one business
-// so the team can sign in locally. Not a story; see README "Datos de prueba".
+// Seeds the local Firebase Emulator Suite with test accounts, one active
+// business with a collaborator, and one business pending approval, so the
+// team can sign in locally. Not a story; see README "Datos de prueba".
 //
 //   npx firebase emulators:exec --only auth,firestore --project demo-booking-system "npm run seed"
 //
@@ -21,15 +22,20 @@ import {
   SEED_DEFAULT_PROJECT_ID,
   SEED_DOCUMENT_ID,
   SEED_ENV_VAR,
+  SEED_PAYMENT_RESULT,
+  SEED_PENDING_BUSINESS,
   SEED_PLAN,
   SEED_SERVICE,
   SEED_SUBSCRIPTION_PERIOD,
+  SEED_TABLE_CELL,
   SEED_USER,
   SEED_WEEKDAY,
 } from "./constants/SeedEmulator.constants";
 import { FIRESTORE_COLLECTION } from "../src/shared/constants/firestore/FirestoreCollection.constants";
 import { BUSINESS_STATUS } from "../src/shared/domain/business/BusinessStatus.constants";
 import { isReservedBusinessSlug } from "../src/shared/domain/business/isReservedBusinessSlug";
+import { COLLABORATOR_PERMISSION } from "../src/shared/domain/collaborator/CollaboratorPermission.constants";
+import { COLLABORATOR_STATUS } from "../src/shared/domain/collaborator/CollaboratorStatus.constants";
 import { PLAN_STATUS } from "../src/shared/domain/plan/PlanStatus.constants";
 import { SERVICE_STATUS } from "../src/shared/domain/service/ServiceStatus.constants";
 import { SUBSCRIPTION_STATUS } from "../src/shared/domain/subscription/SubscriptionStatus.constants";
@@ -48,6 +54,7 @@ interface SeedUser {
 
 interface SeedUserClaims {
   businessId?: string;
+  collaboratorId?: string;
   role: UserRole;
 }
 
@@ -157,17 +164,23 @@ const seedPlans = async (firestore: Firestore): Promise<void> => {
     .set(buildPlanDocument(SEED_PLAN.PRO));
 };
 
-const seedBusiness = async (firestore: Firestore): Promise<void> => {
-  if (isReservedBusinessSlug(SEED_BUSINESS.SLUG)) {
-    throw new Error(`Reserved business slug: ${SEED_BUSINESS.SLUG}`);
+const assertSlugIsNotReserved = (slug: string): void => {
+  if (isReservedBusinessSlug(slug)) {
+    throw new Error(`Reserved business slug: ${slug}`);
   }
+};
+
+const readSeedMsFromNow = (days: number): number =>
+  Date.now() + days * SEED_SUBSCRIPTION_PERIOD.MS_PER_DAY;
+
+const seedBusiness = async (firestore: Firestore): Promise<void> => {
+  assertSlugIsNotReserved(SEED_BUSINESS.SLUG);
 
   const businessDocument = firestore
     .collection(FIRESTORE_COLLECTION.BUSINESSES)
     .doc(SEED_DOCUMENT_ID.BUSINESS);
   const currentPeriodEndsAt = Timestamp.fromMillis(
-    Date.now() +
-      SEED_SUBSCRIPTION_PERIOD.DAYS * SEED_SUBSCRIPTION_PERIOD.MS_PER_DAY,
+    readSeedMsFromNow(SEED_SUBSCRIPTION_PERIOD.DAYS),
   );
 
   await businessDocument.set({
@@ -201,15 +214,106 @@ const seedBusiness = async (firestore: Firestore): Promise<void> => {
   await servicesCollection
     .doc(SEED_DOCUMENT_ID.SERVICE_COLOR)
     .set(buildServiceDocument(SEED_SERVICE.COLOR));
+
+  // Collaborator (Q1): serves haircuts and beard trims, and may manage every
+  // booking and schedule block of the business (KAN-86).
+  await businessDocument
+    .collection(FIRESTORE_COLLECTION.COLLABORATORS)
+    .doc(SEED_DOCUMENT_ID.COLLABORATOR)
+    .set({
+      email: SEED_USER.COLLABORATOR.EMAIL,
+      fullName: SEED_USER.COLLABORATOR.FULL_NAME,
+      permissions: [
+        COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+        COLLABORATOR_PERMISSION.MANAGE_SCHEDULE_BLOCKS,
+      ],
+      phone: SEED_USER.COLLABORATOR.PHONE,
+      serviceIds: [
+        SEED_DOCUMENT_ID.SERVICE_HAIRCUT,
+        SEED_DOCUMENT_ID.SERVICE_BEARD,
+      ],
+      status: COLLABORATOR_STATUS.ACTIVE,
+      userId: SEED_USER.COLLABORATOR.UID,
+    });
+};
+
+// Paid through the simulated checkout (KAN-22) and signed up (KAN-25), not
+// approved yet (PROP-1): status pending, no Subscription.
+const seedPendingBusiness = async (firestore: Firestore): Promise<void> => {
+  assertSlugIsNotReserved(SEED_PENDING_BUSINESS.SLUG);
+
+  const paidAt = Timestamp.now();
+  const basicPlanPriceInCents = SEED_PLAN.BASIC.PRICE_IN_CENTS;
+
+  await firestore
+    .collection(FIRESTORE_COLLECTION.PLAN_CHECKOUTS)
+    .doc(SEED_DOCUMENT_ID.PENDING_PLAN_CHECKOUT)
+    .set({
+      amountInCents: basicPlanPriceInCents,
+      email: SEED_USER.PENDING_SUBSCRIBER.EMAIL,
+      paidAt,
+      planId: SEED_DOCUMENT_ID.PLAN_BASIC,
+      signUpCompletedAt: paidAt,
+    });
+
+  const businessDocument = firestore
+    .collection(FIRESTORE_COLLECTION.BUSINESSES)
+    .doc(SEED_DOCUMENT_ID.PENDING_BUSINESS);
+
+  await businessDocument.set({
+    businessHours: buildBusinessHours(),
+    currency: SEED_PENDING_BUSINESS.CURRENCY,
+    name: SEED_PENDING_BUSINESS.NAME,
+    ownerUserId: SEED_USER.PENDING_SUBSCRIBER.UID,
+    planCheckoutId: SEED_DOCUMENT_ID.PENDING_PLAN_CHECKOUT,
+    slug: SEED_PENDING_BUSINESS.SLUG,
+    status: BUSINESS_STATUS.PENDING,
+    timeZone: SEED_PENDING_BUSINESS.TIME_ZONE,
+  });
+  await businessDocument
+    .collection(FIRESTORE_COLLECTION.PAYMENTS)
+    .doc(SEED_DOCUMENT_ID.PENDING_BUSINESS_PAYMENT)
+    .set({
+      amountInCents: basicPlanPriceInCents,
+      createdAt: paidAt,
+      planId: SEED_DOCUMENT_ID.PLAN_BASIC,
+      refundedAt: null,
+      result: SEED_PAYMENT_RESULT.SUCCEEDED,
+    });
 };
 
 const printCredentials = (): void => {
   console.log("\nEmulator seed done. Test credentials (emulator only):");
+  const activeBusinessLabel = `${SEED_BUSINESS.NAME} (active)`;
+  const pendingBusinessLabel = `${SEED_PENDING_BUSINESS.NAME} (pending)`;
   const credentialRows = [
-    { role: USER_ROLE.SUPER_ADMIN, seedUser: SEED_USER.SUPER_ADMIN },
-    { role: USER_ROLE.SUBSCRIBER, seedUser: SEED_USER.SUBSCRIBER },
-    { role: USER_ROLE.CUSTOMER, seedUser: SEED_USER.CUSTOMER },
-  ].map(({ role, seedUser }) => ({
+    {
+      business: SEED_TABLE_CELL.NONE,
+      role: USER_ROLE.SUPER_ADMIN,
+      seedUser: SEED_USER.SUPER_ADMIN,
+    },
+    {
+      business: activeBusinessLabel,
+      role: USER_ROLE.SUBSCRIBER,
+      seedUser: SEED_USER.SUBSCRIBER,
+    },
+    {
+      business: activeBusinessLabel,
+      role: USER_ROLE.COLLABORATOR,
+      seedUser: SEED_USER.COLLABORATOR,
+    },
+    {
+      business: pendingBusinessLabel,
+      role: USER_ROLE.SUBSCRIBER,
+      seedUser: SEED_USER.PENDING_SUBSCRIBER,
+    },
+    {
+      business: SEED_TABLE_CELL.NONE,
+      role: USER_ROLE.CUSTOMER,
+      seedUser: SEED_USER.CUSTOMER,
+    },
+  ].map(({ business, role, seedUser }) => ({
+    business,
     email: seedUser.EMAIL,
     password: seedUser.PASSWORD,
     role,
@@ -218,6 +322,9 @@ const printCredentials = (): void => {
   console.table(credentialRows);
   console.log(
     `Business: ${SEED_BUSINESS.NAME} (${SEED_DOCUMENT_ID.BUSINESS}), page /${SEED_BUSINESS.SLUG}`,
+  );
+  console.log(
+    `Pending approval: ${SEED_PENDING_BUSINESS.NAME} (${SEED_DOCUMENT_ID.PENDING_BUSINESS}), slug ${SEED_PENDING_BUSINESS.SLUG}`,
   );
 };
 
@@ -245,14 +352,26 @@ const seedEmulator = async (): Promise<void> => {
     businessId: SEED_DOCUMENT_ID.BUSINESS,
     role: USER_ROLE.SUBSCRIBER,
   });
+  await upsertAuthUser(auth, SEED_USER.COLLABORATOR, {
+    businessId: SEED_DOCUMENT_ID.BUSINESS,
+    collaboratorId: SEED_DOCUMENT_ID.COLLABORATOR,
+    role: USER_ROLE.COLLABORATOR,
+  });
+  await upsertAuthUser(auth, SEED_USER.PENDING_SUBSCRIBER, {
+    businessId: SEED_DOCUMENT_ID.PENDING_BUSINESS,
+    role: USER_ROLE.SUBSCRIBER,
+  });
   await upsertAuthUser(auth, SEED_USER.CUSTOMER, { role: USER_ROLE.CUSTOMER });
 
   await writeUserProfile(firestore, SEED_USER.SUPER_ADMIN);
   await writeUserProfile(firestore, SEED_USER.SUBSCRIBER);
+  await writeUserProfile(firestore, SEED_USER.COLLABORATOR);
+  await writeUserProfile(firestore, SEED_USER.PENDING_SUBSCRIBER);
   await writeUserProfile(firestore, SEED_USER.CUSTOMER);
 
   await seedPlans(firestore);
   await seedBusiness(firestore);
+  await seedPendingBusiness(firestore);
 
   printCredentials();
 };

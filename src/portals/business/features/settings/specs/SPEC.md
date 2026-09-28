@@ -1,4 +1,4 @@
-# Subscriber settings (KAN-31)
+# Subscriber and collaborator settings (KAN-31)
 
 | Field | Value |
 | --- | --- |
@@ -6,10 +6,10 @@
 | Feature folder | `src/portals/business/features/settings/` |
 | Stories | KAN-51, KAN-52, KAN-53 |
 | Status | Draft |
-| Depends on | KAN-28 (subscriber sign-in and session); password rules from KAN-25 / KAN-37 (`forms-validation-standards` §5); `i18n-standards` (languages); `theming-standards` §4 (theme modes) |
+| Depends on | KAN-28 (subscriber sign-in and session); Q1 decided 2026-09-28 (a collaborator has the same personal settings); password rules from KAN-25 / KAN-37 (`forms-validation-standards` §5); `i18n-standards` (languages); `theming-standards` §4 (theme modes) |
 
 ## Intent
-The subscriber adjusts their own account from a settings screen in the business portal: the interface language (Spanish or English), the appearance (light or dark) and their password. These are personal account settings, not business data.
+The subscriber, or a collaborator, adjusts their own account from a settings screen in the business portal: the interface language (Spanish or English), the appearance (light or dark) and their password. These are personal account settings, not business data.
 
 ## Actors and permissions
 | Actor | Can |
@@ -17,7 +17,7 @@ The subscriber adjusts their own account from a settings screen in the business 
 | subscriber (own account only) | Change their own language, theme and password. |
 | customer | Has equivalent settings in the customer portal (KAN-168 epic); not part of this spec. |
 | super admin | Not part of this spec. |
-| collaborator | BLOCKED — Q1 (not part of this spec). |
+| collaborator (own account only, `active`) | Change their own language, theme and password, exactly like the subscriber. No permission is needed (AS-5). |
 
 ## In scope
 - Language switch between `es` and `en` for the business portal, saved to the subscriber's profile.
@@ -45,6 +45,7 @@ The subscriber adjusts their own account from a settings screen in the business 
 - [ ] **AC-KAN-51-04** · edge · Given a subscriber who never chose a language, when they first open the portal, then the detected browser language is used if it is `es` or `en`, otherwise Spanish (`es`). [KAN-51]
 - [ ] **AC-KAN-51-05** · edge · Given the language is changed, when emails and exported files are generated for this subscriber afterwards, then they use the new language (`User.language`). [KAN-51]
 - [ ] **AC-KAN-51-06** · edge · Given a business that is `inactive` or `suspended`, when the subscriber changes the language, then the change is allowed. See AS-1. [KAN-51, KAN-49]
+- [ ] **AC-KAN-51-07** · happy · Given a signed-in `active` collaborator, when they choose another language in settings, then the result is the same as AC-KAN-51-01 and AC-KAN-51-02, saved to their own `User.language`. See AS-5. [KAN-51]
 
 ### KAN-52 — Change theme (light / dark)
 - [ ] **AC-KAN-52-01** · happy · Given a signed-in subscriber using the light theme, when they choose dark in settings, then the whole business portal switches to the dark theme immediately, and the choice is kept after reloading. [KAN-52]
@@ -66,9 +67,10 @@ The subscriber adjusts their own account from a settings screen in the business 
 - [ ] **AC-KAN-53-09** · edge · Given the password was changed, when other devices or sessions of the same account make their next request, then they are signed out and must sign in again; the current session stays signed in. See AS-4. [KAN-53]
 - [ ] **AC-KAN-53-10** · edge · Given the password fields, when the subscriber uses show / hide, then each field toggles its visibility independently, and the entered values are cleared after a successful change. [KAN-53]
 - [ ] **AC-KAN-53-11** · edge · Given a business that is `inactive` or `suspended`, when the subscriber changes the password, then the change is allowed. See AS-1. [KAN-53, KAN-49]
+- [ ] **AC-KAN-53-12** · happy · Given a signed-in `active` collaborator, when they change their password as in AC-KAN-53-01, then their own password changes and nothing of the business or of the subscriber account changes. See AS-5. [KAN-53]
 
 ## BLOCKED
-None. No story of this epic depends on Q1–Q7.
+None. No story of this epic is blocked; Q1 (2026-09-28) adds the collaborator as a user of these personal settings (AC-KAN-51-07, AC-KAN-53-12).
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -77,6 +79,7 @@ None. No story of this epic depends on Q1–Q7.
 | AS-2 | The theme switch offers `light`, `dark` and `system` (default `system`), as in `theming-standards`, although KAN-52 mentions only light and dark. | AC-KAN-52-04 |
 | AS-3 | The new password must differ from the current one. | AC-KAN-53-08 |
 | AS-4 | Changing the password revokes the other sessions of the account (Firebase revokes refresh tokens on password change); the current session is re-authenticated and continues. | AC-KAN-53-09 |
+| AS-5 | Personal settings are open to every business-portal user, including a collaborator without permissions: they are not a business area covered by `CollaboratorPermission` (collaborators spec AS-3). | AC-KAN-51-07, AC-KAN-53-12 |
 
 ## Backlog issues
 - KAN-52 says "mi página/interfaz gráfica": it is unclear whether the theme also changes the business's public page seen by customers. Read as the subscriber's own interface only.
@@ -94,7 +97,7 @@ None. No story of this epic depends on Q1–Q7.
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-51 | AC-KAN-51-01 … AC-KAN-51-06 | `tests/SettingsPage.test.tsx` |
+| KAN-51 | AC-KAN-51-01 … AC-KAN-51-07 | `tests/SettingsPage.test.tsx` |
 | KAN-51 | AC-KAN-51-05 | `functions/src/notifications/tests/recipientLanguage.test.ts` |
 | KAN-52 | AC-KAN-52-01 … AC-KAN-52-06 | `tests/SettingsPage.test.tsx` |
-| KAN-53 | AC-KAN-53-01 … AC-KAN-53-11 | `tests/ChangePasswordForm.test.tsx` |
+| KAN-53 | AC-KAN-53-01 … AC-KAN-53-12 | `tests/ChangePasswordForm.test.tsx` |

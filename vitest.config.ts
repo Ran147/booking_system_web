@@ -16,6 +16,9 @@ export default mergeConfig(
         thresholds: { lines: 70 },
       },
       environment: "jsdom",
+      // Rules test files share one emulator database and each clears it in
+      // beforeEach, so they must not run in parallel.
+      fileParallelism: !isFirestoreEmulatorRunning,
       globals: true,
       include: isFirestoreEmulatorRunning
         ? ["tests/rules/**/*.test.ts"]

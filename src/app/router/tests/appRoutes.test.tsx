@@ -2,6 +2,7 @@ import { ROUTE_PATH } from "@/shared/constants";
 import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
 import {
+  COLLABORATOR_SESSION,
   CUSTOMER_SESSION,
   SIGNED_OUT_SESSION,
   SUBSCRIBER_SESSION,
@@ -66,6 +67,34 @@ describe("app routes", () => {
     expect(
       await appRoutesPage.findPageHeading(
         testI18n.t("business:placeholder.title"),
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("KAN-86: opens the business portal for a collaborator of the business", async () => {
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: COLLABORATOR_SESSION,
+    });
+    const appRoutesPage = createAppRoutesPage();
+
+    expect(
+      await appRoutesPage.findPageHeading(
+        testI18n.t("business:placeholder.title"),
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("KAN-86: redirects a collaborator away from the admin portal", async () => {
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: ROUTE_PATH.ADMIN.ROOT,
+      session: COLLABORATOR_SESSION,
+    });
+    const appRoutesPage = createAppRoutesPage();
+
+    expect(
+      await appRoutesPage.findPageHeading(
+        testI18n.t("landing:placeholder.title"),
       ),
     ).toBeInTheDocument();
   });

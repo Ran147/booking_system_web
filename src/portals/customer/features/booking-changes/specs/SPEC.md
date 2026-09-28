@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/customer/features/booking-changes/` |
 | Stories | KAN-156, KAN-157, KAN-158, KAN-159, KAN-160, KAN-161, KAN-162 |
 | Status | Draft |
-| Depends on | KAN-150 my bookings (entry point), KAN-139 availability (`getAvailability`, KAN-141, KAN-143, KAN-144), KAN-63 business `BookingPolicy` settings, KAN-163 reschedule / cancel emails (`functions/src/notifications` spec), KAN-128 customer sign-in; Q1 (availability per collaborator stays out) |
+| Depends on | KAN-150 my bookings (entry point), KAN-139 availability (`getAvailability`, KAN-141, KAN-143, KAN-144), KAN-63 business `BookingPolicy` settings, KAN-163 reschedule / cancel emails (`functions/src/notifications` spec), KAN-128 customer sign-in; Q1 decided 2026-09-28 (a reschedule keeps the booking's collaborator; availability per collaborator, KAN-142) |
 
 ## Intent
 A signed-in `customer` can move one of their future bookings to another free time slot, or cancel it, as long as the business's `BookingPolicy` allows it. Before doing either they see the policy and any penalty, and afterwards they get a clear confirmation.
@@ -27,13 +27,13 @@ A signed-in `customer` can move one of their future bookings to another free tim
 - On-screen confirmation of the result (KAN-162).
 
 ## Out of scope
-- Choosing another service or another collaborator while rescheduling (collaborator: Q1).
+- Choosing another service or another collaborator while rescheduling: the booking keeps its service and its collaborator (AS-7).
 - Emails sent after a reschedule or cancellation (KAN-166, KAN-167, `functions/src/notifications`).
 - Charging a penalty: the platform only records `isPenalized`; it does not collect money from customers.
 - Rescheduling or cancelling on behalf of the business (KAN-71, KAN-72).
 
 ## Data
-- `Booking`: rescheduling changes `startsAt` / `endsAt` and appends an entry to `rescheduleHistory` (no status change, `domain-glossary` §4.1). Cancelling moves `pending` or `confirmed` to `cancelled` and stores `cancellation: { cancelledBy: "customer", isPenalized, note }`.
+- `Booking`: rescheduling changes `startsAt` / `endsAt` and appends an entry to `rescheduleHistory` (no status change, `domain-glossary` §4.1); `collaboratorId` does not change (AS-7). Cancelling moves `pending` or `confirmed` to `cancelled` and stores `cancellation: { cancelledBy: "customer", isPenalized, note }`.
 - `Business`: `BookingPolicy` (cancellation / reschedule window and penalty), `timeZone`, currency. Read only.
 - Writes run only in callable functions (`rescheduleBooking`, `cancelBooking`), in a transaction; rules deny direct writes to `bookings`.
 - No new fields.
@@ -52,6 +52,7 @@ A signed-in `customer` can move one of their future bookings to another free tim
 - [ ] **AC-KAN-157-03** · edge · Given a date with no free time slots (full, closed or fully blocked), when the customer picks it, then `customer:bookingChanges.reschedule.noSlotsEmpty` is shown. [KAN-157]
 - [ ] **AC-KAN-157-04** · edge · Given dates in the past, or dates whose slots would fall inside the policy window, when the customer browses dates, then those dates or slots cannot be selected. See AS-1. [KAN-157, KAN-158]
 - [ ] **AC-KAN-157-05** · error · Given the availability cannot be loaded because of the network, when the customer picks a date, then `common:errors.network` is shown with a retry action and no slot can be selected. [KAN-157]
+- [ ] **AC-KAN-157-06** · happy · Given a booking with a `collaboratorId`, when the customer picks a date, then only slots in which that collaborator is free are shown (as in AC-KAN-142-01); the booking's own time does not count as taken. See AS-7. [KAN-157, KAN-142]
 
 ### KAN-158 — Change the date or time of a booking within the business policy
 - [ ] **AC-KAN-158-01** · happy · Given a future `pending` or `confirmed` booking inside the allowed window, when the customer picks a free slot and confirms, then the booking's `startsAt` / `endsAt` change to the new slot, its `status` stays the same, and an entry with the previous and new times is appended to `rescheduleHistory`. See AS-2. [KAN-158]
@@ -62,6 +63,7 @@ A signed-in `customer` can move one of their future bookings to another free tim
 - [ ] **AC-KAN-158-06** · error · Given the request fails because of the network or the server, when the customer confirms, then the booking keeps its previous time and `common:errors.network` or `common:errors.unknown` is shown. [KAN-158]
 - [ ] **AC-KAN-158-07** · edge · Given the customer's `Customer` record at the business is `blocked` (KAN-93), when they confirm a reschedule, then the booking does not change and `customer:bookingChanges.reschedule.customerBlockedError` is shown. See AS-3. [KAN-158, KAN-93]
 - [ ] **AC-KAN-158-08** · edge · Given the business is `inactive` or `suspended`, when the customer confirms a reschedule, then the booking does not change and `customer:bookingChanges.businessUnavailableError` is shown. See AS-4. [KAN-158, KAN-49]
+- [ ] **AC-KAN-158-09** · error · Given the booking's collaborator is now `inactive`, when the customer confirms a reschedule, then the booking does not change and `customer:bookingChanges.reschedule.collaboratorUnavailableError` is shown; cancelling is still possible. See AS-7. [KAN-158, KAN-83]
 
 ### KAN-159 — Cancel a future booking
 - [ ] **AC-KAN-159-01** · happy · Given a `pending` or `confirmed` booking whose `startsAt` is in the future, when the customer chooses "Cancel", reviews the policy (KAN-160) and confirms, then the booking's `status` becomes `cancelled` with `cancellation.cancelledBy` = customer, `cancellation.isPenalized` set as shown before confirming (KAN-161) and `cancellation.note` set to the optional reason. See AS-5. [KAN-159]
@@ -91,7 +93,7 @@ A signed-in `customer` can move one of their future bookings to another free tim
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| — | — | No story of this epic is blocked. Choosing a collaborator while rescheduling (Q1) is out of scope. |
+| — | — | No story of this epic is blocked. Q1 (2026-09-28): a reschedule keeps the booking's collaborator (AC-KAN-157-06, AC-KAN-158-09, AS-7). |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -102,6 +104,7 @@ A signed-in `customer` can move one of their future bookings to another free tim
 | AS-4 | While a business is `inactive` or `suspended`, customers cannot reschedule its bookings; cancelling is still allowed. | AC-KAN-158-08 |
 | AS-5 | The customer may add an optional cancellation reason, stored in `cancellation.note`, up to 500 characters. | AC-KAN-159-01, AC-KAN-159-06 |
 | AS-6 | Without a configured `BookingPolicy`, cancelling and rescheduling are allowed until `startsAt` and never penalized. | AC-KAN-160-02 |
+| AS-7 | A customer reschedule keeps the same collaborator (`collaboratorId` does not change) and only offers that collaborator's free time; to change collaborator the customer cancels and books again. | AC-KAN-157-06, AC-KAN-158-09 |
 
 ## Backlog issues
 - KAN-156 says "solicitar su reprogramación" (request), suggesting an approval step; KAN-158 says the customer changes the booking. Treated as a direct change (AS-2); confirm with the team.
@@ -122,8 +125,8 @@ A signed-in `customer` can move one of their future bookings to another free tim
 | Story | Criteria | Test file |
 | --- | --- | --- |
 | KAN-156 | AC-KAN-156-01 … AC-KAN-156-04 | `tests/RescheduleBookingPage.test.tsx` |
-| KAN-157 | AC-KAN-157-01 … AC-KAN-157-05 | `tests/RescheduleBookingPage.test.tsx` |
-| KAN-158 | AC-KAN-158-01 … AC-KAN-158-08 | `tests/RescheduleBookingPage.test.tsx`, `functions/src/bookings/tests/rescheduleBooking.test.ts` |
+| KAN-157 | AC-KAN-157-01 … AC-KAN-157-06 | `tests/RescheduleBookingPage.test.tsx` |
+| KAN-158 | AC-KAN-158-01 … AC-KAN-158-09 | `tests/RescheduleBookingPage.test.tsx`, `functions/src/bookings/tests/rescheduleBooking.test.ts` |
 | KAN-159 | AC-KAN-159-01 … AC-KAN-159-06 | `tests/CancelBookingDialog.test.tsx`, `functions/src/bookings/tests/cancelBooking.test.ts` |
 | KAN-160 | AC-KAN-160-01 … AC-KAN-160-03 | `tests/CancelBookingDialog.test.tsx` |
 | KAN-161 | AC-KAN-161-01 … AC-KAN-161-05 | `tests/CancelBookingDialog.test.tsx`, `tests/RescheduleBookingPage.test.tsx`, `functions/src/bookings/tests/cancelBooking.test.ts` |

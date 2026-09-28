@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/admin/features/support-tickets/` |
 | Stories | KAN-190, KAN-191, KAN-192 |
 | Status | Draft |
-| Depends on | A subscriber-side story to create tickets (missing, see Backlog issues); KAN-174 businesses spec (business profile link); email sending in `functions/` |
+| Depends on | PROP-3 subscriber support tickets (proposed, not in Jira yet; `src/portals/business/features/support` spec) creates the tickets; KAN-174 businesses spec (business profile link); email sending in `functions/` |
 
 ## Intent
 Business owners raise support tickets and the super admin handles them from the admin portal: sees them all with their status, answers by email and marks them resolved when done. The owner gets the answer in their inbox and the platform keeps a record of each ticket's state.
@@ -15,7 +15,7 @@ Business owners raise support tickets and the super admin handles them from the 
 | Actor | Can |
 | --- | --- |
 | super admin (`super_admin`) | List all `SupportTicket`s, read them, reply, resolve |
-| subscriber | Create tickets and read their own (not specified here, see Backlog issues); never sees other businesses' tickets |
+| subscriber | Create tickets and read their own (PROP-3, business support spec); never sees other businesses' tickets |
 | customer, visitor | Nothing |
 
 ## In scope
@@ -25,7 +25,7 @@ Business owners raise support tickets and the super admin handles them from the 
 - Resolve a ticket (KAN-192).
 
 ## Out of scope
-- Creating tickets and the subscriber's view of them (no story in the backlog).
+- Creating tickets and the subscriber's view of them (PROP-3, business support spec).
 - Reopening a ticket (the glossary has no transition out of `resolved`).
 - Attachments, assignment to other admins, priorities, SLAs.
 - Replies from the owner by email back into the ticket.
@@ -67,7 +67,7 @@ Business owners raise support tickets and the super admin handles them from the 
 - [ ] **AC-KAN-192-06** · error · Given a caller without the `super_admin` role, when they try to change a ticket's status directly, then it is rejected with `common:errors.permissionDenied`. [KAN-192]
 
 ## BLOCKED
-None. No story in this epic depends on Q1–Q7.
+None. No story in this epic is blocked; the missing subscriber side is the proposed story PROP-3.
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -77,11 +77,11 @@ None. No story in this epic depends on Q1–Q7.
 | AS-3 | A reply is 1–5,000 characters of plain text. | AC-KAN-191-04, AC-KAN-191-05 |
 | AS-4 | The reply is stored first and the email is sent by a Cloud Function; if sending fails, the reply is kept and marked, and the status change still applies. | AC-KAN-191-01, AC-KAN-191-08 |
 | AS-5 | Resolving a ticket does not send an email to the owner. | AC-KAN-192-01 |
-| AS-6 | Replies are stored with the ticket (array or subcollection, decided in design) and are visible to the owner in a future subscriber view. | Data |
+| AS-6 | Replies are stored with the ticket (array or subcollection, decided in design) and are visible to the owner in the subscriber view (PROP-3). | Data |
 | AS-7 | Emails are sent in the owner's `User.language`. | AC-KAN-191-01 |
 
 ## Backlog issues
-- No story lets a subscriber create a support ticket or see its answers; KAN-190 assumes tickets "creados por los dueños de negocio". A business-portal story is needed (KAN-19 "sección de ayuda" in the landing is the closest, but it is for visitors).
+- No Jira story lets a subscriber create a support ticket or see its answers; KAN-190 assumes tickets "creados por los dueños de negocio". The proposed story PROP-3 (business support spec, not in Jira yet) covers it; it must be created in Jira before it is implemented.
 - KAN-192 has a typo: "ticket de sport" = "ticket de soporte". "Cerrar" and "marcar como resuelto" are the same transition (`resolved`), as the glossary states.
 - KAN-190 lists the statuses in Spanish (abierto, en proceso, resuelto); they map to `open`, `in_progress`, `resolved`.
 - KAN-5 (landing contact form) is another inbound channel; it is not a `SupportTicket` and is not listed here.

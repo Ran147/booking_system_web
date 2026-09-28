@@ -25,7 +25,7 @@ A person on a business's pages in the customer portal always knows which busines
 - Keeping every navbar link inside the business's slug (`/<businessSlug>/...`, Q4).
 
 ## Out of scope
-- Creating or changing a business slug (set when the business is created, KAN-176 / Q7).
+- Creating a business slug (set at subscriber sign-up, KAN-25, Q7) or changing it (never allowed).
 - The sign-in form, password recovery and idle logout themselves (KAN-128, `src/features/auth`).
 - The content of the my-bookings (KAN-150) and profile (KAN-168) screens.
 - Language and theme switches (KAN-172, KAN-173 in the profile epic).
@@ -107,7 +107,7 @@ A person on a business's pages in the customer portal always knows which busines
 ## Backlog issues
 - KAN-121 (phone, email and logo) overlaps KAN-118 (contact information) and, for the logo, KAN-107 (navbar). Kept as separate stories; KAN-121 only adds the logo in the footer.
 - KAN-119 mixes platform terms (landing KAN-9) and booking terms (`BookingPolicy`, KAN-147 and KAN-160). See AS-6.
-- No business-portal story lets the subscriber enter the business logo, phone, email or social networks (KAN-39 only shows name and logo in the sidebar; KAN-31 Settings covers language, theme and password). The data this footer shows has no source story.
+- No Jira story lets the subscriber enter the business logo, phone, email or social networks (KAN-39 only shows name and logo in the sidebar; KAN-31 Settings covers language, theme and password). The proposed story PROP-4 (business-profile spec, not in Jira yet) is the source of this data.
 - KAN-110 (sign in from the navbar) overlaps the customer login epic KAN-128; the navbar only provides the entry point.
 - The epic KAN-96 is titled "Navbar (Clientes)" but its first story (KAN-107) is about the business identity, not the customer.
 

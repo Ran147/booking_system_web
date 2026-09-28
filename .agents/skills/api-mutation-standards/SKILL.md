@@ -28,7 +28,9 @@ This skill is the **single source of truth** for **writes**: where a write runs 
 | Anything touching several documents or needing a server check: create, confirm, reschedule or cancel a booking (KAN-69, KAN-144, KAN-158) | Callable function (transaction) | Prevents double booking |
 | Delete a service only without active bookings (KAN-59) | Callable function | Needs a query the client cannot be trusted with |
 | Payments, subscription changes, renewals (KAN-22, KAN-45, KAN-47, KAN-48) | Callable / scheduled function | Simulated gateway runs on the server |
-| Super admin actions: suspend / reactivate business, plan and price changes (KAN-179, KAN-183, KAN-184) | Callable function | Writes the audit entry in the same transaction |
+| Super admin actions: approve / reject a `pending` business, suspend / reactivate business, plan and price changes, platform settings (PROP-1, PROP-2, KAN-179, KAN-181–184) | Callable function | Writes the audit entry in the same transaction |
+| Plan checkout from the landing and subscriber sign-up (KAN-22, KAN-25) | Callable function | Simulated gateway, `PlanCheckout`, business `pending`, claims |
+| Invite, edit, deactivate, reactivate a collaborator, change their permissions (KAN-78–86) | Callable function | Also sets Auth claims and checks `Plan.limits.maxCollaborators` |
 | Emails and invitations (KAN-24, KAN-97, KAN-164) | Function triggered by the write | The client never sends email |
 | Export (KAN-89, reports) | Callable `exportCollection` | See `api-query-standards` |
 | Anonymize a customer (KAN-98) | Callable function | Touches bookings and customer records together |
@@ -62,7 +64,21 @@ Before calling a status-changing mutation, the ViewModel checks `canTransition(.
 
 ## 6. Audit trail
 
-Super admin mutations write an `AuditLogEntry` (`auditLog/`) inside the same function transaction: actor, action type, target, before/after values, timestamp. Known action types from KAN-194: business suspension and reactivation, plan changes, price edits. Which "approvals" are audited is **BLOCKED — Q3**; do not add an approval action type until it is decided.
+Super admin mutations write an `AuditLogEntry` (`auditLog/`) inside the same function transaction: actor, action type, target, before/after values, timestamp. The action type is an `AUDIT_LOG_ACTION_TYPE` value (`@/shared/domain`, Q3 decided 2026-09-28):
+
+| Action | `AUDIT_LOG_ACTION_TYPE` | Story |
+| --- | --- | --- |
+| Approve a `pending` business | `BUSINESS_APPROVED` | PROP-1, KAN-176 |
+| Reject a `pending` business (with reason) | `BUSINESS_REJECTED` | PROP-1 |
+| Suspend a business | `BUSINESS_SUSPENDED` | PROP-2 |
+| Reactivate a suspended business | `BUSINESS_REACTIVATED` | KAN-179 |
+| Create a plan | `PLAN_CREATED` | KAN-181 |
+| Edit a plan (features, billing period, limits) | `PLAN_UPDATED` | KAN-183 |
+| Change a plan's price | `PLAN_PRICE_CHANGED` | KAN-183 |
+| Activate / deactivate a plan | `PLAN_ACTIVATED` / `PLAN_DEACTIVATED` | KAN-184 |
+| Change platform settings | `PLATFORM_SETTINGS_UPDATED` | KAN-182 |
+
+An edit that changes the price and other fields writes one `PLAN_PRICE_CHANGED` entry and one `PLAN_UPDATED` entry. A new audited action adds its value to `AUDIT_LOG_ACTION_TYPE` and to `domain-glossary` in the same PR.
 
 ## 7. Correct example: delete a service (KAN-59)
 
@@ -384,4 +400,4 @@ For simple single-document writes (§1), the `api/` function uses `setDoc` / `up
 - [ ] The entity's queries are invalidated on success; optimistic updates only for toggles, with rollback.
 - [ ] Buttons are disabled while `isPending`.
 - [ ] Status changes are checked with `canTransition` before calling.
-- [ ] Super admin actions write an audit entry in the same transaction; no "approval" action type while Q3 is open.
+- [ ] Super admin actions write an audit entry with its `AUDIT_LOG_ACTION_TYPE` value in the same transaction.

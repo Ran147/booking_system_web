@@ -5,17 +5,18 @@
 | Portal | shared (used from landing, business, customer and admin) |
 | Feature folder | `src/features/auth/` |
 | Stories | KAN-33, KAN-34, KAN-35, KAN-36, KAN-37, KAN-38 (KAN-28); KAN-129, KAN-130, KAN-131, KAN-132, KAN-133 (KAN-128) |
-| Status | BLOCKED (partially) |
-| Depends on | KAN-182 platform settings (`PlatformSettings.idleTimeoutMinutes`, admin); KAN-26 subscriber sign-up; KAN-122 customer sign-up; KAN-29 / KAN-110 sign-out; Q7 (destination of a subscriber account without a business) |
+| Status | Draft |
+| Depends on | KAN-182 platform settings (`PlatformSettings.idleTimeoutMinutes`, admin); KAN-26 subscriber sign-up; KAN-122 customer sign-up; KAN-29 / KAN-110 sign-out; Q7 and Q2 decided 2026-09-28 (a subscriber whose business is `pending` lands on the "under review" screen); Q1 decided 2026-09-28 (collaborators sign in to the business portal); KAN-174 admin businesses (approval PROP-1) |
 
 ## Intent
-Every account holder (subscriber, customer and super admin) signs in with email and password through one flow protected by reCAPTCHA, gets clear errors that never reveal whether an email is registered, can show or hide the password, can recover a forgotten password with a strong new one, and is signed out automatically after a period of inactivity. After sign-in each role lands in its own portal.
+Every account holder (subscriber, collaborator, customer and super admin) signs in with email and password through one flow protected by reCAPTCHA, gets clear errors that never reveal whether an email is registered, can show or hide the password, can recover a forgotten password with a strong new one, and is signed out automatically after a period of inactivity. After sign-in each role lands in its own portal.
 
 ## Actors and permissions
 | Actor | Can |
 | --- | --- |
 | visitor | Sign in, request a password reset, set a new password from a valid reset link |
-| subscriber | Sign in; lands in the business portal of their own business (`businessId` from the session, never from the URL) |
+| subscriber | Sign in; lands in the business portal of their own business (`businessId` from the session, never from the URL), or on the "under review" / "rejected" screen while the business is `pending` / `rejected` |
+| collaborator | Sign in; lands in the business portal of their business, limited to their permissions (KAN-86) |
 | customer | Sign in; lands in the customer portal (my bookings) or back where they were |
 | super admin | Sign in with the same flow; lands in the admin portal |
 | any signed-in user | Is signed out after `PlatformSettings.idleTimeoutMinutes` without activity |
@@ -37,7 +38,8 @@ Signed-in users who open sign-in or password recovery are sent to their own port
 
 ## Data
 - `User` (`users/{userId}`): read after sign-in for `language`.
-- Session from Firebase Auth custom claims: `role` (`subscriber`, `customer`, `super_admin`) and `businessId` for subscribers (`auth-and-roles` §1).
+- Session from Firebase Auth custom claims: `role` (`subscriber`, `collaborator`, `customer`, `super_admin`), `businessId` for subscribers and collaborators, `collaboratorId` for collaborators (`auth-and-roles` §1).
+- `Business.status` (`pending`, `rejected`, `active`, `inactive`, `suspended`) and `rejectionReason`, read after a subscriber signs in to decide the landing screen (KAN-33).
 - `PlatformSettings` (`platformSettings/current`): `idleTimeoutMinutes`, read only. Fallback `DEFAULT_PLATFORM_SETTINGS.IDLE_TIMEOUT_MINUTES` when it cannot be read.
 - Password rules: `PASSWORD_RULE` (`forms-validation-standards` §5).
 - No new entity or field.
@@ -53,6 +55,12 @@ Signed-in users who open sign-in or password recovery are sent to their own port
 - [ ] **AC-KAN-33-06** · edge · Given a subscriber whose business is `inactive` or `suspended`, when they sign in, then sign-in succeeds and they reach the business portal, which is read-only (`business:errors.readOnly`, KAN-49). [KAN-33, KAN-49]
 - [ ] **AC-KAN-33-07** · edge · Given a user who is already signed in, when they open the sign-in page, then they are redirected to their own portal home. [KAN-33]
 - [ ] **AC-KAN-33-08** · edge · Given the user double-clicks submit, when the first request is in progress, then the button is disabled and shows a loading state; only one attempt is made. [KAN-33]
+- [ ] **AC-KAN-33-09** · happy · Given a subscriber whose business is `pending` (paid and signed up, awaiting approval, Q2), when they sign in, then they land on the "under review" screen `business:pendingApproval.*` with the business name, the plan and the sign-up date and a sign-out action; no other screen of the business portal is reachable. [KAN-33, KAN-176]
+- [ ] **AC-KAN-33-10** · happy · Given the "under review" screen is open, when the super admin approves the business, then the next status check (on reload or when the screen checks again, AS-9) shows the full business portal without signing in again. [KAN-33, KAN-176]
+- [ ] **AC-KAN-33-11** · edge · Given a subscriber whose business is `rejected`, when they sign in, then they land on the "rejected" screen `business:rejected.*` with the rejection reason, the platform contact and a sign-out action. [KAN-33, PROP-1]
+- [ ] **AC-KAN-33-12** · error · Given the business status cannot be read after sign-in (network), when the subscriber lands, then no business data is shown and `common:errors.network` is shown with a retry action. [KAN-33]
+- [ ] **AC-KAN-33-13** · happy · Given an `active` collaborator, when they sign in with the same form, then they land on the business portal home of their business, showing only what their permissions allow (KAN-86). [KAN-33, KAN-86]
+- [ ] **AC-KAN-33-14** · error · Given a collaborator who is `inactive` (KAN-81), when they sign in with the right password, then they are not signed in and `common:auth.signIn.accountDisabled` is shown. [KAN-33, KAN-81]
 
 ### KAN-34 — Clear error messages for wrong data (subscriber)
 - [ ] **AC-KAN-34-01** · happy · Given the user corrects a field that showed an error, when the value becomes valid, then the error disappears from that field without submitting. [KAN-34]
@@ -127,9 +135,7 @@ Signed-in users who open sign-in or password recovery are sent to their own port
 - [ ] **AC-KAN-133-04** · edge · Given a visitor browsing public customer pages without a session, when they are inactive, then no warning and no sign-out happen. [KAN-133]
 
 ## BLOCKED
-| Story | Waiting on | What stays out until decided |
-| --- | --- | --- |
-| KAN-33 (destination after sign-in of a subscriber account with no `subscriber` role or no business yet) | Q7 — checkout in the MVP | Where an account created by KAN-26 lands before its first payment / business creation (KAN-176). Until decided, such an account gets no portal. |
+None. Q7 and Q2 were decided on 2026-09-28: a subscriber whose business is `pending` lands on the "under review" screen (AC-KAN-33-09).
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -142,9 +148,11 @@ Signed-in users who open sign-in or password recovery are sent to their own port
 | AS-6 | `idleTimeoutMinutes` is read when the session starts and refreshed when the settings query refreshes; a change does not sign out active users at once. | AC-KAN-38-07 |
 | AS-7 | Unsaved form data is not restored after an idle sign-out. | AC-KAN-133-03 |
 | AS-8 | The recovery and reset pages are shared by all roles; the reset email is sent in `User.language`. | AC-KAN-36-02, AC-KAN-132-01 |
+| AS-9 | The "under review" screen checks the business status when it loads and again when the window regains focus; no realtime listener. | AC-KAN-33-10 |
+| AS-10 | A deactivated collaborator's Firebase account is disabled, so sign-in reports `common:auth.signIn.accountDisabled` only after a correct password; wrong passwords still get the neutral `common:auth.signIn.invalidCredentials`. | AC-KAN-33-14 |
 
 ## Backlog issues
-- KAN-28 and KAN-128 are both named "Login" and describe the same flow for two roles; covered by one spec in `src/features/auth`. Super admin sign-in has no story and uses the same flow.
+- KAN-28 and KAN-128 are both named "Login" and describe the same flow for two roles; covered by one spec in `src/features/auth`. Super admin and collaborator sign-in have no story and use the same flow.
 - KAN-33 to KAN-38 say "usuario"; in the KAN-28 epic this is the subscriber (the epic map says "Login (suscriptor)").
 - KAN-128 has no stories for reCAPTCHA or password strength; the same rules apply to customers (reCAPTCHA on sign-in, `PASSWORD_RULE` on reset), consistent with `auth-and-roles` §5.
 - KAN-38 describes "a security token that signs me out"; the requirement is sign-out after inactivity (`PlatformSettings.idleTimeoutMinutes`), not the lifetime of the Firebase token.
@@ -152,7 +160,7 @@ Signed-in users who open sign-in or password recovery are sent to their own port
 - KAN-182 (platform settings, including the idle timeout) sits in the plans epic KAN-180 although it drives this spec.
 
 ## Non-functional
-- i18n keys: new prefixes `common:auth.signIn.*`, `common:auth.password.*`, `common:auth.passwordReset.*`, `common:auth.idle.*` (the auth feature is shared by every portal, so it uses `common`). Reused: `validation:required`, `validation:emailInvalid`, `validation:passwordTooWeak`, `validation:recaptchaRequired`, `common:errors.network`, `common:errors.unknown`, `business:errors.readOnly`.
+- i18n keys: new prefixes `common:auth.signIn.*`, `common:auth.password.*`, `common:auth.passwordReset.*`, `common:auth.idle.*` (the auth feature is shared by every portal, so it uses `common`). Reused: `validation:required`, `validation:emailInvalid`, `validation:passwordTooWeak`, `validation:recaptchaRequired`, `common:errors.network`, `common:errors.unknown`, `business:errors.readOnly`. New in the business namespace: `business:pendingApproval.*`, `business:rejected.*`; new: `common:auth.signIn.accountDisabled`, `common:auth.invitation.*` (collaborator invitation page, KAN-79).
 - reCAPTCHA required on sign-in (KAN-33, KAN-129) and on the recovery request; submit disabled until there is a token; token verified on the server before the action.
 - Idle timeout from `PlatformSettings.idleTimeoutMinutes` (KAN-182) with a warning dialog; fallback `DEFAULT_PLATFORM_SETTINGS.IDLE_TIMEOUT_MINUTES`.
 - Security: errors never reveal whether an email exists; the password is never logged or kept after a failed attempt; sign-out clears cached data; the business comes from the session claim, never from the URL.
@@ -163,7 +171,8 @@ Signed-in users who open sign-in or password recovery are sent to their own port
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-33 | AC-KAN-33-01 … AC-KAN-33-08 | `tests/SignInPage.test.tsx` |
+| KAN-33 | AC-KAN-33-01 … AC-KAN-33-08, AC-KAN-33-13, AC-KAN-33-14 | `tests/SignInPage.test.tsx` |
+| KAN-33 | AC-KAN-33-09 … AC-KAN-33-12 | `src/portals/business/layout/tests/BusinessStatusGate.test.tsx` |
 | KAN-34 | AC-KAN-34-01 … AC-KAN-34-07 | `tests/SignInPage.test.tsx` |
 | KAN-35 | AC-KAN-35-01 … AC-KAN-35-04 | `tests/SignInPage.test.tsx` |
 | KAN-36 | AC-KAN-36-01 … AC-KAN-36-06 | `tests/PasswordRecoveryPage.test.tsx` |

@@ -5,8 +5,8 @@
 | Portal | admin |
 | Feature folder | `src/portals/admin/features/plans/` |
 | Stories | KAN-181, KAN-182, KAN-183, KAN-184, KAN-185 |
-| Status | BLOCKED (partially) |
-| Depends on | Q1 (collaborator limit in plans), Q5 decided 2026-09-28 (no renewal retries in the MVP; grace days alone decide when `past_due` becomes `expired`); KAN-1 home (plan catalog KAN-7), KAN-20 plan details (KAN-21), KAN-32 subscription spec; `features/auth` spec (idle logout KAN-38) |
+| Status | Draft |
+| Depends on | Q1 decided 2026-09-28 (collaborator limit `limits.maxCollaborators`, used by KAN-85); Q3 decided 2026-09-28 (plan and settings changes are audited, KAN-194); Q5 decided 2026-09-28 (no renewal retries in the MVP; grace days alone decide when `past_due` becomes `expired`); KAN-1 home (plan catalog KAN-7), KAN-20 plan details (KAN-21), KAN-32 subscription spec; `features/auth` spec (idle logout KAN-38) |
 
 ## Intent
 The super admin defines the commercial offer: which plans exist, what they cost, what they include and which are sold. From the same admin area they also set the platform-wide parameters (idle timeout, grace days, maximum bookings per business) that the other portals read.
@@ -20,18 +20,18 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 
 ## In scope
 - List of all plans, `active` and `inactive` (KAN-185).
-- Create a plan with name, price, billing period, features and limits (KAN-181), except the collaborator limit.
+- Create a plan with name, price, billing period, features and limits, including the collaborator limit (KAN-181).
 - Edit a plan's price, features and billing period (KAN-183).
 - Activate / deactivate a plan (KAN-184).
 - Platform settings screen: idle timeout, grace days after expiry, maximum bookings per business (KAN-182).
 
 ## Out of scope
-- The collaborator limit on a plan (KAN-181): BLOCKED, Q1.
+- Enforcing the collaborator limit when a collaborator is registered or reactivated (KAN-85, collaborators spec).
 - Deleting a plan (no story; deactivation replaces it).
 - Running the `past_due` → `expired` change after the grace days and whether a new price applies at renewal: the KAN-32 subscription spec. There are no renewal retries in the MVP (Q5).
 - Enforcing the booking limits when a booking is created (booking specs KAN-63 / KAN-145).
 - Plan change by a subscriber (KAN-44).
-- Which plan edits are written to the audit log (KAN-194, Q3).
+- Viewing the audit log (KAN-194). Every create, edit, price change, activation, deactivation and settings change of this spec writes an `AuditLogEntry` (`plan_created`, `plan_updated`, `plan_price_changed`, `plan_activated`, `plan_deactivated`, `platform_settings_updated`; audit-log spec AC-KAN-194-09).
 
 ## Data
 - `Plan` (`plans/{planId}`, glossary §3, §4.5). Status `active` ↔ `inactive`. Proposed fields (new; to confirm in review):
@@ -39,7 +39,7 @@ The super admin defines the commercial offer: which plans exist, what they cost,
   - `priceInCents: number` (integer, minor units)
   - `billingPeriod`: `monthly` | `annual` (story: "duración (mensual/anual)")
   - `features: string[]` (list of included features, display text)
-  - `limits: { maxBookings }` (glossary: `limits`, KAN-181). `limits.maxCollaborators` is **not** added while Q1 is open.
+  - `limits: { maxBookings, maxCollaborators }` (glossary: `limits`, KAN-181; `maxCollaborators` counts `invited` and `active` collaborators, KAN-85).
   - `status`, `createdAt`, `updatedAt`
 - `PlatformSettings` (`platformSettings/current`, glossary §3). Fields:
   - `idleTimeoutMinutes: number` (named in `auth-and-roles`)
@@ -60,6 +60,9 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 - [ ] **AC-KAN-181-07** · error · Given another plan already has the same name (ignoring case and accents), when the super admin saves, then the plan is not created and `admin:plans.form.duplicateNameError` is shown (AS-5). [KAN-181]
 - [ ] **AC-KAN-181-08** · error · Given the request fails because of the network, when the super admin saves, then no plan is created, the form keeps its values and `common:errors.network` is shown. [KAN-181]
 - [ ] **AC-KAN-181-09** · edge · Given the super admin double-clicks save, when the request is in flight, then the save action is disabled and only one plan is created. [KAN-181]
+- [ ] **AC-KAN-181-10** · happy · Given the new-plan form, when the super admin enters a maximum number of collaborators and saves, then the plan stores it in `limits.maxCollaborators`, and the plan catalog (KAN-7) and plan detail (KAN-21) show it with `landing:planCheckout.detail.limits.maxCollaborators`. [KAN-181, KAN-85]
+- [ ] **AC-KAN-181-11** · error · Given a maximum number of collaborators that is empty, negative or not a whole number, when the super admin saves, then the plan is not created and `validation:required` or `validation:outOfRange` is shown on that field (AS-13). [KAN-181]
+- [ ] **AC-KAN-181-12** · edge · Given a maximum number of collaborators of 0, when the plan is saved, then businesses on that plan cannot register collaborators and are served by the business as one resource (collaborators spec AS-6); the catalog shows `landing:planCheckout.detail.noCollaborators`. [KAN-181, KAN-85]
 
 ### KAN-182 — Configure global platform parameters (idle timeout, grace days after subscription expiry, maximum bookings per business)
 - [ ] **AC-KAN-182-01** · happy · Given a signed-in super admin, when they open platform settings, then they see the current `idleTimeoutMinutes`, `gracePeriodDays` and `maxBookingsPerBusiness`, or the default values when none were saved yet. [KAN-182]
@@ -96,9 +99,7 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 - [ ] **AC-KAN-185-05** · error · Given a signed-in `subscriber` or `customer`, when they open the admin plans URL, then they are redirected to their own portal. [KAN-185]
 
 ## BLOCKED
-| Story | Waiting on | What stays out until decided |
-| --- | --- | --- |
-| KAN-181 (collaborator limit only) | Q1 — collaborator | The "número de colaboradores" limit on a plan (`limits.maxCollaborators` is not added); KAN-85 (upgrade prompt when the limit is reached) stays blocked too |
+None. Q1 was decided on 2026-09-28: the collaborator limit is `limits.maxCollaborators` (AC-KAN-181-10 … AC-KAN-181-12).
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -114,14 +115,15 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 | AS-9 | Concurrent edits are detected with the plan's `updatedAt`; last write does not silently win. | AC-KAN-183-06 |
 | AS-10 | Deactivating the last `active` plan is allowed after a warning; the catalog then shows its empty state. | AC-KAN-184-04 |
 | AS-11 | The plans list is not paginated: the number of plans is small. | AC-KAN-185-01 |
-| AS-12 | Limits (`limits`) are also editable in KAN-183, with the same rules as creation, although the story only names price, features and billing period. | AC-KAN-183-01 |
+| AS-12 | Limits (`limits`, including `maxCollaborators`) are also editable in KAN-183, with the same rules as creation, although the story only names price, features and billing period. Lowering `maxCollaborators` below a business's current count keeps its collaborators (collaborators spec AS-12). | AC-KAN-183-01 |
+| AS-13 | `limits.maxCollaborators` is a whole number from 0 to 500; there is no "unlimited" value for it. | AC-KAN-181-11, AC-KAN-181-12 |
 
 ## Backlog issues
 - KAN-182 (platform settings) sits in the plans epic but is not about plans. Specified here, in `src/portals/admin/features/plans`, as the backlog places it; the team may move it to its own folder (for example `src/portals/admin/features/platform-settings`) in `epic-map.md`.
 - KAN-182 "límite máximo de reservas por negocio" overlaps with KAN-181 plan limit "reservas máximas". Which one wins when both apply is not stated (for example the lower of the two). Needs a decision before the booking specs enforce limits.
 - KAN-182 grace days decide when `past_due` becomes `expired` (glossary §4.2); since Q5 deferred renewal retries (out of MVP), nothing else changes that date.
 - No story says whether a plan price change applies to existing subscriptions at their next renewal (AS-8).
-- KAN-181 mentions a collaborator limit ("número de colaboradores"), which depends on Q1.
+- KAN-181's collaborator limit ("número de colaboradores") is `limits.maxCollaborators` (Q1); KAN-85 enforces it in the business portal.
 - KAN-183 says "duración" for monthly/annual; it is the billing period, not a length of time. It does not say whether limits can be edited (AS-12).
 - KAN-184 "manteniendo activos a los negocios" matches the glossary rule for `Plan` (inactive plans keep their subscribers).
 
@@ -136,7 +138,7 @@ The super admin defines the commercial offer: which plans exist, what they cost,
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-181 | AC-KAN-181-01 … AC-KAN-181-09 | `tests/PlanFormScreen.test.tsx` |
+| KAN-181 | AC-KAN-181-01 … AC-KAN-181-12 | `tests/PlanFormScreen.test.tsx` |
 | KAN-182 | AC-KAN-182-01, AC-KAN-182-02, AC-KAN-182-04, AC-KAN-182-05, AC-KAN-182-07, AC-KAN-182-08 | `tests/PlatformSettingsScreen.test.tsx` |
 | KAN-182 | AC-KAN-182-03 | `tests/IdleTimeout.test.tsx` (in `src/features/auth`) |
 | KAN-182 | AC-KAN-182-06 | `functions/src/rules/tests/platformSettings.rules.test.ts` |

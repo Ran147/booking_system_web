@@ -5,11 +5,11 @@
 | Portal | landing |
 | Feature folder | `src/portals/landing/features/home/` |
 | Stories | KAN-2, KAN-3, KAN-4, KAN-5, KAN-6, KAN-7, KAN-8, KAN-9, KAN-10, KAN-11, KAN-12, KAN-13 |
-| Status | BLOCKED (partially) |
-| Depends on | KAN-20 plan checkout (plan details KAN-21; checkout Q7), KAN-28 / KAN-128 sign-in (`src/features/auth`), KAN-14 contact (shared contact data), KAN-180 plans (admin, source of `Plan`), Q7 |
+| Status | Draft |
+| Depends on | KAN-20 plan checkout (plan details KAN-21; checkout KAN-22, Q7 decided 2026-09-28), KAN-28 / KAN-128 sign-in (`src/features/auth`), KAN-14 contact (shared contact data), KAN-180 plans (admin, source of `Plan`) |
 
 ## Intent
-The public landing page for business owners who are evaluating the platform. A visitor understands what the platform offers, sees the available plans and their prices, trusts it through testimonials, and can sign in, read the legal terms or contact the platform team from one page.
+The public landing page for business owners who are evaluating the platform. A visitor understands what the platform offers, sees the available plans and their prices, trusts it through testimonials, starts contracting a plan (Q7), and can sign in, read the legal terms or contact the platform team from one page.
 
 ## Actors and permissions
 | Actor | Can |
@@ -25,12 +25,12 @@ No actor writes platform data from this page. The contact form only sends a mess
 - Short platform introduction with "Read more" (KAN-4).
 - Contact form protected by reCAPTCHA (KAN-5).
 - Testimonials (KAN-6).
-- Catalog of `active` plans with price, features and limits (KAN-7).
+- Catalog of `active` plans with price, features and limits, with a contract action on each plan (KAN-7, KAN-2).
 - Footer with general information, terms link, social links, phone and contact email (KAN-8 to KAN-13).
 - Terms and conditions page reachable from the home page (KAN-9).
 
 ## Out of scope
-- What happens after a visitor chooses a plan (checkout, payment, terms acceptance before payment): KAN-22, KAN-23, KAN-24, blocked by Q7 in the KAN-20 spec.
+- The checkout itself (payment, terms acceptance before payment, confirmation email): KAN-22, KAN-23, KAN-24, specified in the KAN-20 spec.
 - Plan detail page (KAN-21, specified in the KAN-20 spec).
 - The sign-in form itself (KAN-28 / KAN-128 spec).
 - Managing testimonials, plans or contact data from the admin portal (no story; plans are KAN-180).
@@ -47,6 +47,8 @@ No actor writes platform data from this page. The contact form only sends a mess
 - [ ] **AC-KAN-2-02** · happy · Given the hero is shown, when the visitor activates the call to action, then the page scrolls to the plans section (KAN-7) and moves focus to its heading. See AS-1. [KAN-2]
 - [ ] **AC-KAN-2-03** · error · Given the plans cannot be loaded (network error), when the visitor activates the call to action, then they still reach the plans section, which shows `common:errors.network` with a retry action (AC-KAN-7-03). [KAN-2, KAN-7]
 - [ ] **AC-KAN-2-04** · edge · Given a phone-width viewport (360 px), when the hero renders, then the headline and the call to action are visible without horizontal scrolling. [KAN-2]
+- [ ] **AC-KAN-2-05** · happy · Given the call to action took the visitor to the plans section, when they activate `landing:home.plans.contract` on a plan, then the checkout of that plan opens (KAN-22): the call to action starts the contracting process. [KAN-2, KAN-7, KAN-22]
+- [ ] **AC-KAN-2-06** · error · Given there are no `active` plans, when the visitor activates the call to action, then they reach the plans section with `landing:home.plans.empty` and no contract action. [KAN-2, KAN-7]
 
 ### KAN-3 — Navbar with a Sign In option
 - [ ] **AC-KAN-3-01** · happy · Given a visitor on any landing page, when the page loads, then a navbar shows the logo (KAN-12), links to the home sections (AS-3) and a Sign In action labelled `landing:home.navbar.signIn`. [KAN-3]
@@ -83,6 +85,9 @@ No actor writes platform data from this page. The contact form only sends a mess
 - [ ] **AC-KAN-7-04** · edge · Given a plan with status `inactive`, when the section renders, then that plan is not shown. [KAN-7, KAN-184]
 - [ ] **AC-KAN-7-05** · edge · Given there are no `active` plans, when the section renders, then `landing:home.plans.empty` is shown instead of an empty grid. [KAN-7]
 - [ ] **AC-KAN-7-06** · edge · Given the plans are loading, when the section renders, then placeholders of the same size are shown so the page does not jump when the plans arrive. [KAN-7]
+- [ ] **AC-KAN-7-07** · happy · Given a plan card, when the visitor activates `landing:home.plans.contract`, then the checkout page of that plan opens (KAN-22). [KAN-7, KAN-22]
+- [ ] **AC-KAN-7-08** · error · Given the plan was deactivated after the catalog loaded, when the visitor activates contract, then the checkout does not open and `landing:planCheckout.payment.planUnavailableError` is shown (AC-KAN-21-10). [KAN-7, KAN-184]
+- [ ] **AC-KAN-7-09** · edge · Given a signed-in user, when they activate contract, then they see `landing:planCheckout.detail.signedInNotice` as in AC-KAN-21-11. [KAN-7, KAN-21]
 
 ### KAN-8 — Footer with general information
 - [ ] **AC-KAN-8-01** · happy · Given any landing page, when it renders, then a footer shows the logo, a short platform description, links to the terms (KAN-9) and the contact section, the social links (KAN-10), the phone (KAN-11), the contact email (KAN-13) and the copyright line with the current year. [KAN-8]
@@ -113,10 +118,7 @@ No actor writes platform data from this page. The contact form only sends a mess
 - [ ] **AC-KAN-13-02** · error · Given no contact email is configured, when the footer renders, then the email item is omitted. [KAN-13, KAN-8]
 
 ## BLOCKED
-| Story | Waiting on | What stays out until decided |
-| --- | --- | --- |
-| KAN-2 (what the call to action starts beyond the plan catalog) | Q7 — checkout in the MVP | Whether "start contracting" leads to checkout and payment. Until decided, the call to action only takes the visitor to the plans (AC-KAN-2-02). |
-| KAN-7 ("choose this plan" / contract action on a plan card) | Q7 — checkout in the MVP | A contract button on each plan card. Only "see details" (KAN-21) is specified. |
+None. Q7 was decided on 2026-09-28: the call to action and each plan card lead to the plan checkout (AC-KAN-2-05, AC-KAN-7-07).
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -137,8 +139,8 @@ No actor writes platform data from this page. The contact form only sends a mess
 ## Backlog issues
 - KAN-5 (contact form, Home epic) overlaps with KAN-17 (direct contact means, Contact epic KAN-14). This spec owns the form; the KAN-14 spec reuses it and does not define a second form.
 - KAN-10, KAN-11 and KAN-13 show the same contact data as KAN-17. One source of contact data should serve both epics.
-- KAN-2 says the call to action "starts the contracting process", which depends on Q7 (see BLOCKED).
-- KAN-9 (read the terms) and KAN-23 (accept the terms before paying, Q7) must show the same terms text.
+- KAN-2 says the call to action "starts the contracting process": it scrolls to the plans (AS-1), where each plan has the contract action (Q7).
+- KAN-9 (read the terms) and KAN-23 (accept the terms before paying) show the same terms text.
 - KAN-6 says "otros clientes": on the landing these are subscribers (business owners), not `customer`s.
 
 ## Non-functional
@@ -152,12 +154,12 @@ No actor writes platform data from this page. The contact form only sends a mess
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-2 | AC-KAN-2-01, AC-KAN-2-02, AC-KAN-2-03, AC-KAN-2-04 | `tests/HomePage.test.tsx` |
+| KAN-2 | AC-KAN-2-01 … AC-KAN-2-06 | `tests/HomePage.test.tsx` |
 | KAN-3 | AC-KAN-3-01, AC-KAN-3-02, AC-KAN-3-03, AC-KAN-3-04, AC-KAN-3-05 | `tests/LandingNavbar.test.tsx` |
 | KAN-4 | AC-KAN-4-01, AC-KAN-4-02, AC-KAN-4-03, AC-KAN-4-04 | `tests/HomePage.test.tsx` |
 | KAN-5 | AC-KAN-5-01 … AC-KAN-5-07 | `tests/ContactForm.test.tsx`; `functions/src/contact/tests/sendContactMessage.test.ts` |
 | KAN-6 | AC-KAN-6-01, AC-KAN-6-02, AC-KAN-6-03, AC-KAN-6-04 | `tests/HomePage.test.tsx` |
-| KAN-7 | AC-KAN-7-01 … AC-KAN-7-06 | `tests/PlanCatalog.test.tsx` |
+| KAN-7 | AC-KAN-7-01 … AC-KAN-7-09 | `tests/PlanCatalog.test.tsx` |
 | KAN-8 | AC-KAN-8-01, AC-KAN-8-02, AC-KAN-8-03 | `tests/LandingFooter.test.tsx` |
 | KAN-9 | AC-KAN-9-01, AC-KAN-9-02, AC-KAN-9-03 | `tests/TermsPage.test.tsx` |
 | KAN-10 | AC-KAN-10-01, AC-KAN-10-02, AC-KAN-10-03 | `tests/LandingFooter.test.tsx` |

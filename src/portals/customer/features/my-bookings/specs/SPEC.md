@@ -5,8 +5,8 @@
 | Portal | customer |
 | Feature folder | `src/portals/customer/features/my-bookings/` |
 | Stories | KAN-151, KAN-152, KAN-153, KAN-154 |
-| Status | BLOCKED (partially) |
-| Depends on | KAN-145 booking checkout (bookings exist), KAN-96 navbar (KAN-108 entry point), KAN-155 booking changes (actions launched from the detail), KAN-128 customer sign-in; Q1 (collaborator); Q4 decided 2026-09-28 (a link back to a business's pages goes to `/<businessSlug>`) |
+| Status | Draft |
+| Depends on | KAN-145 booking checkout (bookings exist), KAN-96 navbar (KAN-108 entry point), KAN-155 booking changes (actions launched from the detail), KAN-128 customer sign-in; Q1 decided 2026-09-28 (`Booking.collaboratorId`, KAN-77 collaborators); Q4 decided 2026-09-28 (a link back to a business's pages goes to `/<businessSlug>`) |
 
 ## Intent
 A signed-in `customer` sees their upcoming bookings, their past bookings as a history, and the details of any one booking, and can filter the list to find a specific booking quickly.
@@ -20,20 +20,21 @@ A signed-in `customer` sees their upcoming bookings, their past bookings as a hi
 
 ## In scope
 - Upcoming bookings list (KAN-151).
-- Booking detail: service, date, time, status (KAN-152).
+- Booking detail: service, date, time, status and collaborator (KAN-152).
 - Past bookings history (KAN-153).
 - Filters on the lists (KAN-154).
 - Server-side cursor pagination of both lists.
 
 ## Out of scope
-- The collaborator in the booking detail (Q1).
+- Choosing or changing the collaborator (booking flow, KAN-136 to KAN-138; reschedule keeps the collaborator, KAN-155 spec).
 - Rescheduling and cancelling (KAN-155 spec); this feature only offers the entry to those actions.
 - Bookings created by a subscriber for a `Customer` without an account (`customerUserId` `null`, KAN-69): they are not linked to any customer account.
 - Export of the lists (not requested).
 
 ## Data
-- `Booking` (read only): `businessId`, `serviceSnapshot` (`name`, `priceInCents`, `durationMinutes`), `startsAt`, `endsAt`, `status` (`pending`, `confirmed`, `cancelled`, `completed`, `no_show`), `cancellation` (`cancelledBy`, `isPenalized`, `note`), `rescheduleHistory`. See `domain-glossary` §3 and §4.1.
+- `Booking` (read only): `businessId`, `serviceSnapshot` (`name`, `priceInCents`, `durationMinutes`), `startsAt`, `endsAt`, `status` (`pending`, `confirmed`, `cancelled`, `completed`, `no_show`), `cancellation` (`cancelledBy`, `isPenalized`, `note`), `rescheduleHistory`, `collaboratorId` (`Nullable`, Q1). See `domain-glossary` §3 and §4.1.
 - `Business` (read only): name, logo, `timeZone`, currency.
+- `Collaborator` (read only): the full name of the booking's collaborator, whatever its status (AS-6).
 - Rules: a `customer` reads a booking only when `customerUserId` equals their uid (`auth-and-roles` §4).
 - No new fields.
 
@@ -54,6 +55,9 @@ A signed-in `customer` sees their upcoming bookings, their past bookings as a hi
 - [ ] **AC-KAN-152-04** · error · Given a booking id that does not exist or belongs to another customer, when the customer opens that detail, then no booking data is shown and `common:errors.notFound` is shown. [KAN-152]
 - [ ] **AC-KAN-152-05** · edge · Given a booking that was rescheduled, when its detail is shown, then the current date and time are shown (the ones in `startsAt` / `endsAt`), not the original ones. [KAN-152, KAN-158]
 - [ ] **AC-KAN-152-06** · edge · Given the service was renamed or its price changed after the booking was made, when the detail is shown, then the name and price are those of `serviceSnapshot`, not the current service. [KAN-152, KAN-62]
+- [ ] **AC-KAN-152-07** · happy · Given a booking with a `collaboratorId`, when its detail is shown, then it shows the collaborator's full name under `customer:myBookings.detail.collaborator`; given a booking whose `collaboratorId` is `null` (the service has no collaborator), then `customer:myBookings.detail.businessResource` is shown instead. See AS-6. [KAN-152]
+- [ ] **AC-KAN-152-08** · edge · Given the booking's collaborator was later made `inactive`, when the detail is shown, then their full name is still shown; no contact data of the collaborator is shown. See AS-6. [KAN-152, KAN-83]
+- [ ] **AC-KAN-152-09** · error · Given the collaborator's name cannot be loaded (network), when the detail is shown, then the rest of the detail is still shown and the collaborator line shows `common:errors.network` with a retry action. [KAN-152]
 
 ### KAN-153 — See my past bookings (history)
 - [ ] **AC-KAN-153-01** · happy · Given a customer with bookings whose `startsAt` has passed and bookings that are `cancelled`, when they open the history, then those bookings are listed in descending `startsAt` order with business, service, date and time in the business `timeZone` and status (`completed`, `no_show`, `cancelled`, or `pending` / `confirmed` not yet updated by the business). See AS-3. [KAN-153]
@@ -72,9 +76,7 @@ A signed-in `customer` sees their upcoming bookings, their past bookings as a hi
 - [ ] **AC-KAN-154-07** · error · Given the filtered request fails because of the network, when the filter is applied, then `common:errors.network` is shown and the filter values are kept for a retry. [KAN-154]
 
 ## BLOCKED
-| Story | Waiting on | What stays out until decided |
-| --- | --- | --- |
-| KAN-152 (collaborator field only) | Q1 — collaborator | The collaborator shown in the booking detail. The rest of KAN-152 is specified above. |
+None. Q1 was decided on 2026-09-28: the collaborator in the booking detail is specified (AC-KAN-152-07 … AC-KAN-152-09).
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -84,9 +86,10 @@ A signed-in `customer` sees their upcoming bookings, their past bookings as a hi
 | AS-3 | "Upcoming" = `pending` or `confirmed` with `startsAt` in the future. "History" = every other booking of the customer: `startsAt` in the past, or `cancelled`. | AC-KAN-151-04, AC-KAN-153-01 |
 | AS-4 | The customer sees `cancelledBy` and `isPenalized` of a cancelled booking, but not the business's cancellation `note` (it may be internal). | AC-KAN-152-02 |
 | AS-5 | Available filters: status (both lists), date range (history) and business (both lists). No free-text search. | AC-KAN-154-01, AC-KAN-154-02, AC-KAN-154-03 |
+| AS-6 | The customer sees only the collaborator's full name (read from a public projection or the booking read model), never their email, phone or status. | AC-KAN-152-07, AC-KAN-152-08 |
 
 ## Backlog issues
-- KAN-152 includes the collaborator in the booking detail; it depends on Q1 and is blocked (see BLOCKED).
+- KAN-152 includes the collaborator in the booking detail; Q1 made the collaborator a fifth actor (AC-KAN-152-07 … AC-KAN-152-09).
 - KAN-151 says "citas que tengo pendientes" ("pending"): here it means upcoming, not only the `pending` status. Both `pending` and `confirmed` future bookings are listed.
 - KAN-154 does not say which filters; they are assumptions (AS-5).
 - KAN-108 (navbar, KAN-96) and KAN-150 both describe reaching the bookings; the navbar only links here.
@@ -102,6 +105,6 @@ A signed-in `customer` sees their upcoming bookings, their past bookings as a hi
 | Story | Criteria | Test file |
 | --- | --- | --- |
 | KAN-151 | AC-KAN-151-01 … AC-KAN-151-06 | `tests/MyBookingsPage.test.tsx` |
-| KAN-152 | AC-KAN-152-01 … AC-KAN-152-06 | `tests/BookingDetailPage.test.tsx` |
+| KAN-152 | AC-KAN-152-01 … AC-KAN-152-09 | `tests/BookingDetailPage.test.tsx` |
 | KAN-153 | AC-KAN-153-01 … AC-KAN-153-05 | `tests/MyBookingsPage.test.tsx` |
 | KAN-154 | AC-KAN-154-01 … AC-KAN-154-07 | `tests/MyBookingsPage.test.tsx` |

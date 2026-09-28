@@ -5,8 +5,8 @@
 | Portal | business |
 | Feature folder | `src/portals/business/features/schedule/` |
 | Stories | KAN-64, KAN-65, KAN-66, KAN-67, KAN-68, KAN-69, KAN-70, KAN-71, KAN-72, KAN-73, KAN-74, KAN-75, KAN-76 |
-| Status | BLOCKED (partially) |
-| Depends on | KAN-28 (subscriber sign-in); KAN-30 (services, snapshot KAN-62); KAN-87 epic (business customers, customers without an account KAN-88, blocked customers KAN-93); KAN-139 epic (availability computation KAN-141, KAN-143, KAN-144); KAN-32 / KAN-49 (read-only); KAN-163 epic (customer emails); KAN-77 epic and Q1 (collaborators) |
+| Status | Draft |
+| Depends on | KAN-28 (subscriber sign-in); KAN-30 (services, snapshot KAN-62); KAN-87 epic (business customers, customers without an account KAN-88, blocked customers KAN-93); KAN-139 epic (availability computation KAN-141, KAN-143, KAN-144); KAN-32 / KAN-49 (read-only); KAN-163 epic (customer emails); KAN-77 collaborators epic (Q1 decided 2026-09-28: `Collaborator`, permissions KAN-86, availability per collaborator) |
 
 ## Intent
 The subscriber controls when their business can be booked and manages every booking. They set business hours and block times or whole days, see bookings and blocks together in a daily or weekly agenda, create bookings by hand with the same double-booking protection customers get, choose between manual and automatic confirmation, and reschedule, cancel, complete or mark bookings as no-show. Paginated lists and a filtered history give them traceability of how the business operates.
@@ -17,18 +17,18 @@ The subscriber controls when their business can be booked and manages every book
 | subscriber (own business only) | Everything in this spec for their own business while it is `active`. While the business is `inactive` or `suspended` (KAN-49), only view the agenda, lists and history. "Como usuario" in KAN-69 and KAN-71 means the subscriber. |
 | customer | Books, reschedules and cancels from the customer portal (KAN-145, KAN-155 epics); sees only free time slots, never other customers' bookings. Not part of this spec. |
 | system (Cloud Functions) | Creates, reschedules and changes the status of bookings in a transaction; writes the service snapshot (KAN-62). |
-| collaborator | BLOCKED — Q1. |
+| collaborator (own business, while `active`) | Sees their own bookings in the agenda (read-only). With `manage_bookings` (KAN-86): everything the subscriber can do with bookings (KAN-67 to KAN-76) for every collaborator. With `manage_schedule_blocks`: create and remove schedule blocks (KAN-65, KAN-66). Never business hours (KAN-64) or the confirmation mode (KAN-70). |
 
 ## In scope
-- Business hours (`BusinessHours`) and schedule blocks (`ScheduleBlock`), partial and full-day, at business level.
-- Agenda (`Schedule`) in day and week views with bookings and blocks, live updates, and business-level free / full indication.
-- Manual booking creation by the subscriber.
+- Business hours (`BusinessHours`) and schedule blocks (`ScheduleBlock`), partial and full-day, for the whole business or for one collaborator (absences, KAN-66).
+- Agenda (`Schedule`) in day and week views with bookings and blocks, a collaborator filter, live updates, and free / full indication for the business and per collaborator.
+- Manual booking creation by the subscriber, with a collaborator chosen or assigned automatically.
 - Booking confirmation mode (manual or automatic) and confirming `pending` bookings.
 - Reschedule, cancel (with penalty flag and note), complete and no-show.
 - Paginated booking list and filtered history of past bookings.
 
 ## Out of scope
-- Everything about collaborators: filter by collaborator, per-collaborator availability and load, collaborator absences, assigning a collaborator to a booking (Q1).
+- Managing collaborators themselves (KAN-77 epic).
 - The availability algorithm itself (KAN-139 epic); this spec reuses it.
 - Booking policies window and penalty rules (`BookingPolicy`, KAN-147, KAN-160) — only the `isPenalized` flag is recorded here.
 - Emails and reminders to customers about bookings (KAN-163 epic) and internal alerts (KAN-101).
@@ -36,12 +36,12 @@ The subscriber controls when their business can be booked and manages every book
 
 ## Data
 - `BusinessHours` (field on `Business`, KAN-64) and `Business.timeZone` (`domain-glossary` §3).
-- `ScheduleBlock` at `businesses/{businessId}/scheduleBlocks/{scheduleBlockId}`: partial (KAN-65) or full-day (KAN-66). Fields used: start and end (date-times, or dates for full-day), reason (text). No collaborator field (Q1).
-- `Booking` at `businesses/{businessId}/bookings/{bookingId}`: `status` (`pending`, `confirmed`, `cancelled`, `completed`, `no_show`, §4.1), `startsAt`, `endsAt`, `serviceId`, `serviceSnapshot`, `customerId`, `customerUserId` (Nullable), `cancellation` (`cancelledBy`, `isPenalized`, `note`), `rescheduleHistory`.
+- `ScheduleBlock` at `businesses/{businessId}/scheduleBlocks/{scheduleBlockId}`: partial (KAN-65) or full-day (KAN-66). Fields used: start and end (date-times, or dates for full-day), reason (text), `collaboratorId` (`Nullable`: `null` blocks the whole business, set blocks one collaborator, KAN-66; glossary §3).
+- `Booking` at `businesses/{businessId}/bookings/{bookingId}`: `status` (`pending`, `confirmed`, `cancelled`, `completed`, `no_show`, §4.1), `startsAt`, `endsAt`, `serviceId`, `serviceSnapshot`, `customerId`, `customerUserId` (Nullable), `collaboratorId` (Nullable, glossary §3), `cancellation` (`cancelledBy`, `isPenalized`, `note`), `rescheduleHistory`.
 - `Customer` at `businesses/{businessId}/customers/{customerId}` (status `active` | `blocked`).
 - `TimeSlot` (computed, KAN-141) and `Schedule` (view).
 - **New field (name to confirm in review):** the booking confirmation mode on `Business` (manual or automatic) for KAN-70, for example `bookingConfirmationMode` with values `manual` | `automatic`.
-- Nothing is added for collaborators (Q1).
+- `Collaborator` at `businesses/{businessId}/collaborators/{collaboratorId}`: `fullName`, `status`, `serviceIds`, read for the filter and the per-collaborator marks. Availability per collaborator follows glossary §3 "Collaborators and availability": each collaborator serves one booking at a time; without collaborators the business is one resource.
 
 ## Acceptance criteria
 
@@ -70,6 +70,9 @@ The subscriber controls when their business can be booked and manages every book
 - [ ] **AC-KAN-66-04** · error · Given the request fails because of the network, when the subscriber saves, then no block is created and `common:errors.network` is shown. [KAN-66]
 - [ ] **AC-KAN-66-05** · edge · Given blocked days that contain `pending` or `confirmed` bookings, when the subscriber saves, then they are warned with `business:schedule.blocks.overlapsBookingsConfirm` and, if they confirm, the bookings are kept. See AS-4. [KAN-66]
 - [ ] **AC-KAN-66-06** · edge · Given a full-day block, when it is evaluated, then the day runs from 00:00 to 24:00 in the business `timeZone`, not in the browser's time zone. [KAN-66]
+- [ ] **AC-KAN-66-07** · happy · Given a subscriber (or a collaborator with `manage_schedule_blocks`), when they block one day or a range of days for one `active` collaborator (vacation, sick leave) with an optional reason and save, then those days show as that collaborator's absence in the agenda, and no time on them is offered with that collaborator; other collaborators stay bookable. [KAN-66]
+- [ ] **AC-KAN-66-08** · edge · Given a collaborator absence over days with that collaborator's `pending` or `confirmed` bookings, when it is saved after the warning `business:schedule.blocks.overlapsBookingsConfirm`, then the bookings are kept with that collaborator and are marked in the agenda as needing reassignment (collaborators spec AS-8). [KAN-66]
+- [ ] **AC-KAN-66-09** · error · Given a collaborator without `manage_schedule_blocks`, when they try to create a block, then the action is not shown and the server rejects it with `common:errors.permissionDenied`. [KAN-66, KAN-86]
 
 ### KAN-67 — Agenda in day or week view with bookings and blocks
 - [ ] **AC-KAN-67-01** · happy · Given a subscriber, when they open the agenda, then they see the current week (or day) in the business `timeZone` with their business's bookings (customer, service name from the snapshot, time, status badge) and schedule blocks in the same calendar, and closed hours shaded. [KAN-67]
@@ -80,11 +83,18 @@ The subscriber controls when their business can be booked and manages every book
 - [ ] **AC-KAN-67-06** · edge · Given a week that includes a daylight-saving change in the business `timeZone`, when it is shown, then every booking appears at its correct local time. [KAN-67]
 - [ ] **AC-KAN-67-07** · edge · Given overlapping items in the same time (for example a booking inside a block, AS-4), when they are drawn, then both are visible and distinguishable. [KAN-67]
 - [ ] **AC-KAN-67-08** · edge · Given a subscriber whose browser is in a different time zone from the business, when they open the agenda, then times are shown in the business `timeZone` and the zone is indicated. [KAN-67]
+- [ ] **AC-KAN-67-09** · happy · Given a business with collaborators, when the subscriber filters the agenda by one or more collaborators, then only those collaborators' bookings and absences, plus whole-business blocks, are shown; the filter is kept in the URL and "all" is the default. [KAN-67]
+- [ ] **AC-KAN-67-10** · happy · Given a signed-in collaborator without `manage_bookings`, when they open the agenda, then it shows only their own bookings and absences plus whole-business blocks, read-only, and no collaborator filter. [KAN-67, KAN-86]
+- [ ] **AC-KAN-67-11** · edge · Given a booking whose `collaboratorId` is `null` (service without collaborators, AS-13), when the agenda is filtered by a collaborator, then it is not shown; it is shown under "all" and under `business:schedule.agenda.businessResource`. [KAN-67]
+- [ ] **AC-KAN-67-12** · error · Given the collaborator list cannot be loaded, when the agenda opens, then bookings are still shown unfiltered and the filter shows `common:errors.network` with a retry action. [KAN-67]
 
 ### KAN-68 — See availability and full times
 - [ ] **AC-KAN-68-01** · happy · Given the agenda in day or week view, when it is shown, then times that still have free time slots (per the availability check used for customers, KAN-141) and times that are full are marked differently, at business level. [KAN-68]
 - [ ] **AC-KAN-68-02** · error · Given the availability cannot be computed because of the network, when the agenda is shown, then bookings and blocks are still shown, the free / full marks are hidden and `business:schedule.agenda.availabilityError` is shown. [KAN-68]
 - [ ] **AC-KAN-68-03** · edge · Given a booking is created or cancelled while the agenda is open, when it happens, then the free / full marks update without reloading. [KAN-68]
+- [ ] **AC-KAN-68-04** · happy · Given a business with `active` collaborators, when the agenda is shown for a day, then each collaborator is marked as free (has at least one free time slot for any of their services) or full for that day, using the same availability rules as customers (glossary §3). [KAN-68]
+- [ ] **AC-KAN-68-05** · edge · Given a collaborator with an absence (AC-KAN-66-07) that day, when the marks are shown, then that collaborator is shown as absent, not as full. [KAN-68, KAN-66]
+- [ ] **AC-KAN-68-06** · error · Given the per-collaborator availability cannot be computed, when the agenda is shown, then the per-collaborator marks are hidden and `business:schedule.agenda.availabilityError` is shown, as in AC-KAN-68-02. [KAN-68]
 
 ### KAN-69 — Create a booking manually
 - [ ] **AC-KAN-69-01** · happy · Given a subscriber of an `active` business, when they choose a service, a date and a time offered as available, and an existing customer of the business, and save, then a booking is created with that customer, the service snapshot (KAN-62), `startsAt` / `endsAt` from the service duration in the business `timeZone`, and a status set by the confirmation mode (KAN-70). [KAN-69]
@@ -97,6 +107,8 @@ The subscriber controls when their business can be booked and manages every book
 - [ ] **AC-KAN-69-08** · edge · Given two bookings for the same time are requested at the same moment (subscriber and customer, or two subscriber tabs), when both reach the server, then exactly one is created and the other gets `business:schedule.bookings.slotTakenError`. [KAN-69]
 - [ ] **AC-KAN-69-09** · edge · Given a customer whose status is `blocked` (KAN-93), when the subscriber selects them, then the booking cannot be saved and `business:schedule.bookings.customerBlockedError` is shown. See AS-6. [KAN-69]
 - [ ] **AC-KAN-69-10** · edge · Given an `inactive` service, when the subscriber opens the service choice, then it is not offered. [KAN-69, KAN-58]
+- [ ] **AC-KAN-69-11** · happy · Given a service with collaborators assigned, when the subscriber creates a booking by hand, then they choose one of the `active` collaborators who serve it and are free at that time, or "any available", in which case the server assigns one and stores it in `collaboratorId`; for a service without collaborators `collaboratorId` stays `null`. [KAN-69, KAN-61]
+- [ ] **AC-KAN-69-12** · error · Given the chosen collaborator was booked or became `inactive` meanwhile, when the subscriber saves, then no booking is created and `business:schedule.bookings.collaboratorUnavailableError` is shown. [KAN-69]
 
 ### KAN-70 — Manual or automatic confirmation
 - [ ] **AC-KAN-70-01** · happy · Given a subscriber of an `active` business, when they set the confirmation mode to automatic and save, then new bookings (from customers and from KAN-69) are created as `confirmed`. [KAN-70]
@@ -160,11 +172,7 @@ The subscriber controls when their business can be booked and manages every book
 - [ ] **AC-KAN-76-07** · edge · Given a booking whose service was later edited or deleted, when it appears in the history, then its name and price come from its snapshot (KAN-62). [KAN-76, KAN-62]
 
 ## BLOCKED
-| Story | Waiting on | What stays out until decided |
-| --- | --- | --- |
-| KAN-66 (block days because of a collaborator's absence, vacation or sick leave) | Q1 — collaborator | Blocks tied to a collaborator. Business-level full-day blocks are specified. |
-| KAN-67 (filter by collaborator only) | Q1 — collaborator | Collaborator filter in the agenda. Day / week views with bookings and blocks are specified. |
-| KAN-68 (availability and full load per collaborator) | Q1 — collaborator | Showing which collaborators are free or fully booked. Only the business-level free / full marks are specified. |
+None. Q1 was decided on 2026-09-28: collaborator absences (AC-KAN-66-07 … AC-KAN-66-09), the collaborator filter (AC-KAN-67-09 … AC-KAN-67-12) and per-collaborator availability (AC-KAN-68-04 … AC-KAN-68-06) are specified.
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -180,17 +188,18 @@ The subscriber controls when their business can be booked and manages every book
 | AS-9 | The cancellation note is required (the story says "dejando una nota aclarativa") and is up to 500 characters. | AC-KAN-72-02, AC-KAN-72-03 |
 | AS-10 | `isPenalized` defaults to false; what a penalty implies for the customer is defined by booking policies (KAN-147, KAN-160), not here. | AC-KAN-72-08 |
 | AS-11 | The booking list shows upcoming bookings (from today on) ordered by `startsAt` ascending; past bookings are in the history (KAN-76). | AC-KAN-75-01 |
-| AS-12 | History filters are date range, status and service. The default range is the last 30 days. Search by customer name is not included. | AC-KAN-76-02 |
+| AS-12 | History filters are date range, status and service (and collaborator when the business has collaborators). The default range is the last 30 days. Search by customer name is not included. | AC-KAN-76-02 |
+| AS-13 | Bookings of services without collaborators (`collaboratorId` = `null`) belong to the business as one resource and are shown as such in the agenda. | AC-KAN-67-11, AC-KAN-69-11 |
 
 ## Backlog issues
-- KAN-66, KAN-67 and KAN-68 mix business-level behavior with collaborator behavior (Q1); the collaborator parts are BLOCKED. KAN-68 is almost entirely about collaborators; only a business-level free / full indication remains.
+- KAN-66, KAN-67 and KAN-68 mix business-level behavior with collaborator behavior; both are specified since Q1 was decided.
 - KAN-69 and KAN-71 say "como usuario"; read as the subscriber.
 - KAN-70 defines a business setting (confirmation mode) that is not in `domain-glossary`; a field name must be agreed (see Data).
 - KAN-72 "registrar si se penaliza" overlaps the booking policy stories (KAN-147, KAN-160) that define penalties; this spec only records the flag.
 - KAN-74: `no_show` and `completed` are terminal in the glossary, so a mistaken mark cannot be undone. The team should confirm this is intended.
 - KAN-75 (paginated list) and KAN-76 (history with filters) overlap; they are split here as upcoming vs past (AS-11).
-- KAN-69 "misma validación de espacio que los clientes" depends on the availability rules of the KAN-139 epic (KAN-141, KAN-143, KAN-144), which also decide capacity when a business has several collaborators (Q1).
-- KAN-65 gives "no hay colaboradores en la mañana" as a reason for a business-level block; that reason is fine, but any per-collaborator block belongs to Q1.
+- KAN-69 "misma validación de espacio que los clientes" depends on the availability rules of the KAN-139 epic (KAN-141, KAN-143, KAN-144), which also decide capacity when a business has several collaborators (one booking at a time per collaborator, glossary §3).
+- KAN-65 gives "no hay colaboradores en la mañana" as a reason for a business-level block; per-collaborator absences use `ScheduleBlock.collaboratorId` (KAN-66).
 
 ## Non-functional
 - i18n keys (new prefixes): `business:schedule.hours.*`, `business:schedule.blocks.*`, `business:schedule.agenda.*`, `business:schedule.bookings.*`, `business:schedule.confirmation.*`, `business:schedule.bookingList.*`, `business:schedule.history.*`. Reused: `validation:required`, `validation:tooLong`, `common:errors.network`, `business:errors.readOnly`. Status labels come from `common` status labels.
@@ -207,14 +216,11 @@ The subscriber controls when their business can be booked and manages every book
 | --- | --- | --- |
 | KAN-64 | AC-KAN-64-01 … AC-KAN-64-07 | `tests/BusinessHoursPage.test.tsx` |
 | KAN-65 | AC-KAN-65-01 … AC-KAN-65-07 | `tests/ScheduleBlockForm.test.tsx` |
-| KAN-66 | AC-KAN-66-01 … AC-KAN-66-06 | `tests/ScheduleBlockForm.test.tsx` |
-| KAN-66 (collaborator absence) | BLOCKED (Q1) | — |
-| KAN-67 | AC-KAN-67-01 … AC-KAN-67-08 | `tests/SchedulePage.test.tsx` |
-| KAN-67 (collaborator filter) | BLOCKED (Q1) | — |
-| KAN-68 | AC-KAN-68-01 … AC-KAN-68-03 | `tests/SchedulePage.test.tsx` |
-| KAN-68 (per collaborator) | BLOCKED (Q1) | — |
+| KAN-66 | AC-KAN-66-01 … AC-KAN-66-09 | `tests/ScheduleBlockForm.test.tsx` |
+| KAN-67 | AC-KAN-67-01 … AC-KAN-67-12 | `tests/SchedulePage.test.tsx` |
+| KAN-68 | AC-KAN-68-01 … AC-KAN-68-06 | `tests/SchedulePage.test.tsx` |
 | KAN-69 | AC-KAN-69-01, AC-KAN-69-02, AC-KAN-69-04, AC-KAN-69-05, AC-KAN-69-06, AC-KAN-69-07, AC-KAN-69-09, AC-KAN-69-10 | `tests/BookingForm.test.tsx` |
-| KAN-69 | AC-KAN-69-01, AC-KAN-69-03, AC-KAN-69-04, AC-KAN-69-06, AC-KAN-69-08, AC-KAN-69-09 | `functions/src/bookings/tests/createBooking.test.ts` |
+| KAN-69 | AC-KAN-69-01, AC-KAN-69-03, AC-KAN-69-04, AC-KAN-69-06, AC-KAN-69-08, AC-KAN-69-09, AC-KAN-69-11, AC-KAN-69-12 | `functions/src/bookings/tests/createBooking.test.ts` |
 | KAN-70 | AC-KAN-70-01 … AC-KAN-70-08 | `tests/BookingConfirmationSettings.test.tsx` |
 | KAN-70 | AC-KAN-70-01, AC-KAN-70-02, AC-KAN-70-05 | `functions/src/bookings/tests/updateBookingStatus.test.ts` |
 | KAN-71 | AC-KAN-71-01 … AC-KAN-71-07 | `tests/RescheduleBookingDialog.test.tsx` |

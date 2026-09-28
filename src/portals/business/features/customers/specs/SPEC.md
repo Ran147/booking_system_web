@@ -16,9 +16,10 @@ For the subscriber who needs one place to know and look after the people who boo
 | --- | --- |
 | subscriber (own business only) | Create, list, search, view, edit, note, block, unblock, invite, delete and anonymize the `Customer` records of their own business. Writes are rejected while the business is `inactive` or `suspended` (KAN-49); reads stay available. |
 | customer | Nothing in this epic. Is affected by blocking (cannot book with that business) and receives the invitation email. |
+| collaborator with `manage_customers` (KAN-86) | The same as the subscriber for the `Customer` records of their business (Q1; collaborators spec AC-KAN-86-02). Without that permission, nothing in this epic. |
 | super admin | Nothing in this epic. |
 
-The business always comes from the signed-in subscriber's session, never from the URL. A `Customer` of another business is never listed, shown or changed.
+The business always comes from the signed-in subscriber's (or collaborator's) session, never from the URL. A `Customer` of another business is never listed, shown or changed.
 
 ## In scope
 - `Customer` records under `businesses/{businessId}/customers/{customerId}`, with or without a linked `User` (`userId` `Nullable`).
@@ -33,7 +34,7 @@ The business always comes from the signed-in subscriber's session, never from th
 - The customer's `User` account and profile (KAN-168). Nothing here changes a `User`.
 - Creating bookings for a customer (KAN-69, KAN-63 spec).
 - How the customer portal shows the "blocked" refusal (KAN-145 spec); only the effect is stated here.
-- Collaborator data of any kind (Q1).
+- Managing collaborators (KAN-77, collaborators spec) and which collaborator served a booking beyond the booking history line (schedule spec).
 - Export of the customer list (no story asks for it).
 
 ## Data

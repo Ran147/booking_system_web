@@ -31,7 +31,7 @@ A `customer` gets an email that records each booking they make, an email wheneve
 - The reminder settings screen (KAN-100, business portal).
 - SMS, push or WhatsApp channels (not in the backlog).
 - Emails to `Customer` records without an account (`customerUserId` `null`), see AS-2.
-- Anything about collaborators (Q1).
+- Emails to collaborators, or the collaborator's name in customer emails: no story asks for them (Q1 decided 2026-09-28). The collaborator invitation email is in the collaborators spec (KAN-79).
 
 ## Data
 - `Booking` (trigger source, read only here): `status`, `startsAt`, `endsAt`, `serviceSnapshot`, `cancellation` (`cancelledBy`, `isPenalized`, `note`), `rescheduleHistory`, `customerUserId`, `businessId`.

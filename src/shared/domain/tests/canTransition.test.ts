@@ -3,6 +3,8 @@ import {
   BOOKING_STATUS_TRANSITIONS,
   BUSINESS_STATUS,
   BUSINESS_STATUS_TRANSITIONS,
+  COLLABORATOR_STATUS,
+  COLLABORATOR_STATUS_TRANSITIONS,
   CUSTOMER_STATUS,
   CUSTOMER_STATUS_TRANSITIONS,
   PLAN_STATUS,
@@ -142,6 +144,112 @@ describe("canTransition for businesses", () => {
         BUSINESS_STATUS_TRANSITIONS,
         BUSINESS_STATUS.SUSPENDED,
         BUSINESS_STATUS.INACTIVE,
+      ),
+    ).toBe(false);
+  });
+
+  it("PROP-1, KAN-176: approves a pending business", () => {
+    expect(
+      canTransition(
+        BUSINESS_STATUS_TRANSITIONS,
+        BUSINESS_STATUS.PENDING,
+        BUSINESS_STATUS.ACTIVE,
+      ),
+    ).toBe(true);
+  });
+
+  it("PROP-1: rejects a pending business", () => {
+    expect(
+      canTransition(
+        BUSINESS_STATUS_TRANSITIONS,
+        BUSINESS_STATUS.PENDING,
+        BUSINESS_STATUS.REJECTED,
+      ),
+    ).toBe(true);
+  });
+
+  it("PROP-2: rejects suspending a pending business", () => {
+    expect(
+      canTransition(
+        BUSINESS_STATUS_TRANSITIONS,
+        BUSINESS_STATUS.PENDING,
+        BUSINESS_STATUS.SUSPENDED,
+      ),
+    ).toBe(false);
+  });
+
+  it("PROP-2: suspends an active business", () => {
+    expect(
+      canTransition(
+        BUSINESS_STATUS_TRANSITIONS,
+        BUSINESS_STATUS.ACTIVE,
+        BUSINESS_STATUS.SUSPENDED,
+      ),
+    ).toBe(true);
+  });
+
+  it("KAN-176: rejects sending an inactive business back to pending", () => {
+    expect(
+      canTransition(
+        BUSINESS_STATUS_TRANSITIONS,
+        BUSINESS_STATUS.INACTIVE,
+        BUSINESS_STATUS.PENDING,
+      ),
+    ).toBe(false);
+  });
+
+  it("PROP-1: keeps a rejected business terminal", () => {
+    expect(BUSINESS_STATUS_TRANSITIONS[BUSINESS_STATUS.REJECTED]).toEqual([]);
+  });
+});
+
+describe("canTransition for collaborators", () => {
+  it("KAN-79: activates an invited collaborator who accepts the invitation", () => {
+    expect(
+      canTransition(
+        COLLABORATOR_STATUS_TRANSITIONS,
+        COLLABORATOR_STATUS.INVITED,
+        COLLABORATOR_STATUS.ACTIVE,
+      ),
+    ).toBe(true);
+  });
+
+  it("KAN-81: deactivates an active collaborator", () => {
+    expect(
+      canTransition(
+        COLLABORATOR_STATUS_TRANSITIONS,
+        COLLABORATOR_STATUS.ACTIVE,
+        COLLABORATOR_STATUS.INACTIVE,
+      ),
+    ).toBe(true);
+  });
+
+  it("KAN-82: reactivates an inactive collaborator", () => {
+    expect(
+      canTransition(
+        COLLABORATOR_STATUS_TRANSITIONS,
+        COLLABORATOR_STATUS.INACTIVE,
+        COLLABORATOR_STATUS.ACTIVE,
+      ),
+    ).toBe(true);
+  });
+
+  it("KAN-81: rejects deactivating a collaborator who has not accepted the invitation", () => {
+    expect(
+      canTransition(
+        COLLABORATOR_STATUS_TRANSITIONS,
+        COLLABORATOR_STATUS.INVITED,
+        COLLABORATOR_STATUS.INACTIVE,
+      ),
+    ).toBe(false);
+  });
+
+  it("KAN-82: rejects sending an inactive collaborator back to invited", () => {
+    expect(
+      canTransition(
+        COLLABORATOR_STATUS_TRANSITIONS,
+        COLLABORATOR_STATUS.INACTIVE,
+        COLLABORATOR_STATUS.INVITED,
       ),
     ).toBe(false);
   });

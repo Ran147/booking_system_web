@@ -15,10 +15,12 @@ Source: `docs/backlog/jira-export.csv` (31 epics, 164 stories, exported 2026-09)
 | KAN-31 | Settings | business | `portals/business/features/settings` |
 | KAN-32 | Gestión de suscripción | business | `portals/business/features/subscription` |
 | KAN-63 | Agenda y reservas | business | `portals/business/features/schedule` |
-| KAN-77 | Colaboradores | business | `portals/business/features/collaborators` (BLOCKED, Q1) |
+| KAN-77 | Colaboradores | business | `portals/business/features/collaborators` |
 | KAN-87 | Clientes | business | `portals/business/features/customers` |
 | KAN-99 | Notificaciones | business | `portals/business/features/notification-settings` |
 | KAN-102 | Reportes | business | `portals/business/features/reports` |
+| PROP-3 | Soporte (Proposed — not in Jira yet) | business | `portals/business/features/support` |
+| PROP-4 | Perfil público del negocio (Proposed — not in Jira yet) | business | `portals/business/features/business-profile` |
 | KAN-96 | Navbar | customer | `portals/customer/layout` |
 | KAN-111 | Página principal del negocio | customer | `portals/customer/features/business-home` |
 | KAN-117 | Footer | customer | `portals/customer/layout` |
@@ -36,3 +38,5 @@ Source: `docs/backlog/jira-export.csv` (31 epics, 164 stories, exported 2026-09)
 | KAN-186 | Dashboard global | admin | `portals/admin/features/dashboard` |
 | KAN-189 | Ticketing | admin | `portals/admin/features/support-tickets` |
 | KAN-193 | Auditoría | admin | `portals/admin/features/audit-log` |
+
+Proposed stories (`PROP-n`, `docs/decisions/open-questions.md`) are not Jira epics: PROP-3 and PROP-4 have their own folders above; PROP-1 (approve or reject a pending business) and PROP-2 (suspend a business) live in the KAN-174 spec, `portals/admin/features/businesses`. Each PROP story must be created in Jira before it is implemented.

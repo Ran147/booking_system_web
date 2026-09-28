@@ -26,17 +26,20 @@ Security is enforced on the server. Client checks only decide what to show.
 | --- | --- | --- |
 | `super_admin` | `admin` | `{ role: "super_admin" }` |
 | `subscriber` | `business` | `{ role: "subscriber", businessId }` |
+| `collaborator` | `business` (limited by `Collaborator.permissions`, KAN-86) | `{ role: "collaborator", businessId, collaboratorId }` |
 | `customer` | `customer` | `{ role: "customer" }` |
 | visitor | `landing`, public customer pages (cannot book, Q6) | not signed in |
-| collaborator | — | Fifth actor confirmed (Q1, 2026-09-28); claims **BLOCKED — Q1** |
 
-- Claims are set **only** by Cloud Functions: when the first payment is confirmed (subscriber, KAN-176), when a customer finishes sign-up (KAN-122), or by the `grantSuperAdmin` script for super admins.
+- Claims are set **only** by Cloud Functions: when a subscriber finishes sign-up after a paid checkout (KAN-25, Q7; the business is created `pending`), when a collaborator accepts the invitation (KAN-79), when a customer finishes sign-up (KAN-122), or by the `grantSuperAdmin` script for super admins.
+- A collaborator's permissions are **not** claims: they live on `businesses/{businessId}/collaborators/{collaboratorId}` so the subscriber can change them without a token refresh. Rules read that document (§4). Deactivating a collaborator (KAN-81) makes every rule deny them at once; the function also disables their Firebase Auth user and revokes their refresh tokens, so the next token refresh signs them out and sign-in fails with `common:auth.signIn.accountDisabled`. Reactivating (KAN-82) enables the user again.
 - After a claim changes, the client refreshes the token with `getIdToken(true)`.
-- A subscriber owns exactly one business. Its `businessId` comes from the claim, never from the URL.
+- A subscriber owns exactly one business; a collaborator works for exactly one business. Their `businessId` comes from the claim, never from the URL.
+- A subscriber whose business is `pending` (awaiting approval, Q2) or `rejected` signs in normally and the business portal shows only the "under review" or "rejected" screen (KAN-33, business layout spec). Nothing else of the portal is reachable until approval.
 
 ```ts
 // src/shared/domain/user/UserRole.constants.ts
 export const USER_ROLE = {
+  COLLABORATOR: "collaborator",
   CUSTOMER: "customer",
   SUBSCRIBER: "subscriber",
   SUPER_ADMIN: "super_admin",
@@ -57,8 +60,8 @@ export * from "./user/UserRole.constants";
 | Export | Returns |
 | --- | --- |
 | `AuthProvider` | Wraps the app; listens to `onAuthStateChanged` and reads the claims |
-| `useSession()` | `Session`: `{ status: "loading" }`, `{ status: "signed_out" }` or `{ status: "signed_in", userId, role, businessId }` |
-| `useCurrentBusiness()` | `{ businessId }` for the signed-in subscriber; throws outside the business portal |
+| `useSession()` | `Session`: `{ status: "loading" }`, `{ status: "signed_out" }` or `{ status: "signed_in", userId, role, businessId, collaboratorId }` |
+| `useCurrentBusiness()` | `{ businessId }` for the signed-in subscriber or collaborator; throws outside the business portal |
 | `RequireRole` | Route guard (§3) |
 | `useIdleTimeout` | Inactivity logout (§5) |
 | `useSignOut()` | Signs out, clears the query cache and goes to sign-in |
@@ -80,6 +83,7 @@ import type { SESSION_STATUS } from "../constants/SessionStatus.constants";
 
 export interface SignedInSession {
   businessId: Nullable<string>;
+  collaboratorId: Nullable<string>;
   role: UserRole;
   status: typeof SESSION_STATUS.SIGNED_IN;
   userId: string;
@@ -137,17 +141,23 @@ export interface CurrentBusiness {
 ```ts
 // src/features/auth/hooks/useCurrentBusiness.ts
 import { PROVIDER_ERROR } from "@/shared/constants";
-import { USER_ROLE } from "@/shared/domain";
+import { USER_ROLE, type UserRole } from "@/shared/domain";
 import { useSession } from "./useSession";
 import { SESSION_STATUS } from "../constants/SessionStatus.constants";
 import type { CurrentBusiness } from "../models/CurrentBusiness.interface";
+
+// Roles that work inside one business, taken from the businessId claim.
+const BUSINESS_PORTAL_ROLES: readonly UserRole[] = [
+  USER_ROLE.COLLABORATOR,
+  USER_ROLE.SUBSCRIBER,
+];
 
 export const useCurrentBusiness = (): CurrentBusiness => {
   const session = useSession();
 
   if (
     session.status !== SESSION_STATUS.SIGNED_IN ||
-    session.role !== USER_ROLE.SUBSCRIBER ||
+    !BUSINESS_PORTAL_ROLES.includes(session.role) ||
     !session.businessId
   ) {
     throw new Error(PROVIDER_ERROR.MISSING_CURRENT_BUSINESS);
@@ -168,7 +178,7 @@ Each portal's route tree is wrapped by `RequireRole` (a Decorator, `component-ar
 | `landing` | none |
 | `customer` public pages under `/:businessSlug` (business page, catalog, service details) | none |
 | `customer` private pages (booking flow: service selection, availability, checkout; my bookings, profile) | `RequireRole allowedRoles={[USER_ROLE.CUSTOMER]}` — booking requires a customer account (Q6) |
-| `business` | `RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER]}` |
+| `business` | `RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER, USER_ROLE.COLLABORATOR]}`; inside it, each screen checks the collaborator's permission (KAN-86) and a `pending` or `rejected` business shows only its status screen |
 | `admin` | `RequireRole allowedRoles={[USER_ROLE.SUPER_ADMIN]}` |
 | sign-in, sign-up | `GuestOnly` (redirects signed-in users to their portal) |
 
@@ -263,6 +273,20 @@ service cloud.firestore {
     function ownsBusiness(businessId) {
       return hasRole('subscriber') && request.auth.token.businessId == businessId;
     }
+    function collaboratorRecord(businessId) {
+      return get(/databases/$(database)/documents/businesses/$(businessId)/collaborators/$(request.auth.token.collaboratorId)).data;
+    }
+    function isCollaboratorOf(businessId) {
+      return hasRole('collaborator')
+        && request.auth.token.businessId == businessId
+        && request.auth.token.collaboratorId is string
+        && collaboratorRecord(businessId).status == 'active';
+    }
+    function collaboratorCan(businessId, permission) {
+      return isCollaboratorOf(businessId)
+        && collaboratorRecord(businessId).permissions.hasAny([permission]);
+    }
+    // pending, rejected, inactive and suspended are read-only.
     function businessIsWritable(businessId) {
       return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
     }
@@ -274,19 +298,30 @@ service cloud.firestore {
              .hasAny(['status', 'ownerUserId']);  // status changes only via functions
 
       match /services/{serviceId} {
-        allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin();
+        allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
+          || isCollaboratorOf(businessId);
         allow create, update: if ownsBusiness(businessId) && businessIsWritable(businessId);
         allow delete: if false;                   // via deleteService function (KAN-59)
       }
 
       match /bookings/{bookingId} {
         allow read: if ownsBusiness(businessId)
-          || (hasRole('customer') && resource.data.customerUserId == request.auth.uid);
+          || (hasRole('customer') && resource.data.customerUserId == request.auth.uid)
+          || (isCollaboratorOf(businessId)
+              && resource.data.collaboratorId == request.auth.token.collaboratorId)
+          || collaboratorCan(businessId, 'manage_bookings');
         allow write: if false;                    // only via booking functions
       }
 
       match /customers/{customerId} {
         allow read, write: if ownsBusiness(businessId) && businessIsWritable(businessId);
+        allow read: if collaboratorCan(businessId, 'manage_customers');
+      }
+
+      match /collaborators/{collaboratorId} {
+        allow read: if ownsBusiness(businessId)
+          || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
+        allow write: if false;                    // functions only (they also set claims)
       }
     }
 
@@ -302,7 +337,9 @@ Rules keep their literals: the rules language cannot import TypeScript constants
 
 - Customers never read other customers' bookings. Availability for the booking flow (KAN-139 to KAN-144) comes from a callable `getAvailability` that returns free time slots only.
 - The customer portal identifies the business by `Business.slug` from the URL (Q4). That is fine for public reads; every write still checks the caller's claims on the server, and the business portal never reads `businessId` from the URL.
-- An `inactive` or `suspended` business is read-only (KAN-49): rules deny writes and the UI shows an `Alert` and disables create actions.
+- An `inactive` or `suspended` business is read-only (KAN-49): rules deny writes and the UI shows an `Alert` and disables create actions. A `pending` or `rejected` business is read-only too; its portal shows only its status screen.
+- **Collaborators (Q1).** A collaborator reads only inside their own business and only while their `Collaborator.status` is `active`. Without permissions they read their own bookings, the business's services and their own `Collaborator` record. Each `CollaboratorPermission` (KAN-86) opens one area: `manage_bookings` (every booking of the business), `manage_customers`, `manage_schedule_blocks`, `manage_services`, `view_reports`. Writes for those areas are added to the rules together with each feature, always behind `collaboratorCan(...)` and `businessIsWritable(...)`. A collaborator never reads or writes the subscription, payments, business settings, business profile or other collaborators.
+- **Super admin approval (Q2).** Approving or rejecting a `pending` business, suspending (PROP-2) and reactivating (KAN-179) run in callable functions that check `super_admin`, the transition (`BUSINESS_STATUS_TRANSITIONS`) and write the `AuditLogEntry` in the same transaction.
 
 ## 5. Sign-in flow, reCAPTCHA and inactivity
 
@@ -387,4 +424,5 @@ export type { Session } from "./models/Session.types";
 - [ ] Read-only businesses (inactive / suspended) cannot write, and the UI says why.
 - [ ] Public forms include reCAPTCHA; auth errors never reveal whether an email exists.
 - [ ] Sign-out clears the query cache.
-- [ ] Nothing was added for the collaborator role while Q1 is open.
+- [ ] Collaborator access is checked on the server with `isCollaboratorOf` / `collaboratorCan`, never only in the UI; a deactivated collaborator is denied.
+- [ ] Screens for subscriber-only areas (subscription, settings, business profile, collaborators) are hidden from collaborators and denied by the rules.

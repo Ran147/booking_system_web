@@ -6,7 +6,7 @@
 | Feature folder | `src/portals/business/layout/` |
 | Stories | KAN-39, KAN-40, KAN-41, KAN-42 |
 | Status | Draft |
-| Depends on | KAN-28 (subscriber sign-in and session); KAN-38 (idle logout); KAN-32 (subscription data, payment page KAN-45, read-only KAN-49); KAN-182 (`PlatformSettings`); Q5 decided 2026-09-28 (no renewal retries in the MVP, so the `past_due` countdown follows the grace days only) |
+| Depends on | KAN-28 (subscriber sign-in and session); KAN-38 (idle logout); KAN-32 (subscription data, payment page KAN-45, read-only KAN-49); KAN-182 (`PlatformSettings`); Q5 decided 2026-09-28 (no renewal retries in the MVP, so the `past_due` countdown follows the grace days only); Q1 decided 2026-09-28 (the collaborator uses this layout, sections limited by KAN-86); Q2 decided 2026-09-28 (a `pending` or `rejected` business shows the status screens of KAN-33, not this layout); PROP-4 business profile (where the logo is set) |
 
 ## Intent
 Every screen of the business portal shows a sidebar that tells the subscriber which business they are managing, the state of their subscription, and warns them before the subscription runs out. From the sidebar the subscriber can sign out to protect their account when they finish.
@@ -16,23 +16,27 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 | --- | --- |
 | subscriber (own business only) | See their own business name and logo and their own subscription banners; sign out. Allowed whatever the business status, including `inactive` and `suspended`. |
 | customer, super admin, visitor | Never reach the business layout (route guard redirects them). |
-| collaborator | BLOCKED — Q1 (not part of this spec). |
+| collaborator (own business only, `active`) | See the business name and logo and their own name; sign out. No subscription banners (AS-10). Which navigation sections they see is decided by KAN-86 (collaborators spec, AC-KAN-86-02). |
 
 ## In scope
 - Sidebar header with the business name and logo.
 - Subscription banner (plan and status) and "about to end" warning banner.
 - Sign-out action in the sidebar.
+- The same sidebar for a collaborator, without the subscription banners.
 
 ## Out of scope
 - Navigation links of the sidebar: no story in this epic defines them (see Backlog issues).
-- Where the subscriber uploads or changes the logo and name (no story in the business portal defines it; see Backlog issues).
+- Where the subscriber uploads or changes the logo (PROP-4, business-profile spec); the business name is set at sign-up (KAN-25).
+- The "under review" and "rejected" screens of a `pending` or `rejected` business (KAN-33, auth spec: AC-KAN-33-09 … AC-KAN-33-11).
+- Which navigation sections a collaborator sees (KAN-86, collaborators spec).
 - Idle logout (KAN-38, auth spec) — only referenced.
 - Paying, upgrading or cancelling (KAN-44, KAN-45, KAN-47 in the subscription spec); the banners only link there.
 - Internal alerts "subscription about to end" (KAN-101, notifications epic).
 - Retry schedule of failed renewals (KAN-48): deferred, out of MVP (Q5).
 
 ## Data
-- `Business` (`domain-glossary` §3): `name`, `status` (`active`, `inactive`, `suspended`), `timeZone`. **Logo field:** not defined in the glossary; this spec reads a Nullable `logoUrl` (name to confirm; see Backlog issues).
+- `Business` (`domain-glossary` §3): `name`, `status` (`pending`, `active`, `inactive`, `suspended`, `rejected`; this layout is shown only for `active`, `inactive` and `suspended`), `timeZone`. **Logo field:** not defined in the glossary; this spec reads a Nullable `logoUrl` (name to confirm with PROP-4; see Backlog issues).
+- `Collaborator` (`businesses/{businessId}/collaborators/{collaboratorId}`): `fullName`, read for the signed-in collaborator only (session `collaboratorId`).
 - `Subscription` at `businesses/{businessId}/subscription/current`: `status` (`active`, `past_due`, `expired`, `cancelled`), `planId`, `currentPeriodEndsAt`, `cancelAtPeriodEnd` (`domain-glossary` §4.2).
 - `Plan` (`plans/{planId}`): `name`.
 - `PlatformSettings` (`platformSettings/current`): `gracePeriodDays` (KAN-182), for the `past_due` countdown.
@@ -46,6 +50,8 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 - [ ] **AC-KAN-39-03** · edge · Given a business without a logo, or whose logo fails to load, when the sidebar is shown, then a fallback with the business initials is shown and no broken image appears. See AS-1. [KAN-39]
 - [ ] **AC-KAN-39-04** · edge · Given a business name longer than the sidebar width, when it is shown, then it is truncated with an ellipsis and the full name is available as accessible text and on hover. [KAN-39]
 - [ ] **AC-KAN-39-05** · edge · Given the sidebar is collapsed or the screen is narrow, when it is shown, then only the logo (or initials) is visible and the business name stays available to screen readers. See AS-2. [KAN-39]
+- [ ] **AC-KAN-39-06** · happy · Given a signed-in `active` collaborator, when any business-portal screen is shown, then the sidebar shows the name and logo of their business (from the session `businessId`) and their own full name. [KAN-39, KAN-86]
+- [ ] **AC-KAN-39-07** · edge · Given a subscriber whose business is `pending` or `rejected`, when they open any business-portal URL, then the sidebar is not shown; the status screen of AC-KAN-33-09 or AC-KAN-33-11 is shown instead. [KAN-39, KAN-33]
 
 ### KAN-40 — Subscription banner
 - [ ] **AC-KAN-40-01** · happy · Given a subscriber with an `active` subscription, when the sidebar is shown, then a banner shows the plan name, a status badge `active` and the renewal date (`currentPeriodEndsAt`) formatted in the business `timeZone`, with a link to the subscription page (KAN-43). [KAN-40]
@@ -55,6 +61,7 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 - [ ] **AC-KAN-40-05** · error · Given the subscription cannot be loaded because of the network, when the sidebar is shown, then the banner shows `business:layout.subscriptionBanner.loadError` with a retry action, and the rest of the sidebar works. [KAN-40]
 - [ ] **AC-KAN-40-06** · edge · Given the subscription status changes while the subscriber is using the portal (for example after paying in KAN-45), when they return to any screen, then the banner shows the new status without signing out. See AS-3. [KAN-40]
 - [ ] **AC-KAN-40-07** · edge · Given the business is `suspended` by the super admin, when the banner is shown, then it shows `business:layout.subscriptionBanner.suspendedNotice` and no pay link, because paying does not lift a suspension (`domain-glossary` §4.3). [KAN-40]
+- [ ] **AC-KAN-40-08** · edge · Given a signed-in collaborator, when the sidebar is shown, then no subscription banner and no "about to end" warning are shown, and the subscription is not read. See AS-10. [KAN-40, KAN-41, KAN-86]
 
 ### KAN-41 — Warning banner when the subscription is about to end
 - [ ] **AC-KAN-41-01** · happy · Given an `active` subscription with `cancelAtPeriodEnd` true and `currentPeriodEndsAt` within the warning window, when the subscriber opens any business-portal screen, then a warning banner `business:layout.expiryWarning.message` with the remaining days and the end date (business `timeZone`) and a link to the subscription page is shown. See AS-4. [KAN-41]
@@ -74,6 +81,7 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 - [ ] **AC-KAN-42-05** · edge · Given the portal is open in several tabs, when the subscriber signs out in one, then the other tabs also end up on sign-in without showing business data. [KAN-42]
 - [ ] **AC-KAN-42-06** · edge · Given a business that is `inactive` or `suspended`, when the subscriber signs out, then sign-out works normally (the read-only rule does not apply to it). [KAN-42, KAN-49]
 - [ ] **AC-KAN-42-07** · edge · Given a sign-out through the idle timeout (`PlatformSettings.idleTimeoutMinutes`, KAN-38), when it happens, then the result is the same as AC-KAN-42-01. [KAN-42, KAN-38]
+- [ ] **AC-KAN-42-08** · happy · Given a signed-in collaborator, when they choose sign out in the sidebar, then the result is the same as AC-KAN-42-01. [KAN-42]
 
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
@@ -92,9 +100,10 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 | AS-7 | Sign-out always clears the local session even if the server call fails, so a subscriber is never stuck signed in. | AC-KAN-42-03 |
 | AS-8 | Unsaved-changes confirmation on sign-out applies to forms of the business portal that track unsaved changes. | AC-KAN-42-04 |
 | AS-9 | A `past_due` subscription becomes `expired` at `currentPeriodEndsAt` plus `PlatformSettings.gracePeriodDays` (fallback: the default of the admin plans spec, AS-6 there), counted in the business `timeZone`. No retry changes that date in the MVP (Q5). | AC-KAN-41-07 |
+| AS-10 | Subscription banners and warnings are for the subscriber only; a collaborator never sees subscription data (the subscription is subscriber-only, collaborators spec AS-3). | AC-KAN-40-08 |
 
 ## Backlog issues
-- No story in the business portal lets the subscriber set or change the business name and logo shown here (KAN-39); the logo field is not in `domain-glossary` either. It may belong to sign-up (KAN-26) or a missing business-profile story. `logoUrl` is used as a proposed name.
+- No Jira story lets the subscriber set or change the logo shown here (KAN-39); the proposed story PROP-4 (business-profile spec, not in Jira yet) covers it. The logo field is not in `domain-glossary` yet; `logoUrl` is used as a proposed name. The business name is set at sign-up (KAN-25).
 - The epic is called "Sidebar (Logout)" but has no story for the sidebar's navigation links.
 - KAN-41 overlaps KAN-101 (internal alert "suscripción por vencer", notifications epic). This spec covers the banner only.
 - KAN-40 "ver un banner de mi suscripción" does not say what the banner contains; the content (plan, status, date) is inferred.
@@ -111,7 +120,7 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-39 | AC-KAN-39-01 … AC-KAN-39-05 | `tests/BusinessSidebar.test.tsx` |
-| KAN-40 | AC-KAN-40-01 … AC-KAN-40-07 | `tests/SubscriptionBanner.test.tsx` |
+| KAN-39 | AC-KAN-39-01 … AC-KAN-39-07 | `tests/BusinessSidebar.test.tsx` |
+| KAN-40 | AC-KAN-40-01 … AC-KAN-40-08 | `tests/SubscriptionBanner.test.tsx` |
 | KAN-41 | AC-KAN-41-01, AC-KAN-41-03 … AC-KAN-41-08 (AC-KAN-41-02 replaced) | `tests/ExpiryWarningBanner.test.tsx` |
-| KAN-42 | AC-KAN-42-01 … AC-KAN-42-07 | `tests/BusinessSidebar.test.tsx` |
+| KAN-42 | AC-KAN-42-01 … AC-KAN-42-08 | `tests/BusinessSidebar.test.tsx` |

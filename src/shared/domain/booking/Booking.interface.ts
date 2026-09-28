@@ -19,6 +19,10 @@ export interface BookingCancellation {
 export interface Booking {
   businessId: string;
   cancellation: Nullable<BookingCancellation>;
+  // The collaborator who serves the booking (Q1). Null only when the service
+  // has no collaborator assigned, so the business serves it as one resource.
+  // Automatic assignment (KAN-138) is always resolved to one collaborator.
+  collaboratorId: Nullable<string>;
   customerId: string;
   customerUserId: Nullable<string>;
   endsAt: Date;

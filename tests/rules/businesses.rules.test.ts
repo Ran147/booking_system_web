@@ -42,6 +42,9 @@ describe("firestore.rules: tenant isolation", () => {
       await adminFirestore
         .doc(BUSINESS_A_CUSTOMER_PATH)
         .set({ status: "active" });
+      await adminFirestore
+        .doc("businesses/business-pending")
+        .set({ ownerUserId: "subscriber-pending", status: "pending" });
     });
   });
 
@@ -79,6 +82,34 @@ describe("firestore.rules: tenant isolation", () => {
 
     await assertFails(
       subscriberB.firestore().doc(BUSINESS_A_CUSTOMER_PATH).get(),
+    );
+  });
+
+  it("KAN-33: denies a subscriber of a pending business creating a service", async () => {
+    const pendingSubscriber = testEnvironment.authenticatedContext(
+      "subscriber-pending",
+      subscriberOf("business-pending"),
+    );
+
+    await assertFails(
+      pendingSubscriber
+        .firestore()
+        .doc("businesses/business-pending/services/service-1")
+        .set({ name: "Corte", status: "active" }),
+    );
+  });
+
+  it("PROP-1: denies a subscriber approving their own pending business", async () => {
+    const pendingSubscriber = testEnvironment.authenticatedContext(
+      "subscriber-pending",
+      subscriberOf("business-pending"),
+    );
+
+    await assertFails(
+      pendingSubscriber
+        .firestore()
+        .doc("businesses/business-pending")
+        .update({ status: "active" }),
     );
   });
 

@@ -28,7 +28,7 @@ For the subscriber who wants to decide how and when their customers are reminded
 - The customer's reminder opt-in control (no customer story defines it; see Backlog issues).
 - Where and how the subscriber reads the `Notification` list (no story defines the inbox; see Backlog issues).
 - Alerts for failed renewal charges and retries (KAN-48/KAN-50): deferred, out of MVP (Q5 decided 2026-09-28).
-- Any alert or reminder for a collaborator (Q1).
+- Any alert or reminder for a collaborator: no story asks for them (Q1 decided 2026-09-28; the notification settings are subscriber-only, collaborators spec AC-KAN-86-05).
 - Channels other than email for reminders, and email/push for internal alerts (AS-1, AS-5).
 
 ## Data
@@ -70,7 +70,7 @@ For the subscriber who wants to decide how and when their customers are reminded
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
-| — | — | No story of this epic depends on Q1–Q7. Alerts about renewal retries or `past_due` (KAN-48) are not part of KAN-101 and must not be added under its "etc.": Q5 (2026-09-28) deferred KAN-48 / KAN-50 (out of MVP). |
+| — | — | No story of this epic is blocked. Alerts about renewal retries or `past_due` (KAN-48) are not part of KAN-101 and must not be added under its "etc.": Q5 (2026-09-28) deferred KAN-48 / KAN-50 (out of MVP). |
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
