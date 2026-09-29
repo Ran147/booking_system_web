@@ -1,4 +1,20 @@
 {
+  "home": {
+    "plans": {
+      "billingPeriod": {
+        "annual": "/año",
+        "monthly": "/mes"
+      },
+      "empty": "No hay planes de suscripción disponibles en este momento.",
+      "limits": {
+        "maxBookings": "Hasta {{count}} reservas al mes"
+      },
+      "retry": "Reintentar",
+      "seeDetails": "Comenzar",
+      "subtitle": "Selecciona el plan ideal para gestionar las reservas y citas de tu negocio.",
+      "title": "Planes y Precios"
+    }
+  },
   "layout": {
     "title": "Booking System"
   },
