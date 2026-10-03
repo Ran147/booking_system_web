@@ -107,6 +107,7 @@ Before saying a task is done or opening a PR, the following commands **must pass
 | `npm run typecheck` | TypeScript compilation (`tsc -b --noEmit`) |
 | `npm run test:run` | Vitest unit and component test suite |
 | `npm run test:rules` | `firestore.rules` tests against the emulator |
+| `npm run test:e2e` | Playwright end-to-end tests (`e2e/`); builds the app and serves it with `vite preview` |
 | `npm run dev` | Vite development server |
 | `npm run seed` | Seed local emulator data (`scripts/seed-emulator.ts`) |
 

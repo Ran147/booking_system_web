@@ -26,5 +26,10 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+
 # Knowledge graph (graphify)
 graphify-out/

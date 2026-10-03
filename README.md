@@ -11,7 +11,7 @@ SaaS multi-tenant de reservas. Cada negocio (suscriptor) publica sus servicios y
 
 Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/shared/domain`): ningún negocio puede usarlos.
 
-Este repositorio es el **esqueleto base**: configuración, fundamentos compartidos y los cuatro portales como carcasas vacías. Ninguna funcionalidad de las specs está implementada todavía; cada carpeta de feature solo contiene su `specs/SPEC.md`.
+Este repositorio es el **esqueleto base**: configuración, fundamentos compartidos y los cuatro portales como carcasas vacías. Cada carpeta de feature tiene su `specs/SPEC.md` con los criterios de aceptación de la épica; la primera historia implementada es US-07 (catálogo de planes en la landing).
 
 **Stack:** React 19 + TypeScript 5.9 (Vite 8, React Router 8) · Firebase 12 (Auth, Firestore, Cloud Functions, App Check, Hosting) · TanStack Query 5 + React Context · Tailwind CSS v4 + shadcn/ui · React Hook Form + Zod · react-i18next (es, en) · Vitest + Testing Library + Firebase Emulator Suite.
 
@@ -107,51 +107,60 @@ npm run build
 | `npm run test:run` | Tests unitarios y de componentes, una sola vez |
 | `npm run test:coverage` | Tests con cobertura (mínimo 70 % de líneas en portales, features y dominio) |
 | `npm run test:rules` | Tests de `firestore.rules` contra el emulador (`tests/rules/`); no forman parte de `test:run` |
+| `npm run test:e2e` | Tests end-to-end con Playwright (`e2e/`), solo flujos críticos. La primera vez: `npx playwright install chromium` |
 | `npm run emulators` | Firebase Emulator Suite |
 | `npm run seed` | Carga datos de prueba en los emuladores (ver «Datos de prueba») |
 
-Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run` (y `npm run test:rules` si cambió `firestore.rules`). No hay CI por ahora: estos chequeos se corren localmente.
+Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run` (y `npm run test:rules` si cambió `firestore.rules`, `npm run test:e2e` si cambió un flujo crítico). No hay CI por ahora: estos chequeos se corren localmente.
 
 ## Estructura
+
+La estructura completa y sus reglas están en `AGENTS.md` §3 (arquitectura modular).
 
 ```
 .agents/skills/        # skills para agentes de IA y personas (una por tema)
 .github/               # plantilla de PR, instrucciones de Copilot (sin CI por ahora)
+docs/CONTEXTO-APP.md   # resumen del dominio: actores, portales, colecciones y estados
+docs/ERRORES-Y-LECCIONES.md  # errores ya cometidos en el repo; no repetirlos
+docs/specs/            # especificación técnica de cada historia (YYYY-MM-DD-US-XX-nombre.md)
 docs/backlog/          # export de Jira, mapa épica → carpeta, notas de revisión de specs
 docs/decisions/        # preguntas abiertas (Q1–Q7) y ADRs
-docs/setup/tooling.md  # dependencias y configuración de herramientas
+e2e/                   # tests end-to-end con Playwright (flujos críticos)
 functions/             # Cloud Functions (paquete aparte)
 scripts/               # herramientas locales (seed de los emuladores)
 src/app/               # App, providers (Query, i18n, Theme, Auth) y router
-src/portals/<portal>/  # <portal>.routes.tsx, layout/, placeholder/ y features/
-src/features/auth/     # sesión, roles y guards compartidos por los portales
-src/shared/            # components, constants, domain, hooks, lib, types, utils, test-utils
+src/modules/<portal>/  # landing, business, customer, admin y auth: rutas, layout y features/
+src/components/common/ # componentes atómicos compartidos (botón, input, modal, spinner…)
+src/constants/         # constantes congeladas con Object.freeze, ordenadas A-Z
+src/context/  src/domain/  src/hooks/  src/services/  src/types/  src/utils/
 src/i18n/              # configuración de i18next y locales/{es,en}
 src/styles/tokens.css  # tokens de diseño (claro / oscuro)
 tests/rules/           # tests de reglas de Firestore (emulador)
 firestore.rules        # la frontera de seguridad multi-tenant
 ```
 
-La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
-
-Los componentes de shadcn/ui se agregan con `npx shadcn@latest add <componente>` (configuración en `components.json`); quedan en `src/shared/components/ui/` y se exportan desde `src/shared/components/index.ts`. Las features nunca importan `ui/` directamente.
+Las carpetas `src/portals/`, `src/shared/` y `src/features/` son de la estructura anterior y se están migrando a la de arriba: no se agrega código nuevo en ellas. La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
 
 ## Skills, specs y decisiones
 
-- **`AGENTS.md`** es el punto de entrada: dice qué skill cargar para cada tarea y cuál gana cuando dos se contradicen. Copilot, Antigravity y Claude Code lo leen.
-- **Skills:** `.agents/skills/<nombre>/SKILL.md` (estilo de código, constantes, i18n, theming, componentes, arquitectura, estado, queries, mutations, formularios, auth y roles, tests, glosario del dominio, backlog → spec).
-- **Specs:** cada feature tiene `specs/SPEC.md` en su carpeta, con criterios de aceptación citando la clave KAN. El mapa épica → carpeta está en `docs/backlog/epic-map.md`.
+- **`AGENTS.md`** es el contrato para agentes de IA y personas: el orden de lectura obligatorio, la estructura, qué skill aplica a cada tarea y los comandos de verificación. Copilot, Antigravity y Claude Code lo leen.
+- **Skills:** `.agents/skills/<nombre>/SKILL.md`. La skill `revisor-agente` revisa una rama o un PR contra todas las demás.
+- **Claves de historias:** `US-XX` usa el mismo número que la clave de Jira (`US-33` = `KAN-33`).
+- **Specs, en dos niveles:** cada feature tiene `specs/SPEC.md` en su carpeta, con los criterios de aceptación de toda la épica (`AC-KAN-XX-nn`). Antes de programar una historia se escribe su especificación técnica en `docs/specs/YYYY-MM-DD-US-XX-nombre.md` (ejemplo: `docs/specs/2026-09-28-US-07-planes-suscripcion-landing.md`), tomando de ahí los criterios. No se escribe código sin esa spec.
 - **Decisiones:** `docs/decisions/open-questions.md`. Q1–Q7 están decididas (2026-09-28) y ya están en las specs y en `domain-glossary`: Q1 colaborador como quinto actor, Q2 + Q3 aprobación de negocios nuevos por el super admin y tipos de acción de auditoría, Q4 URL por slug, Q5 sin reintentos de renovación en el MVP, Q6 cuenta de cliente obligatoria, Q7 contratación del plan desde la landing con la pasarela simulada. Si una pregunta nueva queda abierta, lo marcado **BLOCKED** no se implementa ni se inventa.
 - **Propuestas:** historias que faltan en Jira están en las specs con claves `PROP-n` («Proposed — not in Jira yet») hasta que se creen en Jira.
 
 ## Flujo de trabajo y pull requests
 
-1. **Una rama por historia o épica**, con su clave KAN: `feature/KAN-55-listado-servicios`, `fix/KAN-72-cancelacion`. Nunca se trabaja directo sobre `main`.
-2. **Spec primero:** si la feature no tiene `specs/SPEC.md`, se crea con la skill `backlog-to-spec` antes de escribir código.
-3. **Commits pequeños** que mencionan la clave KAN.
-4. **Pull request contra `main`** usando la plantilla (`.github/pull_request_template.md`): qué cambia, historias KAN y el checklist (spec, tests con clave KAN, textos en `es` y `en`, modo claro y oscuro, reglas e índices, nada BLOCKED).
-5. **Chequeos locales antes de cada PR:** no hay CI por ahora (el workflow se quitó en `main`). Quien abre el PR corre `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test:run` y `npm run build`, y lo indica en el checklist. El PR necesita al menos una revisión antes de hacer merge. El CI se puede volver a activar más adelante.
-6. Si cambian `firestore.rules`, se agregan sus tests en `tests/rules/` y se corre `npm run test:rules` localmente.
+Los detalles están en la skill `git-workflow`.
+
+1. **Ramas:** `main` es la versión estable y `develop` la de integración. Cada historia tiene su rama `US-XX` creada desde `develop`. Nunca se trabaja directo sobre `main` ni sobre `develop`.
+2. **Spec primero:** se escribe `docs/specs/YYYY-MM-DD-US-XX-nombre.md` a partir del `specs/SPEC.md` de la feature antes de escribir código.
+3. **Commits atómicos** en español, en imperativo y sin tildes en el asunto: `feat(landing): catalogo de planes de suscripcion para visitantes (US-07)`.
+4. **Pull request contra `develop`** usando la plantilla (`.github/pull_request_template.md`). El PR necesita al menos una revisión antes de hacer merge. `develop` pasa a `main` con un PR cuando el equipo lo decide.
+5. **Chequeos locales antes de cada PR:** no hay CI por ahora (el workflow se quitó). Quien abre el PR corre `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test:run` y `npm run build`, y lo indica en el checklist. El CI se puede volver a activar más adelante.
+6. Si la historia es un flujo crítico (login, reservar, pagar), se agrega o actualiza su test en `e2e/` y se corre `npm run test:e2e`.
+7. Si cambian `firestore.rules`, se agregan sus tests en `tests/rules/` y se corre `npm run test:rules` localmente.
 
 ## Reglas que no se negocian
 
