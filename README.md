@@ -107,6 +107,7 @@ npm run build
 | `npm run test:run` | Tests unitarios y de componentes, una sola vez |
 | `npm run test:coverage` | Tests con cobertura (mínimo 70 % de líneas en portales, features y dominio) |
 | `npm run test:rules` | Tests de `firestore.rules` contra el emulador (`tests/rules/`); no forman parte de `test:run` |
+| `npm run test:e2e` | Tests end-to-end con Playwright (`e2e/`), solo flujos críticos. La primera vez: `npx playwright install chromium` |
 | `npm run emulators` | Firebase Emulator Suite |
 | `npm run seed` | Carga datos de prueba en los emuladores (ver «Datos de prueba») |
 
@@ -151,7 +152,8 @@ Los componentes de shadcn/ui se agregan con `npx shadcn@latest add <componente>`
 3. **Commits pequeños** que mencionan la clave KAN.
 4. **Pull request contra `main`** usando la plantilla (`.github/pull_request_template.md`): qué cambia, historias KAN y el checklist (spec, tests con clave KAN, textos en `es` y `en`, modo claro y oscuro, reglas e índices, nada BLOCKED).
 5. **Chequeos locales antes de cada PR:** no hay CI por ahora (el workflow se quitó en `main`). Quien abre el PR corre `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test:run` y `npm run build`, y lo indica en el checklist. El PR necesita al menos una revisión antes de hacer merge. El CI se puede volver a activar más adelante.
-6. Si cambian `firestore.rules`, se agregan sus tests en `tests/rules/` y se corre `npm run test:rules` localmente.
+6. Si la historia es un flujo crítico (login, reservar, pagar), se agrega o actualiza su test en `e2e/` y se corre `npm run test:e2e`.
+7. Si cambian `firestore.rules`, se agregan sus tests en `tests/rules/` y se corre `npm run test:rules` localmente.
 
 ## Reglas que no se negocian
 
