@@ -112,6 +112,7 @@ export default tseslint.config(
       "functions/lib/**",
       "node_modules/**",
       "src/shared/components/ui/**", // vendored shadcn/ui (component-standards §3)
+      "src/components/common/ui/**", // vendored shadcn/ui (component-standards §3)
     ],
   },
 
@@ -201,11 +202,11 @@ export default tseslint.config(
               message: "Use the @/ alias (code-style-standards).",
             },
             {
-              group: ["@/shared/components/ui/*"],
-              message: "Import from @/shared/components (component-standards).",
+              group: ["@/shared/components/ui/*", "@/components/common/ui/*"],
+              message: "Import from @/components/common (component-standards).",
             },
             {
-              group: ["@/portals/*/features/*/*"],
+              group: ["@/portals/*/features/*/*", "@/modules/*/features/*/*"],
               message:
                 "Import another feature only through its index.ts (component-architecture).",
             },
@@ -273,13 +274,17 @@ export default tseslint.config(
 
   // code-style-standards: Nullable.ts is the only place allowed to spell | null / | undefined
   {
-    files: ["src/shared/types/Nullable.ts"],
+    files: ["src/shared/types/Nullable.ts", "src/types/Nullable.ts"],
     rules: { "no-restricted-syntax": "off" },
   },
 
   // i18n-standards + component-architecture + component-standards: feature UI files
   {
-    files: ["src/portals/**/*.tsx", "src/features/**/*.tsx"],
+    files: [
+      "src/portals/**/*.tsx",
+      "src/features/**/*.tsx",
+      "src/modules/**/*.tsx",
+    ],
     ignores: ["**/tests/**", "**/*.test.tsx"],
     plugins: { i18next },
     rules: {
@@ -313,7 +318,7 @@ export default tseslint.config(
 
   // i18n-standards: no visible text in shared components either
   {
-    files: ["src/shared/components/**/*.tsx"],
+    files: ["src/shared/components/**/*.tsx", "src/components/**/*.tsx"],
     plugins: { i18next },
     rules: { "i18next/no-literal-string": I18N_LITERAL_RULE },
   },
@@ -335,7 +340,12 @@ export default tseslint.config(
 
   // Tests: vitest globals
   {
-    files: ["**/*.test.{ts,tsx}", "**/tests/**", "src/shared/test-utils/**"],
+    files: [
+      "**/*.test.{ts,tsx}",
+      "**/tests/**",
+      "src/shared/test-utils/**",
+      "src/test-utils/**",
+    ],
     languageOptions: { globals: { ...globals.vitest } },
   },
 

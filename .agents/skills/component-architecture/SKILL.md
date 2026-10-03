@@ -1,412 +1,242 @@
 ---
 name: component-architecture
-description: Use when creating a new feature or page, adding state, effects, handlers or data loading to a component, splitting a large component, or deciding where a file goes inside src/portals, src/features or src/shared. Covers feature folders per portal, spec-first development, the ViewModel pattern, local mini components and SOLID.
+description: Feature-based component architecture, presentation vs logic separation (views + use*ViewModel hooks), scannable returns, modular folder rules, and JSDoc interface contracts (models/*.model.js / models/*.model.ts).
 ---
 
-# Component Architecture
+# Component Architecture Standards
 
-This skill is the **single source of truth** for how UI features are structured: feature folders per portal, spec-first development (SDD), SOLID and design patterns, presentation/logic separation with ViewModel hooks, and short composed returns.
-
-## Precedence
-
-| Topic | Owner |
-| --- | --- |
-| Folder layout, ViewModel split, what may live in `.tsx`, patterns | **this skill** — wins over `component-standards` on structure and logic |
-| Format and content of `specs/SPEC.md` | `backlog-to-spec` |
-| Which shared primitive to use | `component-standards` |
-| Where each kind of state lives | `state-management` |
-| Data loading and writing inside the ViewModel | `api-query-standards`, `api-mutation-standards` |
-| Tests and Page Objects | `unit-testing-standards` |
+This skill defines the structure for organizing UI components, separating business logic from presentation (MVVM), keeping JSX returns clean and scannable (< 80-100 lines), and enforcing formal interface contracts using JSDoc (`@typedef`, `@property`) in `models/`.
 
 ---
 
-## 1. Feature folders inside their portal
+## 1. Directory Responsibility Map (SaaS Booking Platform)
 
-Every feature lives in **one** folder under the portal that owns it. Features shared by several portals live in `src/features/`. The epic → folder map is in `docs/backlog/epic-map.md`.
+Source code lives inside `src/`. Always use the `@/` path alias. All component, layout, and module folders MUST be named in **`kebab-case`**.
 
+```text
+src/
+├── assets/                  # Logos, icons, branding assets, static images
+├── components/              # Shared UI building blocks (reusable across all modules)
+│   ├── common/              # Atomic reusable UI components in kebab-case folders
+│   │   ├── badge/
+│   │   │   ├── Badge.tsx (or .jsx)
+│   │   │   └── index.ts (or .js)
+│   │   ├── button/
+│   │   │   ├── Button.tsx
+│   │   │   └── index.ts
+│   │   ├── card/
+│   │   ├── input-field/
+│   │   ├── modal/
+│   │   ├── select-field/
+│   │   ├── spinner/
+│   │   ├── status-badge/
+│   │   └── index.ts         # Unified barrel export for all common components
+│   ├── layout/              # Structural chrome wrappers in kebab-case folders
+│   │   ├── navbar/
+│   │   ├── sidebar/         # Business & Admin sidebars with logout and status
+│   │   ├── footer/
+│   │   └── index.ts         # Unified barrel export for layout components
+├── constants/               # Single source of truth for global constants (Object.freeze, A-Z)
+├── context/                 # Global React Context providers (AuthContext, ThemeContext)
+│   └── models/              # JSDoc contracts for context values (authContext.model.js/ts)
+├── hooks/                   # Custom cross-cutting React hooks (useTheme, useDebounce)
+├── modules/                 # Business feature pages & colocated sub-components
+│   ├── landing/             # Public portal: home, pricing, contact, subscriber onboarding
+│   │   ├── components/      # Local presentational minis (Hero, Testimonials, PlanCatalog)
+│   │   ├── hooks/           # useLandingViewModel, usePlanCatalogViewModel
+│   │   ├── models/          # JSDoc / TS contracts (plan.model.ts, landing.model.ts)
+│   │   └── LandingPage.tsx
+│   ├── business/            # Subscriber portal (B2B): services, schedule, collaborators, customers
+│   │   ├── services/        # CRUD, pricing, duration, discounts
+│   │   ├── schedule/        # Daily/weekly agenda, business blocks, holidays
+│   │   ├── subscription/    # Plan status, mock gateway, payment receipts
+│   │   ├── collaborators/   # Invitations, roles, permissions
+│   │   ├── customers/       # Directory, internal notes, blocking, GDPR forget
+│   │   ├── reports/         # Estimated financial reports, occupancy, CSV/Excel export
+│   │   └── settings/        # Locale, dark/light theme, password management
+│   ├── customer/            # Customer portal (B2C): service booking, my appointments
+│   │   ├── business-home/   # Public page of a specific business
+│   │   ├── booking-flow/    # Service selection, collaborator, date/time slots
+│   │   ├── my-bookings/     # Upcoming appointments, reschedule, cancellation
+│   │   └── profile/         # Personal info, notifications preferences
+│   ├── admin/               # Super Admin portal: global SaaS governance
+│   │   ├── businesses/      # Business verification & directory (active/inactive/pending)
+│   │   ├── plans/           # Commercial subscription plans management & limits
+│   │   ├── parameters/      # System parameters (inactivity timeout, grace days)
+│   │   ├── dashboard/       # Global metrics (MRR, active businesses, reservations)
+│   │   ├── support-tickets/ # Ticketing support system
+│   │   └── audit-log/       # Traceability of critical administrative actions
+│   └── auth/                # Cross-cutting auth: login, signup, reset password, reCAPTCHA
+├── services/                # Firebase connection, Firestore queries, Cloud Functions, Mock Gateway
+└── utils/                   # Pure stateless helper functions (formatters, date/currency, validators)
 ```
-src/portals/<portal>/features/<feature-name>/     # kebab-case
-├── FeatureNamePage.tsx          # route entry: thin composition only
-├── components/                  # feature-private minis (presentation only)
-│   ├── FeatureNameToolbar.tsx
-│   └── FeatureNameTable.tsx
-├── hooks/
-│   └── useFeatureNamePageViewModel.ts
-├── models/                      # *.interface.ts, *.schema.ts, *.mutation.ts
-├── constants/                   # *.constants.ts used only by this feature
-├── api/                         # query/mutation hooks and Firestore functions
-├── specs/SPEC.md                # written with backlog-to-spec before coding
-├── tests/                       # *.page.ts + *.test.tsx
-└── index.ts                     # the only public entry of the feature
-```
 
-### Rules
+---
 
-- **One feature, one folder.** Do not scatter a feature across `src/shared/`.
-- **Colocate by default.** Hooks, models, constants and API calls used by one feature stay inside it.
-- **Promote to `src/shared/` only when a second feature needs it.**
-- **Import another feature only through its `index.ts`.** Never deep-import `../other-feature/hooks/…`.
-- **Portals do not import from other portals.** Shared logic goes to `src/features/` or `src/shared/`.
-- **No new top-level folders** (`containers/`, `views/`, `smart/`, `helpers/`).
-- A portal's `layout/` holds its chrome (sidebar, navbar, footer) and follows the same rules as a feature.
+## 2. Presentation vs Logic Separation (`use*ViewModel`)
 
-### Incorrect
+- **View File (`.tsx` / `.jsx`):** Renders visual layout, semantic HTML, and Tailwind styling only. Prohibited: direct Firebase calls, complex state orchestration, heavy side effects, or raw data transformations.
+- **`use*ViewModel` Hook:** Encapsulates component state (`useState`), side effects (`useEffect`), business calculations, and event handlers. Exposes a clean, typed contract to the view.
 
-```
-src/portals/business/
-├── ServicesPage.tsx              ← loose file, no feature folder
-└── useServices.ts
-src/shared/hooks/
-└── useServiceFilters.ts          ← feature logic parked in shared
-src/portals/customer/features/availability/
-└── ../../../business/features/services/api/…   ← cross-portal deep import
-```
-
-### Correct
-
-```
-src/portals/business/features/services/
-├── ServicesPage.tsx
-├── components/ServicesToolbar.tsx
-├── hooks/useServicesPageViewModel.ts
-├── hooks/useServiceListFilters.ts
-├── models/ServicesPageViewModel.interface.ts
-├── api/useServiceListQuery.ts
-├── specs/SPEC.md
-├── tests/ServicesPage.page.ts
-└── index.ts
-```
-
-## 2. Spec first (SDD)
-
-Before implementing a new feature or any behavior change, the spec exists and the work is checked against it.
-
-1. **Specify.** `specs/SPEC.md` is generated with `backlog-to-spec` from the KAN stories. Every acceptance criterion cites its KAN key.
-2. **Plan.** List the files to touch, the shared components to reuse, and the queries and mutations. Add `specs/plan.md` only for large work.
-3. **Implement.** Build task by task inside the feature folder.
-4. **Validate.** Each acceptance criterion maps to at least one test (`unit-testing-standards`).
-
-- Do not start non-trivial work without a spec. If the prompt already contains acceptance criteria, persist them into `specs/SPEC.md` first.
-- If the spec is marked `BLOCKED`, implement only the parts that are not blocked.
-- If requirements change, update the spec **before** the code.
-- Style-only tweaks with no behavior change may skip the spec.
-
-## 3. SOLID and patterns
-
-| Principle | Applied here |
-| --- | --- |
-| **S** — single responsibility | `.tsx` renders, the ViewModel orchestrates, `api/` talks to Firebase, minis render one region |
-| **O** — open/closed | Extend with props, variants and composition; never fork a shared primitive |
-| **L** — Liskov | Shared components keep their contract. A `Button` never fetches or navigates by itself |
-| **I** — interface segregation | Small `Props` and ViewModel interfaces; split hooks when consumers need a subset |
-| **D** — dependency inversion | ViewModels depend on feature `api/` hooks, not on the Firebase SDK |
-
-| Pattern | Use it for |
-| --- | --- |
-| **ViewModel / Presentation** | Every component with logic (§4) |
-| **Composition** | Screens built from shared primitives and local minis (§5) |
-| **Facade** | A ViewModel that coordinates several hooks (filters + query + pagination) |
-| **Adapter** | Mapping Firestore documents to domain models in `api/` (`api-query-standards`) |
-| **State** | Mutually exclusive UI modes as one union (`VIEW_STATE`, wizard steps) instead of several booleans |
-| **Strategy** | Behavior chosen by a map (status → tone, status → allowed actions) instead of `switch` in JSX |
-| **Decorator** | Guards and providers that wrap a subtree (`RequireRole`, `ThemeProvider`) |
-| **Template** | Layout shells with slots (`PageTemplate`, `AuthTemplate`) |
-
-**Forbidden:** god components or god ViewModels; copy-pasting a feature "with tweaks"; prop drilling more than two levels (use composition or Context per `state-management`); abstractions without a second consumer; class components and inheritance.
-
-**Design gate.** Before coding, the plan names the responsibilities, the pattern and the shared pieces being reused. If it cannot, the design is not ready.
-
-## 4. Presentation vs logic
-
-| File | Role |
-| --- | --- |
-| `FeatureNamePage.tsx`, minis | **Presentation only.** JSX, `useTranslation`, binding ViewModel outputs to props |
-| `hooks/use<Component>ViewModel.ts` | **Logic.** State, effects, queries, mutations, handlers, derived values, navigation |
-
-- `.tsx` files contain no `useState`, `useEffect`, `useQuery`, `useMutation` or non-trivial handlers.
-- The ViewModel is named after its component (`ServicesPage` → `useServicesPageViewModel`) and returns a typed interface from `models/`.
-- A component that only maps props to JSX needs no ViewModel.
-
-### Incorrect
+### Incorrect (Logic mixed in View)
 
 ```tsx
-export const ServicesPage = (): ReactElement => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const { data } = useQuery({
-    queryFn: () => getDocs(collection(firestore, "services")),
-    queryKey: ["services"],
-  });
+// ❌ Monolithic component mixing Firestore fetch, state, handlers, and JSX
+const ServicesPage = () => {
+  const [services, setServices] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  if (!data) return <p>Cargando…</p>;
+  useEffect(() => {
+    setIsLoading(true);
+    getDocs(collection(db, "services")).then(...);
+  }, []);
 
-  return (
-    <div>
-      <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-      {data.docs.map((doc) => <div key={doc.id}>{doc.data().name}</div>)}
-    </div>
-  );
+  const handleCreate = async () => { ... };
+
+  return <div>{services.map(...)}</div>;
 };
 ```
 
-Problems: state, data access and Firestore calls in the `.tsx`; no tenant scoping; literal text; abbreviations (`e`, `data`, `doc`); raw HTML controls.
-
-### Correct
-
-```ts
-// src/shared/constants/ui/ViewState.constants.ts
-export const VIEW_STATE = {
-  EMPTY: "empty",
-  ERROR: "error",
-  LOADING: "loading",
-  READY: "ready",
-} as const;
-
-export type ViewState = (typeof VIEW_STATE)[keyof typeof VIEW_STATE];
-```
-
-```ts
-// src/shared/constants/index.ts (append)
-export { VIEW_STATE, type ViewState } from "./ui/ViewState.constants";
-```
-
-```ts
-// src/shared/utils/resolveViewState.ts
-import type { UseQueryResult } from "@tanstack/react-query";
-import { VIEW_STATE, type ViewState } from "@/shared/constants";
-
-export const resolveViewState = (
-  queryResult: Pick<UseQueryResult, "isError" | "isPending">,
-  itemCount: number,
-): ViewState => {
-  if (queryResult.isPending) return VIEW_STATE.LOADING;
-  if (queryResult.isError) return VIEW_STATE.ERROR;
-  return itemCount === 0 ? VIEW_STATE.EMPTY : VIEW_STATE.READY;
-};
-```
-
-```ts
-// src/portals/business/features/services/models/ServicesPageViewModel.interface.ts
-import type { CursorPaginationProps } from "@/shared/components";
-import type { ViewState } from "@/shared/constants";
-import type { ServicesTableProps } from "./ServicesTableProps.interface";
-import type { ServicesToolbarProps } from "./ServicesToolbarProps.interface";
-
-export interface ServicesPageViewModel {
-  pagination: CursorPaginationProps;
-  table: ServicesTableProps;
-  toolbar: ServicesToolbarProps;
-  viewState: ViewState;
-}
-```
-
-```ts
-// src/portals/business/features/services/models/ServicesToolbarProps.interface.ts
-export interface ServicesToolbarProps {
-  onCreateClick: () => void;
-  onSearchTermChange: (nextSearchTerm: string) => void;
-  searchTerm: string;
-}
-```
-
-```ts
-// src/portals/business/features/services/models/ServicesTableProps.interface.ts
-import type { ServiceListItem } from "./ServiceListItem.interface";
-
-export interface ServicesTableProps {
-  onEditClick: (serviceId: string) => void;
-  serviceList: ServiceListItem[];
-}
-```
-
-```ts
-// src/portals/business/features/services/hooks/useServicesPageViewModel.ts
-import { useNavigate } from "react-router";
-import { useCurrentBusiness } from "@/features/auth";
-import { PAGINATION, ROUTE_PATH } from "@/shared/constants";
-import { useCursorPagination } from "@/shared/hooks";
-import { resolveViewState } from "@/shared/utils/resolveViewState";
-import { useServiceListFilters } from "./useServiceListFilters";
-import { useServiceListQuery } from "../api/useServiceListQuery";
-import type { ServicesPageViewModel } from "../models/ServicesPageViewModel.interface";
-
-export const useServicesPageViewModel = (): ServicesPageViewModel => {
-  const navigate = useNavigate();
-  const { businessId } = useCurrentBusiness();
-  const { filters, handleSearchTermChange } = useServiceListFilters();
-  const pagination = useCursorPagination([filters]);
-  const serviceListQuery = useServiceListQuery({
-    businessId,
-    filters,
-    pageCursor: pagination.currentCursor,
-    pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
-  });
-
-  const serviceList = serviceListQuery.data?.items ?? [];
-  const nextCursor = serviceListQuery.data?.nextCursor ?? null;
-
-  return {
-    pagination: {
-      hasNextPage: nextCursor !== null,
-      hasPreviousPage: pagination.hasPreviousPage,
-      onNextPageClick: (): void => {
-        if (nextCursor) pagination.goToNextPage(nextCursor);
-      },
-      onPreviousPageClick: pagination.goToPreviousPage,
-      pageNumber: pagination.pageNumber,
-      totalCount: serviceListQuery.data?.totalCount ?? 0,
-    },
-    table: {
-      onEditClick: (serviceId: string): void => {
-        void navigate(serviceId);
-      },
-      serviceList,
-    },
-    toolbar: {
-      onCreateClick: (): void => {
-        void navigate(ROUTE_PATH.BUSINESS.SERVICE_NEW);
-      },
-      onSearchTermChange: handleSearchTermChange,
-      searchTerm: filters.searchTerm,
-    },
-    viewState: resolveViewState(serviceListQuery, serviceList.length),
-  };
-};
-```
+### Correct (Presentation + ViewModel Hook separation)
 
 ```tsx
-// src/portals/business/features/services/ServicesPage.tsx
-import type { ReactElement } from "react";
-import { useTranslation } from "react-i18next";
-import {
-  CursorPagination,
-  PageTemplate,
-  ViewStateSwitch,
-} from "@/shared/components";
-import { I18N_NAMESPACE } from "@/shared/constants";
-import { ServicesTable } from "./components/ServicesTable";
+// ✅ Presentation file: ServicesPage.tsx
+import { useServicesViewModel } from "./hooks/useServicesViewModel";
 import { ServicesToolbar } from "./components/ServicesToolbar";
-import { useServicesPageViewModel } from "./hooks/useServicesPageViewModel";
+import { ServicesTable } from "./components/ServicesTable";
 
 export const ServicesPage = (): ReactElement => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
-  const { pagination, table, toolbar, viewState } = useServicesPageViewModel();
+  const {
+    services,
+    filters,
+    viewState,
+    handleCreateService,
+    handleFilterChange,
+  } = useServicesViewModel();
 
   return (
-    <PageTemplate title={t("services.list.title")}>
-      <ServicesToolbar {...toolbar} />
-      <ViewStateSwitch
-        emptyMessage={t("services.list.empty")}
-        viewState={viewState}
-      >
-        <ServicesTable {...table} />
-      </ViewStateSwitch>
-      <CursorPagination {...pagination} />
-    </PageTemplate>
-  );
-};
-```
-
-```ts
-// src/portals/business/features/services/index.ts
-export { ServicesPage } from "./ServicesPage";
-```
-
-## 5. Short returns: extract local minis
-
-The main return reads like an outline. When a region grows (toolbar, table, filters, modals, empty state), extract a **mini** inside the feature.
-
-| Situation | Placement |
-| --- | --- |
-| One or two minis | Next to the page, or in `components/` |
-| Several minis | `components/<FeatureName><Region>.tsx` |
-| A second feature needs it | Promote to `src/shared/components/` (`component-standards`) |
-
-- Minis are presentation-only: props in, JSX out. No fetching, no effects.
-- Name them by region: `ServicesToolbar`, `ServicesTable`. Never `Part1` or `Helper`.
-
-```tsx
-// src/portals/business/features/services/components/ServicesToolbar.tsx
-import type { ReactElement } from "react";
-import { useTranslation } from "react-i18next";
-import { Button, SearchInput } from "@/shared/components";
-import { I18N_NAMESPACE } from "@/shared/constants";
-import type { ServicesToolbarProps } from "../models/ServicesToolbarProps.interface";
-
-export const ServicesToolbar = ({
-  onCreateClick,
-  onSearchTermChange,
-  searchTerm,
-}: ServicesToolbarProps): ReactElement => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
-
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <SearchInput
-        label={t("services.toolbar.searchLabel")}
-        onValueChange={onSearchTermChange}
-        value={searchTerm}
+    <main className="container mx-auto p-6 space-y-6">
+      <ServicesToolbar
+        filters={filters}
+        onCreateClick={handleCreateService}
+        onFilterChange={handleFilterChange}
       />
-      <Button onClick={onCreateClick}>
-        {t("services.toolbar.createAction")}
-      </Button>
-    </div>
+      <ServicesTable services={services} viewState={viewState} />
+    </main>
   );
 };
-```
-
-**`src/i18n/locales/es/business.json`**
-
-```json
-{
-  "services": {
-    "list": {
-      "empty": "Todavía no tienes servicios.",
-      "title": "Servicios"
-    },
-    "toolbar": {
-      "createAction": "Nuevo servicio",
-      "searchLabel": "Buscar servicios"
-    }
-  }
-}
-```
-
-**`src/i18n/locales/en/business.json`**
-
-```json
-{
-  "services": {
-    "list": {
-      "empty": "You have no services yet.",
-      "title": "Services"
-    },
-    "toolbar": {
-      "createAction": "New service",
-      "searchLabel": "Search services"
-    }
-  }
-}
 ```
 
 ---
 
-## 6. Enforced by
+## 3. Scannable Returns (Extract Mini Components)
 
-| Rule | Tool |
-| --- | --- |
-| No hooks with logic in `.tsx` (`useState`, `useEffect`, `useQuery`, `useMutation`, `useReducer`) | ESLint `no-restricted-imports` / `no-restricted-syntax` on those calls in `src/portals/**/*.tsx` and `src/features/**/*.tsx` |
-| No cross-portal imports | ESLint `import-x/no-restricted-paths` (zones between `src/portals/*`) |
-| No deep imports into another feature | ESLint `no-restricted-imports` patterns `@/portals/*/features/*/*` |
-| No `../../` | ESLint `no-restricted-imports` (`code-style-standards`) |
-| Specs exist before implementation | Pull request template checkbox and review |
+If a view's JSX return exceeds **80–100 lines** or contains multiple visual sections (toolbar, filters, tables, modals), extract local mini components into the feature's `components/` subfolder:
 
-## 7. Checklist
+- Mini components are strictly presentational.
+- They receive data and callbacks via props.
+- They live in the feature folder and are not exported globally unless reused by a second module.
 
-- [ ] The feature lives in `src/portals/<portal>/features/<kebab-name>/` (or `src/features/` when shared by portals).
-- [ ] `specs/SPEC.md` exists (from `backlog-to-spec`) and the work was checked against it.
-- [ ] The design names its responsibilities and pattern. No god component, no copy-paste.
-- [ ] `.tsx` files hold only composition and `useTranslation`. Logic is in `use<Component>ViewModel.ts` with a typed interface.
-- [ ] The main return is short. Regions are extracted into named minis.
-- [ ] UI modes use one union (`VIEW_STATE`), not several booleans.
-- [ ] Other features are imported only through their `index.ts`. No cross-portal imports.
-- [ ] Acceptance criteria are covered by tests (`unit-testing-standards`).
+---
+
+## 4. Interface Contracts (`models/*.model.js` / `models/*.model.ts`) — MANDATORY
+
+**Requerimiento del profesor: todo dato con forma no trivial — props de un componente, valor de un Context, resultado de un `use*ViewModel`, entidad de negocio — se documenta con una interfaz JSDoc (`@typedef`) antes de abrir el PR.** Obligatorio para todo componente, hook o contexto nuevo o modificado.
+
+### 4.1 Dónde viven
+
+Una carpeta `models/` colocada junto al código que documenta:
+
+- Componente común/atómico: `src/components/common/<component>/models/<component>.model.js` (o `.ts`).
+- Contexto global: `src/context/models/<contextName>Context.model.js` (ej. `src/context/models/authContext.model.js`).
+- Módulo de negocio: `src/modules/<module>/models/<module>.model.js`.
+- Un `index.js` (o `index.ts`) barrel re-exporta todos los `.model` de esa carpeta (`export * from './x.model';`) en orden alfabético.
+
+### 4.2 Cómo se escribe un archivo `.model.js` / `.model.ts`
+
+```javascript
+/**
+ * @file Contrato de interfaz para el catálogo de planes de suscripción.
+ */
+
+/**
+ * @typedef {Object} PlanLimits
+ * @property {number} maxBookings - Cantidad máxima de reservas mensuales permitidas.
+ */
+
+/**
+ * @typedef {"monthly" | "annual"} BillingPeriod
+ */
+
+/**
+ * @typedef {Object} Plan
+ * @property {string} id - Identificador único del plan.
+ * @property {string} name - Nombre comercial del plan.
+ * @property {number} priceInCents - Precio unitario en centavos.
+ * @property {BillingPeriod} billingPeriod - Periodicidad de cobro.
+ * @property {string[]} features - Lista de características incluidas.
+ * @property {PlanLimits} limits - Límites operativos del plan.
+ * @property {"active" | "inactive"} status - Estado de disponibilidad comercial.
+ */
+
+/**
+ * @typedef {Object} FormattedPlanCard
+ * @property {string} id - ID del plan.
+ * @property {string} name - Nombre para visualización.
+ * @property {string} formattedPrice - Precio formateado con divisa local (ej. $29.00).
+ * @property {string} billingPeriodLabel - Etiqueta de periodicidad traducida (/mes, /año).
+ * @property {string[]} features - Características a desplegar.
+ * @property {string} maxBookingsLabel - Texto accesible de reservas permitidas.
+ */
+
+/**
+ * @typedef {Object} UsePlanCatalogViewModelReturn
+ * @property {FormattedPlanCard[]} plans - Lista de planes formateados y ordenados.
+ * @property {"empty" | "error" | "loading" | "ready"} viewState - Estado de la vista.
+ * @property {string} emptyMessage - Mensaje para estado sin datos.
+ * @property {() => void} retry - Handler para reintentar la carga.
+ * @property {(planId: string) => void} handleSelectPlan - Handler para seleccionar plan.
+ */
+
+export {};
+```
+
+- `export {}` al final convierte el archivo en módulo ES para permitir imports de tipos.
+
+### 4.3 Cómo se consume desde la vista o el ViewModel
+
+```javascript
+/**
+ * Tarjeta presentacional de plan de suscripción.
+ * @param {{
+ *   plan: import('../models').FormattedPlanCard,
+ *   onSelectPlan: (planId: string) => void
+ * }} props
+ * @returns {import('react').JSX.Element}
+ */
+export const PlanCard = ({ plan, onSelectPlan }) => {
+  /* ... */
+};
+```
+
+```javascript
+/**
+ * Hook ViewModel para el catálogo de planes.
+ * @returns {import('../models').UsePlanCatalogViewModelReturn}
+ */
+export const usePlanCatalogViewModel = () => {
+  /* ... */
+};
+```
+
+---
+
+## 5. Checklist de Verificación de Arquitectura
+
+- [ ] Todo componente con props complejas tiene su contrato documentado con `@typedef` en `models/*.model.*`.
+- [ ] Todo Context expone su contrato `<Nombre>ContextValue` en `src/context/models/`.
+- [ ] Todo hook `use*ViewModel` documenta su objeto de retorno.
+- [ ] Las vistas solo renderizan layout y JSX; cero lógica de negocio o queries directas.
+- [ ] Los retornos JSX son scannables (< 80-100 líneas).
+- [ ] Cero elementos HTML nativos crudos (`<button>`, `<input>`); se utilizan las primitivas de `src/components/common/`.
+- [ ] Cada carpeta `models/` cuenta con su `index` barrel en orden alfabético.

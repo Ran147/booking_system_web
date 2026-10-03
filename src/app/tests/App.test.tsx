@@ -1,10 +1,10 @@
 import { render } from "@testing-library/react";
-import { SESSION_STATUS } from "@/features/auth";
 import { i18n } from "@/i18n/i18n";
+import { SESSION_STATUS } from "@/modules/auth";
 import { App } from "../App";
 import { createAppPage } from "./App.page";
 
-vi.mock("@/features/auth/api/subscribeToSession", () => ({
+vi.mock("@/modules/auth/api/subscribeToSession", () => ({
   subscribeToSession: (
     onSessionChange: (session: { status: string }) => void,
   ): (() => void) => {

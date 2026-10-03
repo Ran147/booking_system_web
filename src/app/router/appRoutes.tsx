@@ -1,9 +1,9 @@
 import type { RouteObject } from "react-router";
-import { adminRoutes } from "@/portals/admin/admin.routes";
-import { businessRoutes } from "@/portals/business/business.routes";
-import { customerRoutes } from "@/portals/customer/customer.routes";
-import { landingRoutes } from "@/portals/landing/landing.routes";
-import { ROUTE_PATH } from "@/shared/constants";
+import { ROUTE_PATH } from "@/constants";
+import { adminRoutes } from "@/modules/admin/admin.routes";
+import { businessRoutes } from "@/modules/business/business.routes";
+import { customerRoutes } from "@/modules/customer/customer.routes";
+import { landingRoutes } from "@/modules/landing/landing.routes";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
 // Joins the four portal route trees. Each portal wraps its own tree in the

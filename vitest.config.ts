@@ -11,7 +11,13 @@ export default mergeConfig(
   defineConfig({
     test: {
       coverage: {
-        include: ["src/portals/**", "src/features/**", "src/shared/domain/**"],
+        include: [
+          "src/modules/**",
+          "src/domain/**",
+          "src/portals/**",
+          "src/features/**",
+          "src/shared/domain/**",
+        ],
         provider: "v8",
         thresholds: { lines: 70 },
       },

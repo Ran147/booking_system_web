@@ -1,2 +1,1 @@
-export { useCursorPagination } from "./useCursorPagination";
-export type { UseCursorPaginationReturn } from "./UseCursorPaginationReturn.interface";
+export * from "@/hooks";
