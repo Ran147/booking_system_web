@@ -33,3 +33,6 @@ blob-report/
 
 # Knowledge graph (graphify)
 graphify-out/
+# Knowledge graph (graphify)
+graphify-out/
+.graphify/
