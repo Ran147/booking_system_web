@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/services/` |
+| Feature folder | `src/modules/business/features/services/` |
 | Stories | KAN-54, KAN-55, KAN-56, KAN-57, KAN-58, KAN-59, KAN-60, KAN-61, KAN-62 |
-| Status | Draft |
+| Status | Ready |
 | Depends on | KAN-28 (subscriber sign-in, session and `businessId` claim); KAN-32 / KAN-49 (read-only business); KAN-63 (bookings used by KAN-59 and KAN-62); KAN-111 (public catalog KAN-113, discounts shown in KAN-115); KAN-77 collaborators (Q1 decided 2026-09-28: `Collaborator.serviceIds`; permission `manage_services`, KAN-86) |
 
 ## Intent
@@ -22,26 +22,27 @@ The subscriber builds and maintains the catalog of services their business offer
 The business always comes from the session, never from the URL. A subscriber never sees or changes another business's services.
 
 ## In scope
-- Service form (create and edit) with name, description, price, approximate duration, image and additional features.
-- Paginated service list with search by name and filter by status.
-- Status changes `active` ↔ `inactive`, and deletion of `inactive` services without `pending` or `confirmed` bookings.
-- Discounts on a service: percentage or fixed amount, with a validity date range.
-- Snapshot of name, price and duration on every booking (KAN-62).
+- Service form (create and edit) with name, description, price, approximate duration, image and additional features (KAN-54, KAN-56).
+- Paginated service list with search by name prefix and filter by status (KAN-55).
+- Status changes `active` ↔ `inactive` (KAN-57, KAN-58).
+- Deletion of `inactive` services without `pending` or `confirmed` bookings (KAN-59).
+- Discounts on a service: percentage or fixed amount, with a validity date range (KAN-60).
 - Assigning collaborators to a service and choosing whether the customer picks one or the system assigns one (KAN-61).
+- Snapshot of name, price and duration on every booking (KAN-62).
 
 ## Out of scope
-- Registering and managing collaborators (KAN-77 epic).
-- A discount type called "reservas" (see Backlog issues) until the team clarifies it.
-- Plan limits on the number of services (KAN-181, admin plans epic).
-- How customers see services and discounts (KAN-113 to KAN-115).
-- Booking creation itself (KAN-69, KAN-148); this spec only defines what the booking stores from the service.
+- Registering and managing collaborators (specified in KAN-77 epic).
+- A discount type called "reservas" (see Backlog issues) until the product team clarifies it.
+- Plan limits on the number of services (specified in KAN-181, admin plans epic).
+- How customers see services and discounts (specified in KAN-113 to KAN-115).
+- Booking creation flow itself (specified in KAN-69, KAN-148); this spec only defines what the booking stores from the service.
 
 ## Data
 - `Service` at `businesses/{businessId}/services/{serviceId}` (`domain-glossary` §3). Fields used: `name`, `description`, `priceInCents`, `durationMinutes`, `status` (`active` | `inactive`, `domain-glossary` §4.5), `searchName` (normalized name for prefix search, `api-query-standards` §6), `discounts` (`ServiceDiscount`, KAN-60).
-- **New fields (names to confirm in review):** `imageUrl` (Nullable, the service image), `features` (list of short text items for "more characteristics"). `ServiceDiscount`: `type` (`percentage` | `fixed_amount`), `value` (percent, or amount in cents), `startsAt`, `endsAt`.
+- **New fields:** `imageUrl` (Nullable, the service image), `features` (list of short text items for "more characteristics"). `ServiceDiscount`: `type` (`percentage` | `fixed_amount`), `value` (percent, or amount in cents), `startsAt`, `endsAt`.
 - `Booking.serviceSnapshot` (`name`, `priceInCents`, `durationMinutes`) — `domain-glossary` §3 and the `Booking` interface (KAN-62).
 - `Business` status (`active`, `inactive`, `suspended`) decides whether writes are allowed (KAN-49).
-- **New field (KAN-61):** `collaboratorSelection` on `Service`: `customer_choice` | `automatic` (glossary §3). Which collaborators serve the service is `Collaborator.serviceIds` (collaborators spec); this screen edits it from the service side.
+- **New field (KAN-61):** `collaboratorSelection` on `Service`: `customer_choice` | `automatic` (glossary §3). Which collaborators serve the service is stored in `Collaborator.serviceIds` (collaborators spec); this screen edits it from the service side.
 
 ## Acceptance criteria
 
@@ -125,7 +126,10 @@ The business always comes from the session, never from the URL. A subscriber nev
 - [ ] **AC-KAN-62-05** · edge · Given a booking whose service was later deleted (KAN-59), when it is shown in the agenda or history, then its name, price and duration come from the snapshot and no `common:errors.notFound` is shown. [KAN-62, KAN-59]
 
 ## BLOCKED
-None. Q1 was decided on 2026-09-28: KAN-61 is specified (AC-KAN-61-01 … AC-KAN-61-07).
+None. All open architectural questions (Q1–Q7) were resolved on 2026-09-28 and none block service management.
+
+## Deferred (out of MVP)
+None.
 
 ## Assumptions (to confirm)
 | Id | Assumption | Affects |
@@ -154,26 +158,31 @@ None. Q1 was decided on 2026-09-28: KAN-61 is specified (AC-KAN-61-01 … AC-KAN
 
 ## Non-functional
 - i18n keys (new prefixes): `business:services.form.*`, `business:services.list.*`, `business:services.delete.*`, `business:services.discounts.*`, `business:services.snapshot.*`, `business:services.status.*` (activate / deactivate confirmation texts), `business:services.collaborators.*`. Reused: `validation:required`, `validation:outOfRange`, `validation:tooLong`, `common:errors.network`, `common:errors.notFound`, `business:errors.readOnly`.
+- Theming: Full support for light and dark modes using Tailwind CSS v4 semantic tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-card`). No static palette colors.
 - Pagination: cursor pagination with `PAGINATION.DEFAULT_PAGE_SIZE`, total count from the server, filters and search kept in the URL and reset to page one on change (`api-query-standards` §5–6). Search input debounced.
 - Delete runs through the `deleteService` callable so the booking check happens on the server; status toggles (KAN-57/58) may update optimistically with rollback (`api-mutation-standards`).
 - Snapshot (KAN-62) is written inside the booking transaction on the server.
 - Tenant isolation: every read and write uses the session `businessId`; Firestore rules deny writes when the business is not `active`.
 - Money shown from `priceInCents` in the business currency; discount dates in the business `timeZone`.
 - Idle logout (KAN-38) applies on every screen of this feature; no reCAPTCHA (authenticated screens).
-- Accessibility: status badges have a text label, not only color; confirmation dialogs for deactivate and delete trap focus and are keyboard operable; the image field has alt text taken from the service name.
+- Accessibility (WCAG 2.1 AA):
+  - Status badges have an explicit text label and icon, not relying on color alone.
+  - Confirmation dialogs for deactivate and delete trap focus, announce headings via ARIA, and are fully keyboard operable (Escape to dismiss, Tab/Shift-Tab cycle).
+  - The image upload field has alt text taken from the service name and accessible drag-and-drop / file selector controls.
+  - Interactive table rows, pagination controls, and action buttons meet minimum touch target sizes (44x44 CSS px) and show visible focus indicators (`focus-visible:ring-2`).
 
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-54 | AC-KAN-54-01 … AC-KAN-54-09 | `tests/ServiceFormPage.test.tsx` |
-| KAN-55 | AC-KAN-55-01 … AC-KAN-55-08 | `tests/ServiceListPage.test.tsx` |
-| KAN-56 | AC-KAN-56-01 … AC-KAN-56-06 | `tests/ServiceFormPage.test.tsx` |
-| KAN-57 | AC-KAN-57-01 … AC-KAN-57-04 | `tests/ServiceListPage.test.tsx` |
-| KAN-58 | AC-KAN-58-01 … AC-KAN-58-05 | `tests/ServiceListPage.test.tsx` |
-| KAN-59 | AC-KAN-59-01 … AC-KAN-59-05 | `tests/ServiceListPage.test.tsx` |
+| KAN-54 | AC-KAN-54-01 … AC-KAN-54-09 | `src/modules/business/features/services/tests/ServiceFormPage.test.tsx` |
+| KAN-55 | AC-KAN-55-01 … AC-KAN-55-08 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
+| KAN-56 | AC-KAN-56-01 … AC-KAN-56-06 | `src/modules/business/features/services/tests/ServiceFormPage.test.tsx` |
+| KAN-57 | AC-KAN-57-01 … AC-KAN-57-04 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
+| KAN-58 | AC-KAN-58-01 … AC-KAN-58-05 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
+| KAN-59 | AC-KAN-59-01 … AC-KAN-59-05 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
 | KAN-59 | AC-KAN-59-02, AC-KAN-59-06, AC-KAN-59-07 | `functions/src/services/tests/deleteService.test.ts` |
-| KAN-60 | AC-KAN-60-01, AC-KAN-60-02, AC-KAN-60-04 … AC-KAN-60-10 | `tests/ServiceDiscountsPage.test.tsx` |
+| KAN-60 | AC-KAN-60-01, AC-KAN-60-02, AC-KAN-60-04 … AC-KAN-60-10 | `src/modules/business/features/services/tests/ServiceDiscountsPage.test.tsx` |
 | KAN-60 | AC-KAN-60-03 | `functions/src/bookings/tests/createBooking.test.ts` |
-| KAN-61 | AC-KAN-61-01 … AC-KAN-61-07 | `tests/ServiceCollaboratorsPage.test.tsx` |
+| KAN-61 | AC-KAN-61-01 … AC-KAN-61-07 | `src/modules/business/features/services/tests/ServiceCollaboratorsPage.test.tsx` |
 | KAN-62 | AC-KAN-62-01, AC-KAN-62-03, AC-KAN-62-04 | `functions/src/bookings/tests/createBooking.test.ts` |
-| KAN-62 | AC-KAN-62-02, AC-KAN-62-05 | `tests/ServiceFormPage.test.tsx` |
+| KAN-62 | AC-KAN-62-02, AC-KAN-62-05 | `src/modules/business/features/services/tests/ServiceFormPage.test.tsx` |
