@@ -1,4 +1,20 @@
 {
+  "home": {
+    "plans": {
+      "billingPeriod": {
+        "annual": "/year",
+        "monthly": "/month"
+      },
+      "empty": "No subscription plans available at this time.",
+      "limits": {
+        "maxBookings": "Up to {{count}} bookings per month"
+      },
+      "retry": "Retry",
+      "seeDetails": "Get started",
+      "subtitle": "Choose the ideal plan to manage your business bookings and appointments.",
+      "title": "Plans & Pricing"
+    }
+  },
   "layout": {
     "title": "Booking System"
   },
