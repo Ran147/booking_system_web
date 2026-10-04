@@ -4,7 +4,7 @@
 | --- | --- |
 | Portal | landing |
 | Feature folder | `src/portals/landing/features/home/` |
-| Stories | KAN-2, KAN-3, KAN-4, KAN-5, KAN-6, KAN-7, KAN-8, KAN-9, KAN-10, KAN-11, KAN-12, KAN-13 |
+| Stories | KAN-2, KAN-3, KAN-4, KAN-5, KAN-6, KAN-7, KAN-9, KAN-12 (KAN-8, KAN-10, KAN-11, KAN-13 moved to KAN-196) |
 | Status | Draft |
 | Depends on | KAN-20 plan checkout (plan details KAN-21; checkout KAN-22, Q7 decided 2026-09-28), KAN-28 / KAN-128 sign-in (`src/features/auth`), KAN-14 contact (shared contact data), KAN-180 plans (admin, source of `Plan`) |
 
@@ -26,7 +26,7 @@ No actor writes platform data from this page. The contact form only sends a mess
 - Contact form protected by reCAPTCHA (KAN-5).
 - Testimonials (KAN-6).
 - Catalog of `active` plans with price, features and limits, with a contract action on each plan (KAN-7, KAN-2).
-- Footer with general information, terms link, social links, phone and contact email (KAN-8 to KAN-13).
+- Footer: moved to Epic KAN-196 ([Landing] Footer, specified in `src/portals/landing/layout/specs/SPEC.md`).
 - Terms and conditions page reachable from the home page (KAN-9).
 
 ## Out of scope
@@ -89,33 +89,27 @@ No actor writes platform data from this page. The contact form only sends a mess
 - [ ] **AC-KAN-7-08** · error · Given the plan was deactivated after the catalog loaded, when the visitor activates contract, then the checkout does not open and `landing:planCheckout.payment.planUnavailableError` is shown (AC-KAN-21-10). [KAN-7, KAN-184]
 - [ ] **AC-KAN-7-09** · edge · Given a signed-in user, when they activate contract, then they see `landing:planCheckout.detail.signedInNotice` as in AC-KAN-21-11. [KAN-7, KAN-21]
 
-### KAN-8 — Footer with general information
-- [ ] **AC-KAN-8-01** · happy · Given any landing page, when it renders, then a footer shows the logo, a short platform description, links to the terms (KAN-9) and the contact section, the social links (KAN-10), the phone (KAN-11), the contact email (KAN-13) and the copyright line with the current year. [KAN-8]
-- [ ] **AC-KAN-8-02** · error · Given one footer item (phone, email or a social link) has no value configured, when the footer renders, then that item is omitted and no empty label or dead link is shown. [KAN-8]
-- [ ] **AC-KAN-8-03** · edge · Given a phone-width viewport, when the footer renders, then its columns stack vertically without horizontal scrolling. [KAN-8]
+### KAN-8 — Footer with general information (Moved to KAN-196)
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
 
 ### KAN-9 — Terms and conditions
 - [ ] **AC-KAN-9-01** · happy · Given a visitor, when they activate `landing:home.footer.terms`, then the terms and conditions page opens with a title, the last-updated date and the full text in the active language. [KAN-9]
 - [ ] **AC-KAN-9-02** · error · Given the terms page fails to load (network error while loading the route), when the visitor opens it, then `common:errors.network` is shown with a retry action. [KAN-9]
 - [ ] **AC-KAN-9-03** · edge · Given a visitor opens the terms URL directly, when the page loads, then it renders without requiring sign-in, and a way back to the home page is available. [KAN-9]
 
-### KAN-10 — Links to the company's social networks
-- [ ] **AC-KAN-10-01** · happy · Given social links are configured (AS-4), when the footer renders, then each network is shown as an icon link with an accessible name (`landing:home.footer.social.<network>`) that opens the profile in a new tab. [KAN-10]
-- [ ] **AC-KAN-10-02** · error · Given a network has no URL configured, when the footer renders, then no icon is rendered for it. [KAN-10]
-- [ ] **AC-KAN-10-03** · edge · Given a social link opens in a new tab, when it is followed, then the landing page stays open in the original tab and the new tab has no access to it (no opener). [KAN-10]
+### KAN-10 — Links to the company's social networks (Moved to KAN-196)
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
 
-### KAN-11 — Phone number
-- [ ] **AC-KAN-11-01** · happy · Given a phone is configured, when the footer renders, then the phone is shown in international format and activating it starts a call on devices that support it (tel link). [KAN-11]
-- [ ] **AC-KAN-11-02** · error · Given no phone is configured, when the footer renders, then the phone item is omitted. [KAN-11, KAN-8]
+### KAN-11 — Phone number (Moved to KAN-196)
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
 
 ### KAN-12 — Company logo
 - [ ] **AC-KAN-12-01** · happy · Given any landing page, when the navbar renders, then the platform logo is shown with the alternative text `landing:home.navbar.logoAlt`, and activating it opens the landing home. [KAN-12]
 - [ ] **AC-KAN-12-02** · error · Given the logo image fails to load, when the navbar renders, then the platform name is shown as text in its place and the link still works. [KAN-12]
 - [ ] **AC-KAN-12-03** · edge · Given the active theme is dark, when the logo renders, then the variant for dark backgrounds is used so it stays legible. See AS-12. [KAN-12]
 
-### KAN-13 — Contact email
-- [ ] **AC-KAN-13-01** · happy · Given a contact email is configured, when the footer renders, then the address is shown and activating it opens the device's mail client with the address filled in (mailto link). [KAN-13]
-- [ ] **AC-KAN-13-02** · error · Given no contact email is configured, when the footer renders, then the email item is omitted. [KAN-13, KAN-8]
+### KAN-13 — Contact email (Moved to KAN-196)
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
 
 ## BLOCKED
 None. Q7 was decided on 2026-09-28: the call to action and each plan card lead to the plan checkout (AC-KAN-2-05, AC-KAN-7-07).
@@ -160,9 +154,9 @@ None. Q7 was decided on 2026-09-28: the call to action and each plan card lead t
 | KAN-5 | AC-KAN-5-01 … AC-KAN-5-07 | `tests/ContactForm.test.tsx`; `functions/src/contact/tests/sendContactMessage.test.ts` |
 | KAN-6 | AC-KAN-6-01, AC-KAN-6-02, AC-KAN-6-03, AC-KAN-6-04 | `tests/HomePage.test.tsx` |
 | KAN-7 | AC-KAN-7-01 … AC-KAN-7-09 | `tests/PlanCatalog.test.tsx` |
-| KAN-8 | AC-KAN-8-01, AC-KAN-8-02, AC-KAN-8-03 | `tests/LandingFooter.test.tsx` |
+| KAN-8 | Moved to KAN-196 | `src/modules/landing/layout/specs/SPEC.md` |
 | KAN-9 | AC-KAN-9-01, AC-KAN-9-02, AC-KAN-9-03 | `tests/TermsPage.test.tsx` |
-| KAN-10 | AC-KAN-10-01, AC-KAN-10-02, AC-KAN-10-03 | `tests/LandingFooter.test.tsx` |
-| KAN-11 | AC-KAN-11-01, AC-KAN-11-02 | `tests/LandingFooter.test.tsx` |
+| KAN-10 | Moved to KAN-196 | `src/modules/landing/layout/specs/SPEC.md` |
+| KAN-11 | Moved to KAN-196 | `src/modules/landing/layout/specs/SPEC.md` |
 | KAN-12 | AC-KAN-12-01, AC-KAN-12-02, AC-KAN-12-03 | `tests/LandingNavbar.test.tsx` |
-| KAN-13 | AC-KAN-13-01, AC-KAN-13-02 | `tests/LandingFooter.test.tsx` |
+| KAN-13 | Moved to KAN-196 | `src/modules/landing/layout/specs/SPEC.md` |
