@@ -14,3 +14,4 @@
 
 # Jira exports come from Excel/Jira and may use CRLF; keep them untouched
 docs/backlog/*.csv -text
+graphify-out/graph.json merge=graphify

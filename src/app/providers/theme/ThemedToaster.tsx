@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Toaster } from "@/shared/components";
+import { Toaster } from "@/components/common";
 import { useTheme } from "./useTheme";
 
 export const ThemedToaster = (): ReactElement => {

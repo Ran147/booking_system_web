@@ -25,3 +25,6 @@ npm-debug.log*
 *.log
 .DS_Store
 Thumbs.db
+
+# Knowledge graph (graphify)
+graphify-out/

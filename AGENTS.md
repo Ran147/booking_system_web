@@ -1,91 +1,122 @@
-# AGENTS.md
+# Booking System Web — Agent Contract
 
-Guide for AI coding agents (GitHub Copilot, Google Antigravity, Claude Code and others) working in **booking_system_web**: a multi-tenant booking SaaS with four portals — `landing`, `business` (subscriber and collaborators), `customer` and `admin`.
+This file is the **cross-IDE contract** for every AI coding agent (Google Antigravity, GitHub Copilot, Claude Code and others) working in **Booking System Web**: a multi-tenant booking SaaS with four portals — `landing`, `business` (subscriber and collaborators), `customer` and `admin`.
 
-Stack: React + TypeScript (Vite, React Router) · Firebase (Auth, Firestore, Cloud Functions, App Check, Hosting) · TanStack Query + React Context · Tailwind CSS v4 + shadcn/ui · React Hook Form + Zod · react-i18next (es, en) · Vitest + Testing Library + Firebase Emulator.
+Stack: React 19 + TypeScript (Vite, React Router) · Firebase (Auth, Firestore, Cloud Functions, App Check, Hosting) · TanStack Query + React Context · Tailwind CSS v4 + shadcn/ui · React Hook Form + Zod · react-i18next (es, en) · Vitest + Testing Library + Firebase Emulator.
 
-## 1. Before you write code
+---
 
-1. **Find the spec.** Every feature has `specs/SPEC.md` in its folder. If it does not exist, create it first with the `backlog-to-spec` skill. Do not implement from a vague prompt.
-2. **Load the skills for the task** (table below). Each skill is `.agents/skills/<name>/SKILL.md`.
-3. **Respect decisions.** Q1–Q7 are decided (`docs/decisions/open-questions.md`). Anything still marked `BLOCKED` is not implemented or invented; stories under "Deferred (out of MVP)" are not built; `PROP-n` stories are proposals not yet in Jira: create the Jira story before implementing one.
-4. **Check your work** with the commands in §4 before saying you are done.
+## 1. Read this first (Mandatory Reading Order)
 
-## 2. Which skills to load
+Before writing or modifying any code, read these documents in order:
 
-| If the task is… | Load |
+| Document | Purpose |
 | --- | --- |
-| Any TypeScript or TSX change | `code-style-standards` (always) |
-| Naming a domain concept, a status, a collection or a field | `domain-glossary` |
-| Turning a KAN story or epic into a spec, or writing acceptance criteria | `backlog-to-spec`, `domain-glossary` |
-| A new feature, page or screen | `component-architecture`, `component-standards`, `state-management`, `i18n-standards` |
-| Rendering UI elements, creating a shared component | `component-standards`, `theming-standards`, `i18n-standards` |
-| Any text a person reads (labels, messages, emails, exports) | `i18n-standards` |
-| A technical string or a number in code | `constants-standards` |
-| Colors, dark mode, status badges | `theming-standards` |
-| Deciding where state lives, filters in the URL, a new Context | `state-management` |
-| Reading data, lists, pagination, search, realtime, export | `api-query-standards`, `auth-and-roles` |
-| Creating, updating, deleting, status changes, Cloud Functions | `api-mutation-standards`, `auth-and-roles`, `domain-glossary` |
-| Forms and validation | `forms-validation-standards`, `i18n-standards`, `api-mutation-standards` |
-| Sign-in, roles, route guards, `firestore.rules`, idle logout, reCAPTCHA | `auth-and-roles` |
-| Writing or reviewing tests | `unit-testing-standards` |
+| [`AGENTS.md`](AGENTS.md) | This contract: non-negotiable architectural rules and quality gates. |
+| [`docs/CONTEXTO-APP.md`](docs/CONTEXTO-APP.md) | Compact domain & architectural summary: actors, portals, collections, and state machines. |
+| [`docs/ERRORES-Y-LECCIONES.md`](docs/ERRORES-Y-LECCIONES.md) | Historical log of mistakes made in this repo. **Do not repeat them.** |
+| [`docs/decisions/open-questions.md`](docs/decisions/open-questions.md) | Open architectural questions (Q1–Q7). Anything marked `BLOCKED` stays out of code. |
+| [`.agents/skills/revisor-agente/SKILL.md`](.agents/skills/revisor-agente/SKILL.md) | Automated auditor subagent to review PRs and branches against all project skills. |
 
-## 3. Precedence between skills
+---
 
-When two skills seem to disagree, the higher one wins:
+## 2. Default Role: Elite Senior Software Engineer & Architect
 
-1. **Tooling** — ESLint, Prettier and `tsc` (`eslint.config.js`, `.prettierrc.json`, `tsconfig.json`). If a skill contradicts them, the skill is wrong and must be fixed.
-2. **`auth-and-roles`** — security, permissions, tenant isolation.
-3. **`domain-glossary`** — names, statuses and transitions.
-4. **Topic owners**, each on its own topic:
-   - visible text → `i18n-standards` (over `constants-standards`)
-   - technical literals and numbers → `constants-standards`
-   - colors and tokens → `theming-standards` (over `component-standards`)
-   - structure and logic → `component-architecture` (over `component-standards`)
-   - which primitive → `component-standards`
-   - where state lives → `state-management`
-   - reads → `api-query-standards`; writes → `api-mutation-standards`
-   - forms → `forms-validation-standards`
-   - spec format → `backlog-to-spec`; tests → `unit-testing-standards`
-5. **`code-style-standards`** — the base layer for everything not covered above.
+**Always** operate as an elite senior software engineer and frontend/fullstack architect on every prompt. Deliver production-grade, maintainable solutions by default. No junior shortcuts, tutorial-style antipatterns, or "good enough" code.
 
-## 4. Commands
+### Core Engineering Rules:
+- **Spec-First Protocol (SDD):** No code is written without a prior technical specification (`docs/specs/YYYY-MM-DD-US-XX-nombre.md`).
+- **Simplicity & SOLID:** Prefer the simplest correct architecture; avoid over-engineering. Extend established patterns, never invent parallel ones.
+- **Strict Scope Boundaries:** Keep diffs strictly focused on the assigned User Story (`US-XX`). **Zero drive-by refactors.**
+- **No HTML Controls in Modules:** All buttons, inputs, modals, and spinners must consume `src/components/common/`.
+- **Secrets & Git:** Never commit secrets, tokens, or credentials (`.env*` is gitignored). Commits are atomic, in Spanish, imperative, and without accents in the subject line (`feat(scope): descripcion (US-XX)`).
 
-| Command | Does |
+---
+
+## 3. Project Structure (Clean Modular Architecture)
+
+```text
+src/
+├── assets/                  # Logos, marcas y recursos visuales estaticos
+├── components/              # Bloques de UI reutilizables
+│   ├── common/              # Atomos en carpetas kebab-case (button/, badge/, card/, modal/, spinner/)
+│   │   ├── button/
+│   │   │   ├── Button.tsx
+│   │   │   ├── models/button.model.ts
+│   │   │   └── index.ts
+│   │   └── index.ts         # Export barrel unificado de componentes comunes
+│   └── layout/              # Estructuras visuales (navbar/, sidebar/, footer/)
+├── constants/               # Constantes globales congeladas (Object.freeze) ordenadas A-Z
+├── context/                 # React Context globales (AuthContext, ThemeContext)
+│   └── models/              # Contratos JSDoc de los ContextValues
+├── domain/                  # Entidades del dominio y maquinas de estado canonicas
+├── hooks/                   # Custom hooks transversales (useTheme, useDebounce)
+├── modules/                 # Paginas de negocio organizadas por dominio
+│   ├── landing/             # Portal publico: home, pricing (US-07), contact, onboarding
+│   ├── business/            # Portal dueno de negocio (B2B): services, schedule, subscription, customers, reports
+│   ├── customer/            # Portal cliente final (B2C): business-home, booking-flow, my-bookings, profile
+│   ├── admin/               # Portal Super Admin: businesses, plans, parameters, dashboard, tickets, audit
+│   └── auth/                # Modulo compartido de login, registro, recuperacion y reCAPTCHA
+├── services/                # Conexion a Firebase, Firestore queries, Cloud Functions y Mock Gateway
+├── types/                   # Tipos TypeScript transversales (Nullable, CursorPage)
+└── utils/                   # Funciones puras (formateadores de divisa/fecha, validaciones)
+```
+
+---
+
+## 4. Mandatory Skill Protocol & Catalog
+
+Before implementing or reviewing code, agents **must** consult and follow every matching skill under `.agents/skills/<name>/SKILL.md`:
+
+| Skill | Path | Use when |
+| --- | --- | --- |
+| `component-architecture` | `.agents/skills/component-architecture/SKILL.md` | Structuring modules in `src/modules/`, MVVM separation (`use*ViewModel`), scannable returns (< 80 lines), and JSDoc contracts in `models/*.model.*`. |
+| `code-style-standards` | `.agents/skills/code-style-standards/SKILL.md` | Writing any TSX/TS, enforcing `const` arrow functions, and strictly forbidding abbreviations (`error` not `err`, `event` not `e`, `button` not `btn`). |
+| `component-standards` | `.agents/skills/component-standards/SKILL.md` | Consuming atomic UI from `src/components/common/`, forbidding raw `<button>`, `<input>`, `<select>`, `<textarea>`, custom spinners, or ad-hoc modals. |
+| `constants-standards` | `.agents/skills/constants-standards/SKILL.md` | Centralizing technical literals & magic numbers into `@/constants/` with `Object.freeze()` and strict alphabetical sorting A-Z at every level. |
+| `dynamic-theming-standards`| `.agents/skills/dynamic-theming-standards/SKILL.md`| Styling with Tailwind v4 semantic tokens (`bg-background`, `text-foreground`, `bg-card`), forbidding static palette colors, ensuring Dark/Light mode (RNF-05). |
+| `git-workflow` | `.agents/skills/git-workflow/SKILL.md` | Managing branches (`US-XX` from `develop`), atomic Spanish commit subjects without accents, and opening PRs against `develop`. |
+| `revisor-agente` | `.agents/skills/revisor-agente/SKILL.md` | Auditing PRs or branches against project skills, running automated checks (format, lint, types, tests), and generating canonical review reports. |
+| `i18n-standards` | `.agents/skills/i18n-standards/SKILL.md` | Managing user-visible text in `src/i18n/locales/{es,en}/*.json` with `t(...)` keys and Intl currency/date formatting. |
+| `auth-and-roles` | `.agents/skills/auth-and-roles/SKILL.md` | Firebase Auth, RBAC permissions, route guards, idle session logout, reCAPTCHA, and tenant isolation. |
+| `api-query-standards` | `.agents/skills/api-query-standards/SKILL.md` | Reading data with TanStack Query hooks, query keys, cursor pagination, and Zod document adapters. |
+| `api-mutation-standards` | `.agents/skills/api-mutation-standards/SKILL.md` | Writing data to Firestore or Cloud Functions, optimistic updates, cache invalidation, and toast error feedback. |
+| `unit-testing-standards` | `.agents/skills/unit-testing-standards/SKILL.md` | Writing tests with Vitest, React Testing Library, and Page Object Model mapping acceptance criteria (KAN keys). |
+
+---
+
+## 5. Token Efficiency: Graphify-First Protocol
+
+**Before reading dozens of source files to understand architecture or relationships, agents should query the knowledge graph first:**
+
+This project supports [graphify](https://github.com/safishamsi/graphify) to maintain a persistent knowledge graph of the codebase (`graphify-out/graph.json`), saving > 80% of tokens.
+- Query with: `graphify query "<pregunta>"`
+- Trace dependencies: `graphify query "what calls usePlanCatalogViewModel"`
+- `graphify-out/` is gitignored — never commit it.
+
+---
+
+## 6. Verification Commands
+
+Before saying a task is done or opening a PR, the following commands **must pass with 0 errors**:
+
+| Command | Action |
 | --- | --- |
-| `npm run dev` | Vite dev server (uses the Firebase emulators when `VITE_USE_EMULATORS=true`) |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier (write) · `npm run format:check` to verify |
-| `npm run typecheck` | `tsc -b --noEmit` (app and tool configs) |
-| `npm run test:run` | Unit and component tests |
+| `npm run format:check` | Prettier verification (format and UTF-8 without BOM) |
+| `npm run lint` | ESLint (0 errors, 0 warnings) |
+| `npm run typecheck` | TypeScript compilation (`tsc -b --noEmit`) |
+| `npm run test:run` | Vitest unit and component test suite |
 | `npm run test:rules` | `firestore.rules` tests against the emulator |
-| `npm run emulators` | Firebase Emulator Suite |
-| `npm run seed` | Test accounts (super admin, subscriber, collaborator, customer, subscriber of a pending business), an active and a pending business in the emulators only (`scripts/seed-emulator.ts`; needs `FIRESTORE_EMULATOR_HOST` and `FIREBASE_AUTH_EMULATOR_HOST`) |
+| `npm run dev` | Vite development server |
+| `npm run seed` | Seed local emulator data (`scripts/seed-emulator.ts`) |
 
-Before finishing a task: `npm run lint && npm run typecheck && npm run test:run` must pass (plus `npm run format:check`, `npm run build`, and `npm run test:rules` when `firestore.rules` changed). There is no CI for now: these checks are run locally before each PR. CI can be re-enabled later.
+---
 
-## 5. Repository map
+## 7. Hard Non-Negotiable Rules
 
-```
-.agents/skills/          # the skills listed above
-docs/backlog/            # jira-export.csv, epic-map.md (epic → portal → folder)
-docs/decisions/          # open-questions.md (Q1–Q7, all decided) and ADRs
-functions/               # Cloud Functions (emails, payments, bookings, exports, audit)
-src/app/                 # App, providers, router
-src/portals/<portal>/    # landing | business | customer | admin: routes, layout, features/
-src/features/            # features shared by several portals (auth)
-src/shared/              # components, constants, domain, hooks, lib, types, utils, test-utils
-src/i18n/                # i18n setup and locales/{es,en}
-src/styles/tokens.css    # design tokens (light / dark)
-firestore.rules          # the security boundary
-```
-
-## 6. Hard rules
-
-- Never commit secrets. Firebase web config comes from `.env.local` (`VITE_FIREBASE_*`), which is git-ignored.
-- Never weaken `firestore.rules` to make a feature work.
-- Never read `businessId` from the URL or a form in the business portal.
-- Never add a status, role, field or screen for a `BLOCKED` question.
-- Never write user-visible text in code. It goes to `src/i18n/locales/{es,en}`.
-- Never disable a lint rule inline to get green. Fix the code, or propose a change to the rule and the skill.
-- Do not add dependencies (state libraries, UI kits, date libraries) without the team's agreement.
+- Never commit secrets (`.env.local` is gitignored).
+- Never weaken `firestore.rules` to make a feature pass.
+- Never read `businessId` from the URL or form inputs in the business portal (always from authenticated session).
+- Never implement features or database fields for questions marked `BLOCKED` in `docs/decisions/open-questions.md`.
+- Never put user-visible text in code; it belongs in `src/i18n/locales/{es,en}`.
+- Never disable lint or TypeScript rules inline (`// eslint-disable`) to pass checks. Fix the code.
