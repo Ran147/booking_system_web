@@ -41,6 +41,4 @@ describe("readFirebaseEnvironment", () => {
     expect(firebaseEnvironment.firebaseOptions.projectId).toBe("booking-dev");
     expect(firebaseEnvironment.recaptchaEnterpriseSiteKey).toBe("site-key");
   });
-
-
 });
