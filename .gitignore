@@ -28,3 +28,4 @@ Thumbs.db
 
 # Knowledge graph (graphify)
 graphify-out/
+.graphify/
