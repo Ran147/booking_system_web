@@ -15,8 +15,8 @@ test("business portal sends a signed-out visitor to sign-in", async ({
 }) => {
   await page.goto("/business");
 
-  await expect(page).toHaveURL(/\/sign-in$/);
+  await expect(page).toHaveURL(/\/sign-in\?redirectTo=%2Fbusiness$/);
   await expect(
-    page.getByRole("heading", { name: common.signInPlaceholder.title }),
+    page.getByRole("heading", { name: common.auth.signIn.title }),
   ).toBeVisible();
 });

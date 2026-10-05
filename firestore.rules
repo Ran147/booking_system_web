@@ -86,6 +86,12 @@ service cloud.firestore {
       }
     }
 
+    // Each user reads only their own profile; sign-in needs User.language
+    // (AC-KAN-129-02). Writes arrive with the profile stories.
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+    }
+
     match /auditLog/{auditLogEntryId} {
       allow read: if isSuperAdmin();
       allow write: if false; // functions only

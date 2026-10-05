@@ -1,4 +1,9 @@
-import { ENV_FLAG, FIREBASE_EMULATOR } from "@/shared/constants";
+import {
+  ENV_FLAG,
+  FIREBASE_EMULATOR,
+  RECAPTCHA,
+  STRING,
+} from "@/shared/constants";
 import type { FirebaseEnvironment } from "./FirebaseEnvironment.interface";
 
 export const readFirebaseEnvironment = (
@@ -34,6 +39,11 @@ export const readFirebaseEnvironment = (
     },
     recaptchaEnterpriseSiteKey:
       environment.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || null,
+    // Google's public test key always passes; only used with the emulators.
+    recaptchaSiteKey: emulatorFallback(
+      environment.VITE_RECAPTCHA_SITE_KEY || STRING.EMPTY,
+      RECAPTCHA.TEST_SITE_KEY,
+    ),
     shouldUseEmulators,
   };
 };

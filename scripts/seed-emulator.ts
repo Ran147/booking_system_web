@@ -32,6 +32,7 @@ import {
   SEED_WEEKDAY,
 } from "./constants/SeedEmulator.constants";
 import { FIRESTORE_COLLECTION } from "../src/shared/constants/firestore/FirestoreCollection.constants";
+import { DEFAULT_LANGUAGE } from "../src/shared/constants/i18n/Language.constants";
 import { BUSINESS_STATUS } from "../src/shared/domain/business/BusinessStatus.constants";
 import { isReservedBusinessSlug } from "../src/shared/domain/business/isReservedBusinessSlug";
 import { COLLABORATOR_PERMISSION } from "../src/shared/domain/collaborator/CollaboratorPermission.constants";
@@ -114,6 +115,8 @@ const writeUserProfile = async (
   await firestore.collection(FIRESTORE_COLLECTION.USERS).doc(seedUser.UID).set({
     email: seedUser.EMAIL,
     fullName: seedUser.FULL_NAME,
+    // Sign-in switches the interface to User.language (AC-KAN-129-02).
+    language: DEFAULT_LANGUAGE,
     phone: seedUser.PHONE,
   });
 };
