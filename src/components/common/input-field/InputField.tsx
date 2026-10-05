@@ -16,6 +16,7 @@ export const InputField = forwardRef(
       name,
       placeholder,
       required = false,
+      trailingElement,
       type = "text",
       ...restProperties
     }: InputFieldProps,
@@ -58,6 +59,7 @@ export const InputField = forwardRef(
               error
                 ? "border-destructive focus:border-destructive focus:ring-destructive/20"
                 : "border-border focus:border-primary focus:ring-primary/20",
+              trailingElement && "pr-11",
               inputClassName,
             )}
             disabled={disabled}
@@ -69,6 +71,11 @@ export const InputField = forwardRef(
             type={type}
             {...restProperties}
           />
+          {trailingElement && (
+            <div className="absolute inset-y-0 right-1 flex items-center">
+              {trailingElement}
+            </div>
+          )}
         </div>
 
         {error ? (
