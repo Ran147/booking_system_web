@@ -1,9 +1,12 @@
 {
   "emailInvalid": "Enter a valid email.",
+  "fileInvalid": "Select a PNG, JPEG or WebP image up to 2 MB.",
   "outOfRange": "The value is out of the allowed range.",
   "passwordTooWeak": "The password does not meet the requirements.",
+  "phoneInvalid": "Enter a valid phone number.",
   "recaptchaRequired": "Confirm you are not a robot.",
   "required": "This field is required.",
   "tooLong": "The text is too long.",
-  "tooShort": "The text is too short."
+  "tooShort": "The text is too short.",
+  "urlInvalid": "Enter a valid HTTPS address."
 }

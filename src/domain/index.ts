@@ -4,6 +4,8 @@ export * from "./booking/BookingStatus.constants";
 export * from "./booking/BookingStatusTone.constants";
 export * from "./business/BusinessSlug.constants";
 export * from "./business/BusinessStatus.constants";
+export type * from "./business/Business.interface";
+export * from "./business/SocialNetwork.constants";
 export * from "./business/isReservedBusinessSlug";
 export * from "./collaborator/CollaboratorPermission.constants";
 export * from "./collaborator/CollaboratorStatus.constants";

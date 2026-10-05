@@ -21,6 +21,19 @@ export const businessRoutes: RouteObject[] = [
               return { Component: BusinessPlaceholderPage };
             },
           },
+          {
+            children: [
+              {
+                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                  const { BusinessProfilePage } =
+                    await import("./features/business-profile");
+                  return { Component: BusinessProfilePage };
+                },
+                path: ROUTE_PATH.BUSINESS.BUSINESS_PROFILE,
+              },
+            ],
+            element: <RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER]} />,
+          },
         ],
         element: <BusinessLayout />,
       },

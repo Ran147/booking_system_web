@@ -25,4 +25,3 @@ The decisions above need stories that are not in Jira yet. They are specified wi
 | PROP-1 | Super admin approves or rejects a pending business | `src/portals/admin/features/businesses/specs/SPEC.md` |
 | PROP-2 | Super admin suspends a business (KAN-179 reactivates it) | `src/portals/admin/features/businesses/specs/SPEC.md` |
 | PROP-3 | Subscriber creates a support ticket and sees its replies and status | `src/portals/business/features/support/specs/SPEC.md` |
-| PROP-4 | Subscriber edits the business public profile (logo, description, contact phone and email, social links; slug read-only) | `src/portals/business/features/business-profile/specs/SPEC.md` |
