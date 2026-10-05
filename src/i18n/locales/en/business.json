@@ -1,9 +1,52 @@
 {
+  "errors": {
+    "readOnly": "Your business is inactive or suspended. Changes cannot be made."
+  },
   "layout": {
     "title": "Business portal"
   },
   "placeholder": {
     "description": "This is where you will manage your business's services, schedule and customers.",
     "title": "Business dashboard"
+  },
+  "services": {
+    "form": {
+      "addFeatureAction": "Add feature",
+      "backToServicesAction": "Back to services",
+      "cancelAction": "Cancel",
+      "createSuccess": "Service created.",
+      "currencySymbol": "$",
+      "descriptionHelp": "Maximum 1000 characters.",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Briefly describe what the service includes",
+      "durationHelp": "Between 5 and 480 minutes, in 5-minute increments.",
+      "durationLabel": "Duration (minutes)",
+      "durationPlaceholder": "60",
+      "featureItemLabel": "Feature {{index}}",
+      "featurePlaceholder": "e.g. Includes wash and styling",
+      "featuresDescription": "Add up to 10 features or benefits of the service.",
+      "featuresTitle": "Additional features",
+      "imageHelp": "JPEG, PNG or WebP format, up to 2 MB.",
+      "imageInvalidError": "The image must be JPEG, PNG or WebP and under 2 MB.",
+      "imageLabel": "Service image",
+      "imagePreviewAlt": "Service preview",
+      "imageRemoveAction": "Remove image",
+      "imageUploadAction": "Select image",
+      "imageUploadPrompt": "Drag an image or click to select",
+      "maxFeaturesReached": "You have reached the maximum of 10 features.",
+      "moveFeatureDownAction": "Move down",
+      "moveFeatureUpAction": "Move up",
+      "nameLabel": "Service name",
+      "namePlaceholder": "e.g. Classic haircut",
+      "priceHelp": "Enter the price in the business currency.",
+      "priceLabel": "Price",
+      "pricePlaceholder": "0.00",
+      "readOnlyNotice": "Your business is inactive or suspended. Service creation is disabled.",
+      "removeFeatureAction": "Remove feature",
+      "submitAction": "Save service",
+      "submitting": "Saving…",
+      "subtitle": "Fill in the details to add a new service to your business catalog.",
+      "title": "New service"
+    }
   }
 }
