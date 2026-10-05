@@ -114,6 +114,7 @@ const writeUserProfile = async (
   await firestore.collection(FIRESTORE_COLLECTION.USERS).doc(seedUser.UID).set({
     email: seedUser.EMAIL,
     fullName: seedUser.FULL_NAME,
+    language: "es",
     phone: seedUser.PHONE,
   });
 };

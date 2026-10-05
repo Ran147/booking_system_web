@@ -9,6 +9,16 @@
     "description": "This is where you will manage your business's services, schedule and customers.",
     "title": "Business dashboard"
   },
+  "settings": {
+    "description": "Manage your personal account preferences.",
+    "language": {
+      "description": "Text, dates, times and prices will use the selected language.",
+      "label": "Interface language",
+      "saveError": "The language changed on this device, but it could not be saved to your account.",
+      "title": "Language"
+    },
+    "title": "Settings"
+  },
   "services": {
     "form": {
       "addFeatureAction": "Add feature",

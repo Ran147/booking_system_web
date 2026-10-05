@@ -28,6 +28,13 @@ export const businessRoutes: RouteObject[] = [
             },
             path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
           },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { SettingsPage } = await import("./features/settings");
+              return { Component: SettingsPage };
+            },
+            path: ROUTE_PATH.BUSINESS.SETTINGS,
+          },
         ],
         element: <BusinessLayout />,
       },

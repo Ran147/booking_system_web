@@ -9,6 +9,16 @@
     "description": "Aquí gestionarás los servicios, la agenda y los clientes de tu negocio.",
     "title": "Panel del negocio"
   },
+  "settings": {
+    "description": "Administra las preferencias personales de tu cuenta.",
+    "language": {
+      "description": "Los textos, fechas, horas y precios utilizarán el idioma seleccionado.",
+      "label": "Idioma de la interfaz",
+      "saveError": "El idioma cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
+      "title": "Idioma"
+    },
+    "title": "Configuración"
+  },
   "services": {
     "form": {
       "addFeatureAction": "Agregar característica",
