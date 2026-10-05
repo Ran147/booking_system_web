@@ -5,5 +5,28 @@
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
+  },
+  "profile": {
+    "edit": {
+      "cancelAction": "Cancelar",
+      "description": "Mantén actualizada la información personal asociada a tu cuenta.",
+      "discardAction": "Descartar cambios",
+      "discardConfirm": "Tienes cambios sin guardar. ¿Quieres descartarlos?",
+      "discardTitle": "Descartar cambios",
+      "emailHint": "El correo de acceso no se puede cambiar desde esta pantalla.",
+      "emailLabel": "Correo electrónico",
+      "empty": "No hay datos de perfil disponibles para editar.",
+      "fullNameLabel": "Nombre completo",
+      "fullNamePlaceholder": "Ingresa tu nombre completo",
+      "keepEditingAction": "Continuar editando",
+      "phoneInvalidError": "Ingresa un teléfono válido con 7 a 15 dígitos.",
+      "phoneLabel": "Teléfono",
+      "phonePlaceholder": "+506 8888-8888",
+      "saveAction": "Guardar cambios",
+      "saveSuccess": "Tus datos personales se actualizaron correctamente.",
+      "saving": "Guardando…",
+      "sectionTitle": "Datos personales",
+      "title": "Editar mi perfil"
+    }
   }
 }

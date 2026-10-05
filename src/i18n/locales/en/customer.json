@@ -5,5 +5,28 @@
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
+  },
+  "profile": {
+    "edit": {
+      "cancelAction": "Cancel",
+      "description": "Keep the personal information associated with your account up to date.",
+      "discardAction": "Discard changes",
+      "discardConfirm": "You have unsaved changes. Do you want to discard them?",
+      "discardTitle": "Discard changes",
+      "emailHint": "Your sign-in email cannot be changed from this screen.",
+      "emailLabel": "Email address",
+      "empty": "There is no profile information available to edit.",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Enter your full name",
+      "keepEditingAction": "Keep editing",
+      "phoneInvalidError": "Enter a valid phone number with 7 to 15 digits.",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "+1 555 123 4567",
+      "saveAction": "Save changes",
+      "saveSuccess": "Your personal information was updated successfully.",
+      "saving": "Saving…",
+      "sectionTitle": "Personal information",
+      "title": "Edit my profile"
+    }
   }
 }

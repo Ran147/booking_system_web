@@ -22,7 +22,16 @@ export const customerRoutes: RouteObject[] = [
         },
       },
       {
-        children: [],
+        children: [
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { ProfileEditPage } =
+                await import("./features/profile/ProfileEditPage");
+              return { Component: ProfileEditPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.PROFILE,
+          },
+        ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
       },
     ],
