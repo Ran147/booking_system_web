@@ -5,5 +5,32 @@
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
+  },
+  "profile": {
+    "password": {
+      "changeSuccess": "Tu contraseña se cambió correctamente.",
+      "confirmationLabel": "Confirmar nueva contraseña",
+      "currentInvalidError": "La contraseña actual es incorrecta.",
+      "currentPasswordLabel": "Contraseña actual",
+      "description": "Actualiza tu contraseña para mantener segura tu cuenta.",
+      "hidePassword": "Ocultar contraseña",
+      "mismatchError": "Las contraseñas nuevas no coinciden.",
+      "newPasswordLabel": "Nueva contraseña",
+      "reauthenticationError": "Tu sesión ya no es válida. Inicia sesión nuevamente e inténtalo de nuevo.",
+      "requirementsTitle": "La nueva contraseña debe incluir:",
+      "ruleDigit": "Un número",
+      "ruleLowercase": "Una letra minúscula",
+      "ruleMinLength": "Al menos {{count}} caracteres",
+      "ruleSymbol": "Un símbolo",
+      "ruleUppercase": "Una letra mayúscula",
+      "sameAsCurrentError": "La nueva contraseña debe ser diferente de la actual.",
+      "saveAction": "Cambiar contraseña",
+      "saving": "Cambiando contraseña…",
+      "sectionTitle": "Seguridad de la cuenta",
+      "securityHint": "Por seguridad, verificaremos tu contraseña actual antes de guardar el cambio.",
+      "showPassword": "Mostrar contraseña",
+      "title": "Cambiar contraseña",
+      "tooManyAttemptsError": "Se realizaron demasiados intentos. Espera un momento antes de volver a intentarlo."
+    }
   }
 }

@@ -5,5 +5,32 @@
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
+  },
+  "profile": {
+    "password": {
+      "changeSuccess": "Your password was changed successfully.",
+      "confirmationLabel": "Confirm new password",
+      "currentInvalidError": "The current password is incorrect.",
+      "currentPasswordLabel": "Current password",
+      "description": "Update your password to keep your account secure.",
+      "hidePassword": "Hide password",
+      "mismatchError": "The new passwords do not match.",
+      "newPasswordLabel": "New password",
+      "reauthenticationError": "Your session is no longer valid. Sign in again and try once more.",
+      "requirementsTitle": "The new password must include:",
+      "ruleDigit": "One number",
+      "ruleLowercase": "One lowercase letter",
+      "ruleMinLength": "At least {{count}} characters",
+      "ruleSymbol": "One symbol",
+      "ruleUppercase": "One uppercase letter",
+      "sameAsCurrentError": "The new password must be different from the current password.",
+      "saveAction": "Change password",
+      "saving": "Changing password…",
+      "sectionTitle": "Account security",
+      "securityHint": "For security, we will verify your current password before saving the change.",
+      "showPassword": "Show password",
+      "title": "Change password",
+      "tooManyAttemptsError": "Too many attempts were made. Wait a moment before trying again."
+    }
   }
 }
