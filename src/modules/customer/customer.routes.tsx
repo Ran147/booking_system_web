@@ -22,7 +22,16 @@ export const customerRoutes: RouteObject[] = [
         },
       },
       {
-        children: [],
+        children: [
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { ChangePasswordPage } =
+                await import("./features/change-password/ChangePasswordPage");
+              return { Component: ChangePasswordPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.CHANGE_PASSWORD,
+          },
+        ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
       },
     ],

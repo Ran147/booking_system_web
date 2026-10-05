@@ -1,8 +1,16 @@
 export const FIREBASE_ERROR_CODE = {
   FAILED_PRECONDITION: "functions/failed-precondition",
+  INVALID_CREDENTIAL: "auth/invalid-credential",
+  INVALID_USER_TOKEN: "auth/invalid-user-token",
   NETWORK_REQUEST_FAILED: "auth/network-request-failed",
   NOT_FOUND: "functions/not-found",
   PERMISSION_DENIED: "permission-denied",
+  REQUIRES_RECENT_LOGIN: "auth/requires-recent-login",
+  TOO_MANY_REQUESTS: "auth/too-many-requests",
   UNAVAILABLE: "unavailable",
   UNKNOWN: "unknown",
+  USER_MISMATCH: "auth/user-mismatch",
+  USER_TOKEN_EXPIRED: "auth/user-token-expired",
+  WEAK_PASSWORD: "auth/weak-password",
+  WRONG_PASSWORD: "auth/wrong-password",
 } as const;

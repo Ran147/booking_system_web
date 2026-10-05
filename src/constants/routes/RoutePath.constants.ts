@@ -25,6 +25,7 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
+    CHANGE_PASSWORD: "profile/password",
     ROOT: "/:businessSlug",
   },
   LANDING: {
