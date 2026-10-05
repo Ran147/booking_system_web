@@ -1,4 +1,10 @@
 {
+  "auth": {
+    "password": {
+      "hide": "Ocultar contraseña",
+      "show": "Mostrar contraseña"
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelada",
     "completed": "Completada",

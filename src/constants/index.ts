@@ -39,6 +39,7 @@ export { MONEY } from "./numbers/Money.constants";
 export { PAGINATION } from "./numbers/Pagination.constants";
 export { QUERY_DEFAULTS } from "./numbers/Query.constants";
 export { TIME_MS } from "./numbers/Time.constants";
+export { RECAPTCHA } from "./recaptcha/Recaptcha.constants";
 export { ROUTE_PATH } from "./routes/RoutePath.constants";
 export { SEARCH_PARAM } from "./routes/SearchParam.constants";
 export { STORAGE_KEY } from "./storage/StorageKey.constants";
