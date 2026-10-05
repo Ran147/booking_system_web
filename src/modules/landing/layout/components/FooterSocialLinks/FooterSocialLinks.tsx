@@ -2,17 +2,9 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLink } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
-import type { FooterSocialLinkItem, FooterSocialNetwork } from "../models";
+import type { FooterSocialLinksProps, SocialIconProps } from "./types";
 
-export interface FooterSocialLinksProps {
-  readonly socialLinks: FooterSocialLinkItem[];
-}
-
-const SocialIcon = ({
-  network,
-}: {
-  readonly network: FooterSocialNetwork;
-}): ReactElement => {
+const SocialIcon = ({ network }: SocialIconProps): ReactElement => {
   switch (network) {
     case "facebook":
       return (

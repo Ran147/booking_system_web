@@ -1,16 +1,8 @@
-import type { MouseEvent, ReactElement } from "react";
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLink } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
-import type { FooterNavigationLinkItem } from "../models";
-
-export interface FooterNavLinksProps {
-  readonly links: FooterNavigationLinkItem[];
-  readonly onNavigate: (
-    event: MouseEvent<HTMLAnchorElement>,
-    href: string,
-  ) => void;
-}
+import type { FooterNavLinksProps } from "./types";
 
 export const FooterNavLinks = ({
   links,

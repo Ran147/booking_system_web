@@ -3,11 +3,7 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLink } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
-import type { FooterContactInfo } from "../models";
-
-export interface FooterContactProps {
-  readonly contactInfo: FooterContactInfo;
-}
+import type { FooterContactProps } from "./types";
 
 export const FooterContact = ({
   contactInfo,

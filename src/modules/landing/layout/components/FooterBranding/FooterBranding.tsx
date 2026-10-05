@@ -1,10 +1,6 @@
 import { Calendar } from "lucide-react";
 import type { ReactElement } from "react";
-import type { FooterBrandingInfo } from "../models";
-
-export interface FooterBrandingProps {
-  readonly branding: FooterBrandingInfo;
-}
+import type { FooterBrandingProps } from "./types";
 
 export const FooterBranding = ({
   branding,

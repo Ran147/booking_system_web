@@ -1,10 +1,7 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { I18N_NAMESPACE } from "@/shared/constants";
-
-export interface FooterCopyrightProps {
-  readonly currentYear: number;
-}
+import type { FooterCopyrightProps } from "./types";
 
 export const FooterCopyright = ({
   currentYear,
