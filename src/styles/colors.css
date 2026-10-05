@@ -1,0 +1,166 @@
+/**
+ * Booking System Web — Global Color Palette & Brand Design System
+ *
+ * Defines the standard color palette and design tokens extracted from the
+ * official brand style guide for the entire project.
+ *
+ * Core Brand Colors:
+ * - Primary:     #C86D51 (Warm Terracotta / Copper)
+ * - Secondary:   #3A4D39 (Deep Forest / Olive Sage)
+ * - Tertiary:    #9E4F38 (Warm Rust / Brick Red)
+ * - Neutral:     #282624 (Warm Dark Charcoal)
+ * - Destructive: #BA1A1A (Rich Crimson Red)
+ *
+ * Typography:
+ * - Headline:    Newsreader (Serif)
+ * - Body:        Plus Jakarta Sans (Sans-serif)
+ * - Label:       Plus Jakarta Sans (Sans-serif)
+ *
+ * All future agents and UI components must consume semantic design tokens
+ * (@/styles/tokens.css) backed by these palette definitions.
+ */
+
+:root {
+  /* -------------------------------------------------------------------------
+   * 1. Brand Key Colors (Primitive Hex & OKLCH)
+   * ---------------------------------------------------------------------- */
+  --brand-primary: #c86d51;
+  --brand-secondary: #3a4d39;
+  --brand-tertiary: #9e4f38;
+  --brand-neutral: #282624;
+  --brand-destructive: #ba1a1a;
+
+  /* -------------------------------------------------------------------------
+   * 2. Primary Tonal Scale (Terracotta / Copper)
+   * ---------------------------------------------------------------------- */
+  --color-primary-50: oklch(0.984 0.008 36.6); /* #FFF8F6 */
+  --color-primary-100: oklch(0.959 0.021 36); /* #FFEDE8 */
+  --color-primary-200: oklch(0.919 0.043 37.7); /* #FFDBD0 */
+  --color-primary-300: oklch(0.837 0.092 37.2); /* #FFB59F */
+  --color-primary-400: oklch(0.755 0.129 38); /* #F59172 */
+  --color-primary-500: oklch(0.632 0.123 37.9); /* #C86D51 - Base */
+  --color-primary-600: oklch(0.583 0.12 38); /* #B65F44 */
+  --color-primary-700: oklch(0.495 0.114 38); /* #97472E */
+  --color-primary-800: oklch(0.408 0.108 37.7); /* #793019 */
+  --color-primary-900: oklch(0.321 0.1 37.2); /* #5B1A05 */
+  --color-primary-950: oklch(0.313 0.077 35); /* #512014 */
+
+  /* -------------------------------------------------------------------------
+   * 3. Secondary Tonal Scale (Forest / Olive Sage)
+   * ---------------------------------------------------------------------- */
+  --color-secondary-50: oklch(0.984 0.017 140); /* #F4FDF2 */
+  --color-secondary-100: oklch(0.952 0.044 140.1); /* #E0F7DB */
+  --color-secondary-200: oklch(0.91 0.044 141); /* #D2E9CE */
+  --color-secondary-300: oklch(0.824 0.044 139.9); /* #B7CDB2 */
+  --color-secondary-400: oklch(0.737 0.042 140.6); /* #9CB198 */
+  --color-secondary-500: oklch(0.65 0.042 141.6); /* #81967E */
+  --color-secondary-600: oklch(0.564 0.041 142.6); /* #687C66 */
+  --color-secondary-700: oklch(0.477 0.04 142.4); /* #50634E */
+  --color-secondary-800: oklch(0.398 0.041 143.5); /* #3A4D39 - Base */
+  --color-secondary-900: oklch(0.307 0.041 143.3); /* #233522 */
+  --color-secondary-950: oklch(0.242 0.033 146.1); /* #152416 */
+
+  /* -------------------------------------------------------------------------
+   * 4. Tertiary Tonal Scale (Warm Rust / Brick Red)
+   * ---------------------------------------------------------------------- */
+  --color-tertiary-50: oklch(0.984 0.008 36.6); /* #FFF8F6 */
+  --color-tertiary-100: oklch(0.959 0.021 36); /* #FFEDE8 */
+  --color-tertiary-200: oklch(0.919 0.043 36); /* #FFDBD1 */
+  --color-tertiary-300: oklch(0.838 0.092 36.5); /* #FFB5A0 */
+  --color-tertiary-400: oklch(0.754 0.123 36.5); /* #F29277 */
+  --color-tertiary-500: oklch(0.64 0.118 36.8); /* #D2785F */
+  --color-tertiary-600: oklch(0.581 0.114 37); /* #B36048 */
+  --color-tertiary-700: oklch(0.52 0.111 37.1); /* #9E4F38 - Base */
+  --color-tertiary-800: oklch(0.407 0.104 36.7); /* #77311D */
+  --color-tertiary-900: oklch(0.322 0.096 36.8); /* #5A1C09 */
+  --color-tertiary-950: oklch(0.252 0.058 34.2); /* #39160E */
+
+  /* -------------------------------------------------------------------------
+   * 5. Neutral Tonal Scale (Warm Charcoal & Surface Tints)
+   * ---------------------------------------------------------------------- */
+  --color-neutral-50: oklch(0.98 0.005 78.3); /* #FAF8F5 - Surface lightest */
+  --color-neutral-100: oklch(
+    0.958 0.008 61.5
+  ); /* #F5F0EC - Canvas / Page background */
+  --color-neutral-200: oklch(
+    0.914 0.008 48.6
+  ); /* #E7E1DE - Subtle borders / dividers */
+  --color-neutral-300: oklch(
+    0.827 0.008 48.6
+  ); /* #CBC5C2 - Outlines & input borders */
+  --color-neutral-400: oklch(
+    0.741 0.007 53.4
+  ); /* #AFAAA7 - Placeholders & disabled */
+  --color-neutral-500: oklch(0.656 0.006 59.6); /* #94908D - Secondary labels */
+  --color-neutral-600: oklch(0.569 0.006 48.6); /* #7A7674 - Muted text */
+  --color-neutral-700: oklch(
+    0.484 0.006 67.7
+  ); /* #615E5B - Subheadings & icons */
+  --color-neutral-800: oklch(
+    0.396 0.005 56.3
+  ); /* #494644 - Dark borders & surfaces */
+  --color-neutral-900: oklch(
+    0.27 0.005 67.6
+  ); /* #282624 - Base dark / Inverted buttons */
+  --color-neutral-950: oklch(0.208 0.005 39.4); /* #1A1716 - Dark mode canvas */
+
+  /* -------------------------------------------------------------------------
+   * 6. Destructive / Error Color Scale (Crimson Red)
+   * ---------------------------------------------------------------------- */
+  --color-destructive-base: oklch(0.506 0.193 27.7); /* #BA1A1A */
+  --color-destructive-hover: oklch(0.44 0.18 27.7);
+  --color-destructive-subtle: oklch(0.95 0.04 27.7);
+
+  /* -------------------------------------------------------------------------
+   * 7. Status Tones (Success & Warning)
+   * ---------------------------------------------------------------------- */
+  --color-success-base: oklch(
+    0.564 0.041 142.6
+  ); /* #687C66 - from Secondary family */
+  --color-warning-base: oklch(
+    0.755 0.129 38
+  ); /* #F59172 - from Primary family */
+
+  /* -------------------------------------------------------------------------
+   * 8. Typography Font Families
+   * ---------------------------------------------------------------------- */
+  --font-headline: "Newsreader", "Times New Roman", Georgia, serif;
+  --font-body:
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --font-label:
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+
+  /* -------------------------------------------------------------------------
+   * 9. UI Component Semantic Tones (Style Guide References)
+   * ---------------------------------------------------------------------- */
+  /* Buttons */
+  --btn-primary-bg: var(--color-primary-500);
+  --btn-primary-fg: #ffffff;
+  --btn-primary-hover: var(--color-primary-600);
+
+  --btn-secondary-bg: var(--color-neutral-200);
+  --btn-secondary-fg: var(--color-neutral-900);
+  --btn-secondary-hover: var(--color-neutral-300);
+
+  --btn-inverted-bg: var(--color-neutral-900);
+  --btn-inverted-fg: #ffffff;
+  --btn-inverted-hover: var(--color-neutral-800);
+
+  --btn-outlined-border: var(--color-neutral-300);
+  --btn-outlined-fg: var(--color-neutral-900);
+  --btn-outlined-hover: var(--color-neutral-100);
+
+  /* Badges & Chips */
+  --chip-primary-bg: var(--color-primary-500);
+  --chip-secondary-bg: var(--color-secondary-800);
+  --chip-tertiary-bg: var(--color-tertiary-700);
+  --chip-destructive-bg: var(--color-destructive-base);
+
+  /* Search Input */
+  --input-search-bg: var(--color-neutral-50);
+  --input-search-border: var(--color-neutral-200);
+  --input-search-fg: var(--color-neutral-900);
+  --input-search-placeholder: var(--color-neutral-500);
+}
