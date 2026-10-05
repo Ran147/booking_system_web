@@ -51,22 +51,22 @@ No actor writes or updates data through the footer UI; it is a read-only layout 
 - [x] **AC-KAN-8-05** · edge · Given a visitor navigates through the footer using a keyboard (Tab key), when interactive elements receive focus, then a visible focus indicator conforming to the active theme tokens is displayed. [KAN-8]
 
 ### KAN-10 — Links to the company's social networks
-- [ ] **AC-KAN-10-01** · happy · Given official social media accounts are configured for the platform (AS-4), when the footer renders, then each social network is rendered as an icon link with an accessible, localized label (`landing:footer.social.<network>`) announcing the network name. [KAN-10]
-- [ ] **AC-KAN-10-02** · happy · Given a visitor activates any social network link, when the link is opened, then it opens the official external profile in a new browser tab with `target="_blank"` and `rel="noopener noreferrer"`, keeping the landing application tab open without granting the new page window access. [KAN-10]
-- [ ] **AC-KAN-10-03** · error · Given a social network entry has an empty string or invalid URL format in configuration, when the footer renders, then that network's icon is excluded from the rendered social links list. [KAN-10]
-- [ ] **AC-KAN-10-04** · edge · Given no social networks are configured in the platform settings or constants, when the footer renders, then the entire social links section and header are omitted cleanly from the footer layout. [KAN-10, KAN-8]
+- [x] **AC-KAN-10-01** · happy · Given official social media accounts are configured for the platform (AS-4), when the footer renders, then each social network is rendered as an icon link with an accessible, localized label (`landing:footer.social.<network>`) announcing the network name. [KAN-10]
+- [x] **AC-KAN-10-02** · happy · Given a visitor activates any social network link, when the link is opened, then it opens the official external profile in a new browser tab with `target="_blank"` and `rel="noopener noreferrer"`, keeping the landing application tab open without granting the new page window access. [KAN-10]
+- [x] **AC-KAN-10-03** · error · Given a social network entry has an empty string or invalid URL format in configuration, when the footer renders, then that network's icon is excluded from the rendered social links list. [KAN-10]
+- [x] **AC-KAN-10-04** · edge · Given no social networks are configured in the platform settings or constants, when the footer renders, then the entire social links section and header are omitted cleanly from the footer layout. [KAN-10, KAN-8]
 
 ### KAN-11 — Phone number
-- [ ] **AC-KAN-11-01** · happy · Given a platform contact phone number is configured (AS-5), when the footer renders, then the telephone number is displayed in human-readable international format alongside a phone icon and an accessible label (`landing:footer.contact.phoneLabel`). [KAN-11]
-- [ ] **AC-KAN-11-02** · happy · Given a visitor activates the phone number link on a device supporting telephony actions, when clicked, then the device initiates a phone call using the standardized `tel:` protocol URL with the international dial code. [KAN-11]
-- [ ] **AC-KAN-11-03** · error · Given no contact phone number is configured, when the footer renders, then the telephone line item is omitted entirely without displaying placeholder text or empty link targets. [KAN-11, KAN-8]
-- [ ] **AC-KAN-11-04** · edge · Given a device without native calling capabilities (e.g. desktop browser without telephony client), when the visitor right-clicks or copies the phone link, then the plain telephone number text is easily selectable and copyable. [KAN-11]
+- [x] **AC-KAN-11-01** · happy · Given a platform contact phone number is configured (AS-5), when the footer renders, then the telephone number is displayed in human-readable international format alongside a phone icon and an accessible label (`landing:footer.contact.phoneLabel`). [KAN-11]
+- [x] **AC-KAN-11-02** · happy · Given a visitor activates the phone number link on a device supporting telephony actions, when clicked, then the device initiates a phone call using the standardized `tel:` protocol URL with the international dial code. [KAN-11]
+- [x] **AC-KAN-11-03** · error · Given no contact phone number is configured, when the footer renders, then the telephone line item is omitted entirely without displaying placeholder text or empty link targets. [KAN-11, KAN-8]
+- [x] **AC-KAN-11-04** · edge · Given a device without native calling capabilities (e.g. desktop browser without telephony client), when the visitor right-clicks or copies the phone link, then the plain telephone number text is easily selectable and copyable. [KAN-11]
 
 ### KAN-13 — Contact email
-- [ ] **AC-KAN-13-01** · happy · Given an official contact email address is configured (AS-6), when the footer renders, then the email address is displayed visibly with an email icon and an accessible label (`landing:footer.contact.emailLabel`). [KAN-13]
-- [ ] **AC-KAN-13-02** · happy · Given a visitor activates the contact email link, when clicked, then the user's default email client opens with a new draft message addressed to the platform contact address via a `mailto:` protocol URL. [KAN-13]
-- [ ] **AC-KAN-13-03** · error · Given no contact email address is configured, when the footer renders, then the email line item is omitted entirely from the contact column. [KAN-13, KAN-8]
-- [ ] **AC-KAN-13-04** · edge · Given an email address with extensive length, when rendered on a narrow screen (360 px width), then the text wraps or uses word-break so it does not overflow horizontally or clip. [KAN-13]
+- [x] **AC-KAN-13-01** · happy · Given an official contact email address is configured (AS-6), when the footer renders, then the email address is displayed visibly with an email icon and an accessible label (`landing:footer.contact.emailLabel`). [KAN-13]
+- [x] **AC-KAN-13-02** · happy · Given a visitor activates the contact email link, when clicked, then the user's default email client opens with a new draft message addressed to the platform contact address via a `mailto:` protocol URL. [KAN-13]
+- [x] **AC-KAN-13-03** · error · Given no contact email address is configured, when the footer renders, then the email line item is omitted entirely from the contact column. [KAN-13, KAN-8]
+- [x] **AC-KAN-13-04** · edge · Given an email address with extensive length, when rendered on a narrow screen (360 px width), then the text wraps or uses word-break so it does not overflow horizontally or clip. [KAN-13]
 
 ## BLOCKED
 None. All open architectural questions (Q1–Q7) were resolved on 2026-09-28 and none block the landing footer layout.
