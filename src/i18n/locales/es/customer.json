@@ -5,5 +5,17 @@
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
+  },
+  "profile": {
+    "view": {
+      "description": "Consulta la información personal asociada a tu cuenta.",
+      "emailLabel": "Correo electrónico",
+      "empty": "No hay datos personales disponibles para esta cuenta.",
+      "fullNameLabel": "Nombre completo",
+      "notProvidedHint": "No proporcionado",
+      "phoneLabel": "Teléfono",
+      "sectionTitle": "Información personal",
+      "title": "Mi perfil"
+    }
   }
 }
