@@ -21,5 +21,28 @@
   "placeholder": {
     "description": "Reserva servicios de tus negocios favoritos. Esta página está en construcción.",
     "title": "Bienvenido a Booking System"
+  },
+  "subscriberSignUp": {
+    "form": {
+      "accountTitle": "Datos de acceso",
+      "businessNameLabel": "Nombre del negocio",
+      "businessSlugHint": "La dirección de tu negocio será {{businessAddress}}",
+      "businessSlugLabel": "Dirección del negocio",
+      "businessTitle": "Tu negocio",
+      "emailHint": "Es el correo con el que pagaste el plan.",
+      "emailLabel": "Correo electrónico",
+      "firstNameLabel": "Nombre",
+      "lastNameLabel": "Apellido",
+      "passwordConfirmationLabel": "Confirma la contraseña",
+      "passwordLabel": "Contraseña",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "personalDataTitle": "Datos personales",
+      "phoneHint": "Opcional.",
+      "phoneInvalidError": "Usa solo números, espacios, + y -.",
+      "phoneLabel": "Teléfono",
+      "slugInvalidError": "Usa de 3 a 40 letras minúsculas, números y guiones simples, sin guion al inicio ni al final.",
+      "slugReservedError": "Esta dirección está reservada. Elige otra.",
+      "submitAction": "Crear cuenta"
+    }
   }
 }
