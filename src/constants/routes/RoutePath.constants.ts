@@ -25,6 +25,7 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
+    PROFILE: "profile",
     ROOT: "/:businessSlug",
   },
   LANDING: {
