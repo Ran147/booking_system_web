@@ -91,6 +91,11 @@ service cloud.firestore {
       allow write: if false; // functions only
     }
 
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
     // Deny by default.
     match /{document=**} {
       allow read, write: if false;

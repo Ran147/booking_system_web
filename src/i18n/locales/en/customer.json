@@ -5,5 +5,17 @@
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
+  },
+  "profile": {
+    "view": {
+      "description": "Review the personal information associated with your account.",
+      "emailLabel": "Email address",
+      "empty": "No personal information is available for this account.",
+      "fullNameLabel": "Full name",
+      "notProvidedHint": "Not provided",
+      "phoneLabel": "Phone",
+      "sectionTitle": "Personal information",
+      "title": "My profile"
+    }
   }
 }

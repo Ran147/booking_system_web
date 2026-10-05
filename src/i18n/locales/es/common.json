@@ -1,4 +1,7 @@
 {
+  "actions": {
+    "retry": "Reintentar"
+  },
   "bookingStatus": {
     "cancelled": "Cancelada",
     "completed": "Completada",
