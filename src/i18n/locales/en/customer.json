@@ -1,9 +1,16 @@
 {
-  "layout": {
-    "title": "Customer portal"
-  },
+  "layout": { "title": "Customer portal" },
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
+  },
+  "profile": {
+    "preferences": {
+      "languageDescription": "Choose your preferred language for using GatherTable.",
+      "languageHint": "The change will apply immediately throughout the interface.",
+      "languageSectionTitle": "Interface language",
+      "languageTitle": "Language",
+      "syncError": "The language changed on this device, but we could not save it to your account."
+    }
   }
 }

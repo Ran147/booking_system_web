@@ -12,6 +12,12 @@
     "permissionDenied": "No tienes permiso para realizar esta acción.",
     "unknown": "Ocurrió un error inesperado. Inténtalo de nuevo."
   },
+  "language": {
+    "englishLabel": "English",
+    "savingHint": "Guardando tu preferencia…",
+    "selectorLabel": "Seleccionar idioma",
+    "spanishLabel": "Español"
+  },
   "notFound": {
     "description": "La página que buscas no existe o cambió de dirección.",
     "homeAction": "Volver al inicio",

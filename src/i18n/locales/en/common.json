@@ -12,6 +12,12 @@
     "permissionDenied": "You do not have permission to do this.",
     "unknown": "Something went wrong. Please try again."
   },
+  "language": {
+    "englishLabel": "English",
+    "savingHint": "Saving your preference…",
+    "selectorLabel": "Select language",
+    "spanishLabel": "Español"
+  },
   "notFound": {
     "description": "The page you are looking for does not exist or has moved.",
     "homeAction": "Back to home",

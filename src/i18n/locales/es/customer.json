@@ -1,9 +1,16 @@
 {
-  "layout": {
-    "title": "Portal del cliente"
-  },
+  "layout": { "title": "Portal del cliente" },
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
+  },
+  "profile": {
+    "preferences": {
+      "languageDescription": "Elige el idioma que prefieres para usar GatherTable.",
+      "languageHint": "El cambio se aplicará inmediatamente en toda la interfaz.",
+      "languageSectionTitle": "Idioma de la interfaz",
+      "languageTitle": "Idioma",
+      "syncError": "El idioma cambió en este dispositivo, pero no pudimos guardarlo en tu cuenta."
+    }
   }
 }

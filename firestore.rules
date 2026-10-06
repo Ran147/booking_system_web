@@ -91,6 +91,16 @@ service cloud.firestore {
       allow write: if false; // functions only
     }
 
+    match /users/{userId} {
+      allow read: if hasRole('customer') && request.auth.uid == userId;
+      allow update: if hasRole('customer')
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['language', 'updatedAt'])
+        && request.resource.data.language in ['es', 'en'];
+      allow create, delete: if false;
+    }
+
     // Deny by default.
     match /{document=**} {
       allow read, write: if false;

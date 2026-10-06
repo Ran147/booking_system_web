@@ -25,6 +25,7 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
+    LANGUAGE_PREFERENCE: "profile/language",
     ROOT: "/:businessSlug",
   },
   LANDING: {
