@@ -22,7 +22,16 @@ export const customerRoutes: RouteObject[] = [
         },
       },
       {
-        children: [],
+        children: [
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { LanguagePreferencePage } =
+                await import("./features/language-preference/LanguagePreferencePage");
+              return { Component: LanguagePreferencePage };
+            },
+            path: ROUTE_PATH.CUSTOMER.LANGUAGE_PREFERENCE,
+          },
+        ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
       },
     ],
