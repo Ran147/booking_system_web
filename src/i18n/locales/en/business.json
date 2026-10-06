@@ -48,5 +48,15 @@
       "subtitle": "Fill in the details to add a new service to your business catalog.",
       "title": "New service"
     }
+  },
+  "settings": {
+    "description": "Customize your account preferences.",
+    "theme": {
+      "description": "Choose how the business portal interface is displayed.",
+      "label": "Interface theme",
+      "saveError": "The theme changed on this device, but it could not be saved to your account.",
+      "title": "Appearance"
+    },
+    "title": "Settings"
   }
 }

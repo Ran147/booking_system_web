@@ -60,6 +60,11 @@ export {
   type PageTemplateProps,
 } from "./page-template/PageTemplate";
 export { PortalShell, type PortalShellProps } from "./portal-shell/PortalShell";
+export {
+  RadioGroup,
+  type RadioGroupOption,
+  type RadioGroupProps,
+} from "./radio-group";
 export { SearchInput, type SearchInputProps } from "./search-input/SearchInput";
 export { Spinner } from "./spinner/Spinner";
 export { StatusBadge, type StatusBadgeProps } from "./status-badge/StatusBadge";

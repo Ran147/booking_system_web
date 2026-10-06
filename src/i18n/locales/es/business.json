@@ -48,5 +48,15 @@
       "subtitle": "Completa los datos para agregar un nuevo servicio al catálogo de tu negocio.",
       "title": "Nuevo servicio"
     }
+  },
+  "settings": {
+    "description": "Personaliza las preferencias de tu cuenta.",
+    "theme": {
+      "description": "Elige cómo se muestra la interfaz del portal del negocio.",
+      "label": "Tema de la interfaz",
+      "saveError": "El tema cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
+      "title": "Apariencia"
+    },
+    "title": "Configuración"
   }
 }
