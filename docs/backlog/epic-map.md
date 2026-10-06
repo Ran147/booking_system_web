@@ -9,6 +9,7 @@ Source: `docs/backlog/jira-export.csv` (31 epics, 164 stories, exported 2026-09)
 | KAN-14 | Contacto | landing | `portals/landing/features/contact` |
 | KAN-20 | Contratación de planes | landing | `portals/landing/features/plan-checkout` |
 | KAN-26 | Registro del usuario | landing | `portals/landing/features/subscriber-sign-up` |
+| KAN-196 | Footer | landing | `portals/landing/layout` |
 | KAN-28 | Login (suscriptor) | shared | `features/auth` |
 | KAN-29 | Sidebar (Logout) | business | `portals/business/layout` |
 | KAN-30 | Gestión de servicio | business | `portals/business/features/services` |

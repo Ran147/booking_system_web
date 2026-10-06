@@ -1,9 +1,52 @@
 {
+  "errors": {
+    "readOnly": "Tu negocio está inactivo o suspendido. No se pueden realizar cambios."
+  },
   "layout": {
     "title": "Portal del negocio"
   },
   "placeholder": {
     "description": "Aquí gestionarás los servicios, la agenda y los clientes de tu negocio.",
     "title": "Panel del negocio"
+  },
+  "services": {
+    "form": {
+      "addFeatureAction": "Agregar característica",
+      "backToServicesAction": "Volver a servicios",
+      "cancelAction": "Cancelar",
+      "createSuccess": "Servicio creado.",
+      "currencySymbol": "$",
+      "descriptionHelp": "Máximo 1000 caracteres.",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Describe brevemente en qué consiste el servicio",
+      "durationHelp": "Entre 5 y 480 minutos, en pasos de 5 minutos.",
+      "durationLabel": "Duración (minutos)",
+      "durationPlaceholder": "60",
+      "featureItemLabel": "Característica {{index}}",
+      "featurePlaceholder": "Ej. Incluye lavado y peinado",
+      "featuresDescription": "Agrega hasta 10 características o beneficios del servicio.",
+      "featuresTitle": "Características adicionales",
+      "imageHelp": "Formato JPEG, PNG o WebP, hasta 2 MB.",
+      "imageInvalidError": "La imagen debe ser JPEG, PNG o WebP y pesar menos de 2 MB.",
+      "imageLabel": "Imagen del servicio",
+      "imagePreviewAlt": "Vista previa del servicio",
+      "imageRemoveAction": "Eliminar imagen",
+      "imageUploadAction": "Seleccionar imagen",
+      "imageUploadPrompt": "Arrastra una imagen o haz clic para seleccionarla",
+      "maxFeaturesReached": "Has alcanzado el límite de 10 características.",
+      "moveFeatureDownAction": "Mover hacia abajo",
+      "moveFeatureUpAction": "Mover hacia arriba",
+      "nameLabel": "Nombre del servicio",
+      "namePlaceholder": "Ej. Corte de cabello clásico",
+      "priceHelp": "Ingresa el precio en la moneda del negocio.",
+      "priceLabel": "Precio",
+      "pricePlaceholder": "0.00",
+      "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La creación de servicios está deshabilitada.",
+      "removeFeatureAction": "Eliminar característica",
+      "submitAction": "Guardar servicio",
+      "submitting": "Guardando…",
+      "subtitle": "Completa los datos para agregar un nuevo servicio al catálogo de tu negocio.",
+      "title": "Nuevo servicio"
+    }
   }
 }

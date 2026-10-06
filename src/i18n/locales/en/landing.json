@@ -1,4 +1,34 @@
 {
+  "footer": {
+    "brandName": "Booking System",
+    "branding": {
+      "description": "Comprehensive booking and appointment management platform for service businesses.",
+      "logoAlt": "Booking System Logo"
+    },
+    "contact": {
+      "emailLabel": "Contact email: {{email}}",
+      "phoneLabel": "Contact phone: {{phone}}",
+      "title": "Contact"
+    },
+    "copyright": "© {{year}} Booking System. All rights reserved.",
+    "description": "Comprehensive booking and appointment management platform for service businesses.",
+    "landmarkLabel": "Booking System footer",
+    "links": {
+      "contact": "Contact",
+      "home": "Home",
+      "plans": "Plans",
+      "terms": "Terms & Conditions",
+      "title": "Quick links"
+    },
+    "logoAlt": "Booking System Logo",
+    "social": {
+      "facebook": "Booking System Facebook (opens in a new tab)",
+      "instagram": "Booking System Instagram (opens in a new tab)",
+      "linkedin": "Booking System LinkedIn (opens in a new tab)",
+      "title": "Social media",
+      "x": "Booking System X (opens in a new tab)"
+    }
+  },
   "home": {
     "plans": {
       "billingPeriod": {

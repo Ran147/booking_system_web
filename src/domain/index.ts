@@ -9,6 +9,7 @@ export * from "./collaborator/CollaboratorPermission.constants";
 export * from "./collaborator/CollaboratorStatus.constants";
 export * from "./customer/CustomerStatus.constants";
 export * from "./plan/PlanStatus.constants";
+export type * from "./service/Service.interface";
 export * from "./service/ServiceStatus.constants";
 export * from "./stateMachine";
 export * from "./subscription/SubscriptionStatus.constants";

@@ -8,8 +8,11 @@ functions/lib/
 *.tsbuildinfo
 
 # Local environment (Firebase web config, reCAPTCHA key)
+.env
 .env.local
 .env.*.local
+# Example environment file
+.env.example
 
 # Firebase
 .firebase/

@@ -1,4 +1,34 @@
 {
+  "footer": {
+    "brandName": "Booking System",
+    "branding": {
+      "description": "Plataforma integral de gestión de reservas y citas para negocios de servicios.",
+      "logoAlt": "Logo de Booking System"
+    },
+    "contact": {
+      "emailLabel": "Correo electrónico de contacto: {{email}}",
+      "phoneLabel": "Teléfono de contacto: {{phone}}",
+      "title": "Contacto"
+    },
+    "copyright": "© {{year}} Booking System. Todos los derechos reservados.",
+    "description": "Plataforma integral de gestión de reservas y citas para negocios de servicios.",
+    "landmarkLabel": "Pie de página de Booking System",
+    "links": {
+      "contact": "Contacto",
+      "home": "Inicio",
+      "plans": "Planes",
+      "terms": "Términos y condiciones",
+      "title": "Enlaces rápidos"
+    },
+    "logoAlt": "Logo de Booking System",
+    "social": {
+      "facebook": "Facebook de Booking System (abre en una nueva pestaña)",
+      "instagram": "Instagram de Booking System (abre en una nueva pestaña)",
+      "linkedin": "LinkedIn de Booking System (abre en una nueva pestaña)",
+      "title": "Redes sociales",
+      "x": "X de Booking System (abre en una nueva pestaña)"
+    }
+  },
   "home": {
     "plans": {
       "billingPeriod": {
