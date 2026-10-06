@@ -48,5 +48,24 @@
       "subtitle": "Completa los datos para agregar un nuevo servicio al catálogo de tu negocio.",
       "title": "Nuevo servicio"
     }
+  },
+  "settings": {
+    "description": "Administra las preferencias y la seguridad de tu cuenta.",
+    "password": {
+      "confirmationMismatch": "La confirmación no coincide con la nueva contraseña.",
+      "confirmPasswordLabel": "Confirmar nueva contraseña",
+      "currentPasswordInvalid": "La contraseña actual no es correcta.",
+      "currentPasswordLabel": "Contraseña actual",
+      "description": "Actualiza la contraseña que utilizas para acceder a tu cuenta.",
+      "newPasswordLabel": "Nueva contraseña",
+      "sameAsCurrent": "La nueva contraseña debe ser diferente de la actual.",
+      "strengthLabel": "Seguridad de la contraseña",
+      "submitAction": "Cambiar contraseña",
+      "submitting": "Cambiando…",
+      "successMessage": "Contraseña actualizada correctamente.",
+      "title": "Cambiar contraseña",
+      "tooManyAttempts": "Se realizaron demasiados intentos. Espera un momento antes de volver a intentarlo."
+    },
+    "title": "Configuración"
   }
 }

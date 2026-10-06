@@ -48,5 +48,24 @@
       "subtitle": "Fill in the details to add a new service to your business catalog.",
       "title": "New service"
     }
+  },
+  "settings": {
+    "description": "Manage your account preferences and security.",
+    "password": {
+      "confirmationMismatch": "The confirmation does not match the new password.",
+      "confirmPasswordLabel": "Confirm new password",
+      "currentPasswordInvalid": "The current password is incorrect.",
+      "currentPasswordLabel": "Current password",
+      "description": "Update the password you use to access your account.",
+      "newPasswordLabel": "New password",
+      "sameAsCurrent": "The new password must be different from the current password.",
+      "strengthLabel": "Password strength",
+      "submitAction": "Change password",
+      "submitting": "Changing…",
+      "successMessage": "Password updated successfully.",
+      "title": "Change password",
+      "tooManyAttempts": "Too many attempts were made. Wait a moment before trying again."
+    },
+    "title": "Settings"
   }
 }

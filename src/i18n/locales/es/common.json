@@ -1,4 +1,22 @@
 {
+  "auth": {
+    "password": {
+      "hide": "Ocultar contraseña",
+      "rules": {
+        "digit": "Incluye un número",
+        "lowercase": "Incluye una letra minúscula",
+        "minimumLength": "Tiene al menos {{count}} caracteres",
+        "symbol": "Incluye un símbolo",
+        "uppercase": "Incluye una letra mayúscula"
+      },
+      "show": "Mostrar contraseña",
+      "strength": {
+        "medium": "Media",
+        "strong": "Fuerte",
+        "weak": "Débil"
+      }
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelada",
     "completed": "Completada",

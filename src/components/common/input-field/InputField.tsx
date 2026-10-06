@@ -8,6 +8,7 @@ export const InputField = forwardRef(
       autoComplete,
       className,
       disabled = false,
+      endAdornment,
       error,
       helperText,
       id,
@@ -69,6 +70,11 @@ export const InputField = forwardRef(
             type={type}
             {...restProperties}
           />
+          {endAdornment ? (
+            <div className="absolute inset-y-0 right-1 flex items-center">
+              {endAdornment}
+            </div>
+          ) : null}
         </div>
 
         {error ? (

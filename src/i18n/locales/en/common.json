@@ -1,4 +1,22 @@
 {
+  "auth": {
+    "password": {
+      "hide": "Hide password",
+      "rules": {
+        "digit": "Includes a number",
+        "lowercase": "Includes a lowercase letter",
+        "minimumLength": "Has at least {{count}} characters",
+        "symbol": "Includes a symbol",
+        "uppercase": "Includes an uppercase letter"
+      },
+      "show": "Show password",
+      "strength": {
+        "medium": "Medium",
+        "strong": "Strong",
+        "weak": "Weak"
+      }
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelled",
     "completed": "Completed",
