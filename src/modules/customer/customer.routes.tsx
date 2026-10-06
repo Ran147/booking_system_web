@@ -22,7 +22,16 @@ export const customerRoutes: RouteObject[] = [
         },
       },
       {
-        children: [],
+        children: [
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { BookingRemindersPage } =
+                await import("./features/reservation-reminders/ReservationRemindersPage");
+              return { Component: BookingRemindersPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.PROFILE_REMINDERS,
+          },
+        ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
       },
     ],

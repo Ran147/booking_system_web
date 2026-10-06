@@ -5,5 +5,18 @@
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
+  },
+  "profile": {
+    "reminders": {
+      "description": "Choose whether you want to receive reminders about your upcoming bookings.",
+      "disableAction": "Turn reminders off",
+      "disabled": "Off",
+      "enableAction": "Turn reminders on",
+      "enabled": "On",
+      "saveError": "We could not save your preference. The previous setting was restored.",
+      "saving": "Saving preference…",
+      "statusLabel": "Reminder status",
+      "title": "Reservation reminders"
+    }
   }
 }
