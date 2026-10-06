@@ -22,7 +22,16 @@ export const customerRoutes: RouteObject[] = [
         },
       },
       {
-        children: [],
+        children: [
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { ThemePreferencePage } =
+                await import("./features/theme-preference/ThemePreferencePage");
+              return { Component: ThemePreferencePage };
+            },
+            path: ROUTE_PATH.CUSTOMER.PROFILE_THEME,
+          },
+        ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
       },
     ],

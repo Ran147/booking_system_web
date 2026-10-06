@@ -5,5 +5,19 @@
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
+  },
+  "profile": {
+    "preferences": {
+      "activeTheme": "Active theme: {{theme}}",
+      "syncError": "The preference was applied on this device, but it could not be synced with your account.",
+      "syncing": "Syncing preference…",
+      "themeDescription": "Choose how you want to see GatherTable. System follows your device appearance.",
+      "themeOptionDescription": {
+        "dark": "A dark appearance that is comfortable in low light.",
+        "light": "A light and warm appearance.",
+        "system": "Automatically use your device preference."
+      },
+      "themeTitle": "Appearance"
+    }
   }
 }
