@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { PageTemplate } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
+import { HeroSection } from "../features/home/components/HeroSection";
 
 // Temporary portal home. Replace it with the first feature route of this
 // portal and delete the placeholder folder.
@@ -12,6 +13,8 @@ export const LandingPlaceholderPage = (): ReactElement => {
     <PageTemplate
       description={t("placeholder.description")}
       title={t("placeholder.title")}
-    />
+    >
+      <HeroSection />
+    </PageTemplate>
   );
 };
