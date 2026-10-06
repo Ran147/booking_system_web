@@ -5,5 +5,19 @@
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
+  },
+  "profile": {
+    "preferences": {
+      "activeTheme": "Tema activo: {{theme}}",
+      "syncError": "La preferencia se aplicó en este dispositivo, pero no se pudo sincronizar con tu cuenta.",
+      "syncing": "Sincronizando preferencia…",
+      "themeDescription": "Elige cómo quieres ver GatherTable. La opción Sistema sigue la apariencia de tu dispositivo.",
+      "themeOptionDescription": {
+        "dark": "Una apariencia oscura y cómoda con poca luz.",
+        "light": "Una apariencia clara y cálida.",
+        "system": "Usa automáticamente la preferencia de tu dispositivo."
+      },
+      "themeTitle": "Apariencia"
+    }
   }
 }
