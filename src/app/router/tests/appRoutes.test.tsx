@@ -43,6 +43,20 @@ describe("app routes", () => {
     ).toBeInTheDocument();
   });
 
+  it("AC-KAN-203-05: protects the customer reminder preferences route", async () => {
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: `${BUSINESS_PAGE_PATH}/${ROUTE_PATH.CUSTOMER.PROFILE_REMINDERS}`,
+      session: SIGNED_OUT_SESSION,
+    });
+    const appRoutesPage = createAppRoutesPage();
+
+    expect(
+      await appRoutesPage.findPageHeading(
+        testI18n.t("signInPlaceholder.title"),
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("KAN-28: sends a signed-out visitor from the business portal to sign-in", async () => {
     renderRoutesWithProviders(appRoutes, {
       initialPath: ROUTE_PATH.BUSINESS.ROOT,

@@ -4,7 +4,7 @@
 | --- | --- |
 | Portal | customer |
 | Feature folder | `src/portals/customer/features/profile/` |
-| Stories | KAN-169, KAN-170, KAN-171, KAN-172, KAN-173 |
+| Stories | KAN-169, KAN-170, KAN-171, KAN-172, KAN-173, KAN-203 |
 | Status | Draft |
 | Depends on | KAN-122 customer sign-up (personal data fields captured at sign-up); Q6 decided 2026-09-28 (full name and phone are required), KAN-128 customer sign-in and password recovery, KAN-96 navbar (KAN-109 entry point), `i18n-standards` (languages), `theming-standards` (theme modes) |
 
@@ -24,16 +24,17 @@ A signed-in `customer` can check and update the personal data of their platform 
 - Change password (KAN-171).
 - Switch language `es` / `en` (KAN-172).
 - Switch theme light / dark (KAN-173).
+- Enable or disable reservation reminders (KAN-203).
 
 ## Out of scope
 - Changing the account email (needs re-verification; no story asks for it, AS-2).
 - Deleting the account (no story).
 - Business-scoped data about the customer (`Customer` records, notes, blocking: KAN-87, business portal). Editing the profile does not rewrite the businesses' `Customer` records (AS-3).
-- Reminder opt-in preferences (no story defines them; see Backlog issues).
+- Sending or scheduling reservation reminders (KAN-165).
 - Password recovery when signed out (KAN-132, `features/auth`).
 
 ## Data
-- `User` (`users/{userId}`): personal data captured at sign-up (KAN-123; field list is AS-1), email (read only here), `language` (`es` | `en`), `theme` (`light` | `dark` | `system`, `theming-standards` §4).
+- `User` (`users/{userId}`): personal data captured at sign-up (KAN-123; field list is AS-1), email (read only here), `language` (`es` | `en`), `theme` (`light` | `dark` | `system`, `theming-standards` §4), `bookingRemindersEnabled` (boolean; defaults to `true` when absent for backward compatibility with KAN-165 AS-9).
 - Browser storage: `STORAGE_KEY.LANGUAGE`, `STORAGE_KEY.THEME`.
 - Password lives in Firebase Auth, not in Firestore.
 - No new fields beyond those defined by KAN-122 and the standards above.
@@ -79,6 +80,13 @@ A signed-in `customer` can check and update the personal data of their platform 
 - [ ] **AC-KAN-173-04** · edge · Given a stored theme, when the page loads, then it opens directly in that theme without a flash of the other theme. [KAN-173]
 - [ ] **AC-KAN-173-05** · error · Given saving `User.theme` fails because of the network, when the customer switches theme, then the theme still changes for this browser and `customer:profile.preferences.syncError` is shown. See AS-6. [KAN-173]
 
+### KAN-203 — Enable or disable reservation reminders
+- [ ] **AC-KAN-203-01** · happy · Given a signed-in customer, when they open reminder preferences, then the effective value of `User.bookingRemindersEnabled` is shown; a missing field is treated as enabled for backward compatibility. [KAN-203]
+- [ ] **AC-KAN-203-02** · happy · Given reminders are enabled, when the customer disables them, then the control changes immediately and only `bookingRemindersEnabled` and `updatedAt` are saved on their own `User`. [KAN-203]
+- [ ] **AC-KAN-203-03** · happy · Given reminders are disabled, when the customer enables them, then the control changes immediately and the preference is saved on their own `User`. [KAN-203]
+- [ ] **AC-KAN-203-04** · error · Given persistence fails, when the customer changes the preference, then the previous persisted value is restored and `customer:profile.reminders.saveError` is shown. [KAN-203]
+- [ ] **AC-KAN-203-05** · error · Given a visitor or a non-customer role, when they open reminder preferences, then the existing customer route guard redirects them and no preference is shown. [KAN-203]
+
 ## BLOCKED
 | Story | Waiting on | What stays out until decided |
 | --- | --- | --- |
@@ -97,7 +105,7 @@ A signed-in `customer` can check and update the personal data of their platform 
 
 ## Backlog issues
 - KAN-173 mentions only light and dark; `theming-standards` defines `light`, `dark` and `system`. AS-7 keeps all three; confirm.
-- KAN-100 depends on a customer reminder opt-in, but no story in this epic (or elsewhere) lets the customer set it.
+- KAN-203 supplies the customer opt-in required by KAN-100 and KAN-165; sending remains owned by those stories.
 - KAN-109 (navbar) and KAN-169 / KAN-170 both describe reaching and changing the profile; the navbar only links here.
 - KAN-171 overlaps with password recovery (KAN-132) only in its strength rules; recovery stays in `features/auth`.
 - No story covers changing the account email or deleting the account.
@@ -118,3 +126,4 @@ A signed-in `customer` can check and update the personal data of their platform 
 | KAN-171 | AC-KAN-171-01 … AC-KAN-171-08 | `tests/ChangePasswordForm.test.tsx` |
 | KAN-172 | AC-KAN-172-01 … AC-KAN-172-05 | `tests/PreferencesSection.test.tsx` |
 | KAN-173 | AC-KAN-173-01 … AC-KAN-173-05 | `tests/PreferencesSection.test.tsx` |
+| KAN-203 | AC-KAN-203-01 … AC-KAN-203-05 | `tests/ReservationRemindersPage.test.tsx` |
