@@ -51,5 +51,31 @@
   "placeholder": {
     "description": "Book services from your favorite businesses. This page is under construction.",
     "title": "Welcome to Booking System"
+  },
+  "planCheckout": {
+    "detail": {
+      "backToPlans": "← Back to plans",
+      "billingPeriod": {
+        "annual": "/year",
+        "monthly": "/month"
+      },
+      "catalogAction": "See the available plans",
+      "contract": "Contract this plan",
+      "featuresTitle": "What it includes",
+      "limits": {
+        "maxBookings_one": "Up to {{count}} booking per month",
+        "maxBookings_other": "Up to {{count}} bookings per month",
+        "maxCollaborators_one": "Up to {{count}} collaborator",
+        "maxCollaborators_other": "Up to {{count}} collaborators"
+      },
+      "limitsTitle": "Plan limits",
+      "otherPlans": "Other plans",
+      "retryAction": "Try again",
+      "signOutAction": "Sign out",
+      "signedInNotice": "A new business is contracted signed out: each account has only one business. Sign out to continue."
+    },
+    "payment": {
+      "planUnavailableError": "This plan is no longer available. Choose another plan."
+    }
   }
 }

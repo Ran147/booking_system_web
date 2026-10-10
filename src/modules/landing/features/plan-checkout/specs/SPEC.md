@@ -40,16 +40,16 @@ A business owner who is comparing plans opens one plan, sees everything it inclu
 
 ### KAN-21 — Detailed information about each plan
 - [ ] **AC-KAN-21-01** · happy · Given a `Plan` with status `active`, when a visitor opens its detail page from the catalog (KAN-7), then the page shows the plan name, its price formatted from `priceInCents` (AS-3) with its billing period (`monthly` or `annual`), its description, its features and every item of its `limits` (for example number of services and bookings per month) with a translated label. [KAN-21]
-- [ ] **AC-KAN-21-02** · happy · Given the detail page is open, when the visitor activates `landing:planCheckout.detail.backToPlans`, then they return to the plan catalog on the home page. [KAN-21, KAN-7]
-- [ ] **AC-KAN-21-03** · happy · Given several `active` plans, when the visitor is on one plan's detail, then they can switch to another plan's detail without going back to the catalog, and the current plan is marked. See AS-4. [KAN-21]
-- [ ] **AC-KAN-21-04** · error · Given the plan id in the link does not exist, when the detail page loads, then `common:errors.notFound` is shown with a link to the plan catalog. [KAN-21]
-- [ ] **AC-KAN-21-05** · error · Given a `Plan` with status `inactive`, when a visitor opens its detail by direct link, then `common:errors.notFound` is shown, as for a missing plan. [KAN-21, KAN-184]
-- [ ] **AC-KAN-21-06** · error · Given the plan cannot be read (network or server failure), when the page loads, then `common:errors.network` (or `common:errors.unknown`) is shown with a retry action. [KAN-21]
+- [x] **AC-KAN-21-02** · happy · Given the detail page is open, when the visitor activates `landing:planCheckout.detail.backToPlans`, then they return to the plan catalog on the home page. [KAN-21, KAN-7]
+- [x] **AC-KAN-21-03** · happy · Given several `active` plans, when the visitor is on one plan's detail, then they can switch to another plan's detail without going back to the catalog, and the current plan is marked. See AS-4. [KAN-21]
+- [x] **AC-KAN-21-04** · error · Given the plan id in the link does not exist, when the detail page loads, then `common:errors.notFound` is shown with a link to the plan catalog. [KAN-21]
+- [x] **AC-KAN-21-05** · error · Given a `Plan` with status `inactive`, when a visitor opens its detail by direct link, then `common:errors.notFound` is shown, as for a missing plan. [KAN-21, KAN-184]
+- [x] **AC-KAN-21-06** · error · Given the plan cannot be read (network or server failure), when the page loads, then `common:errors.network` (or `common:errors.unknown`) is shown with a retry action. [KAN-21]
 - [ ] **AC-KAN-21-07** · edge · Given a limit whose value means "unlimited" (AS-5), when the detail renders, then it shows `landing:planCheckout.detail.unlimited` instead of a number. [KAN-21, KAN-181]
-- [ ] **AC-KAN-21-08** · edge · Given the visitor switches the language, when the page re-renders, then labels are translated and the price is formatted for the new locale without changing its amount. [KAN-21]
+- [x] **AC-KAN-21-08** · edge · Given the visitor switches the language, when the page re-renders, then labels are translated and the price is formatted for the new locale without changing its amount. [KAN-21]
 - [ ] **AC-KAN-21-09** · happy · Given an `active` plan's detail page, when a visitor activates `landing:planCheckout.detail.contract`, then the checkout page of that plan opens (KAN-22). [KAN-21, KAN-22]
-- [ ] **AC-KAN-21-10** · error · Given the plan was deactivated after the detail page loaded, when the visitor activates the contract action, then the checkout does not open and `landing:planCheckout.payment.planUnavailableError` is shown with a link to the plan catalog. [KAN-21, KAN-184]
-- [ ] **AC-KAN-21-11** · edge · Given a signed-in user of any role, when they activate the contract action, then no checkout opens and `landing:planCheckout.detail.signedInNotice` explains that a new business is contracted signed out, with a sign-out action. See AS-8. [KAN-21]
+- [x] **AC-KAN-21-10** · error · Given the plan was deactivated after the detail page loaded, when the visitor activates the contract action, then the checkout does not open and `landing:planCheckout.payment.planUnavailableError` is shown with a link to the plan catalog. [KAN-21, KAN-184]
+- [x] **AC-KAN-21-11** · edge · Given a signed-in user of any role, when they activate the contract action, then no checkout opens and `landing:planCheckout.detail.signedInNotice` explains that a new business is contracted signed out, with a sign-out action. See AS-8. [KAN-21]
 
 ### KAN-22 — Pay the plan through the simulated gateway to complete the contract
 - [ ] **AC-KAN-22-01** · happy · Given a visitor on the checkout of an `active` plan, when they see the page, then it shows the plan name, its price formatted from `priceInCents` with its billing period, an email field, the simulated payment fields (AS-9), the terms acceptance (KAN-23) and a reCAPTCHA. [KAN-22]
@@ -102,6 +102,9 @@ None. Q7 was decided on 2026-09-28: the MVP includes plan checkout from the land
 - KAN-23 (accept the terms before paying) shows the same terms text as KAN-9 (Home).
 - KAN-24 (email after payment to start sign-up) and the KAN-26 epic title ("Registro del usuario una vez confirmado correo") describe the same hand-off: the confirmed "correo" is the KAN-24 payment email.
 - KAN-176 (admin epic) said the business activates on payment; Q2 changed it to activation on the super admin's approval. KAN-176 must be rewritten in Jira.
+- AC-KAN-21-01 asks for the plan description (AS-2), but the KAN-180 spec defines no description field (`name`, `priceInCents`, `billingPeriod`, `features`, `limits`, `status`). Until the admin plans team adds one, the detail shows the name, price, billing period, features and limits.
+- AC-KAN-21-07 needs an "unlimited" limit (AS-5), but KAN-181 does not say how it is stored. Pending with the admin plans team; the detail shows only numeric limits.
+- `firestore.rules` had no rule for `plans`, so no client could read them and the catalog (KAN-7) always showed its sample plans. KAN-21 adds the read rule: anyone reads an `active` plan, the super admin also reads `inactive` ones, nobody writes from a client (`tests/rules/plans.rules.test.ts`).
 
 ## Non-functional
 - i18n keys: new prefixes `landing:planCheckout.detail.*` (including one label per limit, `landing:planCheckout.detail.limits.<limitName>`), `landing:planCheckout.payment.*`, `landing:planCheckout.terms.*`, `landing:planCheckout.email.*`. Reused: `validation:required`, `validation:emailInvalid`, `validation:recaptchaRequired`, `common:errors.notFound`, `common:errors.network`, `common:errors.unknown`.
@@ -114,6 +117,7 @@ None. Q7 was decided on 2026-09-28: the MVP includes plan checkout from the land
 | Story | Criteria | Test file |
 | --- | --- | --- |
 | KAN-21 | AC-KAN-21-01 … AC-KAN-21-11 | `tests/PlanDetailPage.test.tsx` |
+| KAN-21 | `plans`: read only when `active` (super admin: any), no client writes | `tests/rules/plans.rules.test.ts` |
 | KAN-22 | AC-KAN-22-01 … AC-KAN-22-11 | `tests/PlanCheckoutPage.test.tsx`; `functions/src/billing/tests/payPlanCheckout.test.ts` |
 | KAN-23 | AC-KAN-23-01 … AC-KAN-23-04 | `tests/PlanCheckoutPage.test.tsx` |
 | KAN-24 | AC-KAN-24-01 … AC-KAN-24-06 | `functions/src/notifications/tests/sendPlanCheckoutEmail.test.ts`; `tests/PlanCheckoutConfirmationPage.test.tsx` |

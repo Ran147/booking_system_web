@@ -14,6 +14,13 @@ export const landingRoutes: RouteObject[] = [
           return { Component: LandingPlaceholderPage };
         },
       },
+      {
+        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+          const { PlanDetailPage } = await import("./features/plan-checkout");
+          return { Component: PlanDetailPage };
+        },
+        path: ROUTE_PATH.LANDING.PLAN_DETAIL,
+      },
     ],
     element: <LandingLayout />,
     path: ROUTE_PATH.LANDING.HOME,

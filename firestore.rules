@@ -86,6 +86,14 @@ service cloud.firestore {
       }
     }
 
+    // Public plan catalog and plan detail (KAN-7, KAN-21): anyone reads an
+    // active plan; the super admin also reads inactive ones (KAN-184). Plans
+    // are written only by functions, which write the audit entry (KAN-181).
+    match /plans/{planId} {
+      allow read: if resource.data.status == 'active' || isSuperAdmin();
+      allow write: if false;
+    }
+
     match /auditLog/{auditLogEntryId} {
       allow read: if isSuperAdmin();
       allow write: if false; // functions only

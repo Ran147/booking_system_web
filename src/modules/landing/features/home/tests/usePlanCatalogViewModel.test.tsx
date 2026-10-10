@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
+import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { VIEW_STATE } from "@/shared/constants";
 import { PLAN_STATUS } from "@/shared/domain";
@@ -42,7 +43,9 @@ const createWrapper = (): (({
 
   const TestWrapper = ({ children }: { children: ReactNode }): ReactElement => (
     <QueryClientProvider client={queryClient}>
-      <I18nextProvider i18n={testI18n}>{children}</I18nextProvider>
+      <I18nextProvider i18n={testI18n}>
+        <MemoryRouter>{children}</MemoryRouter>
+      </I18nextProvider>
     </QueryClientProvider>
   );
 
