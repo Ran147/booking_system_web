@@ -2,6 +2,80 @@
   "errors": {
     "readOnly": "Your business is inactive or suspended. Changes cannot be made."
   },
+  "home": {
+    "closeModal": "Got it",
+    "configs": {
+      "settings": {
+        "action": "Configure",
+        "description": "Time zone, currency, notifications and appearance.",
+        "title": "General settings"
+      },
+      "subscription": {
+        "action": "View plan",
+        "description": "Details of your subscribed plan, receipts and renewal dates.",
+        "title": "Plan and subscription"
+      }
+    },
+    "configsDescription": "Manage general parameters and subscription for your business.",
+    "configsTitle": "Settings and configuration",
+    "metrics": {
+      "activeServices": {
+        "helper": "In public catalog",
+        "label": "Configured services",
+        "value": "1"
+      },
+      "businessStatus": {
+        "helper": "Tenant status",
+        "label": "Business status",
+        "value": "Active"
+      },
+      "todayBookings": {
+        "helper": "Upcoming bookings",
+        "label": "Bookings today",
+        "value": "0"
+      }
+    },
+    "placeholderModalDescription": "This tool is currently in development and will be available soon in your portal.",
+    "placeholderModalTitle": "Module under construction",
+    "roleBadge": "Subscriber",
+    "roleCollaboratorBadge": "Collaborator",
+    "status": {
+      "available": "Available",
+      "comingSoon": "Coming soon"
+    },
+    "subtitle": "Easily access management tools and settings for your business.",
+    "title": "Business dashboard",
+    "tools": {
+      "collaborators": {
+        "action": "Manage team",
+        "description": "Invite collaborators, assign services and manage permissions.",
+        "title": "Team and collaborators"
+      },
+      "customers": {
+        "action": "View customers",
+        "description": "Manage your customer directory, visit history and notes.",
+        "title": "Customer directory"
+      },
+      "reports": {
+        "action": "View stats",
+        "description": "Analyze estimated revenue, shift occupancy and metrics.",
+        "title": "Reports and statistics"
+      },
+      "schedule": {
+        "action": "View schedule",
+        "description": "Check appointments of the day, schedule shifts and manage blocks.",
+        "title": "Schedule and bookings"
+      },
+      "services": {
+        "action": "Create service",
+        "description": "Create, edit and organize services offered to your customers.",
+        "title": "Service management"
+      }
+    },
+    "toolsDescription": "Manage your service catalog, schedule, customers and operational reports.",
+    "toolsTitle": "Tools and quick access",
+    "welcome": "Welcome to your dashboard"
+  },
   "layout": {
     "title": "Business portal"
   },
