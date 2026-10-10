@@ -274,7 +274,11 @@ export default tseslint.config(
 
   // code-style-standards: Nullable.ts is the only place allowed to spell | null / | undefined
   {
-    files: ["src/shared/types/Nullable.ts", "src/types/Nullable.ts"],
+    files: [
+      "src/shared/types/Nullable.ts",
+      "src/types/Nullable.ts",
+      "functions/src/shared/types/Nullable.ts",
+    ],
     rules: { "no-restricted-syntax": "off" },
   },
 
@@ -355,6 +359,13 @@ export default tseslint.config(
     files: ["scripts/**/*.ts"],
     languageOptions: { globals: { ...globals.node } },
     rules: { "no-console": "off" },
+  },
+
+  // functions/ is a separate Node package with no @/ alias: relative imports
+  // are the only way to reach functions/src/shared (cloud-functions-standards §1).
+  {
+    files: ["functions/src/**/*.ts"],
+    rules: { "no-restricted-imports": "off" },
   },
 
   // Tool config files must use export default; typescript-eslint documents
