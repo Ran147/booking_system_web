@@ -16,9 +16,8 @@ export const businessRoutes: RouteObject[] = [
           {
             index: true,
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-              const { BusinessPlaceholderPage } =
-                await import("./placeholder/BusinessPlaceholderPage");
-              return { Component: BusinessPlaceholderPage };
+              const { BusinessHomePage } = await import("./features/home");
+              return { Component: BusinessHomePage };
             },
           },
           {
