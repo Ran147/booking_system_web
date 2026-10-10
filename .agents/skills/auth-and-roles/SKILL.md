@@ -345,7 +345,7 @@ Rules keep their literals: the rules language cannot import TypeScript constants
 
 - **Sign-in (KAN-28, KAN-33 to KAN-35, KAN-128):** email + password, `PasswordInput` with show / hide, translated errors mapped from Firebase codes (`api-mutation-standards`). Never reveal whether the email exists.
 - **Password recovery (KAN-36, KAN-37):** `sendPasswordResetEmail`; the same neutral message is shown whether or not the email exists.
-- **reCAPTCHA:** Firebase App Check with the reCAPTCHA Enterprise provider protects Firestore and Functions for the whole app. Public forms (sign-in, sign-up, contact, recovery) also include `RecaptchaField`; its token is verified by the `verifyRecaptcha` callable before the action runs.
+- **reCAPTCHA:** Firebase App Check with the reCAPTCHA Enterprise provider protects Firestore and Functions for the whole app. Public forms (sign-in, sign-up, contact, recovery) also include `RecaptchaField`; when the action itself runs in a Cloud Function (sign-up, contact, checkout), the token is verified **inside that function** with the shared `assertRecaptcha` helper (`cloud-functions-standards` §5), so the check cannot be skipped by calling the action directly. The `verifyRecaptcha` callable is used only before a client-side action that has no function of its own (Firebase Auth sign-in, password recovery).
 - **Inactivity logout (KAN-38):** `useIdleTimeout` signs the user out after `PlatformSettings.idleTimeoutMinutes` (KAN-182) without activity, with a warning dialog first. The fallback value is `DEFAULT_PLATFORM_SETTINGS.IDLE_TIMEOUT_MINUTES`.
 - **Sign-out (KAN-29, KAN-110):** `signOut(auth)`, then `queryClient.clear()`, then navigate to sign-in.
 
