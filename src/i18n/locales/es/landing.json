@@ -51,5 +51,27 @@
   "placeholder": {
     "description": "Reserva servicios de tus negocios favoritos. Esta página está en construcción.",
     "title": "Bienvenido a Booking System"
+  },
+  "planCheckout": {
+    "detail": {
+      "backToPlans": "← Volver a los planes",
+      "billingPeriod": {
+        "annual": "/año",
+        "monthly": "/mes"
+      },
+      "contract": "Contratar este plan",
+      "featuresTitle": "Qué incluye",
+      "limits": {
+        "maxBookings_one": "Hasta {{count}} reserva al mes",
+        "maxBookings_other": "Hasta {{count}} reservas al mes",
+        "maxCollaborators_one": "Hasta {{count}} colaborador",
+        "maxCollaborators_other": "Hasta {{count}} colaboradores"
+      },
+      "limitsTitle": "Límites del plan",
+      "otherPlans": "Otros planes",
+      "retryAction": "Reintentar",
+      "signOutAction": "Cerrar sesión",
+      "signedInNotice": "Un negocio nuevo se contrata sin sesión iniciada: cada cuenta tiene un solo negocio. Cierra sesión para continuar."
+    }
   }
 }

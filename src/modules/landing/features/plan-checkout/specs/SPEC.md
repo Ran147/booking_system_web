@@ -102,6 +102,9 @@ None. Q7 was decided on 2026-09-28: the MVP includes plan checkout from the land
 - KAN-23 (accept the terms before paying) shows the same terms text as KAN-9 (Home).
 - KAN-24 (email after payment to start sign-up) and the KAN-26 epic title ("Registro del usuario una vez confirmado correo") describe the same hand-off: the confirmed "correo" is the KAN-24 payment email.
 - KAN-176 (admin epic) said the business activates on payment; Q2 changed it to activation on the super admin's approval. KAN-176 must be rewritten in Jira.
+- AC-KAN-21-01 asks for the plan description (AS-2), but the KAN-180 spec defines no description field (`name`, `priceInCents`, `billingPeriod`, `features`, `limits`, `status`). Until the admin plans team adds one, the detail shows the name, price, billing period, features and limits.
+- AC-KAN-21-07 needs an "unlimited" limit (AS-5), but KAN-181 does not say how it is stored. Pending with the admin plans team; the detail shows only numeric limits.
+- `firestore.rules` had no rule for `plans`, so no client could read them and the catalog (KAN-7) always showed its sample plans. KAN-21 adds the read rule: anyone reads an `active` plan, the super admin also reads `inactive` ones, nobody writes from a client (`tests/rules/plans.rules.test.ts`).
 
 ## Non-functional
 - i18n keys: new prefixes `landing:planCheckout.detail.*` (including one label per limit, `landing:planCheckout.detail.limits.<limitName>`), `landing:planCheckout.payment.*`, `landing:planCheckout.terms.*`, `landing:planCheckout.email.*`. Reused: `validation:required`, `validation:emailInvalid`, `validation:recaptchaRequired`, `common:errors.notFound`, `common:errors.network`, `common:errors.unknown`.
@@ -114,6 +117,7 @@ None. Q7 was decided on 2026-09-28: the MVP includes plan checkout from the land
 | Story | Criteria | Test file |
 | --- | --- | --- |
 | KAN-21 | AC-KAN-21-01 … AC-KAN-21-11 | `tests/PlanDetailPage.test.tsx` |
+| KAN-21 | `plans`: read only when `active` (super admin: any), no client writes | `tests/rules/plans.rules.test.ts` |
 | KAN-22 | AC-KAN-22-01 … AC-KAN-22-11 | `tests/PlanCheckoutPage.test.tsx`; `functions/src/billing/tests/payPlanCheckout.test.ts` |
 | KAN-23 | AC-KAN-23-01 … AC-KAN-23-04 | `tests/PlanCheckoutPage.test.tsx` |
 | KAN-24 | AC-KAN-24-01 … AC-KAN-24-06 | `functions/src/notifications/tests/sendPlanCheckoutEmail.test.ts`; `tests/PlanCheckoutConfirmationPage.test.tsx` |
