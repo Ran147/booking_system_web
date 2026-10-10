@@ -30,6 +30,21 @@
     }
   },
   "home": {
+    "navbar": {
+      "goToPortal": "Go to my dashboard",
+      "landmarkLabel": "Main navigation",
+      "links": {
+        "contact": "Contact",
+        "home": "Home",
+        "plans": "Plans"
+      },
+      "linksNavLabel": "Main links",
+      "logoAlt": "Booking System logo",
+      "menuClose": "Close navigation menu",
+      "menuOpen": "Open navigation menu",
+      "mobileNavLabel": "Mobile navigation",
+      "signIn": "Sign in"
+    },
     "plans": {
       "billingPeriod": {
         "annual": "/year",
