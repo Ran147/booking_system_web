@@ -81,6 +81,7 @@ Before implementing or reviewing code, agents **must** consult and follow every 
 | `auth-and-roles` | `.agents/skills/auth-and-roles/SKILL.md` | Firebase Auth, RBAC permissions, route guards, idle session logout, reCAPTCHA, and tenant isolation. |
 | `api-query-standards` | `.agents/skills/api-query-standards/SKILL.md` | Reading data with TanStack Query hooks, query keys, cursor pagination, and Zod document adapters. |
 | `api-mutation-standards` | `.agents/skills/api-mutation-standards/SKILL.md` | Writing data to Firestore or Cloud Functions, optimistic updates, cache invalidation, and toast error feedback. |
+| `cloud-functions-standards` | `.agents/skills/cloud-functions-standards/SKILL.md` | Writing code inside `functions/`: callable layout, payload validation, `HttpsError` codes, server-side permission and reCAPTCHA checks, transactions, idempotency, Auth rollback and registering a function. |
 | `unit-testing-standards` | `.agents/skills/unit-testing-standards/SKILL.md` | Writing tests with Vitest, React Testing Library, and Page Object Model mapping acceptance criteria (KAN keys). |
 
 ---
