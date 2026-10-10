@@ -4,20 +4,20 @@
 | --- | --- |
 | Portal | business |
 | Feature folder | `src/modules/business/features/services/` |
-| Stories | KAN-54, KAN-55, KAN-56, KAN-57, KAN-58, KAN-59, KAN-60, KAN-61, KAN-62 |
+| Stories | KAN-54, KAN-55, KAN-56, KAN-57, KAN-58, KAN-59, KAN-60, KAN-61, KAN-62, KAN2-11 |
 | Status | Ready |
 | Depends on | KAN-28 (subscriber sign-in, session and `businessId` claim); KAN-32 / KAN-49 (read-only business); KAN-63 (bookings used by KAN-59 and KAN-62); KAN-111 (public catalog KAN-113, discounts shown in KAN-115); KAN-77 collaborators (Q1 decided 2026-09-28: `Collaborator.serviceIds`; permission `manage_services`, KAN-86) |
 
 ## Intent
-The subscriber builds and maintains the catalog of services their business offers: creates, edits, lists, activates, deactivates and deletes services, and sets time-limited discounts. Bookings keep the price and duration that were valid when they were made, so later edits never change past bookings or revenue reports.
+The subscriber builds and maintains the catalog of services their business offers: creates, edits, lists, activates, deactivates and deletes services, and sets time-limited discounts. Bookings keep the price and duration that were valid when they were made, so later edits never change past bookings or revenue reports. In addition, the subscriber has a home dashboard to easily access tools and business configurations (KAN2-11).
 
 ## Actors and permissions
 | Actor | Can |
 | --- | --- |
-| subscriber (own business only) | Create, list, search, edit, activate, deactivate and delete their own business's services, and manage their discounts, while the business is `active`. Only list and view while the business is `inactive` or `suspended` (KAN-49). |
+| subscriber (own business only) | Create, list, search, edit, activate, deactivate and delete their own business's services, and manage their discounts, while the business is `active`. Only list and view while the business is `inactive` or `suspended` (KAN-49). Access the business home with shortcuts to core tools and configurations (KAN2-11). |
 | customer / visitor | See only `active` services in the public catalog (KAN-113); not part of this spec. |
 | super admin | Not part of this spec. |
-| collaborator (own business, while `active`) | With `manage_services` (KAN-86): the same as the subscriber in this spec. Without it: nothing here. |
+| collaborator (own business, while `active`) | With `manage_services` (KAN-86): the same as the subscriber in this spec. Without it: nothing here. Access the business home showing only tools and settings they are permitted to view (KAN2-11, KAN-86). |
 
 The business always comes from the session, never from the URL. A subscriber never sees or changes another business's services.
 
@@ -29,6 +29,7 @@ The business always comes from the session, never from the URL. A subscriber nev
 - Discounts on a service: percentage or fixed amount, with a validity date range (KAN-60).
 - Assigning collaborators to a service and choosing whether the customer picks one or the system assigns one (KAN-61).
 - Snapshot of name, price and duration on every booking (KAN-62).
+- Subscriber home with accessible shortcuts to essential business tools (services, schedule, customers, reports) and configurations (KAN2-11).
 
 ## Out of scope
 - Registering and managing collaborators (specified in KAN-77 epic).
@@ -125,6 +126,13 @@ The business always comes from the session, never from the URL. A subscriber nev
 - [ ] **AC-KAN-62-04** · edge · Given the subscriber saves a new price at the same moment a booking is being created, when both complete, then the booking snapshot holds exactly one consistent version of the service (all old values or all new values), never a mix. [KAN-62]
 - [ ] **AC-KAN-62-05** · edge · Given a booking whose service was later deleted (KAN-59), when it is shown in the agenda or history, then its name, price and duration come from the snapshot and no `common:errors.notFound` is shown. [KAN-62, KAN-59]
 
+### KAN2-11 — Subscriber home with quick access to tools and configurations
+- [x] **AC-KAN2-11-01** · happy · Given a signed-in subscriber whose business is `active`, when they navigate to the business portal home (`/business`), then they see the subscriber home dashboard with direct access cards to essential tools (services, schedule, customers, reports) and quick access to business configurations. [KAN2-11]
+- [x] **AC-KAN2-11-02** · happy · Given the subscriber on the business home, when they click on any tool or configuration card, then they are navigated directly to the corresponding business portal section. [KAN2-11]
+- [x] **AC-KAN2-11-03** · error · Given loading the business tools summary or status fails due to a network error, when the subscriber opens the business home, then `common:errors.network` and a retry action are displayed while basic navigation links remain accessible. [KAN2-11]
+- [x] **AC-KAN2-11-04** · edge · Given a subscriber whose business is `inactive` or `suspended`, when they open the business home, then they can still view their home tools and navigation shortcuts, but write-dependent actions indicate read-only status and display `business:errors.readOnly`. [KAN2-11, KAN-49]
+- [x] **AC-KAN2-11-05** · edge · Given a signed-in collaborator accessing the business home, when the home renders, then only the tools and configuration shortcuts permitted by their assigned permissions (KAN-86) are displayed. [KAN2-11, KAN-86]
+
 ## BLOCKED
 None. All open architectural questions (Q1–Q7) were resolved on 2026-09-28 and none block service management.
 
@@ -147,6 +155,7 @@ None.
 | AS-11 | A discount is valid from 00:00 of its start date to 23:59 of its end date in the business `timeZone`, evaluated on the booking's creation time (not on the booking date). | AC-KAN-60-03, AC-KAN-60-09 |
 | AS-12 | The default `collaboratorSelection` is `customer_choice`; with `customer_choice` the customer may still choose "any available" (KAN-138). | AC-KAN-61-02 |
 | AS-13 | Assignments are stored on the collaborator side only (`Collaborator.serviceIds`); `Service` keeps no list of collaborators, so there is one source of truth. | AC-KAN-61-01 |
+| AS-14 | The subscriber home (`/business`) displays navigational cards and shortcut actions for core modules (services, schedule, customers, reports) and configuration options (settings, business profile), prioritizing ease of use and frequent workflows. | AC-KAN2-11-01, AC-KAN2-11-02 |
 
 ## Backlog issues
 - KAN-60 lists "reservas" as a discount type next to percentage and fixed amount. Its meaning is unclear (for example "N bookings for the price of M", or "a discount for the first N bookings"). Only percentage and fixed amount are specified; the product owner should clarify or remove it.
@@ -155,9 +164,10 @@ None.
 - KAN-61 (collaborator assignment) belongs to the collaborator topic (KAN-77 epic) but sits in this epic; it edits the same `Collaborator.serviceIds` as KAN-78 / KAN-80.
 - KAN-62 is a system rule shared with booking creation (KAN-69, KAN-148); it is specified here and referenced from those specs to avoid duplicate criteria.
 - KAN-60 overlaps KAN-115 (customer sees discounts): this spec only covers how the subscriber sets them.
+- KAN2-11 specifies a subscriber home for quick access to tools and configurations at the business portal root (`/business`); although included under epic KAN-30, it functions as the central navigation hub for business tools and settings.
 
 ## Non-functional
-- i18n keys (new prefixes): `business:services.form.*`, `business:services.list.*`, `business:services.delete.*`, `business:services.discounts.*`, `business:services.snapshot.*`, `business:services.status.*` (activate / deactivate confirmation texts), `business:services.collaborators.*`. Reused: `validation:required`, `validation:outOfRange`, `validation:tooLong`, `common:errors.network`, `common:errors.notFound`, `business:errors.readOnly`.
+- i18n keys (new prefixes): `business:home.*`, `business:services.form.*`, `business:services.list.*`, `business:services.delete.*`, `business:services.discounts.*`, `business:services.snapshot.*`, `business:services.status.*` (activate / deactivate confirmation texts), `business:services.collaborators.*`. Reused: `validation:required`, `validation:outOfRange`, `validation:tooLong`, `common:errors.network`, `common:errors.notFound`, `business:errors.readOnly`.
 - Theming: Full support for light and dark modes using Tailwind CSS v4 semantic tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-card`). No static palette colors.
 - Pagination: cursor pagination with `PAGINATION.DEFAULT_PAGE_SIZE`, total count from the server, filters and search kept in the URL and reset to page one on change (`api-query-standards` §5–6). Search input debounced.
 - Delete runs through the `deleteService` callable so the booking check happens on the server; status toggles (KAN-57/58) may update optimistically with rollback (`api-mutation-standards`).
@@ -186,3 +196,4 @@ None.
 | KAN-61 | AC-KAN-61-01 … AC-KAN-61-07 | `src/modules/business/features/services/tests/ServiceCollaboratorsPage.test.tsx` |
 | KAN-62 | AC-KAN-62-01, AC-KAN-62-03, AC-KAN-62-04 | `functions/src/bookings/tests/createBooking.test.ts` |
 | KAN-62 | AC-KAN-62-02, AC-KAN-62-05 | `src/modules/business/features/services/tests/ServiceFormPage.test.tsx` |
+| KAN2-11 | AC-KAN2-11-01 … AC-KAN2-11-05 | `src/modules/business/features/home/tests/BusinessHomePage.test.tsx` |

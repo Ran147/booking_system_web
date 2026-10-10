@@ -59,6 +59,12 @@ export {
   PageTemplate,
   type PageTemplateProps,
 } from "./page-template/PageTemplate";
+export {
+  PortalHomeTemplate,
+  type PortalHomeMetricItem,
+  type PortalHomeTemplateProps,
+  type PortalQuickAccessItem,
+} from "./portal-home-template";
 export { PortalShell, type PortalShellProps } from "./portal-shell/PortalShell";
 export { SearchInput, type SearchInputProps } from "./search-input/SearchInput";
 export { Spinner } from "./spinner/Spinner";

@@ -2,6 +2,80 @@
   "errors": {
     "readOnly": "Tu negocio está inactivo o suspendido. No se pueden realizar cambios."
   },
+  "home": {
+    "closeModal": "Entendido",
+    "configs": {
+      "settings": {
+        "action": "Configurar",
+        "description": "Zona horaria, moneda, notificaciones y apariencia.",
+        "title": "Configuración general"
+      },
+      "subscription": {
+        "action": "Ver plan",
+        "description": "Detalles de tu plan contratado, recibos y fechas de renovación.",
+        "title": "Plan y suscripción"
+      }
+    },
+    "configsDescription": "Administra los parámetros generales y la suscripción de tu negocio.",
+    "configsTitle": "Configuraciones y ajustes",
+    "metrics": {
+      "activeServices": {
+        "helper": "En catálogo público",
+        "label": "Servicios configurados",
+        "value": "1"
+      },
+      "businessStatus": {
+        "helper": "Estado del tenant",
+        "label": "Estado del negocio",
+        "value": "Activo"
+      },
+      "todayBookings": {
+        "helper": "Próximas citas",
+        "label": "Citas para hoy",
+        "value": "0"
+      }
+    },
+    "placeholderModalDescription": "Esta herramienta se encuentra actualmente en desarrollo y estará disponible próximamente en tu portal.",
+    "placeholderModalTitle": "Módulo en construcción",
+    "roleBadge": "Suscriptor",
+    "roleCollaboratorBadge": "Colaborador",
+    "status": {
+      "available": "Disponible",
+      "comingSoon": "Próximamente"
+    },
+    "subtitle": "Accede fácilmente a las herramientas de gestión y configuraciones de tu negocio.",
+    "title": "Panel del negocio",
+    "tools": {
+      "collaborators": {
+        "action": "Gestionar equipo",
+        "description": "Invita a tus colaboradores, asigna servicios y gestiona permisos.",
+        "title": "Equipo y colaboradores"
+      },
+      "customers": {
+        "action": "Ver clientes",
+        "description": "Administra tu cartera de clientes, historial de visitas y notas.",
+        "title": "Directorio de clientes"
+      },
+      "reports": {
+        "action": "Ver estadísticas",
+        "description": "Analiza ingresos estimados, ocupación de turnos y métricas.",
+        "title": "Reportes y estadísticas"
+      },
+      "schedule": {
+        "action": "Ver agenda",
+        "description": "Consulta tus citas del día, agenda turnos y administra bloques.",
+        "title": "Agenda y reservas"
+      },
+      "services": {
+        "action": "Crear servicio",
+        "description": "Crea, edita y organiza los servicios que ofreces a tus clientes.",
+        "title": "Gestión de servicios"
+      }
+    },
+    "toolsDescription": "Gestiona tu catálogo de servicios, agenda, clientes y reportes operativos.",
+    "toolsTitle": "Herramientas y accesos rápidos",
+    "welcome": "Bienvenido a tu panel"
+  },
   "layout": {
     "title": "Portal del negocio"
   },
