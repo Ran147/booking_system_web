@@ -30,6 +30,12 @@
     }
   },
   "home": {
+    "hero": {
+      "badge": "Gestión de citas y reservas para profesionales",
+      "ctaAction": "Explorar planes",
+      "tagline": "Simplifica la agenda de tu negocio, automatiza tus recordatorios y permite que tus clientes reserven en línea 24/7 sin complicaciones.",
+      "title": "Impulsa tu negocio con reservas inteligentes y sin esfuerzo"
+    },
     "plans": {
       "billingPeriod": {
         "annual": "/año",

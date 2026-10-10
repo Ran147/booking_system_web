@@ -30,6 +30,12 @@
     }
   },
   "home": {
+    "hero": {
+      "badge": "Appointment & booking management for professionals",
+      "ctaAction": "Explore plans",
+      "tagline": "Simplify your business schedule, automate reminders, and allow your clients to book online 24/7 effortlessly.",
+      "title": "Boost your business with smart and effortless bookings"
+    },
     "plans": {
       "billingPeriod": {
         "annual": "/year",
