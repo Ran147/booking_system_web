@@ -59,6 +59,7 @@
         "annual": "/año",
         "monthly": "/mes"
       },
+      "catalogAction": "Ver los planes disponibles",
       "contract": "Contratar este plan",
       "featuresTitle": "Qué incluye",
       "limits": {
@@ -72,6 +73,9 @@
       "retryAction": "Reintentar",
       "signOutAction": "Cerrar sesión",
       "signedInNotice": "Un negocio nuevo se contrata sin sesión iniciada: cada cuenta tiene un solo negocio. Cierra sesión para continuar."
+    },
+    "payment": {
+      "planUnavailableError": "Este plan ya no está disponible. Elige otro plan."
     }
   }
 }

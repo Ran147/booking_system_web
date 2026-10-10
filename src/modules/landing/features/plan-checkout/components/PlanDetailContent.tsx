@@ -3,10 +3,17 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
+import type { Nullable } from "@/shared/types";
+import { ContractErrorAlert } from "./ContractErrorAlert";
 import { SignedInContractNotice } from "./SignedInContractNotice";
-import type { FormattedPlanDetail } from "../models/PlanDetailViewModel.interface";
+import type {
+  ContractError,
+  FormattedPlanDetail,
+} from "../models/PlanDetailViewModel.interface";
 
 export interface PlanDetailContentProps {
+  readonly contractError: Nullable<ContractError>;
+  readonly isCheckingPlan: boolean;
   readonly isSigningOut: boolean;
   readonly onContract: () => void;
   readonly onSignOut: () => void;
@@ -17,6 +24,8 @@ export interface PlanDetailContentProps {
 // Name, price, features and limits of one plan, and the contract action
 // (AC-KAN-21-01, AC-KAN-21-09).
 export const PlanDetailContent = ({
+  contractError,
+  isCheckingPlan,
   isSigningOut,
   onContract,
   onSignOut,
@@ -77,7 +86,10 @@ export const PlanDetailContent = ({
           onSignOut={onSignOut}
         />
       ) : null}
-      <Button fullWidth onClick={onContract}>
+      {contractError ? (
+        <ContractErrorAlert contractError={contractError} />
+      ) : null}
+      <Button fullWidth isLoading={isCheckingPlan} onClick={onContract}>
         {t("planCheckout.detail.contract")}
       </Button>
     </article>

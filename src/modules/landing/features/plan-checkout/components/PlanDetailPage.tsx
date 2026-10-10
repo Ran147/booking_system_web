@@ -15,9 +15,11 @@ import { usePlanDetailPageViewModel } from "../hooks/usePlanDetailPageViewModel"
 export const PlanDetailPage = (): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
   const {
+    contractError,
     failedMessageKey,
     handleContract,
     handleSignOut,
+    isCheckingPlan,
     isSigningOut,
     plan,
     planDetailState,
@@ -49,6 +51,8 @@ export const PlanDetailPage = (): ReactElement => {
             ) : null}
             {plan ? (
               <PlanDetailContent
+                contractError={contractError}
+                isCheckingPlan={isCheckingPlan}
                 isSigningOut={isSigningOut}
                 onContract={handleContract}
                 onSignOut={handleSignOut}

@@ -59,6 +59,7 @@
         "annual": "/year",
         "monthly": "/month"
       },
+      "catalogAction": "See the available plans",
       "contract": "Contract this plan",
       "featuresTitle": "What it includes",
       "limits": {
@@ -72,6 +73,9 @@
       "retryAction": "Try again",
       "signOutAction": "Sign out",
       "signedInNotice": "A new business is contracted signed out: each account has only one business. Sign out to continue."
+    },
+    "payment": {
+      "planUnavailableError": "This plan is no longer available. Choose another plan."
     }
   }
 }

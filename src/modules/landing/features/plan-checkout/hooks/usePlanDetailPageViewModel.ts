@@ -12,6 +12,7 @@ import type { Nullable } from "@/shared/types";
 import { formatPrice } from "@/shared/utils/format";
 import { useActivePlanDetailsQuery } from "../api/useActivePlanDetailsQuery";
 import { useSignOutMutation } from "../api/useSignOutMutation";
+import { useVerifyPlanIsActiveMutation } from "../api/useVerifyPlanIsActiveMutation";
 import {
   PLAN_BILLING_PERIOD,
   PLAN_DETAIL_CURRENCY,
@@ -21,18 +22,25 @@ import {
 } from "../constants/PlanDetail.constants";
 import type { PlanDetail } from "../models/PlanDetail.interface";
 import type {
+  ContractError,
   FormattedPlanDetail,
   FormattedPlanLimit,
   PlanDetailPageViewModel,
 } from "../models/PlanDetailViewModel.interface";
 
 export const usePlanDetailPageViewModel = (): PlanDetailPageViewModel => {
-  const { i18n, t } = useTranslation(I18N_NAMESPACE.LANDING);
+  const { i18n, t } = useTranslation([
+    I18N_NAMESPACE.LANDING,
+    I18N_NAMESPACE.COMMON,
+  ]);
   const navigate = useNavigate();
   const { planId = STRING.EMPTY } = useParams();
   const session = useSession();
   const activePlansQuery = useActivePlanDetailsQuery();
   const signOutMutation = useSignOutMutation();
+  const verifyPlanIsActiveMutation = useVerifyPlanIsActiveMutation();
+  const [contractError, setContractError] =
+    useState<Nullable<ContractError>>(null);
   const [hasTriedToContractSignedIn, setHasTriedToContractSignedIn] =
     useState<boolean>(false);
 
@@ -95,22 +103,45 @@ export const usePlanDetailPageViewModel = (): PlanDetailPageViewModel => {
     ? formatPlan(currentPlan)
     : null;
 
-  // A signed-in user is asked to sign out first (AC-KAN-21-11, AS-8).
+  // A signed-in user is asked to sign out first (AC-KAN-21-11, AS-8). The
+  // plan is read again before the checkout opens (AC-KAN-21-10).
   const handleContract = (): void => {
     if (isSignedIn) {
       setHasTriedToContractSignedIn(true);
       return;
     }
-    void navigate(generatePath(ROUTE_PATH.LANDING.PLAN_CHECKOUT, { planId }));
+    setContractError(null);
+    verifyPlanIsActiveMutation.mutate(planId, {
+      onError: (mutationError) => {
+        setContractError({
+          message: t(`common:${mutationError.messageKey}`),
+          showCatalogLink: false,
+        });
+      },
+      onSuccess: (isPlanActive) => {
+        if (!isPlanActive) {
+          setContractError({
+            message: t("planCheckout.payment.planUnavailableError"),
+            showCatalogLink: true,
+          });
+          return;
+        }
+        void navigate(
+          generatePath(ROUTE_PATH.LANDING.PLAN_CHECKOUT, { planId }),
+        );
+      },
+    });
   };
 
   return {
+    contractError,
     failedMessageKey:
       activePlansQuery.error?.messageKey ?? ERROR_MESSAGE_KEY.UNKNOWN,
     handleContract,
     handleSignOut: (): void => {
       signOutMutation.mutate();
     },
+    isCheckingPlan: verifyPlanIsActiveMutation.isPending,
     isSigningOut: signOutMutation.isPending,
     plan,
     planDetailState: readPlanDetailState(),

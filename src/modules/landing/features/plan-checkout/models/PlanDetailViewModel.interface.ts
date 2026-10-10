@@ -32,13 +32,25 @@ export interface PlanSwitcherOption {
 }
 
 /**
+ * Why the contract action did not open the checkout (AC-KAN-21-10).
+ */
+export interface ContractError {
+  readonly message: string;
+  /** The plan is no longer active: offer the plan catalog. */
+  readonly showCatalogLink: boolean;
+}
+
+/**
  * Resultado del ViewModel de la pagina de detalle del plan.
  */
 export interface PlanDetailPageViewModel {
+  readonly contractError: Nullable<ContractError>;
   /** Message of a read that failed for a network or server reason. */
   readonly failedMessageKey: ErrorMessageKey;
   readonly handleContract: () => void;
   readonly handleSignOut: () => void;
+  /** The plan is being read again before the checkout opens. */
+  readonly isCheckingPlan: boolean;
   readonly isSigningOut: boolean;
   readonly plan: Nullable<FormattedPlanDetail>;
   readonly planDetailState: PlanDetailState;

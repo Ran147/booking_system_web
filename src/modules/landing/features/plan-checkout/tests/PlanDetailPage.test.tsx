@@ -206,6 +206,45 @@ describe("PlanDetailPage (KAN-21)", () => {
     expect(await screen.findByText(CHECKOUT_TEXT)).toBeInTheDocument();
   });
 
+  it("KAN-21: AC-KAN-21-10 does not open the checkout of a plan deactivated after the page loaded", async () => {
+    renderPlanDetail();
+    await findPlanHeading("Básico");
+    vi.mocked(fetchActivePlanDetails).mockResolvedValue([PRO_PLAN]);
+
+    await userEvent.click(getContractButton());
+
+    expect(
+      await screen.findByText(
+        testI18n.t("landing:planCheckout.payment.planUnavailableError"),
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: testI18n.t("landing:planCheckout.detail.catalogAction"),
+      }),
+    ).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
+    expect(screen.queryByText(CHECKOUT_TEXT)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole(ARIA_ROLE.HEADING, { level: 1, name: "Básico" }),
+    ).toBeInTheDocument();
+  });
+
+  it("KAN-21: AC-KAN-21-10 stays on the detail with the network error when the plan cannot be checked", async () => {
+    renderPlanDetail();
+    await findPlanHeading("Básico");
+    vi.mocked(fetchActivePlanDetails).mockRejectedValueOnce({
+      code: "unavailable",
+      messageKey: ERROR_MESSAGE_KEY.NETWORK,
+    });
+
+    await userEvent.click(getContractButton());
+
+    expect(
+      await screen.findByText(testI18n.t(ERROR_MESSAGE_KEY.NETWORK)),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(CHECKOUT_TEXT)).not.toBeInTheDocument();
+  });
+
   it("KAN-21: AC-KAN-21-11 asks a signed-in user to sign out instead of opening the checkout", async () => {
     renderPlanDetail(BASIC_PLAN.id, SUBSCRIBER_SESSION);
     await findPlanHeading("Básico");
