@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | landing |
-| Feature folder | `src/portals/landing/features/subscriber-sign-up/` |
+| Feature folder | `src/modules/landing/features/subscriber-sign-up/` |
 | Stories | KAN-25, KAN-27 |
 | Status | Draft |
-| Depends on | Q7 decided 2026-09-28 (the form is reached from the KAN-24 payment email); Q4 decided 2026-09-28 (the business `slug` is set here); Q2 decided 2026-09-28 (the new business is `pending` until approval); KAN-20 plan checkout (`PlanCheckout`, KAN-24 email); KAN-28 sign-in (`src/features/auth`, KAN-33 "under review" screen); KAN-174 admin businesses (approval PROP-1, KAN-176) |
+| Depends on | Q7 decided 2026-09-28 (the form is reached from the KAN-24 payment email); Q4 decided 2026-09-28 (the business `slug` is set here); Q2 decided 2026-09-28 (the new business is `pending` until approval); KAN-20 plan checkout (`PlanCheckout`, KAN-24 email); KAN-28 sign-in (`src/features/auth`, KAN-33 "under review" screen); KAN-174 admin businesses (approval PROP-1, KAN-176); `cloud-functions-standards` (proposed in PR #17) for the three functions below |
 
 ## Intent
 A future subscriber (business owner) who has paid a plan on the landing (KAN-22) opens the link of the payment email (KAN-24) and creates their platform account and their business: personal data, a password whose strength they can see, the business name and its `slug` (the address `/<slug>` of its customer pages). They are then sent to sign-in; until the super admin approves the business (Q2), signing in shows an "under review" screen.
@@ -32,10 +32,11 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 - Customer sign-up (KAN-122, customer portal) and collaborator invitations (KAN-79).
 
 ## Data
-- `User` (`users/{userId}`): created with the personal data of the form, the checkout email and the preferred `language` (AS-4).
+- `User` (`users/{userId}`, `userId` = the Firebase Auth uid): `fullName` (first and last name of the form joined by one space, as the glossary names it), `phone` (`null` when empty, AS-1), `email` (the checkout email), `language` (AS-4), `createdAt`.
 - `Business` (`businesses/{businessId}`, glossary §3): created with `status` `pending`, `name`, `slug`, `ownerUserId`, `planCheckoutId`, `timeZone` (AS-8), `createdAt`. No `Subscription` is created: it is created when the super admin approves the business (KAN-176).
 - `Payment` (`businesses/{businessId}/payments/{paymentId}`): the checkout payment is copied here (amount, plan, date, result `succeeded`, reference) so it appears in the payment histories (KAN-46, KAN-178).
-- `PlanCheckout` (`planCheckouts/{planCheckoutId}`): `signUpCompletedAt` is set; the link stops working.
+- `PlanCheckout` (`planCheckouts/{planCheckoutId}`): found by `signUpTokenHash` (the SHA-256 hash of the link token, plan-checkout spec "Data"); valid while `signUpCompletedAt` is `null` and `signUpLinkExpiresAt` has not passed. Sign-up sets `signUpCompletedAt`; the link stops working.
+- `BusinessSlug` lock (`businessSlugs/{slug}`, decided 2026-10-10): `businessId`, `createdAt`. Created in the sign-up transaction; if the document already exists the slug is taken. It makes the slug unique even when two sign-ups run at the same time (AC-KAN-25-18). Written only by functions; denied to clients by the default rule of `firestore.rules`. New collection: to be added to `domain-glossary` §3 (proposed in PR #17).
 - Custom claims `{ role: "subscriber", businessId }` (`auth-and-roles` §1), set by the sign-up function.
 - `slug`: lowercase letters `a–z`, digits and single hyphens, 3–40 characters, not starting or ending with a hyphen (AS-7); never in `RESERVED_BUSINESS_SLUG` (`isReservedBusinessSlug`); unique across all businesses in any status.
 - Password rules: `PASSWORD_RULE` (minimum 8 characters, lowercase, uppercase, digit, symbol) from `forms-validation-standards` §5.
@@ -77,7 +78,9 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 ## BLOCKED
 None. Q7 was decided on 2026-09-28: the form is reached from the KAN-24 payment email, and the sign-up creates the account and the `pending` business with its `slug`.
 
-## Assumptions (to confirm)
+## Assumptions
+AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can still correct them in the PR.
+
 | Id | Assumption | Affects |
 | --- | --- | --- |
 | AS-1 | "Personal data" means first name, last name and phone; phone is optional. | AC-KAN-25-01 |
@@ -94,12 +97,22 @@ None. Q7 was decided on 2026-09-28: the form is reached from the KAN-24 payment 
 - The Jira epic title is "Registro del usuario una vez confirmado correo" ("sign-up once the email is confirmed"); the epic map calls it "Registro del usuario". The confirmed email is the KAN-24 payment email (Q7).
 - KAN-25 says "usuario"; in this epic it is the future subscriber (business owner), not a `customer` (customer sign-up is KAN-122).
 - KAN-25 does not mention the business name or its `slug`; Q4 and Q7 place them here (AC-KAN-25-15 … AC-KAN-25-19). The Jira story should say so.
+- `domain-glossary` §3 lists fewer `PlanCheckout` fields than the plan-checkout spec (`termsVersion`, `paymentReference`, `language`, `signUpTokenHash`, `signUpLinkExpiresAt` are missing) and has no `businessSlugs` lock. To be aligned in the glossary (PR #17 or a follow-up).
 - KAN-27 says the redirect is "to enter the panel"; until the super admin approves the business (Q2), the panel shows only the "under review" screen (AC-KAN-27-06).
 
 ## Non-functional
 - i18n keys: new prefix `landing:subscriberSignUp.*` (`landing:subscriberSignUp.form.*`, `landing:subscriberSignUp.form.strength.*`, `landing:subscriberSignUp.link.*`, `landing:subscriberSignUp.success`). Also `common:errors.unknown`. Reused: `validation:required`, `validation:emailInvalid`, `validation:tooShort`, `validation:tooLong`, `validation:passwordTooWeak`, `validation:recaptchaRequired`, `common:errors.network`.
-- reCAPTCHA required on the form; submit disabled until there is a token; token verified on the server before the account is created (`auth-and-roles` §5).
+- reCAPTCHA required on the form; submit disabled until there is a token; the token is verified **inside** `completeSubscriberSignUp`, before the account is created, with the shared `assertRecaptcha` helper (`auth-and-roles` §5, `cloud-functions-standards` §5, proposed in PR #17).
 - The account, the business, the payment copy and the claims are created by one callable function (`api-mutation-standards` §1); the slug availability check is a callable that returns only available / taken / reserved.
+- **Server functions** (`functions/src/billing/`, decided 2026-10-10). All three are public (no signed-in user) and need a valid `signUpToken`; error `details.reason` values come from `SIGN_UP_ERROR_REASON` (`LINK_EXPIRED`, `LINK_INVALID`, `ACCOUNT_EXISTS`, `SLUG_RESERVED`, `SLUG_TAKEN`), mirrored in the client.
+
+  | Function | Payload | Response | Errors (`HttpsError` code · reason) |
+  | --- | --- | --- | --- |
+  | `validateSignUpLink` | `{ signUpToken }` | `{ checkoutEmail, planName, amountInCents, billingPeriod }` | `invalid-argument` (no token) · `failed-precondition` · `LINK_INVALID` (unknown or used) / `LINK_EXPIRED` |
+  | `checkBusinessSlug` | `{ signUpToken, businessSlug }` | `{ availability: "available" \| "taken" \| "reserved" }` | `invalid-argument` (slug outside AS-7) · `failed-precondition` · `LINK_INVALID` / `LINK_EXPIRED` |
+  | `completeSubscriberSignUp` | `{ signUpToken, recaptchaToken, firstName, lastName, phone, password, businessName, businessSlug, language, timeZone }` (no email: it comes from the checkout; no confirmation: checked in the form) | `{ email }` (to pre-fill sign-in, KAN-27) | `invalid-argument` (payload outside AS-3, AS-7, AS-9 or `PASSWORD_RULE`) · `permission-denied` / `unavailable` (reCAPTCHA) · `failed-precondition` · `LINK_INVALID` / `LINK_EXPIRED` / `SLUG_RESERVED` · `already-exists` · `SLUG_TAKEN` / `ACCOUNT_EXISTS` (shown with the neutral message, AS-5) · `internal` (`common:errors.unknown`) |
+
+- **Order and rollback of `completeSubscriberSignUp`** (AC-KAN-25-16, AC-KAN-25-22): (1) parse and normalize the payload; (2) verify the reCAPTCHA; (3) find the `PlanCheckout` by `signUpTokenHash` and reject a used or expired link; (4) create the Firebase Auth user with the checkout email (an existing email ⇒ `ACCOUNT_EXISTS`, the link stays valid); (5) in one transaction: re-read the `PlanCheckout` (still unused), `get` `businessSlugs/{slug}` (must not exist), then create the `Business` (`pending`), the `User`, the `businessSlugs/{slug}` lock and the `Payment` copy, and set `signUpCompletedAt`; (6) if the transaction fails, delete the Auth user and re-throw, so no account is left without its business and the link stays valid; (7) after the commit, set the claims `{ role: "subscriber", businessId }` (a failure is logged and repaired from the stored documents; the account and business stay).
 - Sign-up is a guest-only page: signed-in users are redirected to their portal.
 - No pagination, export, realtime or idle timeout (no session yet).
 - Accessibility: labels on every field, errors linked to their field and announced, the strength indicator is readable by screen readers (not colour only), usable at 360 px width.
@@ -109,5 +122,8 @@ None. Q7 was decided on 2026-09-28: the form is reached from the KAN-24 payment 
 | --- | --- | --- |
 | KAN-25 | AC-KAN-25-01 … AC-KAN-25-15, AC-KAN-25-17, AC-KAN-25-19 … AC-KAN-25-21 (AC-KAN-25-05 and AC-KAN-25-12 struck through) | `tests/SubscriberSignUpPage.test.tsx` |
 | KAN-25 | AC-KAN-25-16, AC-KAN-25-18, AC-KAN-25-22 | `functions/src/billing/tests/completeSubscriberSignUp.test.ts` |
+| KAN-25 | AC-KAN-25-14, AC-KAN-25-20 (server side) | `functions/src/billing/tests/validateSignUpLink.test.ts` |
+| KAN-25 | AC-KAN-25-15, AC-KAN-25-17, AC-KAN-25-18 (availability check) | `functions/src/billing/tests/checkBusinessSlug.test.ts` |
+| KAN-25 | `planCheckouts`, `businessSlugs`, `users` denied to clients | `tests/rules/planCheckouts.rules.test.ts` |
 | KAN-27 | AC-KAN-27-01 … AC-KAN-27-06 | `tests/SubscriberSignUpPage.test.tsx` |
 

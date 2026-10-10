@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | landing |
-| Feature folder | `src/portals/landing/features/plan-checkout/` |
+| Feature folder | `src/modules/landing/features/plan-checkout/` |
 | Stories | KAN-21, KAN-22, KAN-23, KAN-24 |
 | Status | Draft |
 | Depends on | Q7 decided 2026-09-28 (plan checkout from the landing with the simulated gateway); Q5 decided 2026-09-28 (the gateway only fakes a success or a failure); Q2 decided 2026-09-28 (the new business waits for approval); KAN-1 Home (terms KAN-9) (plan catalog KAN-7); KAN-180 plans (admin: `Plan`, `limits` KAN-181, `active`/`inactive` KAN-184); KAN-26 subscriber sign-up (KAN-25, reached from the KAN-24 email); KAN-174 admin businesses (approval PROP-1, KAN-176) |
@@ -32,7 +32,8 @@ A business owner who is comparing plans opens one plan, sees everything it inclu
 
 ## Data
 - `Plan` (`plans/{planId}`), read only: name, `priceInCents`, `billingPeriod` (`monthly` / `annual`), features and `limits` (KAN-181, as defined in the KAN-180 spec), status `active` / `inactive` (glossary §4.5). Description text: AS-2.
-- `PlanCheckout` (`planCheckouts/{planCheckoutId}`, glossary §3), created by a Cloud Function only when the simulated payment succeeds: `planId`, `email`, `amountInCents` (the plan price at payment time), `paidAt`, `termsAcceptedAt`, `termsVersion` (AS-10), `paymentReference`, `language`, `signUpCompletedAt` (`null` until KAN-25). Not readable by clients; the sign-up link carries a single-use token that identifies it (AS-6).
+- `PlanCheckout` (`planCheckouts/{planCheckoutId}`, glossary §3), created by a Cloud Function only when the simulated payment succeeds: `planId`, `email`, `amountInCents` (the plan price at payment time), `paidAt`, `termsAcceptedAt`, `termsVersion` (AS-10), `paymentReference`, `language`, `signUpCompletedAt` (`null` until KAN-25), `signUpTokenHash`, `signUpLinkExpiresAt`. Not readable by clients; the sign-up link carries a single-use token that identifies it (AS-6).
+- Sign-up link (decided 2026-10-10 with the KAN-25 owner): `/sign-up?token=<signUpToken>`. The function that sends the KAN-24 email creates `signUpToken` (32 random bytes, base64url) and stores **only** its SHA-256 hash in `signUpTokenHash`, never the token itself, plus `signUpLinkExpiresAt` = `paidAt` + 7 days (AS-6). Requesting a new link replaces both fields, so the previous link stops working. The link is used up when the sign-up sets `signUpCompletedAt` (KAN-25).
 - No `Business`, `User`, `Subscription` or `Payment` is created here: the account and the `pending` business are created at sign-up (KAN-25), where the checkout payment is copied to `businesses/{businessId}/payments`.
 - Routes: the plan detail and checkout pages live under a static landing segment (for example `/plans/:planId` and `/plans/:planId/checkout`); that segment is added to `RESERVED_BUSINESS_SLUG` in the PR that adds the route (glossary §3).
 
