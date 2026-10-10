@@ -50,6 +50,21 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
     }
 
+    function isBusinessPortalUser() {
+      return hasRole('subscriber')
+        || (hasRole('collaborator')
+          && isCollaboratorOf(request.auth.token.businessId));
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && isBusinessPortalUser()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['language'])
+        && request.resource.data.language in ['es', 'en'];
+    }
+
     match /businesses/{businessId} {
       allow read: if true; // public profile (KAN-112)
       allow update: if ownsBusiness(businessId)
