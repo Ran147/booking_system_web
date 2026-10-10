@@ -1,6 +1,44 @@
 {
+  "businessProfile": {
+    "contact": {
+      "emailLabel": "Contact email",
+      "phoneLabel": "Contact phone",
+      "title": "Contact"
+    },
+    "description": "Keep the information your customers see when they visit your business up to date.",
+    "descriptionField": {
+      "label": "Description"
+    },
+    "eyebrow": "Public presence",
+    "logo": {
+      "helper": "PNG, JPEG or WebP up to 2 MB.",
+      "label": "Business logo",
+      "removeAction": "Remove logo",
+      "undoAction": "Keep logo"
+    },
+    "name": {
+      "label": "Business name"
+    },
+    "retryAction": "Retry",
+    "saveAction": "Save changes",
+    "saveSuccess": "The public profile was saved successfully.",
+    "slug": {
+      "label": "Public link",
+      "readOnlyHint": "The link is defined when the business is created and cannot be changed."
+    },
+    "socialLinks": {
+      "facebookLabel": "Facebook",
+      "helper": "Add HTTPS links only. Leave networks you do not use empty.",
+      "instagramLabel": "Instagram",
+      "tiktokLabel": "TikTok",
+      "title": "Social networks",
+      "websiteLabel": "Website",
+      "whatsappLabel": "WhatsApp"
+    },
+    "title": "Business public profile"
+  },
   "errors": {
-    "readOnly": "Your business is inactive or suspended. Changes cannot be made."
+    "readOnly": "This business is read-only and cannot be changed."
   },
   "layout": {
     "title": "Business portal"

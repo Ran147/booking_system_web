@@ -6,6 +6,7 @@ import {
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { FIREBASE_EMULATOR } from "@/shared/constants";
 import { readFirebaseEnvironment } from "./readFirebaseEnvironment";
 
@@ -30,6 +31,7 @@ if (
 export const auth = getAuth(firebaseApp);
 export const firestore = getFirestore(firebaseApp);
 export const functions = getFunctions(firebaseApp);
+export const storage = getStorage(firebaseApp);
 
 if (firebaseEnvironment.shouldUseEmulators) {
   connectAuthEmulator(auth, FIREBASE_EMULATOR.AUTH_URL, {
@@ -44,5 +46,10 @@ if (firebaseEnvironment.shouldUseEmulators) {
     functions,
     FIREBASE_EMULATOR.HOST,
     FIREBASE_EMULATOR.PORT.FUNCTIONS,
+  );
+  connectStorageEmulator(
+    storage,
+    FIREBASE_EMULATOR.HOST,
+    FIREBASE_EMULATOR.PORT.STORAGE,
   );
 }

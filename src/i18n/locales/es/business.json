@@ -1,6 +1,44 @@
 {
+  "businessProfile": {
+    "contact": {
+      "emailLabel": "Correo de contacto",
+      "phoneLabel": "Teléfono de contacto",
+      "title": "Contacto"
+    },
+    "description": "Mantén actualizada la información que tus clientes verán cuando visiten tu negocio.",
+    "descriptionField": {
+      "label": "Descripción"
+    },
+    "eyebrow": "Presencia pública",
+    "logo": {
+      "helper": "PNG, JPEG o WebP de hasta 2 MB.",
+      "label": "Logo del negocio",
+      "removeAction": "Quitar logo",
+      "undoAction": "Conservar logo"
+    },
+    "name": {
+      "label": "Nombre del negocio"
+    },
+    "retryAction": "Reintentar",
+    "saveAction": "Guardar cambios",
+    "saveSuccess": "El perfil público se guardó correctamente.",
+    "slug": {
+      "label": "Enlace público",
+      "readOnlyHint": "El enlace se define al crear el negocio y no puede modificarse."
+    },
+    "socialLinks": {
+      "facebookLabel": "Facebook",
+      "helper": "Agrega únicamente enlaces HTTPS. Deja vacías las redes que no utilices.",
+      "instagramLabel": "Instagram",
+      "tiktokLabel": "TikTok",
+      "title": "Redes sociales",
+      "websiteLabel": "Sitio web",
+      "whatsappLabel": "WhatsApp"
+    },
+    "title": "Perfil público del negocio"
+  },
   "errors": {
-    "readOnly": "Tu negocio está inactivo o suspendido. No se pueden realizar cambios."
+    "readOnly": "Este negocio está en modo de solo lectura y no puede modificarse."
   },
   "layout": {
     "title": "Portal del negocio"

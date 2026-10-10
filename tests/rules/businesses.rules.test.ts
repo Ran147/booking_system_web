@@ -113,6 +113,92 @@ describe("firestore.rules: tenant isolation", () => {
     );
   });
 
+  it("KAN-199: lets the owner update only public profile fields", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriberA.firestore().doc("businesses/business-a").update({
+        contactEmail: "contact@example.com",
+        name: "Updated business",
+        socialLinks: [],
+      }),
+    );
+  });
+
+  it("KAN-199: denies changing protected business fields", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertFails(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ slug: "another-slug" }),
+    );
+  });
+
+  it("KAN-199: denies updating another subscriber's public profile", async () => {
+    const subscriberB = testEnvironment.authenticatedContext(
+      "subscriber-b",
+      subscriberOf("business-b"),
+    );
+
+    await assertFails(
+      subscriberB
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Stolen business" }),
+    );
+  });
+
+  it.each([
+    ["an empty name", { name: "" }],
+    ["an oversized name", { name: "n".repeat(121) }],
+    ["an oversized description", { description: "d".repeat(1_001) }],
+    ["an empty optional field instead of null", { description: "" }],
+    ["an invalid email", { contactEmail: "invalid-email" }],
+    ["an invalid phone", { contactPhone: "123" }],
+    [
+      "a non-HTTPS social URL",
+      {
+        socialLinks: [{ network: "facebook", url: "http://example.com" }],
+      },
+    ],
+    [
+      "an unsupported social network",
+      {
+        socialLinks: [{ network: "other", url: "https://example.com" }],
+      },
+    ],
+    [
+      "more than five social links",
+      {
+        socialLinks: Array.from({ length: 6 }, (_, index) => ({
+          network: "website",
+          url: `https://example.com/${index}`,
+        })),
+      },
+    ],
+    ["an invalid profile field type", { description: 42 }],
+  ])("KAN-199: denies %s", async (_caseName, invalidUpdate) => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertFails(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a")
+        .update(invalidUpdate),
+    );
+  });
+
   it("denies a visitor reading a business's bookings", async () => {
     const visitor = testEnvironment.unauthenticatedContext();
 

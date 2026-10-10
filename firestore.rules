@@ -50,11 +50,63 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
     }
 
+    function isOptionalNullableString(data, field, maximumLength) {
+      return !(field in data)
+        || data[field] == null
+        || (data[field] is string
+          && data[field].size() > 0
+          && data[field].size() <= maximumLength);
+    }
+
+    function isValidSocialLink(link) {
+      return link is map
+        && link.keys().hasOnly(['network', 'url'])
+        && link.network in ['facebook', 'instagram', 'tiktok', 'website', 'whatsapp']
+        && link.url is string
+        && link.url.matches('^https://[^ ]+$');
+    }
+
+    function areValidSocialLinks(data) {
+      return !('socialLinks' in data)
+        || (data.socialLinks is list
+          && data.socialLinks.size() <= 5
+          && (data.socialLinks.size() < 1 || isValidSocialLink(data.socialLinks[0]))
+          && (data.socialLinks.size() < 2 || isValidSocialLink(data.socialLinks[1]))
+          && (data.socialLinks.size() < 3 || isValidSocialLink(data.socialLinks[2]))
+          && (data.socialLinks.size() < 4 || isValidSocialLink(data.socialLinks[3]))
+          && (data.socialLinks.size() < 5 || isValidSocialLink(data.socialLinks[4])));
+    }
+
+    function hasValidPublicProfile(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 120
+        && isOptionalNullableString(data, 'description', 1000)
+        && isOptionalNullableString(data, 'contactEmail', 320)
+        && (!('contactEmail' in data)
+          || data.contactEmail == null
+          || data.contactEmail.matches('^[^@]+@[^@]+\\.[^@]+$'))
+        && isOptionalNullableString(data, 'contactPhone', 25)
+        && (!('contactPhone' in data)
+          || data.contactPhone == null
+          || data.contactPhone.matches('^\\+?[0-9 ()-]{7,25}$'))
+        && isOptionalNullableString(data, 'logoUrl', 2048)
+        && areValidSocialLinks(data);
+    }
+
     match /businesses/{businessId} {
       allow read: if true; // public profile (KAN-112)
       allow update: if ownsBusiness(businessId)
-        && !request.resource.data.diff(resource.data).affectedKeys()
-             .hasAny(['status', 'ownerUserId']); // status changes only via functions
+        && businessIsWritable(businessId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'contactEmail',
+          'contactPhone',
+          'description',
+          'logoUrl',
+          'name',
+          'socialLinks'
+        ])
+        && hasValidPublicProfile(request.resource.data);
 
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()

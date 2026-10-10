@@ -30,7 +30,10 @@ export const readFirebaseEnvironment = (
         environment.VITE_FIREBASE_PROJECT_ID,
         FIREBASE_EMULATOR.DEMO_PROJECT_ID,
       ),
-      storageBucket: environment.VITE_FIREBASE_STORAGE_BUCKET,
+      storageBucket: emulatorFallback(
+        environment.VITE_FIREBASE_STORAGE_BUCKET,
+        FIREBASE_EMULATOR.DEMO_STORAGE_BUCKET,
+      ),
     },
     recaptchaEnterpriseSiteKey:
       environment.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || null,

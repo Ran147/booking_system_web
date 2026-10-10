@@ -185,11 +185,16 @@ const seedBusiness = async (firestore: Firestore): Promise<void> => {
 
   await businessDocument.set({
     businessHours: buildBusinessHours(),
+    contactEmail: null,
+    contactPhone: null,
     currency: SEED_BUSINESS.CURRENCY,
+    description: null,
+    logoUrl: null,
     name: SEED_BUSINESS.NAME,
     ownerUserId: SEED_USER.SUBSCRIBER.UID,
     slug: SEED_BUSINESS.SLUG,
     status: BUSINESS_STATUS.ACTIVE,
+    socialLinks: [],
     timeZone: SEED_BUSINESS.TIME_ZONE,
   });
   await businessDocument

@@ -4,9 +4,11 @@ export const FIREBASE_EMULATOR = {
   AUTH_URL: "http://127.0.0.1:9099",
   DEMO_API_KEY: "demo-api-key",
   DEMO_PROJECT_ID: "demo-booking-system",
+  DEMO_STORAGE_BUCKET: "demo-booking-system.appspot.com",
   HOST: "127.0.0.1",
   PORT: {
     FIRESTORE: 8080,
     FUNCTIONS: 5001,
+    STORAGE: 9199,
   },
 } as const;
