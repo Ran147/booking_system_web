@@ -63,6 +63,7 @@ export { PortalShell, type PortalShellProps } from "./portal-shell/PortalShell";
 export { SearchInput, type SearchInputProps } from "./search-input/SearchInput";
 export { Spinner } from "./spinner/Spinner";
 export { StatusBadge, type StatusBadgeProps } from "./status-badge/StatusBadge";
+export { Switch, type SwitchProps } from "./switch/Switch";
 export { SelectField } from "./select-field";
 export type {
   SelectFieldOption,

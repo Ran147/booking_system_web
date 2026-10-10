@@ -53,8 +53,18 @@ service cloud.firestore {
     match /businesses/{businessId} {
       allow read: if true; // public profile (KAN-112)
       allow update: if ownsBusiness(businessId)
-        && !request.resource.data.diff(resource.data).affectedKeys()
-             .hasAny(['status', 'ownerUserId']); // status changes only via functions
+        && businessIsWritable(businessId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alertSettings'])
+        && request.resource.data.alertSettings is map
+        && request.resource.data.alertSettings.keys().hasOnly([
+          'bookingCreated', 'bookingCancelledByCustomer', 'subscriptionEnding'
+        ])
+        && request.resource.data.alertSettings.keys().hasAll([
+          'bookingCreated', 'bookingCancelledByCustomer', 'subscriptionEnding'
+        ])
+        && request.resource.data.alertSettings.bookingCreated is bool
+        && request.resource.data.alertSettings.bookingCancelledByCustomer is bool
+        && request.resource.data.alertSettings.subscriptionEnding is bool;
 
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()

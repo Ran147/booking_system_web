@@ -28,6 +28,19 @@ export const businessRoutes: RouteObject[] = [
             },
             path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
           },
+          {
+            children: [
+              {
+                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                  const { NotificationSettingsPage } =
+                    await import("./features/notification-settings");
+                  return { Component: NotificationSettingsPage };
+                },
+                path: ROUTE_PATH.BUSINESS.NOTIFICATION_SETTINGS,
+              },
+            ],
+            element: <RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER]} />,
+          },
         ],
         element: <BusinessLayout />,
       },
