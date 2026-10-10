@@ -1,24 +1,14 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  I18N_NAMESPACE,
-  VALIDATION_MESSAGE_KEY,
-  type ValidationMessageKey,
-} from "@/shared/constants";
+import { I18N_NAMESPACE } from "@/shared/constants";
 import type { Nullable } from "@/shared/types";
+import { isValidationMessageKey } from "@/shared/utils";
 import { cn } from "@/shared/utils/cn";
 import { useFormField } from "../ui/form";
 
 export interface FormMessageProps {
   className?: string;
 }
-
-const isValidationMessageKey = (
-  message: Nullable<string>,
-): message is ValidationMessageKey =>
-  Object.values(VALIDATION_MESSAGE_KEY).some(
-    (messageKey) => messageKey === message,
-  );
 
 // Schemas store VALIDATION_MESSAGE_KEY values as messages; this renders the
 // translated text from the validation namespace (forms-validation-standards).

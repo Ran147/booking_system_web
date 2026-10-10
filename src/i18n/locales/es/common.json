@@ -24,6 +24,28 @@
     "summary_one": "Página {{pageNumber}} · {{count}} resultado",
     "summary_other": "Página {{pageNumber}} · {{count}} resultados"
   },
+  "password": {
+    "hideAction": "Ocultar contraseña",
+    "showAction": "Mostrar contraseña"
+  },
+  "passwordStrength": {
+    "emptyLabel": "Escribe una contraseña para ver su seguridad.",
+    "level": {
+      "medium": "media",
+      "strong": "fuerte",
+      "weak": "débil"
+    },
+    "levelLabel": "Seguridad de la contraseña: {{level}}",
+    "rule": {
+      "digit": "Al menos un número",
+      "lowercase": "Al menos una letra minúscula",
+      "minLength": "Al menos 8 caracteres",
+      "symbol": "Al menos un símbolo",
+      "uppercase": "Al menos una letra mayúscula"
+    },
+    "ruleMet": "Cumplido:",
+    "ruleMissing": "Pendiente:"
+  },
   "signInPlaceholder": {
     "description": "El inicio de sesión todavía no está disponible.",
     "title": "Iniciar sesión"

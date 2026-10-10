@@ -51,5 +51,53 @@
   "placeholder": {
     "description": "Book services from your favorite businesses. This page is under construction.",
     "title": "Welcome to Booking System"
+  },
+  "subscriberSignUp": {
+    "description": "Fill in your details and your business details to start taking bookings.",
+    "form": {
+      "accountTitle": "Sign-in details",
+      "businessNameLabel": "Business name",
+      "businessSlugHint": "Your business address will be {{businessAddress}}",
+      "businessSlugHintWithStatus": "Your business address will be {{businessAddress}}. {{slugStatus}}",
+      "businessSlugLabel": "Business address",
+      "businessTitle": "Your business",
+      "cannotCreateAccount": "We could not create the account with this email. If you already have one, sign in or recover your password.",
+      "emailHint": "The email you paid the plan with.",
+      "emailLabel": "Email",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "passwordConfirmationLabel": "Confirm password",
+      "passwordLabel": "Password",
+      "passwordMismatch": "The passwords do not match.",
+      "passwordRecoveryAction": "Recover password",
+      "personalDataTitle": "Personal details",
+      "phoneHint": "Optional.",
+      "phoneInvalidError": "Use only digits, spaces, + and -.",
+      "phoneLabel": "Phone",
+      "signInAction": "Sign in",
+      "slugAvailable": "It is available.",
+      "slugChecking": "Checking availability…",
+      "slugInvalidError": "Use 3 to 40 lowercase letters, digits and single hyphens, not starting or ending with a hyphen.",
+      "slugReservedError": "This address is reserved. Choose another one.",
+      "slugTakenError": "Another business already uses this address. Choose another one.",
+      "submitAction": "Create account"
+    },
+    "link": {
+      "contactAction": "Contact us",
+      "expired": "This sign-up link has expired. Write to us and we will send you a new one.",
+      "invalid": "This sign-up link is not valid or was already used.",
+      "missing": "Sign-up starts by choosing a plan. Choose yours and we will send you the link to create your account.",
+      "plansAction": "See the plans",
+      "retryAction": "Try again"
+    },
+    "plan": {
+      "billingPeriod": {
+        "annual": "/year",
+        "monthly": "/month"
+      },
+      "title": "Your plan"
+    },
+    "success": "Your account is ready. Sign in with your email and password.",
+    "title": "Create your account"
   }
 }

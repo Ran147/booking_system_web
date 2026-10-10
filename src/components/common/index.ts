@@ -59,6 +59,10 @@ export {
   PageTemplate,
   type PageTemplateProps,
 } from "./page-template/PageTemplate";
+export { PasswordInput } from "./password-input";
+export type { PasswordInputProps } from "./password-input/models/passwordInput.model";
+export { PasswordStrengthMeter } from "./password-strength-meter";
+export type { PasswordStrengthMeterProps } from "./password-strength-meter/models/passwordStrengthMeter.model";
 export { PortalShell, type PortalShellProps } from "./portal-shell/PortalShell";
 export { SearchInput, type SearchInputProps } from "./search-input/SearchInput";
 export { Spinner } from "./spinner/Spinner";
