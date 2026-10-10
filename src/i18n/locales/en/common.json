@@ -1,4 +1,24 @@
 {
+  "auth": {
+    "password": {
+      "hide": "Hide password",
+      "show": "Show password"
+    },
+    "signIn": {
+      "accountDisabled": "Your account is disabled. If you think this is a mistake, contact whoever gave you access.",
+      "emailLabel": "Email",
+      "forgotPassword": "Forgot your password?",
+      "invalidCredentials": "The email or password is incorrect.",
+      "passwordLabel": "Password",
+      "recaptchaLabel": "Security check",
+      "recoverPasswordAction": "Recover password",
+      "submitAction": "Sign in",
+      "submittingLabel": "Signing in…",
+      "subtitle": "Sign in with your email and password.",
+      "title": "Sign in",
+      "tooManyAttempts": "Too many attempts. Wait a few minutes or recover your password."
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelled",
     "completed": "Completed",
@@ -23,10 +43,6 @@
     "previousAction": "Previous",
     "summary_one": "Page {{pageNumber}} · {{count}} result",
     "summary_other": "Page {{pageNumber}} · {{count}} results"
-  },
-  "signInPlaceholder": {
-    "description": "Sign-in is not available yet.",
-    "title": "Sign in"
   },
   "status": {
     "loading": "Loading…"

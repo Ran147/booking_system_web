@@ -1,4 +1,4 @@
-import { ENV_FLAG, FIREBASE_EMULATOR } from "@/shared/constants";
+import { ENV_FLAG, FIREBASE_EMULATOR, RECAPTCHA } from "@/shared/constants";
 import { readFirebaseEnvironment } from "../readFirebaseEnvironment";
 
 const EMPTY_ENVIRONMENT: ImportMetaEnv = {
@@ -14,6 +14,7 @@ const EMPTY_ENVIRONMENT: ImportMetaEnv = {
   VITE_FIREBASE_PROJECT_ID: "",
   VITE_FIREBASE_STORAGE_BUCKET: "",
   VITE_RECAPTCHA_ENTERPRISE_SITE_KEY: "",
+  VITE_RECAPTCHA_SITE_KEY: "",
   VITE_USE_EMULATORS: "",
 };
 
@@ -40,5 +41,28 @@ describe("readFirebaseEnvironment", () => {
     expect(firebaseEnvironment.shouldUseEmulators).toBe(false);
     expect(firebaseEnvironment.firebaseOptions.projectId).toBe("booking-dev");
     expect(firebaseEnvironment.recaptchaEnterpriseSiteKey).toBe("site-key");
+  });
+});
+
+describe("readFirebaseEnvironment reCAPTCHA site key (US-33)", () => {
+  it("falls back to Google's test key with the emulators", () => {
+    const firebaseEnvironment = readFirebaseEnvironment({
+      ...EMPTY_ENVIRONMENT,
+      VITE_USE_EMULATORS: ENV_FLAG.ENABLED,
+    });
+
+    expect(firebaseEnvironment.recaptchaSiteKey).toBe(RECAPTCHA.TEST_SITE_KEY);
+  });
+
+  it("keeps the configured site key and never uses the test key in a real project", () => {
+    expect(
+      readFirebaseEnvironment({
+        ...EMPTY_ENVIRONMENT,
+        VITE_RECAPTCHA_SITE_KEY: "real-site-key",
+      }).recaptchaSiteKey,
+    ).toBe("real-site-key");
+    expect(readFirebaseEnvironment(EMPTY_ENVIRONMENT).recaptchaSiteKey).toBe(
+      "",
+    );
   });
 });

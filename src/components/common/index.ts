@@ -1,3 +1,5 @@
+export { Alert, ALERT_VARIANT } from "./alert";
+export type { AlertProps, AlertVariant } from "./alert";
 export { AppLink, type AppLinkProps } from "./app-link/AppLink";
 export {
   APP_LINK_VARIANT,
@@ -59,7 +61,11 @@ export {
   PageTemplate,
   type PageTemplateProps,
 } from "./page-template/PageTemplate";
+export { PasswordInput } from "./password-input";
+export type { PasswordInputProps } from "./password-input";
 export { PortalShell, type PortalShellProps } from "./portal-shell/PortalShell";
+export { RecaptchaField } from "./recaptcha-field";
+export type { RecaptchaFieldProps } from "./recaptcha-field";
 export { SearchInput, type SearchInputProps } from "./search-input/SearchInput";
 export { Spinner } from "./spinner/Spinner";
 export { StatusBadge, type StatusBadgeProps } from "./status-badge/StatusBadge";
