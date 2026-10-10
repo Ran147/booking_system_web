@@ -1,4 +1,5 @@
-export const FIRESTORE_COLLECTION = {
+// Mirror of src/constants/firestore/FirestoreCollection.constants.ts — keep in sync.
+export const FIRESTORE_COLLECTION = Object.freeze({
   AUDIT_LOG: "auditLog",
   BOOKINGS: "bookings",
   BUSINESS_SLUGS: "businessSlugs",
@@ -15,7 +16,4 @@ export const FIRESTORE_COLLECTION = {
   SUBSCRIPTION: "subscription",
   SUPPORT_TICKETS: "supportTickets",
   USERS: "users",
-} as const;
-
-export type FirestoreCollection =
-  (typeof FIRESTORE_COLLECTION)[keyof typeof FIRESTORE_COLLECTION];
+} as const);
