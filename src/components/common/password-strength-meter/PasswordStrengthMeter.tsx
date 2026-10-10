@@ -19,6 +19,7 @@ export const PasswordStrengthMeter = ({
   const { t } = useTranslation(I18N_NAMESPACE.COMMON);
   const { level, rules } = evaluatePasswordStrength(password);
   const filledSegments = PASSWORD_STRENGTH_FILLED_SEGMENTS[level];
+  const hasPassword = password.length > 0;
 
   return (
     <div className={cn("flex flex-col gap-2", className)} id={id}>
@@ -27,7 +28,7 @@ export const PasswordStrengthMeter = ({
           <span
             className={cn(
               "h-1.5 flex-1 rounded-full bg-muted",
-              password.length > 0 &&
+              hasPassword &&
                 segment <= filledSegments &&
                 PASSWORD_STRENGTH_SEGMENT_CLASS_NAME[level],
             )}
@@ -36,7 +37,7 @@ export const PasswordStrengthMeter = ({
         ))}
       </div>
       <p className="text-xs font-medium text-foreground" role="status">
-        {password.length > 0
+        {hasPassword
           ? t("passwordStrength.levelLabel", {
               level: t(`passwordStrength.level.${level}`),
             })

@@ -2,12 +2,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { ChangeEvent } from "react";
 import { useForm, useWatch, type FieldError } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {
-  I18N_NAMESPACE,
-  VALIDATION_MESSAGE_KEY,
-  type ValidationMessageKey,
-} from "@/shared/constants";
+import { I18N_NAMESPACE } from "@/shared/constants";
 import type { NullableUndefined } from "@/shared/types";
+import { isValidationMessageKey } from "@/shared/utils";
 import { BUSINESS_SLUG_PATH_PREFIX } from "../constants/SubscriberSignUpForm.constants";
 import { DEFAULT_SUBSCRIBER_SIGN_UP_FORM_VALUES } from "../constants/SubscriberSignUpFormDefaults.constants";
 import {
@@ -21,13 +18,6 @@ import type {
 } from "../models/SubscriberSignUpFormViewModel.interface";
 import { isSubscriberSignUpMessageKey } from "../utils/isSubscriberSignUpMessageKey";
 import { suggestBusinessSlug } from "../utils/suggestBusinessSlug";
-
-const isValidationMessageKey = (
-  message: string,
-): message is ValidationMessageKey =>
-  Object.values(VALIDATION_MESSAGE_KEY).some(
-    (messageKey) => messageKey === message,
-  );
 
 export const useSubscriberSignUpFormViewModel = ({
   checkoutEmail,

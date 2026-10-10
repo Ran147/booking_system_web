@@ -6,7 +6,7 @@ import {
   PasswordStrengthMeter,
 } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
-import type { AccountSectionProps } from "../models/BusinessSectionProps.interface";
+import type { AccountSectionProps } from "../models/AccountSectionProps.interface";
 
 export const AccountSection = ({
   fieldErrors,
