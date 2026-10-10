@@ -31,6 +31,7 @@ import {
   SEED_USER,
   SEED_WEEKDAY,
 } from "./constants/SeedEmulator.constants";
+import { seedSignUpCheckouts } from "./seedSignUpCheckout";
 import { FIRESTORE_COLLECTION } from "../src/shared/constants/firestore/FirestoreCollection.constants";
 import { BUSINESS_STATUS } from "../src/shared/domain/business/BusinessStatus.constants";
 import { isReservedBusinessSlug } from "../src/shared/domain/business/isReservedBusinessSlug";
@@ -374,6 +375,7 @@ const seedEmulator = async (): Promise<void> => {
   await seedPendingBusiness(firestore);
 
   printCredentials();
+  await seedSignUpCheckouts(firestore);
 };
 
 await seedEmulator();

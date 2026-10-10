@@ -80,6 +80,8 @@ npx firebase emulators:exec --only auth,firestore --project demo-booking-system 
 
 Los datos del emulador se borran al apagarlo; con `npm run emulators` hay que volver a correr el seed cada vez. Usuarios (contraseña de prueba `Emulator-Only-123!`, **solo para el emulador**): `admin@demo.test` (super admin), `suscriptor@demo.test` (suscriptor de «Barbería Centro»), `colaborador@demo.test` (colaborador de «Barbería Centro»), `pendiente@demo.test` (suscriptor de «Estética Luna», pendiente de aprobación) y `cliente@demo.test` (cliente).
 
+Para probar el registro del suscriptor (KAN-25), el seed también crea dos pagos de plan con links conocidos: uno válido para `nuevo-suscriptor@demo.test` (`/sign-up?token=seed-valid-sign-up-token`) y uno vencido (`/sign-up?token=seed-expired-sign-up-token`). También reserva los slugs de los dos negocios en `businessSlugs`. El registro llama a Cloud Functions, así que los emuladores deben incluir `functions` (`npm run emulators`). Si se vuelve a correr el seed, el link válido queda sin usar otra vez, pero el usuario de Auth creado antes sigue existiendo hasta que se apaguen los emuladores.
+
 ### Cloud Functions
 
 `functions/` es un paquete aparte (TypeScript, Node 22):
@@ -110,6 +112,7 @@ npm run build
 | `npm run test:e2e` | Tests end-to-end con Playwright (`e2e/`), solo flujos críticos. La primera vez: `npx playwright install chromium` |
 | `npm run emulators` | Firebase Emulator Suite |
 | `npm run seed` | Carga datos de prueba en los emuladores (ver «Datos de prueba») |
+| `npm run test:functions` | Tests de Cloud Functions contra los emuladores de Auth y Firestore |
 
 Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run` (y `npm run test:rules` si cambió `firestore.rules`, `npm run test:e2e` si cambió un flujo crítico). No hay CI por ahora: estos chequeos se corren localmente.
 
