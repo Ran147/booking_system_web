@@ -24,6 +24,7 @@ export const SUBSCRIBER_SIGN_UP_MESSAGE_KEY = {
   PHONE_INVALID: "subscriberSignUp.form.phoneInvalidError",
   SLUG_INVALID: "subscriberSignUp.form.slugInvalidError",
   SLUG_RESERVED: "subscriberSignUp.form.slugReservedError",
+  SLUG_TAKEN: "subscriberSignUp.form.slugTakenError",
 } as const;
 
 export type SubscriberSignUpMessageKey =
@@ -32,3 +33,21 @@ export type SubscriberSignUpMessageKey =
 export const BUSINESS_SLUG_SEPARATOR = "-";
 
 export const BUSINESS_SLUG_PATH_PREFIX = "/";
+
+// Wait after the last keystroke before asking whether the slug is free
+// (AC-KAN-25-15), so the check does not run on every key.
+export const BUSINESS_SLUG_CHECK_DELAY_MS = 400;
+
+// What the page shows for the sign-up link of the URL (AC-KAN-25-14,
+// AC-KAN-25-20, AC-KAN-25-21).
+export const SIGN_UP_LINK_STATE = {
+  CHECKING: "checking",
+  EXPIRED: "expired",
+  FAILED: "failed",
+  INVALID: "invalid",
+  MISSING: "missing",
+  READY: "ready",
+} as const;
+
+export type SignUpLinkState =
+  (typeof SIGN_UP_LINK_STATE)[keyof typeof SIGN_UP_LINK_STATE];

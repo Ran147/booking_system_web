@@ -53,12 +53,15 @@
     "title": "Bienvenido a Booking System"
   },
   "subscriberSignUp": {
+    "description": "Completa tus datos y los de tu negocio para empezar a recibir reservas.",
     "form": {
       "accountTitle": "Datos de acceso",
       "businessNameLabel": "Nombre del negocio",
       "businessSlugHint": "La dirección de tu negocio será {{businessAddress}}",
+      "businessSlugHintWithStatus": "La dirección de tu negocio será {{businessAddress}}. {{slugStatus}}",
       "businessSlugLabel": "Dirección del negocio",
       "businessTitle": "Tu negocio",
+      "cannotCreateAccount": "No pudimos crear la cuenta con este correo. Si ya tienes una, inicia sesión o recupera tu contraseña.",
       "emailHint": "Es el correo con el que pagaste el plan.",
       "emailLabel": "Correo electrónico",
       "firstNameLabel": "Nombre",
@@ -66,13 +69,35 @@
       "passwordConfirmationLabel": "Confirma la contraseña",
       "passwordLabel": "Contraseña",
       "passwordMismatch": "Las contraseñas no coinciden.",
+      "passwordRecoveryAction": "Recuperar contraseña",
       "personalDataTitle": "Datos personales",
       "phoneHint": "Opcional.",
       "phoneInvalidError": "Usa solo números, espacios, + y -.",
       "phoneLabel": "Teléfono",
+      "signInAction": "Iniciar sesión",
+      "slugAvailable": "Está disponible.",
+      "slugChecking": "Comprobando disponibilidad…",
       "slugInvalidError": "Usa de 3 a 40 letras minúsculas, números y guiones simples, sin guion al inicio ni al final.",
       "slugReservedError": "Esta dirección está reservada. Elige otra.",
+      "slugTakenError": "Esta dirección ya la usa otro negocio. Elige otra.",
       "submitAction": "Crear cuenta"
-    }
+    },
+    "link": {
+      "contactAction": "Contáctanos",
+      "expired": "Este link de registro venció. Escríbenos y te enviaremos uno nuevo.",
+      "invalid": "Este link de registro no es válido o ya se usó.",
+      "missing": "El registro empieza eligiendo un plan. Elige el tuyo y te enviaremos el link para crear tu cuenta.",
+      "plansAction": "Ver los planes",
+      "retryAction": "Reintentar"
+    },
+    "plan": {
+      "billingPeriod": {
+        "annual": "/año",
+        "monthly": "/mes"
+      },
+      "title": "Plan contratado"
+    },
+    "success": "Tu cuenta está lista. Inicia sesión con tu correo y tu contraseña.",
+    "title": "Crea tu cuenta"
   }
 }

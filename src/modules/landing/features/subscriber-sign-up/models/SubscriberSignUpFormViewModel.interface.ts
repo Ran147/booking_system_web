@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
-import type { NullableUndefined } from "@/shared/types";
+import type { Nullable, NullableUndefined } from "@/shared/types";
 import type { SubscriberSignUpFormValues } from "./SubscriberSignUpForm.schema";
 
 export type SubscriberSignUpFieldName = keyof SubscriberSignUpFormValues;
@@ -11,8 +11,19 @@ export type SubscriberSignUpFieldName = keyof SubscriberSignUpFormValues;
 export interface SubscriberSignUpFormProps {
   /** Email of the paid checkout; shown read-only (AC-KAN-25-14). */
   readonly checkoutEmail: string;
-  /** Sends the sign-up; the form stays disabled while it is pending. */
-  readonly onSubmit: (formValues: SubscriberSignUpFormValues) => Promise<void>;
+  /** Called once the account and the business exist (KAN-27). */
+  readonly onSignUpComplete: (email: string) => void;
+  /** Token of the sign-up link; every server call needs it. */
+  readonly signUpToken: string;
+}
+
+/**
+ * Error of a submit that the server rejected, shown above the submit button.
+ */
+export interface SignUpSubmitError {
+  readonly message: string;
+  /** Account exists (AS-5): links to sign-in and password recovery. */
+  readonly showAccountLinks: boolean;
 }
 
 /**
@@ -36,12 +47,14 @@ export type SubscriberSignUpFieldRegistrations = Readonly<
  * Resultado del ViewModel del formulario de registro.
  */
 export interface SubscriberSignUpFormViewModel {
-  readonly businessAddress: string;
+  /** Address "/<slug>" and the availability of the slug (AC-KAN-25-15). */
+  readonly businessSlugHelperText: string;
   readonly fieldErrors: SubscriberSignUpFieldErrors;
   readonly fields: SubscriberSignUpFieldRegistrations;
   readonly handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
   readonly isSubmitting: boolean;
   readonly password: string;
+  readonly submitError: Nullable<SignUpSubmitError>;
 }
 
 /**

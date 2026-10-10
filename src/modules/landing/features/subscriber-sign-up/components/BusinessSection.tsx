@@ -5,7 +5,7 @@ import { I18N_NAMESPACE } from "@/shared/constants";
 import type { BusinessSectionProps } from "../models/BusinessSectionProps.interface";
 
 export const BusinessSection = ({
-  businessAddress,
+  businessSlugHelperText,
   fieldErrors,
   fields,
 }: BusinessSectionProps): ReactElement => {
@@ -28,9 +28,7 @@ export const BusinessSection = ({
         autoCapitalize="none"
         autoComplete="off"
         error={fieldErrors.businessSlug}
-        helperText={t("subscriberSignUp.form.businessSlugHint", {
-          businessAddress,
-        })}
+        helperText={businessSlugHelperText}
         label={t("subscriberSignUp.form.businessSlugLabel")}
         required
         spellCheck={false}

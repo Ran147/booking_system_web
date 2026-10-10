@@ -5,6 +5,7 @@ import { I18N_NAMESPACE } from "@/shared/constants";
 import { AccountSection } from "./AccountSection";
 import { BusinessSection } from "./BusinessSection";
 import { PersonalDataSection } from "./PersonalDataSection";
+import { SignUpSubmitAlert } from "./SignUpSubmitAlert";
 import { useSubscriberSignUpFormViewModel } from "../hooks/useSubscriberSignUpFormViewModel";
 import type { SubscriberSignUpFormProps } from "../models/SubscriberSignUpFormViewModel.interface";
 
@@ -13,12 +14,13 @@ export const SubscriberSignUpForm = (
 ): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
   const {
-    businessAddress,
+    businessSlugHelperText,
     fieldErrors,
     fields,
     handleSubmit,
     isSubmitting,
     password,
+    submitError,
   } = useSubscriberSignUpFormViewModel(subscriberSignUpFormProps);
 
   return (
@@ -30,10 +32,11 @@ export const SubscriberSignUpForm = (
         password={password}
       />
       <BusinessSection
-        businessAddress={businessAddress}
+        businessSlugHelperText={businessSlugHelperText}
         fieldErrors={fieldErrors}
         fields={fields}
       />
+      {submitError ? <SignUpSubmitAlert submitError={submitError} /> : null}
       <Button fullWidth isLoading={isSubmitting} type="submit">
         {t("subscriberSignUp.form.submitAction")}
       </Button>

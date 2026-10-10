@@ -42,7 +42,7 @@ const phoneSchema = z.union([
     ),
 ]);
 
-const businessSlugSchema = z
+export const businessSlugSchema = z
   .string()
   .trim()
   .min(1, VALIDATION_MESSAGE_KEY.REQUIRED)
