@@ -91,6 +91,16 @@ service cloud.firestore {
       allow write: if false; // functions only
     }
 
+    match /users/{userId} {
+      allow read: if hasRole('customer') && request.auth.uid == userId;
+      allow update: if hasRole('customer')
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['theme', 'updatedAt'])
+        && request.resource.data.theme in ['light', 'dark', 'system']
+        && request.resource.data.updatedAt is timestamp;
+      allow create, delete: if false;
+    }
+
     // Deny by default.
     match /{document=**} {
       allow read, write: if false;

@@ -25,6 +25,7 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
+    PROFILE_THEME: "profile/theme",
     ROOT: "/:businessSlug",
   },
   LANDING: {
