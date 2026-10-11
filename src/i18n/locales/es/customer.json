@@ -5,5 +5,18 @@
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
+  },
+  "profile": {
+    "reminders": {
+      "description": "Decide si deseas recibir recordatorios relacionados con tus próximas reservas.",
+      "disableAction": "Desactivar recordatorios",
+      "disabled": "Desactivados",
+      "enableAction": "Activar recordatorios",
+      "enabled": "Activados",
+      "saveError": "No pudimos guardar tu preferencia. Se restauró la configuración anterior.",
+      "saving": "Guardando preferencia…",
+      "statusLabel": "Estado de los recordatorios",
+      "title": "Recordatorios de reservas"
+    }
   }
 }
