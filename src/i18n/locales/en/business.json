@@ -19,6 +19,7 @@
     "name": {
       "label": "Business name"
     },
+    "readOnly": "This business is read-only and cannot be changed.",
     "retryAction": "Retry",
     "saveAction": "Save changes",
     "saveSuccess": "The public profile was saved successfully.",
@@ -38,7 +39,7 @@
     "title": "Business public profile"
   },
   "errors": {
-    "readOnly": "This business is read-only and cannot be changed."
+    "readOnly": "Your business is inactive or suspended. Changes cannot be made."
   },
   "layout": {
     "title": "Business portal"

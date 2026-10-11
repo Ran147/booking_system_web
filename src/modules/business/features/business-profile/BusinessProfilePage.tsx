@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, ErrorState, Spinner } from "@/components";
+import { Button, BUTTON_VARIANT, ErrorState, Spinner } from "@/components";
 import { I18N_NAMESPACE, VIEW_STATE } from "@/constants";
 import { BusinessProfileForm } from "./components/BusinessProfileForm";
 import { useBusinessProfilePageViewModel } from "./hooks/useBusinessProfilePageViewModel";
@@ -15,7 +15,7 @@ export const BusinessProfilePage = (): ReactElement => {
     return (
       <div className="space-y-4">
         <ErrorState />
-        <Button onClick={retry} variant="outline">
+        <Button onClick={retry} variant={BUTTON_VARIANT.OUTLINE}>
           {t("businessProfile.retryAction")}
         </Button>
       </div>

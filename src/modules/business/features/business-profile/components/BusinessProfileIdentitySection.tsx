@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, InputField } from "@/components";
+import { Button, BUTTON_VARIANT, InputField } from "@/components";
 import { BUSINESS_PROFILE, I18N_NAMESPACE } from "@/constants";
 import { BUSINESS_PROFILE_FORM_FIELD } from "../constants/BusinessProfileForm.constants";
 import type { BusinessProfileIdentitySectionProps } from "../models";
@@ -34,14 +34,17 @@ export const BusinessProfileIdentitySection = ({
           {profile.logoUrl && !removeLogo && (
             <Button
               disabled={isReadOnly}
-              onClick={() => setRemoveLogo(true)}
-              variant="outline"
+              onClick={(): void => setRemoveLogo(true)}
+              variant={BUTTON_VARIANT.OUTLINE}
             >
               {t("businessProfile.logo.removeAction")}
             </Button>
           )}
           {removeLogo && (
-            <Button onClick={() => setRemoveLogo(false)} variant="ghost">
+            <Button
+              onClick={(): void => setRemoveLogo(false)}
+              variant={BUTTON_VARIANT.GHOST}
+            >
               {t("businessProfile.logo.undoAction")}
             </Button>
           )}

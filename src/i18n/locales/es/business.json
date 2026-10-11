@@ -19,6 +19,7 @@
     "name": {
       "label": "Nombre del negocio"
     },
+    "readOnly": "Este negocio está en modo de solo lectura y no puede modificarse.",
     "retryAction": "Reintentar",
     "saveAction": "Guardar cambios",
     "saveSuccess": "El perfil público se guardó correctamente.",
@@ -38,7 +39,7 @@
     "title": "Perfil público del negocio"
   },
   "errors": {
-    "readOnly": "Este negocio está en modo de solo lectura y no puede modificarse."
+    "readOnly": "Tu negocio está inactivo o suspendido. No se pueden realizar cambios."
   },
   "layout": {
     "title": "Portal del negocio"

@@ -56,7 +56,7 @@ export const BusinessProfileForm = ({
           className="rounded-lg border border-warning p-4 text-sm"
           role="alert"
         >
-          {t("errors.readOnly")}
+          {t("businessProfile.readOnly")}
         </p>
       )}
 

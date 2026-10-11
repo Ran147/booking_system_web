@@ -14,7 +14,7 @@ export const useSaveBusinessPublicProfileMutation = (
 
   return useMutation({
     mutationFn: saveBusinessPublicProfile,
-    onSuccess: async () => {
+    onSuccess: async (): Promise<void> => {
       await queryClient.invalidateQueries({
         queryKey: businessProfileQueryKeys.detail(businessId),
       });
