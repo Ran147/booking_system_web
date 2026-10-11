@@ -1,5 +1,22 @@
 {
   "layout": {
+    "footer": {
+      "contact": {
+        "emailLabel": "Enviar un correo electrónico a {{email}}",
+        "phoneLabel": "Llamar al {{phone}}",
+        "title": "Contacto"
+      },
+      "landmarkLabel": "Pie de página del negocio",
+      "social": {
+        "linkLabel": "Abrir {{network}} de {{businessName}} en una pestaña nueva",
+        "title": "Redes sociales"
+      },
+      "terms": {
+        "linkLabel": "Abrir los términos y condiciones en una pestaña nueva",
+        "navigationLabel": "Información legal",
+        "text": "Términos y condiciones"
+      }
+    },
     "title": "Portal del cliente"
   },
   "placeholder": {

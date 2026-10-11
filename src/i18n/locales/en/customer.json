@@ -1,5 +1,22 @@
 {
   "layout": {
+    "footer": {
+      "contact": {
+        "emailLabel": "Send an email to {{email}}",
+        "phoneLabel": "Call {{phone}}",
+        "title": "Contact"
+      },
+      "landmarkLabel": "Business footer",
+      "social": {
+        "linkLabel": "Open {{businessName}} on {{network}} in a new tab",
+        "title": "Social media"
+      },
+      "terms": {
+        "linkLabel": "Open the terms and conditions in a new tab",
+        "navigationLabel": "Legal information",
+        "text": "Terms and conditions"
+      }
+    },
     "title": "Customer portal"
   },
   "placeholder": {
