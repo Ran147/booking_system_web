@@ -2,17 +2,7 @@ import { LayoutDashboard, LogIn, Menu, X } from "lucide-react";
 import type { ReactElement } from "react";
 import { Button, BUTTON_SIZE, BUTTON_VARIANT } from "@/components/common";
 import { LANDING_NAVBAR_CONSTANTS } from "@/modules/landing/layout/constants/landingNavbar.constants";
-
-export interface LandingNavbarActionsProps {
-  readonly closeMenuLabel: string;
-  readonly isMobileMenuOpen: boolean;
-  readonly isSignedIn: boolean;
-  readonly onNavigate: (path: string) => void;
-  readonly onToggleMobileMenu: () => void;
-  readonly openMenuLabel: string;
-  readonly portalActionLabel: string;
-  readonly portalActionPath: string;
-}
+import type { LandingNavbarActionsProps } from "./types";
 
 export const LandingNavbarActions = ({
   closeMenuLabel,

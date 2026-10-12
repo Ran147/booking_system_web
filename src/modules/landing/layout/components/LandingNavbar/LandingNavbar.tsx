@@ -2,13 +2,13 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { LANDING_NAVBAR_CONSTANTS } from "@/modules/landing/layout/constants/landingNavbar.constants";
 import { useLandingNavbarViewModel } from "@/modules/landing/layout/hooks/useLandingNavbarViewModel";
-import type { LandingNavbarProps } from "@/modules/landing/layout/models/landingNavbar.model";
 import { I18N_NAMESPACE } from "@/shared/constants";
 import { cn } from "@/shared/utils/cn";
 import { LandingNavbarActions } from "./LandingNavbarActions";
 import { LandingNavbarBranding } from "./LandingNavbarBranding";
 import { LandingNavbarMobileMenu } from "./LandingNavbarMobileMenu";
 import { LandingNavbarNavLinks } from "./LandingNavbarNavLinks";
+import type { LandingNavbarProps } from "./types";
 
 export const LandingNavbar = ({
   className,

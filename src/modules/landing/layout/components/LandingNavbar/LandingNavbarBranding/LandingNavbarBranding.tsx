@@ -2,11 +2,7 @@ import { Calendar } from "lucide-react";
 import type { ReactElement } from "react";
 import { Link } from "react-router";
 import { ROUTE_PATH } from "@/shared/constants";
-
-export interface LandingNavbarBrandingProps {
-  readonly brandName: string;
-  readonly logoAlt: string;
-}
+import type { LandingNavbarBrandingProps } from "./types";
 
 export const LandingNavbarBranding = ({
   brandName,

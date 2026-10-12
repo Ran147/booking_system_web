@@ -2,19 +2,9 @@ import { LayoutDashboard, LogIn } from "lucide-react";
 import type { MouseEvent, ReactElement } from "react";
 import { Button, BUTTON_SIZE, BUTTON_VARIANT } from "@/components/common";
 import { LANDING_NAVBAR_CONSTANTS } from "@/modules/landing/layout/constants/landingNavbar.constants";
-import type { NavbarNavLink } from "@/modules/landing/layout/models/landingNavbar.model";
 import { AppLink } from "@/shared/components";
 import type { Nullable } from "@/shared/types";
-
-export interface LandingNavbarMobileMenuProps {
-  readonly isOpen: boolean;
-  readonly isSignedIn: boolean;
-  readonly mobileNavLabel: string;
-  readonly navLinks: readonly NavbarNavLink[];
-  readonly onNavigate: (path: string) => void;
-  readonly portalActionLabel: string;
-  readonly portalActionPath: string;
-}
+import type { LandingNavbarMobileMenuProps } from "./types";
 
 export const LandingNavbarMobileMenu = ({
   isOpen,

@@ -1,12 +1,6 @@
 import type { MouseEvent, ReactElement } from "react";
-import type { NavbarNavLink } from "@/modules/landing/layout/models/landingNavbar.model";
 import { AppLink } from "@/shared/components";
-
-export interface LandingNavbarNavLinksProps {
-  readonly navLabel: string;
-  readonly navLinks: readonly NavbarNavLink[];
-  readonly onNavigate: (path: string) => void;
-}
+import type { LandingNavbarNavLinksProps } from "./types";
 
 export const LandingNavbarNavLinks = ({
   navLabel,
