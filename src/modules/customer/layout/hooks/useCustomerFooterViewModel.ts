@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { I18N_NAMESPACE } from "@/constants";
+import type { BusinessPublicProfile } from "@/domain";
 import type { Nullable } from "@/types";
 import {
   CUSTOMER_FOOTER_CONTACT_TYPE,
   CUSTOMER_FOOTER_URL_PROTOCOL,
 } from "../constants/CustomerFooter.constants";
 import type {
-  CustomerFooterBusiness,
   CustomerFooterContactItem,
   CustomerFooterSocialItem,
   CustomerFooterViewModel,
@@ -30,7 +30,7 @@ const isSecureUrl = (urlCandidate: string): boolean => {
 
 /** Builds safe, localized presentation state for the customer footer. */
 export const useCustomerFooterViewModel = (
-  business?: Nullable<CustomerFooterBusiness>,
+  business?: Nullable<BusinessPublicProfile>,
 ): CustomerFooterViewModel => {
   const { t } = useTranslation(I18N_NAMESPACE.CUSTOMER);
   const businessName = readTrimmedValue(business?.name);
@@ -71,17 +71,19 @@ export const useCustomerFooterViewModel = (
     if (!businessName) return [];
 
     return (business?.socialLinks ?? []).flatMap((socialLink) => {
-      const network = socialLink.network.trim();
       const url = socialLink.url.trim();
-      if (!network || !isSecureUrl(url)) return [];
+      if (!isSecureUrl(url)) return [];
+
+      const label = t(`layout.footer.social.network.${socialLink.network}`);
 
       return [
         {
           accessibleLabel: t("layout.footer.social.linkLabel", {
             businessName,
-            network,
+            network: label,
           }),
-          network,
+          label,
+          network: socialLink.network,
           url,
         },
       ];

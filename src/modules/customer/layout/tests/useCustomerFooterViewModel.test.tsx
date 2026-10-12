@@ -1,6 +1,11 @@
 import { renderHook } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
+import {
+  BUSINESS_STATUS,
+  SOCIAL_NETWORK,
+  type BusinessPublicProfile,
+} from "@/domain";
 import { testI18n } from "@/test-utils";
 import { useCustomerFooterViewModel } from "../hooks/useCustomerFooterViewModel";
 
@@ -8,14 +13,26 @@ const wrapper = ({ children }: { children: ReactNode }): ReactElement => (
   <I18nextProvider i18n={testI18n}>{children}</I18nextProvider>
 );
 
+const BUSINESS_PROFILE = {
+  contactEmail: null,
+  contactPhone: null,
+  description: null,
+  id: "business-id",
+  logoUrl: null,
+  name: "Negocio",
+  slug: "negocio",
+  socialLinks: [],
+  status: BUSINESS_STATUS.ACTIVE,
+} satisfies BusinessPublicProfile;
+
 describe("useCustomerFooterViewModel", () => {
   it("KAN-118: trims contact data and builds contact protocols", () => {
     const { result } = renderHook(
       () =>
         useCustomerFooterViewModel({
+          ...BUSINESS_PROFILE,
           contactEmail: " contacto@negocio.test ",
           contactPhone: " +506 2222-3333 ",
-          name: "Negocio",
         }),
       { wrapper },
     );
@@ -33,12 +50,17 @@ describe("useCustomerFooterViewModel", () => {
     const { result } = renderHook(
       () =>
         useCustomerFooterViewModel({
-          name: "Negocio",
+          ...BUSINESS_PROFILE,
           socialLinks: [
-            { network: "Instagram", url: "https://instagram.com/negocio" },
-            { network: "Facebook", url: "http://facebook.com/negocio" },
-            { network: "TikTok", url: "not-a-url" },
-            { network: " ", url: "https://example.test" },
+            {
+              network: SOCIAL_NETWORK.INSTAGRAM,
+              url: "https://instagram.com/negocio",
+            },
+            {
+              network: SOCIAL_NETWORK.FACEBOOK,
+              url: "http://facebook.com/negocio",
+            },
+            { network: SOCIAL_NETWORK.TIKTOK, url: "not-a-url" },
           ],
         }),
       { wrapper },
@@ -47,7 +69,7 @@ describe("useCustomerFooterViewModel", () => {
     expect(result.current.socialItems).toHaveLength(1);
     expect(result.current.socialItems[0]).toEqual(
       expect.objectContaining({
-        network: "Instagram",
+        network: SOCIAL_NETWORK.INSTAGRAM,
         url: "https://instagram.com/negocio",
       }),
     );

@@ -1,29 +1,43 @@
 import { screen } from "@testing-library/react";
 import { ROUTE_PATH } from "@/constants";
 import {
+  BUSINESS_STATUS,
+  SOCIAL_NETWORK,
+  type BusinessPublicProfile,
+} from "@/domain";
+import {
   renderWithProviders,
   SIGNED_OUT_SESSION,
   testI18n,
 } from "@/test-utils";
 import { CustomerLayout } from "../CustomerLayout";
 import { CustomerFooter } from "../components";
-import type { CustomerFooterBusiness } from "../models";
 import { createCustomerFooterPage } from "./CustomerFooter.page";
 
 const BUSINESS_NAME = "Barbería Central";
 const COMPLETE_BUSINESS = {
   contactEmail: "contacto@negocio.test",
   contactPhone: "+506 2222-3333",
+  description: null,
+  id: "business-id",
   logoUrl: "https://example.test/logo.webp",
   name: BUSINESS_NAME,
+  slug: "barberia-central",
   socialLinks: [
-    { network: "Instagram", url: "https://instagram.com/negocio" },
-    { network: "Facebook", url: "http://facebook.com/inseguro" },
-    { network: "Sitio web", url: "https://negocio.test" },
+    {
+      network: SOCIAL_NETWORK.INSTAGRAM,
+      url: "https://instagram.com/negocio",
+    },
+    {
+      network: SOCIAL_NETWORK.FACEBOOK,
+      url: "http://facebook.com/inseguro",
+    },
+    { network: SOCIAL_NETWORK.WEBSITE, url: "https://negocio.test" },
   ],
-} as const satisfies CustomerFooterBusiness;
+  status: BUSINESS_STATUS.ACTIVE,
+} as const satisfies BusinessPublicProfile;
 
-const renderFooter = (business?: CustomerFooterBusiness): void => {
+const renderFooter = (business?: BusinessPublicProfile): void => {
   renderWithProviders(<CustomerFooter business={business} />, {
     initialPath: "/barberia-central",
     session: SIGNED_OUT_SESSION,
@@ -55,7 +69,13 @@ describe("CustomerFooter", () => {
   });
 
   it("KAN-118 KAN-120: hides optional sections when they have no data", () => {
-    renderFooter({ name: BUSINESS_NAME });
+    renderFooter({
+      ...COMPLETE_BUSINESS,
+      contactEmail: null,
+      contactPhone: null,
+      logoUrl: null,
+      socialLinks: [],
+    });
     const page = createCustomerFooterPage();
 
     expect(page.queryContactHeading()).not.toBeInTheDocument();

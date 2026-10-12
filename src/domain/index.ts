@@ -3,6 +3,7 @@ export type * from "./booking/Booking.interface";
 export * from "./booking/BookingStatus.constants";
 export * from "./booking/BookingStatusTone.constants";
 export * from "./business/BusinessSlug.constants";
+export * from "./business/BusinessPublicProfileDocument.schema";
 export * from "./business/BusinessStatus.constants";
 export type * from "./business/Business.interface";
 export * from "./business/SocialNetwork.constants";

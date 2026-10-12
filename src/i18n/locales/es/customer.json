@@ -1,5 +1,6 @@
 {
   "layout": {
+    "businessNotFound": "No encontramos el negocio solicitado.",
     "footer": {
       "contact": {
         "emailLabel": "Enviar un correo electrónico a {{email}}",
@@ -9,6 +10,13 @@
       "landmarkLabel": "Pie de página del negocio",
       "social": {
         "linkLabel": "Abrir {{network}} de {{businessName}} en una pestaña nueva",
+        "network": {
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "tiktok": "TikTok",
+          "website": "Sitio web",
+          "whatsapp": "WhatsApp"
+        },
         "title": "Redes sociales"
       },
       "terms": {

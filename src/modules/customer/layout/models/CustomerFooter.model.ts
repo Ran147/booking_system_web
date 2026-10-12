@@ -1,23 +1,9 @@
+import type { BusinessPublicProfile, SocialNetwork } from "@/domain";
 import type { Nullable } from "@/types";
-
-/** Social link received from the public business profile. */
-export interface CustomerFooterSocialLink {
-  readonly network: string;
-  readonly url: string;
-}
-
-/** Minimum business projection required to render the customer footer. */
-export interface CustomerFooterBusiness {
-  readonly contactEmail?: Nullable<string>;
-  readonly contactPhone?: Nullable<string>;
-  readonly logoUrl?: Nullable<string>;
-  readonly name: string;
-  readonly socialLinks?: readonly CustomerFooterSocialLink[];
-}
 
 /** Properties accepted by the customer portal footer. */
 export interface CustomerFooterProps {
-  readonly business?: Nullable<CustomerFooterBusiness>;
+  readonly business?: Nullable<BusinessPublicProfile>;
 }
 
 /** Contact item ready to render as an accessible link. */
@@ -31,7 +17,8 @@ export interface CustomerFooterContactItem {
 /** Social item ready to render as a secure external link. */
 export interface CustomerFooterSocialItem {
   readonly accessibleLabel: string;
-  readonly network: string;
+  readonly label: string;
+  readonly network: SocialNetwork;
   readonly url: string;
 }
 
