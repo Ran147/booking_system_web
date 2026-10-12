@@ -58,6 +58,31 @@
       "seeDetails": "Get started",
       "subtitle": "Choose the ideal plan to manage your business bookings and appointments.",
       "title": "Plans & Pricing"
+    },
+    "testimonials": {
+      "badge": "Customer stories",
+      "items": {
+        "item1": {
+          "authorName": "Carlos Mendoza",
+          "businessName": "Vintage Barbershop",
+          "quote": "Booking System transformed our daily routine. No-shows dropped by 80% with automated reminders, and our clients love booking at midnight without waiting for replies.",
+          "rating": "5"
+        },
+        "item2": {
+          "authorName": "Valeria Castro",
+          "businessName": "Glow Beauty & Spa",
+          "quote": "Managing four stylists used to be chaotic. Now every collaborator has their calendar synced, and our clients can choose their favorite specialist effortlessly.",
+          "rating": "5"
+        },
+        "item3": {
+          "authorName": "Dr. Fernando Ruiz",
+          "businessName": "Ruiz Physiotherapy Center",
+          "quote": "The platform is clean, reliable, and extremely easy for our patients to navigate. It saved us countless administrative hours every single week.",
+          "rating": "5"
+        }
+      },
+      "subtitle": "Discover how service professionals and business owners manage appointments effortlessly.",
+      "title": "Trusted by hundreds of growing businesses"
     }
   },
   "layout": {

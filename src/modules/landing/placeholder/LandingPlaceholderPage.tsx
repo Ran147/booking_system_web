@@ -8,6 +8,11 @@ const PlanCatalogSection = lazy(async () => {
   return { default: Component };
 });
 
+const TestimonialsSection = lazy(async () => {
+  const { TestimonialsSection: Component } = await import("../features/home");
+  return { default: Component };
+});
+
 // Temporary portal home. Replace it with the first feature route of this
 // portal and delete the placeholder folder.
 export const LandingPlaceholderPage = (): ReactElement => {
@@ -20,6 +25,7 @@ export const LandingPlaceholderPage = (): ReactElement => {
     >
       <Suspense fallback={null}>
         <PlanCatalogSection />
+        <TestimonialsSection />
       </Suspense>
     </PageTemplate>
   );
