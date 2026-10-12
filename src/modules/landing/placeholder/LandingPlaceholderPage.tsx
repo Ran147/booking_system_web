@@ -3,6 +3,11 @@ import { useTranslation } from "react-i18next";
 import { PageTemplate } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
 
+const PlatformIntroSection = lazy(async () => {
+  const { PlatformIntroSection: Component } = await import("../features/home");
+  return { default: Component };
+});
+
 const PlanCatalogSection = lazy(async () => {
   const { PlanCatalogSection: Component } = await import("../features/home");
   return { default: Component };
@@ -19,6 +24,7 @@ export const LandingPlaceholderPage = (): ReactElement => {
       title={t("placeholder.title")}
     >
       <Suspense fallback={null}>
+        <PlatformIntroSection />
         <PlanCatalogSection />
       </Suspense>
     </PageTemplate>
