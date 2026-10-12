@@ -28,6 +28,9 @@ describe("readFirebaseEnvironment", () => {
     expect(firebaseEnvironment.firebaseOptions.projectId).toBe(
       FIREBASE_EMULATOR.DEMO_PROJECT_ID,
     );
+    expect(firebaseEnvironment.firebaseOptions.storageBucket).toBe(
+      FIREBASE_EMULATOR.DEMO_STORAGE_BUCKET,
+    );
   });
 
   it("keeps the configured project and site key without emulators", () => {

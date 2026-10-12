@@ -1,4 +1,5 @@
 export { ARIA_ROLE } from "./accessibility/AriaRole.constants";
+export { BUSINESS_PROFILE } from "./business/BusinessProfile.constants";
 export { ENV_FLAG } from "./common/EnvFlag.constants";
 export { STRING } from "./common/String.constants";
 export { BOOTSTRAP_ERROR } from "./errors/BootstrapError.constants";
