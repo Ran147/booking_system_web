@@ -6,6 +6,8 @@ import {
   RouterProvider,
   type RouteObject,
 } from "react-router";
+import { ThemeContext } from "@/app/providers/theme/ThemeContext";
+import { THEME_MODE } from "@/constants";
 import type { Session } from "@/modules/auth";
 import { AuthContext } from "@/modules/auth/context/AuthContext";
 import { testI18n } from "./testI18n";
@@ -14,6 +16,8 @@ export interface RenderRoutesWithProvidersOptions {
   initialPath: string;
   session: Session;
 }
+
+const setTestThemeMode = (): void => undefined;
 
 // Like renderWithProviders, but for a route tree (lazy routes, guards and
 // redirects) instead of a single element.
@@ -31,9 +35,17 @@ export const renderRoutesWithProviders = (
   return render(
     <QueryClientProvider client={testQueryClient}>
       <I18nextProvider i18n={testI18n}>
-        <AuthContext.Provider value={{ session }}>
-          <RouterProvider router={testRouter} />
-        </AuthContext.Provider>
+        <ThemeContext.Provider
+          value={{
+            isDarkApplied: false,
+            setThemeMode: setTestThemeMode,
+            themeMode: THEME_MODE.SYSTEM,
+          }}
+        >
+          <AuthContext.Provider value={{ session }}>
+            <RouterProvider router={testRouter} />
+          </AuthContext.Provider>
+        </ThemeContext.Provider>
       </I18nextProvider>
     </QueryClientProvider>,
   );

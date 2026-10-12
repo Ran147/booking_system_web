@@ -32,6 +32,7 @@ import {
   SEED_WEEKDAY,
 } from "./constants/SeedEmulator.constants";
 import { FIRESTORE_COLLECTION } from "../src/shared/constants/firestore/FirestoreCollection.constants";
+import { THEME_MODE } from "../src/shared/constants/theme/ThemeMode.constants";
 import { BUSINESS_STATUS } from "../src/shared/domain/business/BusinessStatus.constants";
 import { isReservedBusinessSlug } from "../src/shared/domain/business/isReservedBusinessSlug";
 import { COLLABORATOR_PERMISSION } from "../src/shared/domain/collaborator/CollaboratorPermission.constants";
@@ -115,6 +116,7 @@ const writeUserProfile = async (
     email: seedUser.EMAIL,
     fullName: seedUser.FULL_NAME,
     phone: seedUser.PHONE,
+    theme: THEME_MODE.SYSTEM,
   });
 };
 

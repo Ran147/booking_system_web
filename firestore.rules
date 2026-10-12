@@ -50,6 +50,12 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
     }
 
+    function isBusinessPortalUser() {
+      return hasRole('subscriber')
+        || (hasRole('collaborator')
+          && isCollaboratorOf(request.auth.token.businessId));
+    }
+
     function isOptionalNullableString(data, field, maximumLength) {
       return !(field in data)
         || data[field] == null
@@ -92,6 +98,16 @@ service cloud.firestore {
           || data.contactPhone.matches('^\\+?[0-9 ()-]{7,25}$'))
         && isOptionalNullableString(data, 'logoUrl', 2048)
         && areValidSocialLinks(data);
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && isBusinessPortalUser()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['theme'])
+        && request.resource.data.theme in ['light', 'dark', 'system'];
     }
 
     match /businesses/{businessId} {
