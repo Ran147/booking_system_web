@@ -36,6 +36,21 @@
       "tagline": "Simplifica la agenda de tu negocio, automatiza tus recordatorios y permite que tus clientes reserven en línea 24/7 sin complicaciones.",
       "title": "Impulsa tu negocio con reservas inteligentes y sin esfuerzo"
     },
+    "navbar": {
+      "goToPortal": "Ir a mi panel",
+      "landmarkLabel": "Barra de navegación principal",
+      "links": {
+        "contact": "Contacto",
+        "home": "Inicio",
+        "plans": "Planes"
+      },
+      "linksNavLabel": "Enlaces principales",
+      "logoAlt": "Logo de Booking System",
+      "menuClose": "Cerrar menú de navegación",
+      "menuOpen": "Abrir menú de navegación",
+      "mobileNavLabel": "Navegación móvil",
+      "signIn": "Iniciar sesión"
+    },
     "plans": {
       "billingPeriod": {
         "annual": "/año",

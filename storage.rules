@@ -4,6 +4,26 @@ rules_version = '2';
 // its own match block with an emulator test (auth-and-roles).
 service firebase.storage {
   match /b/{bucket}/o {
+    match /businesses/{businessId}/profile/logo {
+      function ownsBusiness() {
+        return request.auth != null
+          && request.auth.token.role == 'subscriber'
+          && request.auth.token.businessId == businessId
+          && firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.ownerUserId == request.auth.uid;
+      }
+
+      function businessIsWritable() {
+        return firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.status == 'active';
+      }
+
+      allow read: if true;
+      allow create, update: if ownsBusiness()
+        && businessIsWritable()
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if ownsBusiness() && businessIsWritable();
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }
