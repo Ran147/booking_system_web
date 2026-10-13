@@ -15,6 +15,7 @@ export const ROUTE_PATH = {
     SIGN_IN: "/sign-in",
   },
   BUSINESS: {
+    BUSINESS_PROFILE: "business-profile",
     CUSTOMERS: "customers",
     REPORTS: "reports",
     ROOT: "/business",
