@@ -56,10 +56,20 @@ export const useSignInViewModel = (): SignInViewModel => {
   useEffect(() => {
     if (!hasSignUpState) return;
     void navigate(
-      { pathname: location.pathname, search: location.search },
+      {
+        hash: location.hash,
+        pathname: location.pathname,
+        search: location.search,
+      },
       { replace: true, state: null },
     );
-  }, [hasSignUpState, location.pathname, location.search, navigate]);
+  }, [
+    hasSignUpState,
+    location.hash,
+    location.pathname,
+    location.search,
+    navigate,
+  ]);
 
   // AC-KAN-34-07: the message is announced (role="alert") and gets focus.
   useEffect(() => {

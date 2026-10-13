@@ -127,9 +127,12 @@ describe("SubscriberSignUpPage (KAN-25, KAN-27)", () => {
     expect(createSubscriberSignUpFormPage().getField("email")).toHaveValue(
       SIGN_UP_TEST_EMAIL,
     );
-    expect(callFunction).toHaveBeenCalledWith("validateSignUpLink", {
-      signUpToken: SIGN_UP_TEST_TOKEN,
-    });
+    expect(callFunction).toHaveBeenCalledWith(
+      FUNCTION_NAME.VALIDATE_SIGN_UP_LINK,
+      {
+        signUpToken: SIGN_UP_TEST_TOKEN,
+      },
+    );
   });
 
   it("KAN-25: AC-KAN-25-21 explains that sign-up starts with a plan when there is no link", async () => {
@@ -279,6 +282,7 @@ describe("SubscriberSignUpPage (KAN-25, KAN-27)", () => {
     expect(queryForm()).not.toBeInTheDocument();
     expect(countCompleteSignUpCalls()).toBe(1);
   });
+
   it.each([
     ["subscriber", SUBSCRIBER_SESSION, ROUTE_PATH.BUSINESS.ROOT],
     ["super admin", SUPER_ADMIN_SESSION, ROUTE_PATH.ADMIN.ROOT],
@@ -292,7 +296,7 @@ describe("SubscriberSignUpPage (KAN-25, KAN-27)", () => {
       ).toBeInTheDocument();
       expect(queryForm()).not.toBeInTheDocument();
       expect(callFunction).not.toHaveBeenCalledWith(
-        "validateSignUpLink",
+        FUNCTION_NAME.VALIDATE_SIGN_UP_LINK,
         expect.anything(),
       );
     },
@@ -308,7 +312,7 @@ describe("SubscriberSignUpPage (KAN-25, KAN-27)", () => {
     ).toBeInTheDocument();
     expect(queryForm()).not.toBeInTheDocument();
     expect(callFunction).not.toHaveBeenCalledWith(
-      "validateSignUpLink",
+      FUNCTION_NAME.VALIDATE_SIGN_UP_LINK,
       expect.anything(),
     );
   });

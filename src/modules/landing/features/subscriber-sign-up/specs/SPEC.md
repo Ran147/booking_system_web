@@ -78,7 +78,7 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 ## BLOCKED
 None. Q7 was decided on 2026-09-28: the form is reached from the KAN-24 payment email, and the sign-up creates the account and the `pending` business with its `slug`.
 
-Two criteria are finished by other stories (noted 2026-10-13); this feature already does its part:
+Two criteria are finished by other stories (noted 2026-10-12); this feature already does its part:
 - **AC-KAN-25-20**, "send a new link" for an expired link: needs the resend function of KAN-24 (plan-checkout spec AS-6). Until then the page offers contact (`landing:subscriberSignUp.link.contactAction`).
 - **AC-KAN-27-06**, "under review" screen: the sign-up creates the business as `pending` (tested in `completeSubscriberSignUp.test.ts`); the screen is AC-KAN-33-09 / AC-KAN-39-07 of `business/layout` (KAN-29). No code of this feature changes when it lands.
 
@@ -124,7 +124,7 @@ AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can stil
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-25 | AC-KAN-25-01 … AC-KAN-25-15, AC-KAN-25-17, AC-KAN-25-19 … AC-KAN-25-21 (AC-KAN-25-05 and AC-KAN-25-12 struck through) | `tests/SubscriberSignUpPage.test.tsx` |
+| KAN-25 | AC-KAN-25-09, AC-KAN-25-10, AC-KAN-25-14, AC-KAN-25-20, AC-KAN-25-21 (page; AC-KAN-25-05 and AC-KAN-25-12 struck through) | `tests/SubscriberSignUpPage.test.tsx` |
 | KAN-25 | AC-KAN-25-08, AC-KAN-25-16, AC-KAN-25-18, AC-KAN-25-22 | `functions/src/billing/tests/completeSubscriberSignUp.test.ts` |
 | KAN-25 | AC-KAN-25-08 (token check against Google) | `functions/src/auth/tests/assertRecaptcha.test.ts` |
 | KAN-25 | AC-KAN-25-01 … AC-KAN-25-04, AC-KAN-25-06 … AC-KAN-25-11, AC-KAN-25-13 … AC-KAN-25-15, AC-KAN-25-17 … AC-KAN-25-19, AC-KAN-25-22 (form) | `tests/SubscriberSignUpForm.test.tsx` |

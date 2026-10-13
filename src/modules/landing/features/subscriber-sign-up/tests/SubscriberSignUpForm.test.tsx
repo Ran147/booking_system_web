@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import { FUNCTION_NAME } from "@/shared/constants";
-import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
+import { PASSWORD_RULE_ID, RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { callFunction } from "@/shared/lib/firebase";
 import {
   SIGNED_OUT_SESSION,
@@ -108,10 +108,21 @@ describe("SubscriberSignUpForm (KAN-25)", () => {
     const signUpPage = createSubscriberSignUpFormPage();
     await signUpPage.typeInto("password", STRONG_PASSWORD);
 
-    await signUpPage.clickShowPassword();
+    await signUpPage.togglePasswordVisibility();
 
     expect(signUpPage.getField("password")).toHaveAttribute("type", "text");
     expect(signUpPage.getField("password")).toHaveValue(STRONG_PASSWORD);
+    expect(signUpPage.getPasswordToggle()).toHaveAccessibleName(
+      testI18n.t("common:auth.password.hide"),
+    );
+
+    await signUpPage.togglePasswordVisibility();
+
+    expect(signUpPage.getField("password")).toHaveAttribute("type", "password");
+    expect(signUpPage.getField("password")).toHaveValue(STRONG_PASSWORD);
+    expect(signUpPage.getPasswordToggle()).toHaveAccessibleName(
+      testI18n.t("common:auth.password.show"),
+    );
   });
 
   it("KAN-25: AC-KAN-25-04 marks empty required fields and does not submit", async () => {
@@ -141,6 +152,15 @@ describe("SubscriberSignUpForm (KAN-25)", () => {
     expect(
       await screen.findByText(testI18n.t("validation:passwordTooWeak")),
     ).toBeInTheDocument();
+    expect(
+      signUpPage.getPasswordRule(PASSWORD_RULE_ID.UPPERCASE),
+    ).toHaveTextContent(testI18n.t("common:auth.password.ruleMissing"));
+    expect(
+      signUpPage.getPasswordRule(PASSWORD_RULE_ID.SYMBOL),
+    ).toHaveTextContent(testI18n.t("common:auth.password.ruleMissing"));
+    expect(
+      signUpPage.getPasswordRule(PASSWORD_RULE_ID.DIGIT),
+    ).toHaveTextContent(testI18n.t("common:auth.password.ruleMet"));
   });
 
   it("KAN-25: AC-KAN-25-07 warns when the confirmation does not match", async () => {

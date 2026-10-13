@@ -18,6 +18,7 @@ export interface SignInPageObject {
   readonly getPasswordInput: () => HTMLElement;
   readonly getPasswordToggle: () => HTMLElement;
   readonly getRecaptcha: () => HTMLElement;
+  readonly getSignUpSuccess: () => HTMLElement;
   readonly getSubmitButton: () => HTMLElement;
   readonly getSubmittingButton: () => HTMLElement;
   readonly queryFieldErrors: (
@@ -81,6 +82,8 @@ export const createSignInPage = (): SignInPageObject => {
     getPasswordInput,
     getPasswordToggle,
     getRecaptcha,
+    // Shown after a sign-up (KAN-27): a status, not an alert.
+    getSignUpSuccess: (): HTMLElement => screen.getByRole(ARIA_ROLE.STATUS),
     getSubmitButton,
     getSubmittingButton,
     queryFieldErrors: (validationKey: ValidationMessageKey): HTMLElement[] =>

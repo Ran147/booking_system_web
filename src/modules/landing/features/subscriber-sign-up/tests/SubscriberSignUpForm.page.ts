@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ARIA_ROLE } from "@/shared/constants";
+import type { PasswordRuleId } from "@/shared/domain";
 import { testI18n } from "@/shared/test-utils";
 
 const FIELD_LABEL_KEY = {
@@ -28,13 +29,15 @@ export interface SubscriberSignUpFormPageObject {
     field: SubscriberSignUpField,
     value: string,
   ) => Promise<void>;
-  readonly clickShowPassword: () => Promise<void>;
   readonly clickSubmit: () => Promise<void>;
   readonly getField: (field: SubscriberSignUpField) => HTMLElement;
+  readonly getPasswordRule: (ruleId: PasswordRuleId) => HTMLElement;
+  readonly getPasswordToggle: () => HTMLElement;
   readonly getRecaptcha: () => HTMLElement;
   readonly getStrengthStatus: () => HTMLElement;
   readonly getSubmitButton: () => HTMLElement;
   readonly solveRecaptcha: () => Promise<void>;
+  readonly togglePasswordVisibility: () => Promise<void>;
   readonly typeInto: (
     field: SubscriberSignUpField,
     value: string,
@@ -56,6 +59,14 @@ export const createSubscriberSignUpFormPage =
       screen.getByRole(ARIA_ROLE.BUTTON, {
         name: testI18n.t("landing:subscriberSignUp.form.recaptchaLabel"),
       });
+    // The first show / hide button belongs to the password field; its name
+    // tells the current state (AC-KAN-25-03).
+    const getPasswordToggle = (): HTMLElement =>
+      screen.getAllByRole(ARIA_ROLE.BUTTON, {
+        name: new RegExp(
+          `^(${testI18n.t("common:auth.password.show")}|${testI18n.t("common:auth.password.hide")})$`,
+        ),
+      })[0] as HTMLElement;
     const getSubmitButton = (): HTMLElement =>
       screen.getByRole(ARIA_ROLE.BUTTON, {
         name: testI18n.t("landing:subscriberSignUp.form.submitAction"),
@@ -73,21 +84,26 @@ export const createSubscriberSignUpFormPage =
         await user.clear(getField(field));
         await user.type(getField(field), value);
       },
-      clickShowPassword: async (): Promise<void> => {
-        const [passwordShowButton] = screen.getAllByRole(ARIA_ROLE.BUTTON, {
-          name: testI18n.t("common:auth.password.show"),
-        });
-        await user.click(passwordShowButton as HTMLElement);
-      },
       clickSubmit: async (): Promise<void> => {
         await user.click(getSubmitButton());
       },
       getField,
+      // Each rule of the strength indicator, read with its met / missing mark.
+      getPasswordRule: (ruleId: PasswordRuleId): HTMLElement =>
+        screen.getByText(
+          new RegExp(
+            escapeRegExp(testI18n.t(`common:auth.password.rules.${ruleId}`)),
+          ),
+        ),
+      getPasswordToggle,
       getRecaptcha,
       getStrengthStatus: (): HTMLElement => screen.getByRole(ARIA_ROLE.STATUS),
       getSubmitButton,
       solveRecaptcha: async (): Promise<void> => {
         await user.click(getRecaptcha());
+      },
+      togglePasswordVisibility: async (): Promise<void> => {
+        await user.click(getPasswordToggle());
       },
       typeInto: async (
         field: SubscriberSignUpField,

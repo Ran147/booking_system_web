@@ -549,6 +549,7 @@ describe("SignInPage", () => {
       },
     );
   });
+
   describe("KAN-27: sign-in right after a subscriber sign-up", () => {
     const SIGN_UP_EMAIL = "nuevo-suscriptor@demo.test";
     const signUpSuccessMessage = (): string =>
@@ -573,7 +574,7 @@ describe("SignInPage", () => {
       const { signInPage } = await renderAfterSignUp();
 
       expect(signInPage.getEmailInput()).toHaveValue(SIGN_UP_EMAIL);
-      expect(screen.getByRole("status")).toHaveTextContent(
+      expect(signInPage.getSignUpSuccess()).toHaveTextContent(
         signUpSuccessMessage(),
       );
     });
