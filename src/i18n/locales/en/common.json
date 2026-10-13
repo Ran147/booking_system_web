@@ -2,6 +2,8 @@
   "auth": {
     "password": {
       "hide": "Hide password",
+      "ruleMet": "Met:",
+      "ruleMissing": "Missing:",
       "rules": {
         "digit": "Includes a number",
         "lowercase": "Includes a lowercase letter",
@@ -11,10 +13,12 @@
       },
       "show": "Show password",
       "strength": {
-        "medium": "Medium",
-        "strong": "Strong",
-        "weak": "Weak"
-      }
+        "medium": "medium",
+        "strong": "strong",
+        "weak": "weak"
+      },
+      "strengthEmpty": "Type a password to see its strength.",
+      "strengthLabel": "Password strength: {{level}}"
     }
   },
   "bookingStatus": {

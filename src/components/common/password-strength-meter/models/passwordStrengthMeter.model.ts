@@ -1,12 +1,11 @@
-/** One password requirement and whether the current value satisfies it. */
-export interface PasswordRuleItem {
-  readonly isMet: boolean;
-  readonly label: string;
-}
-
-/** Properties accepted by the reusable password strength presentation. */
+/**
+ * Propiedades del atomo PasswordStrengthMeter. Solo recibe la contraseña: las
+ * reglas y el nivel salen de evaluatePasswordStrength (@/domain), las mismas
+ * que usan los esquemas de validacion.
+ */
 export interface PasswordStrengthMeterProps {
-  readonly label: string;
-  readonly rules: readonly PasswordRuleItem[];
-  readonly strengthLabel: string;
+  readonly className?: string;
+  /** Id para enlazar el medidor al campo con aria-describedby. */
+  readonly id?: string;
+  readonly password: string;
 }

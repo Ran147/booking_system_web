@@ -9,7 +9,6 @@ import {
   VALIDATION_MESSAGE_KEY,
   type ValidationMessageKey,
 } from "@/constants";
-import { PASSWORD_RULE, PASSWORD_STRENGTH } from "@/modules/auth";
 import type { MutationError, Nullable, NullableUndefined } from "@/types";
 import { useChangePasswordMutation } from "../api/useChangePasswordMutation";
 import {
@@ -49,38 +48,6 @@ export const useChangePasswordFormViewModel =
     });
     const newPassword =
       useWatch({ control: form.control, name: "newPassword" }) ?? "";
-
-    const passwordRules = [
-      {
-        isMet: newPassword.length >= PASSWORD_RULE.MIN_LENGTH,
-        label: t("common:auth.password.rules.minimumLength", {
-          count: PASSWORD_RULE.MIN_LENGTH,
-        }),
-      },
-      {
-        isMet: PASSWORD_RULE.PATTERN.LOWERCASE.test(newPassword),
-        label: t("common:auth.password.rules.lowercase"),
-      },
-      {
-        isMet: PASSWORD_RULE.PATTERN.UPPERCASE.test(newPassword),
-        label: t("common:auth.password.rules.uppercase"),
-      },
-      {
-        isMet: PASSWORD_RULE.PATTERN.DIGIT.test(newPassword),
-        label: t("common:auth.password.rules.digit"),
-      },
-      {
-        isMet: PASSWORD_RULE.PATTERN.SYMBOL.test(newPassword),
-        label: t("common:auth.password.rules.symbol"),
-      },
-    ];
-    const metRuleCount = passwordRules.filter((rule) => rule.isMet).length;
-    const passwordStrengthLabel =
-      metRuleCount >= PASSWORD_STRENGTH.STRONG_MINIMUM_RULES
-        ? t("common:auth.password.strength.strong")
-        : metRuleCount >= PASSWORD_STRENGTH.MEDIUM_MINIMUM_RULES
-          ? t("common:auth.password.strength.medium")
-          : t("common:auth.password.strength.weak");
 
     const resolveFieldErrorMessage = (
       messageKey?: string,
@@ -147,8 +114,7 @@ export const useChangePasswordFormViewModel =
       form,
       handleSubmit: form.handleSubmit(submitChangePassword),
       isSubmitting: changePasswordMutation.isPending,
-      passwordRules,
-      passwordStrengthLabel,
+      newPassword,
       resolveFieldErrorMessage,
       submitErrorMessage,
       visibilityResetKey,

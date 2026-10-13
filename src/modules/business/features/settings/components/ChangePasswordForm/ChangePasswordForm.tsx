@@ -18,8 +18,7 @@ export const ChangePasswordForm = (): ReactElement => {
     form,
     handleSubmit,
     isSubmitting,
-    passwordRules,
-    passwordStrengthLabel,
+    newPassword,
     resolveFieldErrorMessage,
     submitErrorMessage,
     visibilityResetKey,
@@ -70,11 +69,7 @@ export const ChangePasswordForm = (): ReactElement => {
           )}
         />
 
-        <PasswordStrengthMeter
-          label={t("settings.password.strengthLabel")}
-          rules={passwordRules}
-          strengthLabel={passwordStrengthLabel}
-        />
+        <PasswordStrengthMeter password={newPassword} />
 
         <FormField
           control={form.control}

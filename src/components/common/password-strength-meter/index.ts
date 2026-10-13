@@ -1,5 +1,2 @@
 export { PasswordStrengthMeter } from "./PasswordStrengthMeter";
-export type {
-  PasswordRuleItem,
-  PasswordStrengthMeterProps,
-} from "./models/passwordStrengthMeter.model";
+export type { PasswordStrengthMeterProps } from "./models/passwordStrengthMeter.model";

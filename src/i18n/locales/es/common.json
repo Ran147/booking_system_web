@@ -2,6 +2,8 @@
   "auth": {
     "password": {
       "hide": "Ocultar contraseña",
+      "ruleMet": "Cumplido:",
+      "ruleMissing": "Pendiente:",
       "rules": {
         "digit": "Incluye un número",
         "lowercase": "Incluye una letra minúscula",
@@ -11,10 +13,12 @@
       },
       "show": "Mostrar contraseña",
       "strength": {
-        "medium": "Media",
-        "strong": "Fuerte",
-        "weak": "Débil"
-      }
+        "medium": "media",
+        "strong": "fuerte",
+        "weak": "débil"
+      },
+      "strengthEmpty": "Escribe una contraseña para ver su seguridad.",
+      "strengthLabel": "Seguridad de la contraseña: {{level}}"
     }
   },
   "bookingStatus": {

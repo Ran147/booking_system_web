@@ -1,6 +1,5 @@
 import type { FormEvent } from "react";
 import type { UseFormReturn } from "react-hook-form";
-import type { PasswordRuleItem } from "@/components";
 import type { Nullable, NullableUndefined } from "@/types";
 import type { ChangePasswordFormValues } from "./ChangePasswordForm.schema";
 
@@ -11,8 +10,7 @@ export interface ChangePasswordFormViewModel {
     formEvent?: FormEvent<HTMLFormElement>,
   ) => Promise<void>;
   readonly isSubmitting: boolean;
-  readonly passwordRules: readonly PasswordRuleItem[];
-  readonly passwordStrengthLabel: string;
+  readonly newPassword: string;
   readonly resolveFieldErrorMessage: (
     messageKey?: NullableUndefined<string>,
   ) => NullableUndefined<string>;

@@ -1,60 +1,61 @@
 import { Eye, EyeOff } from "lucide-react";
-import {
-  forwardRef,
-  useEffect,
-  useState,
-  type ForwardedRef,
-  type ReactElement,
-} from "react";
+import { forwardRef, type ForwardedRef, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { I18N_NAMESPACE } from "@/constants";
-import { Button } from "../button";
-import { InputField } from "../input-field";
+import { PASSWORD_INPUT_TYPE } from "./constants/passwordInput.constants";
 import type { PasswordInputProps } from "./models/passwordInput.model";
+import { usePasswordInput } from "./usePasswordInput";
+import { Button } from "../button";
+import {
+  BUTTON_SIZE,
+  BUTTON_VARIANT,
+} from "../button/constants/button.constants";
+import { InputField } from "../input-field";
 
+// Shared by sign-in (US-33), sign-up (KAN-25), change password (KAN-53,
+// HU-171) and password recovery.
 export const PasswordInput = forwardRef(
   (
     {
-      inputClassName,
-      visibilityResetKey = 0,
-      ...restProperties
+      disabled,
+      isVisible,
+      onToggleVisibility,
+      visibilityResetKey,
+      ...inputFieldProperties
     }: PasswordInputProps,
     reference: ForwardedRef<HTMLInputElement>,
   ): ReactElement => {
     const { t } = useTranslation(I18N_NAMESPACE.COMMON);
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-    useEffect(() => {
-      setIsPasswordVisible(false);
-    }, [visibilityResetKey]);
-
-    const handleToggleVisibility = (): void => {
-      setIsPasswordVisible((currentVisibility) => !currentVisibility);
-    };
-
-    const visibilityLabel = isPasswordVisible
-      ? t("auth.password.hide")
-      : t("auth.password.show");
+    const { handleToggleMouseDown, handleToggleVisibility, isPasswordVisible } =
+      usePasswordInput({ isVisible, onToggleVisibility, visibilityResetKey });
     const VisibilityIcon = isPasswordVisible ? EyeOff : Eye;
 
     return (
       <InputField
-        {...restProperties}
+        {...inputFieldProperties}
+        disabled={disabled}
         endAdornment={
           <Button
-            ariaLabel={visibilityLabel}
+            ariaLabel={t(
+              isPasswordVisible ? "auth.password.hide" : "auth.password.show",
+            )}
             aria-pressed={isPasswordVisible}
+            disabled={disabled}
             onClick={handleToggleVisibility}
-            size="icon"
+            onMouseDown={handleToggleMouseDown}
+            size={BUTTON_SIZE.ICON}
             type="button"
-            variant="ghost"
+            variant={BUTTON_VARIANT.GHOST}
           >
             <VisibilityIcon aria-hidden="true" className="size-4" />
           </Button>
         }
-        inputClassName={`pr-12 ${inputClassName ?? ""}`}
         ref={reference}
-        type={isPasswordVisible ? "text" : "password"}
+        type={
+          isPasswordVisible
+            ? PASSWORD_INPUT_TYPE.VISIBLE
+            : PASSWORD_INPUT_TYPE.HIDDEN
+        }
       />
     );
   },

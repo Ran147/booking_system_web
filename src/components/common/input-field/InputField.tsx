@@ -59,6 +59,7 @@ export const InputField = forwardRef(
               error
                 ? "border-destructive focus:border-destructive focus:ring-destructive/20"
                 : "border-border focus:border-primary focus:ring-primary/20",
+              endAdornment ? "pr-11" : null,
               inputClassName,
             )}
             disabled={disabled}
