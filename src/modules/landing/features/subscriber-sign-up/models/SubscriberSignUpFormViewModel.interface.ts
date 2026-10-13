@@ -51,9 +51,20 @@ export interface SubscriberSignUpFormViewModel {
   readonly businessSlugHelperText: string;
   readonly fieldErrors: SubscriberSignUpFieldErrors;
   readonly fields: SubscriberSignUpFieldRegistrations;
+  /** Keeps the widget's token; null when it expires or fails. */
+  readonly handleRecaptchaTokenChange: (
+    recaptchaToken: Nullable<string>,
+  ) => void;
   readonly handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
+  /** No solved reCAPTCHA yet: submit stays disabled (AC-KAN-25-08). */
+  readonly isRecaptchaMissing: boolean;
   readonly isSubmitting: boolean;
+  /** Active language for the reCAPTCHA widget. */
+  readonly language: string;
   readonly password: string;
+  /** Changes to reset the widget after the server used its token. */
+  readonly recaptchaResetSignal: number;
+  readonly recaptchaSiteKey: string;
   readonly submitError: Nullable<SignUpSubmitError>;
 }
 

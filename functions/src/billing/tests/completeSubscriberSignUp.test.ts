@@ -1,4 +1,5 @@
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { HttpsError } from "firebase-functions/v2/https";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   SIGN_UP_LINK_STATE,
   TEST_CHECKOUT_EMAIL,
@@ -7,6 +8,7 @@ import {
   seedCheckout,
   seedPlan,
 } from "./signUpTestFixtures.js";
+import { assertRecaptcha } from "../../auth/assertRecaptcha.js";
 import { FIRESTORE_COLLECTION } from "../../shared/constants/FirestoreCollection.constants.js";
 import { auth, firestore } from "../../shared/firebaseAdmin.js";
 import {
@@ -19,6 +21,13 @@ import {
 } from "../../shared/tests/emulatorTestHelpers.js";
 import { completeSubscriberSignUp } from "../completeSubscriberSignUp.js";
 import { SIGN_UP_ERROR_REASON } from "../constants/SubscriberSignUp.constants.js";
+
+// Google is not called from tests: assertRecaptcha has its own test, and here
+// it accepts every token unless a test makes it reject one.
+vi.mock("../../auth/assertRecaptcha.js", () => ({
+  RECAPTCHA_SECRETS: [],
+  assertRecaptcha: vi.fn(),
+}));
 
 const PROMISE_SETTLED_STATUS = {
   FULFILLED: "fulfilled",
@@ -42,6 +51,7 @@ describe("completeSubscriberSignUp", () => {
 
   beforeEach(async () => {
     await clearEmulators();
+    vi.mocked(assertRecaptcha).mockReset().mockResolvedValue();
     await seedPlan();
     planCheckoutId = await seedCheckout({ signUpToken: "valid-token" });
   });
@@ -99,6 +109,31 @@ describe("completeSubscriberSignUp", () => {
     expect(slugLockSnapshot.data()).toMatchObject({
       businessId: businessSnapshot?.id,
     });
+  });
+
+  it("KAN-25: verifies the reCAPTCHA token sent with the form (AC-KAN-25-08)", async () => {
+    await callCompleteSubscriberSignUp(
+      buildCallableRequest(buildSignUpPayload()),
+    );
+
+    expect(assertRecaptcha).toHaveBeenCalledWith("recaptcha-token");
+  });
+
+  it("KAN-25: rejects a refused reCAPTCHA token, creates nothing and keeps the link valid (AC-KAN-25-08)", async () => {
+    vi.mocked(assertRecaptcha).mockRejectedValueOnce(
+      new HttpsError("permission-denied", "The reCAPTCHA token was rejected"),
+    );
+
+    const httpsError = await captureHttpsError(
+      callCompleteSubscriberSignUp(buildCallableRequest(buildSignUpPayload())),
+    );
+
+    expect(httpsError.code).toBe("permission-denied");
+    expect(await countAuthUsers()).toBe(0);
+    expect(await countDocuments(FIRESTORE_COLLECTION.BUSINESSES)).toBe(0);
+    await expect(
+      callCompleteSubscriberSignUp(buildCallableRequest(buildSignUpPayload())),
+    ).resolves.toEqual({ email: TEST_CHECKOUT_EMAIL });
   });
 
   it("KAN-25: uses up the link, so a second sign-up with it fails (AC-KAN-25-16)", async () => {
@@ -250,6 +285,7 @@ describe("completeSubscriberSignUp", () => {
       { businessName: "N".repeat(81) },
     ],
     ["an unknown time zone (AS-8)", { timeZone: "Mars/Olympus" }],
+    ["a missing reCAPTCHA token (AC-KAN-25-08)", { recaptchaToken: "" }],
   ])(
     "KAN-25: rejects %s as invalid-argument and creates nothing",
     async (_caseName, payloadOverrides) => {

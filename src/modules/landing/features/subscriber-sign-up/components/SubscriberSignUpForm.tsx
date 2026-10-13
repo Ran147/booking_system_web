@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/shared/components";
+import { Button, RecaptchaField } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
 import { AccountSection } from "./AccountSection";
 import { BusinessSection } from "./BusinessSection";
@@ -17,9 +17,14 @@ export const SubscriberSignUpForm = (
     businessSlugHelperText,
     fieldErrors,
     fields,
+    handleRecaptchaTokenChange,
     handleSubmit,
+    isRecaptchaMissing,
     isSubmitting,
+    language,
     password,
+    recaptchaResetSignal,
+    recaptchaSiteKey,
     submitError,
   } = useSubscriberSignUpFormViewModel(subscriberSignUpFormProps);
 
@@ -36,8 +41,20 @@ export const SubscriberSignUpForm = (
         fieldErrors={fieldErrors}
         fields={fields}
       />
+      <RecaptchaField
+        label={t("subscriberSignUp.form.recaptchaLabel")}
+        language={language}
+        onTokenChange={handleRecaptchaTokenChange}
+        resetSignal={recaptchaResetSignal}
+        siteKey={recaptchaSiteKey}
+      />
       {submitError ? <SignUpSubmitAlert submitError={submitError} /> : null}
-      <Button fullWidth isLoading={isSubmitting} type="submit">
+      <Button
+        disabled={isRecaptchaMissing}
+        fullWidth
+        isLoading={isSubmitting}
+        type="submit"
+      >
         {t("subscriberSignUp.form.submitAction")}
       </Button>
     </form>

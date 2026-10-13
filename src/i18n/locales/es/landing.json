@@ -95,6 +95,7 @@
       "phoneHint": "Opcional.",
       "phoneInvalidError": "Usa solo números, espacios, + y -.",
       "phoneLabel": "Teléfono",
+      "recaptchaLabel": "Verificación de seguridad",
       "signInAction": "Iniciar sesión",
       "slugAvailable": "Está disponible.",
       "slugChecking": "Comprobando disponibilidad…",

@@ -17,6 +17,7 @@ const buildPayload = (
 ): ReturnType<typeof buildCompleteSubscriberSignUpPayload> =>
   buildCompleteSubscriberSignUpPayload(FORM_VALUES, {
     activeLanguage,
+    recaptchaToken: "recaptcha-token",
     signUpToken: "token",
     timeZone: "America/Mexico_City",
   });

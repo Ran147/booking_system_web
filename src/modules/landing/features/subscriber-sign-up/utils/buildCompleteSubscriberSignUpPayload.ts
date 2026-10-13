@@ -5,6 +5,8 @@ import type { SubscriberSignUpFormValues } from "../models/SubscriberSignUpForm.
 export interface SignUpContext {
   /** Active landing language (AS-4); anything unsupported becomes the default. */
   readonly activeLanguage: string;
+  /** Token of the solved reCAPTCHA (AC-KAN-25-08). */
+  readonly recaptchaToken: string;
   readonly signUpToken: string;
   /** IANA time zone of the browser (AS-8). */
   readonly timeZone: string;
@@ -18,7 +20,7 @@ const toSupportedLanguage = (activeLanguage: string): Language =>
 // the email from the checkout (AC-KAN-25-14).
 export const buildCompleteSubscriberSignUpPayload = (
   formValues: SubscriberSignUpFormValues,
-  { activeLanguage, signUpToken, timeZone }: SignUpContext,
+  { activeLanguage, recaptchaToken, signUpToken, timeZone }: SignUpContext,
 ): CompleteSubscriberSignUpPayload => ({
   businessName: formValues.businessName,
   businessSlug: formValues.businessSlug,
@@ -27,6 +29,7 @@ export const buildCompleteSubscriberSignUpPayload = (
   lastName: formValues.lastName,
   password: formValues.password,
   phone: formValues.phone,
+  recaptchaToken,
   signUpToken,
   timeZone,
 });

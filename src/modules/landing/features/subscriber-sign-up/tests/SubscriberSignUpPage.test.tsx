@@ -22,6 +22,9 @@ import { SIGN_UP_ERROR_REASON } from "../constants/SubscriberSignUpServer.consta
 import type { SignUpCompletedLocationState } from "../models/SignUpCompletedLocationState.interface";
 
 vi.mock("@/services/firebase/callFunction", () => ({ callFunction: vi.fn() }));
+vi.mock("@/components/common/recaptcha-field", async () => ({
+  RecaptchaField: (await import("./recaptchaFieldDouble")).RecaptchaFieldDouble,
+}));
 
 const STRONG_PASSWORD = "Reserva!2026";
 const SIGN_UP_PATH = `${ROUTE_PATH.LANDING.SIGN_UP}?token=${SIGN_UP_TEST_TOKEN}`;
@@ -167,6 +170,7 @@ describe("SubscriberSignUpPage (KAN-25, KAN-27)", () => {
     await signUpPage.typeInto("password", STRONG_PASSWORD);
     await signUpPage.typeInto("passwordConfirmation", STRONG_PASSWORD);
     await signUpPage.typeInto("businessName", "Barbería Centro");
+    await signUpPage.solveRecaptcha();
     await signUpPage.clickSubmit();
 
     await waitFor(() => {

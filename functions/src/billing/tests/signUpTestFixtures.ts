@@ -79,6 +79,7 @@ export const buildSignUpPayload = (
   lastName: "Pérez",
   password: "Segura!2026",
   phone: "",
+  recaptchaToken: "recaptcha-token",
   signUpToken: "valid-token",
   timeZone: "America/Mexico_City",
   ...overrides,

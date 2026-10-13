@@ -75,6 +75,7 @@ export const completeSubscriberSignUpPayloadSchema = z.object({
   lastName: personNameSchema,
   password: passwordSchema,
   phone: phoneSchema,
+  recaptchaToken: z.string().min(1),
   signUpToken: signUpTokenSchema,
   timeZone: z.string().trim().refine(isTimeZone),
 });

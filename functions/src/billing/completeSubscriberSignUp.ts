@@ -12,6 +12,7 @@ import type {
   CompleteSubscriberSignUpResponse,
 } from "./models/CompleteSubscriberSignUp.mutation.js";
 import { completeSubscriberSignUpPayloadSchema } from "./models/SubscriberSignUp.schema.js";
+import { assertRecaptcha, RECAPTCHA_SECRETS } from "../auth/assertRecaptcha.js";
 import { BUSINESS_STATUS } from "../shared/constants/BusinessStatus.constants.js";
 import { FIREBASE_AUTH_ERROR_CODE } from "../shared/constants/FirebaseAuthErrorCode.constants.js";
 import { FIRESTORE_COLLECTION } from "../shared/constants/FirestoreCollection.constants.js";
@@ -125,14 +126,15 @@ const writeSignUpDocuments = async (
 export const completeSubscriberSignUp = onCall<
   CompleteSubscriberSignUpPayload,
   Promise<CompleteSubscriberSignUpResponse>
->(async (request) => {
+>({ secrets: RECAPTCHA_SECRETS }, async (request) => {
   const signUpPayload = readPayload(
     completeSubscriberSignUpPayloadSchema,
     request.data,
     SIGN_UP_ERROR.INVALID_PAYLOAD,
   );
-  // reCAPTCHA (AC-KAN-25-08) is verified here with assertRecaptcha once US-33
-  // (PR #8) is merged.
+  // Before anything is read or created: a rejected token leaves the link
+  // unused (AC-KAN-25-08).
+  await assertRecaptcha(signUpPayload.recaptchaToken);
 
   if (isReservedBusinessSlug(signUpPayload.businessSlug)) {
     throw new HttpsError("failed-precondition", SIGN_UP_ERROR.SLUG_RESERVED, {

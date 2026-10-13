@@ -1,7 +1,7 @@
 /**
  * No email (it comes from the checkout) and no password confirmation (checked
  * in the form). phone is an empty string when the visitor leaves it out (AS-1).
- * recaptchaToken is added with assertRecaptcha (AC-KAN-25-08, US-33).
+ * recaptchaToken is checked with assertRecaptcha (AC-KAN-25-08).
  */
 export interface CompleteSubscriberSignUpPayload {
   readonly businessName: string;
@@ -11,6 +11,7 @@ export interface CompleteSubscriberSignUpPayload {
   readonly lastName: string;
   readonly password: string;
   readonly phone: string;
+  readonly recaptchaToken: string;
   readonly signUpToken: string;
   readonly timeZone: string;
 }

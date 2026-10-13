@@ -31,8 +31,10 @@ export interface SubscriberSignUpFormPageObject {
   readonly clickShowPassword: () => Promise<void>;
   readonly clickSubmit: () => Promise<void>;
   readonly getField: (field: SubscriberSignUpField) => HTMLElement;
+  readonly getRecaptcha: () => HTMLElement;
   readonly getStrengthStatus: () => HTMLElement;
   readonly getSubmitButton: () => HTMLElement;
+  readonly solveRecaptcha: () => Promise<void>;
   readonly typeInto: (
     field: SubscriberSignUpField,
     value: string,
@@ -49,6 +51,11 @@ export const createSubscriberSignUpFormPage =
       screen.getByLabelText(
         new RegExp(`^${escapeRegExp(testI18n.t(FIELD_LABEL_KEY[field]))}\\*?$`),
       );
+    // RecaptchaField is replaced by recaptchaFieldDouble in these tests.
+    const getRecaptcha = (): HTMLElement =>
+      screen.getByRole(ARIA_ROLE.BUTTON, {
+        name: testI18n.t("landing:subscriberSignUp.form.recaptchaLabel"),
+      });
     const getSubmitButton = (): HTMLElement =>
       screen.getByRole(ARIA_ROLE.BUTTON, {
         name: testI18n.t("landing:subscriberSignUp.form.submitAction"),
@@ -76,8 +83,12 @@ export const createSubscriberSignUpFormPage =
         await user.click(getSubmitButton());
       },
       getField,
+      getRecaptcha,
       getStrengthStatus: (): HTMLElement => screen.getByRole(ARIA_ROLE.STATUS),
       getSubmitButton,
+      solveRecaptcha: async (): Promise<void> => {
+        await user.click(getRecaptcha());
+      },
       typeInto: async (
         field: SubscriberSignUpField,
         value: string,

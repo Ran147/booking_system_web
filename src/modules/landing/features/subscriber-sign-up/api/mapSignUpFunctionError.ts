@@ -1,5 +1,5 @@
 import { FunctionsError } from "firebase/functions";
-import { ERROR_MESSAGE_KEY } from "@/shared/constants";
+import { ERROR_MESSAGE_KEY, FIREBASE_ERROR_CODE } from "@/shared/constants";
 import { mapFirebaseError } from "@/shared/lib/firebase";
 import type { Nullable } from "@/shared/types";
 import {
@@ -24,14 +24,18 @@ const readErrorReason = (error: unknown): Nullable<SignUpErrorReason> => {
 // Converts a sign-up function error once, at the api/ boundary
 // (api-mutation-standards §3). A callable that cannot reach the server fails
 // with functions/internal, like a server crash, so an offline browser is
-// reported as a network error (AC-KAN-25-10).
+// reported as a network error (AC-KAN-25-10). functions/unavailable means the
+// function could not reach Google to check the reCAPTCHA.
 export const mapSignUpFunctionError = (error: unknown): SignUpFunctionError => {
   const mutationError = mapFirebaseError(error);
+  const isNetworkError =
+    !navigator.onLine ||
+    mutationError.code === FIREBASE_ERROR_CODE.FUNCTIONS_UNAVAILABLE;
   return {
     ...mutationError,
-    messageKey: navigator.onLine
-      ? mutationError.messageKey
-      : ERROR_MESSAGE_KEY.NETWORK,
+    messageKey: isNetworkError
+      ? ERROR_MESSAGE_KEY.NETWORK
+      : mutationError.messageKey,
     reason: readErrorReason(error),
   };
 };

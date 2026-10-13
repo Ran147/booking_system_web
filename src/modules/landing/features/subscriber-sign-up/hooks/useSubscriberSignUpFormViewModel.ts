@@ -2,7 +2,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, type ChangeEvent } from "react";
 import { useForm, useWatch, type FieldError } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { ERROR_MESSAGE_KEY, I18N_NAMESPACE, STRING } from "@/shared/constants";
+import {
+  DEFAULT_LANGUAGE,
+  ERROR_MESSAGE_KEY,
+  FIREBASE_ERROR_CODE,
+  I18N_NAMESPACE,
+  STRING,
+} from "@/shared/constants";
+import { recaptchaSiteKey } from "@/shared/lib/firebase";
 import type { Nullable, NullableUndefined } from "@/shared/types";
 import { isValidationMessageKey } from "@/shared/utils";
 import { useBusinessSlugAvailability } from "./useBusinessSlugAvailability";
@@ -61,6 +68,8 @@ export const useSubscriberSignUpFormViewModel = ({
   const completeSignUpMutation = useCompleteSubscriberSignUpMutation();
   const [submitError, setSubmitError] =
     useState<Nullable<SignUpSubmitError>>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState<Nullable<string>>(null);
+  const [recaptchaResetSignal, setRecaptchaResetSignal] = useState(0);
 
   // Schemas store message keys; validation keys live in their own namespace,
   // the rest are feature keys under landing:subscriberSignUp.
@@ -129,6 +138,19 @@ export const useSubscriberSignUpFormViewModel = ({
   const handleSignUpError = (
     signUpFunctionError: SignUpFunctionError,
   ): void => {
+    // The function already used the token: every retry needs a new one.
+    setRecaptchaToken(null);
+    setRecaptchaResetSignal((previousSignal) => previousSignal + 1);
+    if (
+      signUpFunctionError.code ===
+      FIREBASE_ERROR_CODE.FUNCTIONS_PERMISSION_DENIED
+    ) {
+      setSubmitError({
+        message: t("validation:recaptchaRequired"),
+        showAccountLinks: false,
+      });
+      return;
+    }
     switch (signUpFunctionError.reason) {
       case SIGN_UP_ERROR_REASON.SLUG_TAKEN:
         form.setError(
@@ -177,10 +199,13 @@ export const useSubscriberSignUpFormViewModel = ({
   };
 
   const submitSignUp = (formValues: SubscriberSignUpFormValues): void => {
+    if (!recaptchaToken) return;
+
     setSubmitError(null);
     completeSignUpMutation.mutate(
       buildCompleteSubscriberSignUpPayload(formValues, {
         activeLanguage: i18n.language,
+        recaptchaToken,
         signUpToken,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
@@ -219,11 +244,17 @@ export const useSubscriberSignUpFormViewModel = ({
       passwordConfirmation: form.register("passwordConfirmation"),
       phone: form.register("phone"),
     },
+    handleRecaptchaTokenChange: setRecaptchaToken,
     handleSubmit: form.handleSubmit(submitSignUp),
+    // Disabled until the reCAPTCHA is solved (AC-KAN-25-08).
+    isRecaptchaMissing: !recaptchaToken,
     // Disabled until the server answers, so a double click creates one
     // account (AC-KAN-25-13).
     isSubmitting: isSubmitting || completeSignUpMutation.isPending,
+    language: i18n.resolvedLanguage ?? DEFAULT_LANGUAGE,
     password,
+    recaptchaResetSignal,
+    recaptchaSiteKey,
     submitError,
   };
 };

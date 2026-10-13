@@ -1,7 +1,7 @@
 // Contract of the completeSubscriberSignUp function (SPEC "Server functions").
 // No email (it comes from the checkout) and no password confirmation (checked
-// in the form); phone is empty when left out (AS-1). recaptchaToken is added
-// with the reCAPTCHA field (AC-KAN-25-08, US-33).
+// in the form); phone is empty when left out (AS-1). recaptchaToken is the
+// solved widget's token, verified by the function (AC-KAN-25-08).
 export interface CompleteSubscriberSignUpPayload {
   readonly businessName: string;
   readonly businessSlug: string;
@@ -10,6 +10,7 @@ export interface CompleteSubscriberSignUpPayload {
   readonly lastName: string;
   readonly password: string;
   readonly phone: string;
+  readonly recaptchaToken: string;
   readonly signUpToken: string;
   readonly timeZone: string;
 }

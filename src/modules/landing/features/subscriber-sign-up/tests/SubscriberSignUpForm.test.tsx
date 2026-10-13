@@ -8,6 +8,7 @@ import {
   testI18n,
 } from "@/shared/test-utils";
 import { createSubscriberSignUpFormPage } from "./SubscriberSignUpForm.page";
+import { RECAPTCHA_TEST_TOKEN } from "./recaptchaFieldDouble";
 import {
   SIGN_UP_TEST_EMAIL,
   SIGN_UP_TEST_TOKEN,
@@ -20,6 +21,9 @@ import { SIGN_UP_ERROR_REASON } from "../constants/SubscriberSignUpServer.consta
 import type { CompleteSubscriberSignUpResponse } from "../models/CompleteSubscriberSignUp.mutation";
 
 vi.mock("@/services/firebase/callFunction", () => ({ callFunction: vi.fn() }));
+vi.mock("@/components/common/recaptcha-field", async () => ({
+  RecaptchaField: (await import("./recaptchaFieldDouble")).RecaptchaFieldDouble,
+}));
 
 const CHECKOUT_EMAIL = SIGN_UP_TEST_EMAIL;
 const STRONG_PASSWORD = "Reserva!2026";
@@ -45,6 +49,7 @@ const fillValidForm = async (
   await signUpPage.typeInto("password", STRONG_PASSWORD);
   await signUpPage.typeInto("passwordConfirmation", STRONG_PASSWORD);
   await signUpPage.typeInto("businessName", "Barbería Centro");
+  await signUpPage.solveRecaptcha();
 };
 
 const readCompleteSignUpCalls = (): unknown[] =>
@@ -76,6 +81,7 @@ describe("SubscriberSignUpForm (KAN-25)", () => {
         lastName: "Pérez",
         password: STRONG_PASSWORD,
         phone: "",
+        recaptchaToken: RECAPTCHA_TEST_TOKEN,
         signUpToken: SIGN_UP_TEST_TOKEN,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
@@ -111,6 +117,7 @@ describe("SubscriberSignUpForm (KAN-25)", () => {
   it("KAN-25: AC-KAN-25-04 marks empty required fields and does not submit", async () => {
     renderSignUpForm();
     const signUpPage = createSubscriberSignUpFormPage();
+    await signUpPage.solveRecaptcha();
 
     await signUpPage.clickSubmit();
 
@@ -393,5 +400,52 @@ describe("SubscriberSignUpForm (KAN-25)", () => {
       await screen.findByText(testI18n.t("common:errors.unknown")),
     ).toBeInTheDocument();
     expect(handleSignUpComplete).not.toHaveBeenCalled();
+  });
+  it("KAN-25: AC-KAN-25-08 keeps submit disabled until the reCAPTCHA is solved", async () => {
+    renderSignUpForm();
+    const signUpPage = createSubscriberSignUpFormPage();
+
+    expect(signUpPage.getSubmitButton()).toBeDisabled();
+    await signUpPage.solveRecaptcha();
+    expect(signUpPage.getSubmitButton()).toBeEnabled();
+  });
+
+  it("KAN-25: AC-KAN-25-08 shows recaptchaRequired and resets the widget when the server rejects the token", async () => {
+    const handleSignUpComplete = vi.fn();
+    mockSignUpFunctions({
+      completeSubscriberSignUp: async () => {
+        throw buildSignUpFunctionError("permission-denied");
+      },
+    });
+    renderSignUpForm(handleSignUpComplete);
+    const signUpPage = createSubscriberSignUpFormPage();
+    await fillValidForm(signUpPage);
+
+    await signUpPage.clickSubmit();
+
+    expect(
+      await screen.findByText(testI18n.t("validation:recaptchaRequired")),
+    ).toBeInTheDocument();
+    expect(signUpPage.getRecaptcha()).toHaveAttribute("data-reset-signal", "1");
+    expect(signUpPage.getSubmitButton()).toBeDisabled();
+    expect(handleSignUpComplete).not.toHaveBeenCalled();
+  });
+
+  it("KAN-25: AC-KAN-25-10 shows the network error when the reCAPTCHA check cannot reach Google", async () => {
+    mockSignUpFunctions({
+      completeSubscriberSignUp: async () => {
+        throw buildSignUpFunctionError("unavailable");
+      },
+    });
+    renderSignUpForm();
+    const signUpPage = createSubscriberSignUpFormPage();
+    await fillValidForm(signUpPage);
+
+    await signUpPage.clickSubmit();
+
+    expect(
+      await screen.findByText(testI18n.t("common:errors.network")),
+    ).toBeInTheDocument();
+    expect(signUpPage.getField("firstName")).toHaveValue("Ana");
   });
 });
