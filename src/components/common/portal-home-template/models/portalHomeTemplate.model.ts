@@ -67,6 +67,7 @@ export interface PortalHomeMetricItem {
 export interface PortalHomeTemplateProps {
   readonly actions?: ReactNode;
   readonly badge?: ReactNode;
+  readonly children?: ReactNode;
   readonly configurationItems?: readonly PortalQuickAccessItem[];
   readonly configurationsSectionDescription?: string;
   readonly configurationsSectionTitle?: string;
@@ -74,9 +75,9 @@ export interface PortalHomeTemplateProps {
   readonly greeting?: string;
   readonly metrics?: readonly PortalHomeMetricItem[];
   readonly onSelectPlaceholder?: (item: PortalQuickAccessItem) => void;
-  readonly quickAccessItems: readonly PortalQuickAccessItem[];
+  readonly quickAccessItems?: readonly PortalQuickAccessItem[];
   readonly quickAccessSectionDescription?: string;
-  readonly quickAccessSectionTitle: string;
+  readonly quickAccessSectionTitle?: string;
   readonly readOnlyAlert?: ReactNode;
   readonly title: string;
 }

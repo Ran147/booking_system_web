@@ -41,15 +41,9 @@ export const BusinessHomePage = ({
             : t("home.roleCollaboratorBadge")}
         </Badge>
       }
-      configurationItems={viewModel.configurationItems}
-      configurationsSectionDescription={t("home.configsDescription")}
-      configurationsSectionTitle={t("home.configsTitle")}
       description={t("home.subtitle")}
       greeting={t("home.welcome")}
       metrics={viewModel.metrics}
-      quickAccessItems={viewModel.quickAccessItems}
-      quickAccessSectionDescription={t("home.toolsDescription")}
-      quickAccessSectionTitle={t("home.toolsTitle")}
       readOnlyAlert={readOnlyAlert}
       title={t("home.title")}
     />

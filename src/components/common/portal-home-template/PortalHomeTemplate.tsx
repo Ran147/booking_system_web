@@ -69,30 +69,34 @@ export const PortalHomeTemplate = ({
         </section>
       )}
 
-      <section aria-labelledby="quick-access-heading" className="space-y-4">
-        <div className="space-y-1">
-          <h2
-            className="font-headline text-2xl font-bold tracking-tight text-foreground"
-            id="quick-access-heading"
-          >
-            {quickAccessSectionTitle}
-          </h2>
-          {quickAccessSectionDescription && (
-            <p className="text-sm text-muted-foreground">
-              {quickAccessSectionDescription}
-            </p>
-          )}
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {quickAccessItems.map((item) => (
-            <QuickAccessCard
-              item={item}
-              key={item.id}
-              onActionClick={handleActionClick}
-            />
-          ))}
-        </div>
-      </section>
+      {quickAccessItems && quickAccessItems.length > 0 && (
+        <section aria-labelledby="quick-access-heading" className="space-y-4">
+          <div className="space-y-1">
+            {quickAccessSectionTitle && (
+              <h2
+                className="font-headline text-2xl font-bold tracking-tight text-foreground"
+                id="quick-access-heading"
+              >
+                {quickAccessSectionTitle}
+              </h2>
+            )}
+            {quickAccessSectionDescription && (
+              <p className="text-sm text-muted-foreground">
+                {quickAccessSectionDescription}
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {quickAccessItems.map((item) => (
+              <QuickAccessCard
+                item={item}
+                key={item.id}
+                onActionClick={handleActionClick}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {configurationItems && configurationItems.length > 0 && (
         <section

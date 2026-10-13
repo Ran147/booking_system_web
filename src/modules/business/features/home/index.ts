@@ -4,3 +4,4 @@ export {
   type UseBusinessHomeViewModelOptions,
 } from "./hooks";
 export type { BusinessHomeViewModel } from "./models";
+export { fetchBusinessStatus } from "./api";

@@ -77,6 +77,29 @@
     "welcome": "Bienvenido a tu panel"
   },
   "layout": {
+    "sidebar": {
+      "ariaLabel": "Navegación del portal del negocio",
+      "brandFallback": "BN",
+      "closeMenu": "Cerrar menú",
+      "collaborators": "Equipo",
+      "collaboratorsDescription": "Colaboradores y asignación de permisos",
+      "customers": "Clientes",
+      "customersDescription": "Directorio y gestión de clientes",
+      "dashboard": "Inicio",
+      "dashboardDescription": "Resumen y estadísticas de tu negocio",
+      "openMenu": "Abrir menú de navegación",
+      "reports": "Reportes",
+      "reportsDescription": "Ocupación y métricas operativas",
+      "schedule": "Agenda",
+      "scheduleDescription": "Turnos, reservas y bloqueos de horario",
+      "services": "Crear servicio",
+      "servicesDescription": "Catálogo de servicios y precios",
+      "settings": "Configuración",
+      "settingsDescription": "Ajustes del sistema y perfil",
+      "signOut": "Cerrar sesión",
+      "subscription": "Suscripción",
+      "subscriptionDescription": "Plan contratado y facturación"
+    },
     "title": "Portal del negocio"
   },
   "placeholder": {

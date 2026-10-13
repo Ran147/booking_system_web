@@ -77,6 +77,29 @@
     "welcome": "Welcome to your dashboard"
   },
   "layout": {
+    "sidebar": {
+      "ariaLabel": "Business portal navigation",
+      "brandFallback": "BP",
+      "closeMenu": "Close menu",
+      "collaborators": "Team",
+      "collaboratorsDescription": "Collaborators and permission assignment",
+      "customers": "Customers",
+      "customersDescription": "Directory and customer management",
+      "dashboard": "Dashboard",
+      "dashboardDescription": "Business summary and statistics",
+      "openMenu": "Open navigation menu",
+      "reports": "Reports",
+      "reportsDescription": "Occupancy and operational metrics",
+      "schedule": "Schedule",
+      "scheduleDescription": "Appointments, bookings and schedule blocks",
+      "services": "Create service",
+      "servicesDescription": "Service catalog and pricing",
+      "settings": "Settings",
+      "settingsDescription": "System settings and profile",
+      "signOut": "Sign out",
+      "subscription": "Subscription",
+      "subscriptionDescription": "Subscribed plan and billing"
+    },
     "title": "Business portal"
   },
   "placeholder": {
