@@ -124,6 +124,6 @@ AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can stil
 | KAN-25 | AC-KAN-25-16, AC-KAN-25-18, AC-KAN-25-22 | `functions/src/billing/tests/completeSubscriberSignUp.test.ts` |
 | KAN-25 | AC-KAN-25-14, AC-KAN-25-20 (server side) | `functions/src/billing/tests/validateSignUpLink.test.ts` |
 | KAN-25 | AC-KAN-25-15, AC-KAN-25-17, AC-KAN-25-18 (availability check) | `functions/src/billing/tests/checkBusinessSlug.test.ts` |
-| KAN-25 | `planCheckouts`, `businessSlugs`, `users` denied to clients | `tests/rules/planCheckouts.rules.test.ts` |
+| KAN-25 | `planCheckouts`, `businessSlugs` denied to clients; `users` only readable by its owner (rule from US-33, AC-KAN-129-02), never writable | `tests/rules/planCheckouts.rules.test.ts` |
 | KAN-27 | AC-KAN-27-01 … AC-KAN-27-06 | `tests/SubscriberSignUpPage.test.tsx` |
 

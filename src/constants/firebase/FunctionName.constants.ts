@@ -6,6 +6,7 @@ export const FUNCTION_NAME = {
   DELETE_SERVICE: "deleteService",
   EXPORT_COLLECTION: "exportCollection",
   VALIDATE_SIGN_UP_LINK: "validateSignUpLink",
+  VERIFY_RECAPTCHA: "verifyRecaptcha",
 } as const;
 
 export type FunctionName = (typeof FUNCTION_NAME)[keyof typeof FUNCTION_NAME];

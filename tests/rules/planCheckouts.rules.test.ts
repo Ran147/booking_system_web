@@ -2,17 +2,20 @@
 import { readFileSync } from "node:fs";
 import {
   assertFails,
+  assertSucceeds,
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
 
 // Runs only against the emulator: npm run test:rules.
 // The sign-up documents (KAN-25) are written only by Cloud Functions with the
-// Admin SDK: no client may read or write them, not even the new owner.
+// Admin SDK: no client may write them. The new owner may only read their own
+// user profile (sign-in needs User.language, AC-KAN-129-02).
 const PROJECT_ID = "demo-booking-system";
 const PLAN_CHECKOUT_PATH = "planCheckouts/checkout-1";
 const BUSINESS_SLUG_PATH = "businessSlugs/barberia-centro";
 const USER_PATH = "users/subscriber-a";
+const OTHER_USER_PATH = "users/subscriber-b";
 
 let testEnvironment: RulesTestEnvironment;
 
@@ -97,7 +100,7 @@ describe("firestore.rules: subscriber sign-up documents", () => {
     );
   });
 
-  it("KAN-25: denies a subscriber reading or writing user profiles and plan checkouts", async () => {
+  it("KAN-25: lets a subscriber only read their own profile and denies plan checkouts", async () => {
     const subscriberFirestore = testEnvironment
       .authenticatedContext("subscriber-a", {
         businessId: "business-a",
@@ -105,7 +108,8 @@ describe("firestore.rules: subscriber sign-up documents", () => {
       })
       .firestore();
 
-    await assertFails(subscriberFirestore.doc(USER_PATH).get());
+    await assertSucceeds(subscriberFirestore.doc(USER_PATH).get());
+    await assertFails(subscriberFirestore.doc(OTHER_USER_PATH).get());
     await assertFails(
       subscriberFirestore.doc(USER_PATH).update({ fullName: "Otra Persona" }),
     );
