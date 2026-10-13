@@ -9,7 +9,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  Input,
+  InputField,
   PasswordInput,
   RecaptchaField,
 } from "@/components/common";
@@ -43,7 +43,7 @@ export const SignInForm = ({
             <FormItem>
               <FormLabel>{t("auth.signIn.emailLabel")}</FormLabel>
               <FormControl>
-                <Input {...field} autoComplete="email" type="email" />
+                <InputField {...field} autoComplete="email" type="email" />
               </FormControl>
               <FormMessage />
             </FormItem>
