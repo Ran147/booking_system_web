@@ -61,6 +61,12 @@ export {
   PageTemplate,
   type PageTemplateProps,
 } from "./page-template/PageTemplate";
+export {
+  PortalHomeTemplate,
+  type PortalHomeMetricItem,
+  type PortalHomeTemplateProps,
+  type PortalQuickAccessItem,
+} from "./portal-home-template";
 export { PasswordInput } from "./password-input";
 export type { PasswordInputProps } from "./password-input/models/passwordInput.model";
 export { PasswordStrengthMeter } from "./password-strength-meter";
@@ -76,6 +82,26 @@ export type {
   SelectFieldOption,
   SelectFieldProps,
 } from "./select-field/models/selectField.model";
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
+export type {
+  TableBodyProps,
+  TableCaptionProps,
+  TableCellProps,
+  TableFooterProps,
+  TableHeadProps,
+  TableHeaderProps,
+  TableProps,
+  TableRowProps,
+} from "./table";
 export { Tabs } from "./tabs";
 export type { TabItem, TabsProps } from "./tabs/models/tabs.model";
 export { TextareaField } from "./textarea-field";
