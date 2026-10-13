@@ -5,3 +5,7 @@ export {
   LINK_TARGET,
   URL_PROTOCOL,
 } from "./landingFooter.constants";
+export {
+  DEFAULT_NAVBAR_LINKS,
+  LANDING_NAVBAR_CONSTANTS,
+} from "./landingNavbar.constants";
