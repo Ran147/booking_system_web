@@ -1,10 +1,14 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+  signInWithCustomToken,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import type { ReactElement } from "react";
-import { useLocation, type RouteObject } from "react-router";
+import { useLocation, useNavigate, type RouteObject } from "react-router";
 import type { Session } from "@/modules/auth";
 import { landingRoutes } from "@/modules/landing/landing.routes";
-import { ARIA_ROLE, ROUTE_PATH } from "@/shared/constants";
+import { ARIA_ROLE, FUNCTION_NAME, ROUTE_PATH } from "@/shared/constants";
 import { callFunction } from "@/shared/lib/firebase";
 import {
   CUSTOMER_SESSION,
@@ -26,6 +30,12 @@ import { SIGN_UP_ERROR_REASON } from "../constants/SubscriberSignUpServer.consta
 import type { SignUpCompletedLocationState } from "../models/SignUpCompletedLocationState.interface";
 
 vi.mock("@/services/firebase/callFunction", () => ({ callFunction: vi.fn() }));
+// Spies on the only ways the browser could start a session (AC-KAN-27-02).
+vi.mock("firebase/auth", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  signInWithCustomToken: vi.fn(),
+  signInWithEmailAndPassword: vi.fn(),
+}));
 vi.mock("@/components/common/recaptcha-field", async () => ({
   RecaptchaField: (await import("./recaptchaFieldDouble")).RecaptchaFieldDouble,
 }));
@@ -33,11 +43,22 @@ vi.mock("@/components/common/recaptcha-field", async () => ({
 const STRONG_PASSWORD = "Reserva!2026";
 const SIGN_UP_PATH = `${ROUTE_PATH.LANDING.SIGN_UP}?token=${SIGN_UP_TEST_TOKEN}`;
 
-// Stand-in for the sign-in page: shows the email the sign-up sent (KAN-27).
+const BACK_ACTION = "back";
+
+// Stand-in for the sign-in page: shows the email the sign-up sent (KAN-27)
+// and a back button like the browser's (AC-KAN-27-05).
 const SignInStub = (): ReactElement => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { signUpEmail } = location.state as SignUpCompletedLocationState;
-  return <p>{`sign-in for ${signUpEmail}`}</p>;
+  return (
+    <>
+      <p>{`sign-in for ${signUpEmail}`}</p>
+      <button onClick={() => void navigate(-1)} type="button">
+        {BACK_ACTION}
+      </button>
+    </>
+  );
 };
 
 // Stand-in for the business and admin portals: shows where GuestOnly sent a
@@ -60,6 +81,26 @@ const renderSignUpPage = (
 ): void => {
   renderRoutesWithProviders(testRoutes, { initialPath, session });
 };
+
+const fillAndSubmitSignUp = async (): Promise<void> => {
+  await screen.findByText("Básico");
+  const signUpPage = createSubscriberSignUpFormPage();
+  await signUpPage.typeInto("firstName", "Ana");
+  await signUpPage.typeInto("lastName", "Pérez");
+  await signUpPage.typeInto("password", STRONG_PASSWORD);
+  await signUpPage.typeInto("passwordConfirmation", STRONG_PASSWORD);
+  await signUpPage.typeInto("businessName", "Barbería Centro");
+  await signUpPage.solveRecaptcha();
+  await signUpPage.clickSubmit();
+};
+
+const countCompleteSignUpCalls = (): number =>
+  vi
+    .mocked(callFunction)
+    .mock.calls.filter(
+      ([functionName]) =>
+        functionName === FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP,
+    ).length;
 
 const queryForm = (): Nullable<HTMLElement> =>
   screen.queryByRole(ARIA_ROLE.BUTTON, {
@@ -175,22 +216,69 @@ describe("SubscriberSignUpPage (KAN-25, KAN-27)", () => {
 
   it("KAN-27: AC-KAN-27-01 takes the visitor to sign-in with the new email after the sign-up", async () => {
     renderSignUpPage();
-    await screen.findByText("Básico");
-    const signUpPage = createSubscriberSignUpFormPage();
 
-    await signUpPage.typeInto("firstName", "Ana");
-    await signUpPage.typeInto("lastName", "Pérez");
-    await signUpPage.typeInto("password", STRONG_PASSWORD);
-    await signUpPage.typeInto("passwordConfirmation", STRONG_PASSWORD);
-    await signUpPage.typeInto("businessName", "Barbería Centro");
-    await signUpPage.solveRecaptcha();
-    await signUpPage.clickSubmit();
+    await fillAndSubmitSignUp();
 
     await waitFor(() => {
       expect(
         screen.getByText(`sign-in for ${SIGN_UP_TEST_EMAIL}`),
       ).toBeInTheDocument();
     });
+  });
+
+  it("KAN-27: AC-KAN-27-02 does not sign the new account in: the visitor reaches sign-in signed out", async () => {
+    renderSignUpPage();
+
+    await fillAndSubmitSignUp();
+
+    expect(
+      await screen.findByText(`sign-in for ${SIGN_UP_TEST_EMAIL}`),
+    ).toBeInTheDocument();
+    expect(signInWithEmailAndPassword).not.toHaveBeenCalled();
+    expect(signInWithCustomToken).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      "the email already has an account (AC-KAN-25-09)",
+      "already-exists",
+      SIGN_UP_ERROR_REASON.ACCOUNT_EXISTS,
+    ],
+    ["the network fails (AC-KAN-25-10)", "internal", undefined],
+  ] as const)(
+    "KAN-27: AC-KAN-27-03 stays on the form when %s",
+    async (_caseName, errorCode, errorReason) => {
+      mockSignUpFunctions({
+        completeSubscriberSignUp: async () => {
+          throw buildSignUpFunctionError(errorCode, errorReason);
+        },
+      });
+      renderSignUpPage();
+
+      await fillAndSubmitSignUp();
+
+      expect(await screen.findByRole(ARIA_ROLE.ALERT)).toBeInTheDocument();
+      expect(queryForm()).toBeInTheDocument();
+      expect(
+        screen.queryByText(`sign-in for ${SIGN_UP_TEST_EMAIL}`),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it("KAN-27: AC-KAN-27-05 does not return to the used sign-up form with the back button", async () => {
+    renderSignUpPage();
+    await fillAndSubmitSignUp();
+    await screen.findByText(`sign-in for ${SIGN_UP_TEST_EMAIL}`);
+
+    await userEvent.click(
+      screen.getByRole(ARIA_ROLE.BUTTON, { name: BACK_ACTION }),
+    );
+
+    expect(
+      screen.getByText(`sign-in for ${SIGN_UP_TEST_EMAIL}`),
+    ).toBeInTheDocument();
+    expect(queryForm()).not.toBeInTheDocument();
+    expect(countCompleteSignUpCalls()).toBe(1);
   });
   it.each([
     ["subscriber", SUBSCRIBER_SESSION, ROUTE_PATH.BUSINESS.ROOT],
