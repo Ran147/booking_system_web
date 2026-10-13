@@ -6,7 +6,7 @@
 | Feature folder | `src/modules/landing/features/subscriber-sign-up/` |
 | Stories | KAN-25, KAN-27 |
 | Status | Draft |
-| Depends on | Q7 decided 2026-09-28 (the form is reached from the KAN-24 payment email); Q4 decided 2026-09-28 (the business `slug` is set here); Q2 decided 2026-09-28 (the new business is `pending` until approval); KAN-20 plan checkout (`PlanCheckout`, KAN-24 email); KAN-28 sign-in (`src/features/auth`, KAN-33 "under review" screen); KAN-174 admin businesses (approval PROP-1, KAN-176); `cloud-functions-standards` (proposed in PR #17) for the three functions below |
+| Depends on | Q7 decided 2026-09-28 (the form is reached from the KAN-24 payment email); Q4 decided 2026-09-28 (the business `slug` is set here); Q2 decided 2026-09-28 (the new business is `pending` until approval); KAN-20 plan checkout (`PlanCheckout`, KAN-24 email); KAN-28 sign-in (US-33, `src/modules/auth`); "under review" screen of a `pending` business (AC-KAN-33-09, built in `business/layout`, KAN-29); KAN-174 admin businesses (approval PROP-1, KAN-176); `cloud-functions-standards` (proposed in PR #17) for the three functions below |
 
 ## Intent
 A future subscriber (business owner) who has paid a plan on the landing (KAN-22) opens the link of the payment email (KAN-24) and creates their platform account and their business: personal data, a password whose strength they can see, the business name and its `slug` (the address `/<slug>` of its customer pages). They are then sent to sign-in; until the super admin approves the business (Q2), signing in shows an "under review" screen.
@@ -78,6 +78,10 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 ## BLOCKED
 None. Q7 was decided on 2026-09-28: the form is reached from the KAN-24 payment email, and the sign-up creates the account and the `pending` business with its `slug`.
 
+Two criteria are finished by other stories (noted 2026-10-13); this feature already does its part:
+- **AC-KAN-25-20**, "send a new link" for an expired link: needs the resend function of KAN-24 (plan-checkout spec AS-6). Until then the page offers contact (`landing:subscriberSignUp.link.contactAction`).
+- **AC-KAN-27-06**, "under review" screen: the sign-up creates the business as `pending` (tested in `completeSubscriberSignUp.test.ts`); the screen is AC-KAN-33-09 / AC-KAN-39-07 of `business/layout` (KAN-29). No code of this feature changes when it lands.
+
 ## Assumptions
 AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can still correct them in the PR.
 
@@ -121,9 +125,13 @@ AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can stil
 | Story | Criteria | Test file |
 | --- | --- | --- |
 | KAN-25 | AC-KAN-25-01 … AC-KAN-25-15, AC-KAN-25-17, AC-KAN-25-19 … AC-KAN-25-21 (AC-KAN-25-05 and AC-KAN-25-12 struck through) | `tests/SubscriberSignUpPage.test.tsx` |
-| KAN-25 | AC-KAN-25-16, AC-KAN-25-18, AC-KAN-25-22 | `functions/src/billing/tests/completeSubscriberSignUp.test.ts` |
+| KAN-25 | AC-KAN-25-08, AC-KAN-25-16, AC-KAN-25-18, AC-KAN-25-22 | `functions/src/billing/tests/completeSubscriberSignUp.test.ts` |
+| KAN-25 | AC-KAN-25-08 (token check against Google) | `functions/src/auth/tests/assertRecaptcha.test.ts` |
+| KAN-25 | AC-KAN-25-01 … AC-KAN-25-04, AC-KAN-25-06 … AC-KAN-25-11, AC-KAN-25-13 … AC-KAN-25-15, AC-KAN-25-17 … AC-KAN-25-19, AC-KAN-25-22 (form) | `tests/SubscriberSignUpForm.test.tsx` |
 | KAN-25 | AC-KAN-25-14, AC-KAN-25-20 (server side) | `functions/src/billing/tests/validateSignUpLink.test.ts` |
 | KAN-25 | AC-KAN-25-15, AC-KAN-25-17, AC-KAN-25-18 (availability check) | `functions/src/billing/tests/checkBusinessSlug.test.ts` |
 | KAN-25 | `planCheckouts`, `businessSlugs` denied to clients; `users` only readable by its owner (rule from US-33, AC-KAN-129-02), never writable | `tests/rules/planCheckouts.rules.test.ts` |
-| KAN-27 | AC-KAN-27-01 … AC-KAN-27-06 | `tests/SubscriberSignUpPage.test.tsx` |
+| KAN-27 | AC-KAN-27-01 (sign-up side), AC-KAN-27-02 … AC-KAN-27-05 | `tests/SubscriberSignUpPage.test.tsx` |
+| KAN-27 | AC-KAN-27-01 (sign-in side: email filled in, message once) | `src/modules/auth/tests/SignInPage.test.tsx` |
+| KAN-27 | AC-KAN-27-06 | Not testable here: see BLOCKED (KAN-29) |
 
