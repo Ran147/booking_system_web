@@ -16,6 +16,7 @@ export const ROUTE_PATH = {
   },
   BUSINESS: {
     CUSTOMERS: "customers",
+    NOTIFICATION_REMINDERS: "notification-settings/reminders",
     REPORTS: "reports",
     ROOT: "/business",
     SCHEDULE: "schedule",

@@ -5,6 +5,27 @@
   "layout": {
     "title": "Business portal"
   },
+  "notificationSettings": {
+    "reminders": {
+      "description": "Configure when reminder emails are sent to your customers.",
+      "emailOnly": "Reminders are sent by email only.",
+      "enabledLabel": "Send booking reminders",
+      "leadTimes": {
+        "60": "1 hour before",
+        "120": "2 hours before",
+        "720": "12 hours before",
+        "1440": "24 hours before",
+        "2880": "48 hours before"
+      },
+      "leadTimesLabel": "Reminder lead times",
+      "maximumError": "You can select at most two lead times.",
+      "save": "Save",
+      "saved": "Reminder settings saved.",
+      "saving": "Saving…",
+      "timeZone": "Business time zone: {{timeZone}}",
+      "title": "Booking reminders"
+    }
+  },
   "placeholder": {
     "description": "This is where you will manage your business's services, schedule and customers.",
     "title": "Business dashboard"
