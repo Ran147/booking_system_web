@@ -12,7 +12,6 @@ import {
 import { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { BADGE_VARIANT } from "@/components/common/badge/constants/badge.constants";
 import { FIRESTORE_COLLECTION, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import {
   BUSINESS_STATUS,
@@ -111,8 +110,6 @@ export const useBusinessSidebarViewModel = (
       label: t("business:layout.sidebar.dashboard"),
     },
     {
-      badgeLabel: t("business:home.status.available"),
-      badgeVariant: BADGE_VARIANT.DEFAULT,
       description: t("business:layout.sidebar.servicesDescription"),
       href: `/business/${ROUTE_PATH.BUSINESS.SERVICES}`,
       icon: Scissors,
@@ -121,8 +118,6 @@ export const useBusinessSidebarViewModel = (
       label: t("business:layout.sidebar.services"),
     },
     {
-      badgeLabel: t("business:home.status.comingSoon"),
-      badgeVariant: BADGE_VARIANT.MUTED,
       description: t("business:layout.sidebar.scheduleDescription"),
       icon: Calendar,
       id: "schedule",
@@ -130,8 +125,6 @@ export const useBusinessSidebarViewModel = (
       label: t("business:layout.sidebar.schedule"),
     },
     {
-      badgeLabel: t("business:home.status.comingSoon"),
-      badgeVariant: BADGE_VARIANT.MUTED,
       description: t("business:layout.sidebar.customersDescription"),
       icon: Users,
       id: "customers",
@@ -139,8 +132,6 @@ export const useBusinessSidebarViewModel = (
       label: t("business:layout.sidebar.customers"),
     },
     {
-      badgeLabel: t("business:home.status.comingSoon"),
-      badgeVariant: BADGE_VARIANT.MUTED,
       description: t("business:layout.sidebar.reportsDescription"),
       icon: BarChart3,
       id: "reports",
@@ -150,8 +141,6 @@ export const useBusinessSidebarViewModel = (
     ...(isSubscriber
       ? [
           {
-            badgeLabel: t("business:home.status.comingSoon"),
-            badgeVariant: BADGE_VARIANT.MUTED,
             description: t("business:layout.sidebar.collaboratorsDescription"),
             icon: UserCheck,
             id: "collaborators",
@@ -160,8 +149,6 @@ export const useBusinessSidebarViewModel = (
             label: t("business:layout.sidebar.collaborators"),
           },
           {
-            badgeLabel: t("business:home.status.comingSoon"),
-            badgeVariant: BADGE_VARIANT.MUTED,
             description: t("business:layout.sidebar.settingsDescription"),
             icon: Settings,
             id: "settings",
@@ -170,8 +157,6 @@ export const useBusinessSidebarViewModel = (
             label: t("business:layout.sidebar.settings"),
           },
           {
-            badgeLabel: t("business:home.status.comingSoon"),
-            badgeVariant: BADGE_VARIANT.MUTED,
             description: t("business:layout.sidebar.subscriptionDescription"),
             icon: CreditCard,
             id: "subscription",

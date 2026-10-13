@@ -80,7 +80,7 @@ describe("BusinessSidebar (KAN-29)", () => {
     ).toBeInTheDocument();
   });
 
-  it("KAN-29: AC-KAN-29-03 displays navigation options without subtext descriptions", async () => {
+  it("KAN-29: AC-KAN-29-03 displays navigation options without subtext descriptions or status tags", async () => {
     renderRoutesWithProviders(testRoutes, {
       initialPath: ROUTE_PATH.BUSINESS.ROOT,
       session: SUBSCRIBER_SESSION,
@@ -93,6 +93,12 @@ describe("BusinessSidebar (KAN-29)", () => {
       screen.queryByText(
         testI18n.t("business:layout.sidebar.servicesDescription"),
       ),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(testI18n.t("business:home.status.available")),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(testI18n.t("business:home.status.comingSoon")),
     ).not.toBeInTheDocument();
   });
 
