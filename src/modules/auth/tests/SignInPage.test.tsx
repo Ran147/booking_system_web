@@ -1,4 +1,4 @@
-import { waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { FirebaseError } from "firebase/app";
 import type { ReactElement } from "react";
 import type { RouteObject } from "react-router";
@@ -25,6 +25,7 @@ import { createSignInPage, type SignInPageObject } from "./SignInPage.page";
 import { signInWithPassword } from "../api/signInWithPassword";
 import { authRoutes } from "../auth.routes";
 import type { SignInResponse } from "../models/SignIn.mutation";
+import type { SignInLocationState } from "../models/SignInLocationState.interface";
 
 vi.mock("../api/signInWithPassword");
 
@@ -547,5 +548,69 @@ describe("SignInPage", () => {
         expect(passwordTypeAtRequest).toBe("password");
       },
     );
+  });
+  describe("KAN-27: sign-in right after a subscriber sign-up", () => {
+    const SIGN_UP_EMAIL = "nuevo-suscriptor@demo.test";
+    const signUpSuccessMessage = (): string =>
+      testI18n.t("landing:subscriberSignUp.success");
+
+    const renderAfterSignUp = async (): Promise<{
+      readonly router: ReturnType<typeof renderRoutesWithProviders>["router"];
+      readonly signInPage: SignInPageObject;
+    }> => {
+      const signUpState: SignInLocationState = { signUpEmail: SIGN_UP_EMAIL };
+      const { router } = renderRoutesWithProviders(testRoutes, {
+        initialPath: ROUTE_PATH.AUTH.SIGN_IN,
+        initialState: signUpState,
+        session: SIGNED_OUT_SESSION,
+      });
+      const signInPage = createSignInPage();
+      await signInPage.findTitle();
+      return { router, signInPage };
+    };
+
+    it("AC-KAN-27-01: fills in the new email and shows that the account is ready", async () => {
+      const { signInPage } = await renderAfterSignUp();
+
+      expect(signInPage.getEmailInput()).toHaveValue(SIGN_UP_EMAIL);
+      expect(screen.getByRole("status")).toHaveTextContent(
+        signUpSuccessMessage(),
+      );
+    });
+
+    it("AC-KAN-27-01: shows the message once, so a reload does not show it again", async () => {
+      const { router } = await renderAfterSignUp();
+
+      await waitFor(() => {
+        expect(router.state.location.state).toBeNull();
+      });
+      expect(router.state.location.pathname).toBe(ROUTE_PATH.AUTH.SIGN_IN);
+      expect(screen.getByText(signUpSuccessMessage())).toBeInTheDocument();
+    });
+
+    it("AC-KAN-27-01: shows no message on a normal visit", async () => {
+      const signInPage = await renderSignInPage();
+
+      expect(signInPage.getEmailInput()).toHaveValue("");
+      expect(
+        screen.queryByText(signUpSuccessMessage()),
+      ).not.toBeInTheDocument();
+    });
+
+    it("AC-KAN-27-01: replaces the message with the error when sign-in fails", async () => {
+      rejectWith(FIREBASE_ERROR_CODE.INVALID_CREDENTIAL);
+      const { signInPage } = await renderAfterSignUp();
+      await signInPage.typePassword(VALID_PASSWORD);
+      await signInPage.solveRecaptcha();
+
+      await signInPage.submit();
+
+      expect(await signInPage.findServerAlert()).toHaveTextContent(
+        testI18n.t("auth.signIn.invalidCredentials"),
+      );
+      expect(
+        screen.queryByText(signUpSuccessMessage()),
+      ).not.toBeInTheDocument();
+    });
   });
 });

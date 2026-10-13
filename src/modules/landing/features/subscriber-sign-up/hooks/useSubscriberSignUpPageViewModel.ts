@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
+import type { SignInLocationState } from "@/modules/auth";
 import {
   ERROR_MESSAGE_KEY,
   I18N_NAMESPACE,
@@ -19,7 +20,6 @@ import {
   SIGN_UP_PLAN_CURRENCY,
   SIGN_UP_TOKEN_SEARCH_PARAM,
 } from "../constants/SubscriberSignUpServer.constants";
-import type { SignUpCompletedLocationState } from "../models/SignUpCompletedLocationState.interface";
 import type {
   SignUpPlanSummary,
   SubscriberSignUpPageViewModel,
@@ -68,7 +68,7 @@ export const useSubscriberSignUpPageViewModel =
 
     // replace: the back button does not return to a used link (AC-KAN-27-05).
     const handleSignUpComplete = (email: string): void => {
-      const signUpCompletedState: SignUpCompletedLocationState = {
+      const signUpCompletedState: SignInLocationState = {
         signUpEmail: email,
       };
       void navigate(ROUTE_PATH.AUTH.SIGN_IN, {

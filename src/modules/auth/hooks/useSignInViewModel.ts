@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { DEFAULT_LANGUAGE } from "@/constants";
 import { recaptchaSiteKey } from "@/services/firebase";
 import type { Nullable, NullableRef } from "@/types";
@@ -20,6 +20,7 @@ import {
   type SignInFormValues,
 } from "../models/SignInForm.schema";
 import type { SignInViewModel } from "../models/signIn.model";
+import { readSignUpEmail } from "../utils/readSignUpEmail";
 
 /**
  * Estado, envío, errores y navegación del inicio de sesión (US-33).
@@ -28,6 +29,7 @@ import type { SignInViewModel } from "../models/signIn.model";
 export const useSignInViewModel = (): SignInViewModel => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const resolveSignInDestination = useRedirectAfterSignIn();
   const signInMutation = useSignInMutation();
   const serverErrorAlertReference = useRef<NullableRef<HTMLDivElement>>(null);
@@ -36,12 +38,28 @@ export const useSignInViewModel = (): SignInViewModel => {
   const [recaptchaResetSignal, setRecaptchaResetSignal] = useState(0);
   const [serverErrorKey, setServerErrorKey] =
     useState<Nullable<SignInErrorKey>>(null);
+  // Read once: the email of a sign-up that just finished (AC-KAN-27-01).
+  const [signUpEmail] = useState(() => readSignUpEmail(location.state));
   const form = useForm<SignInFormValues>({
-    defaultValues: DEFAULT_SIGN_IN_FORM_VALUES,
+    defaultValues: {
+      ...DEFAULT_SIGN_IN_FORM_VALUES,
+      email: signUpEmail ?? DEFAULT_SIGN_IN_FORM_VALUES.email,
+    },
     // First check on blur, then on every change (AC-KAN-34-01).
     mode: "onTouched",
     resolver: zodResolver(signInFormSchema),
   });
+
+  // The sign-up state is dropped from history, so a reload or a later visit
+  // does not show the success message again (AC-KAN-27-01, "once").
+  const hasSignUpState = readSignUpEmail(location.state) !== null;
+  useEffect(() => {
+    if (!hasSignUpState) return;
+    void navigate(
+      { pathname: location.pathname, search: location.search },
+      { replace: true, state: null },
+    );
+  }, [hasSignUpState, location.pathname, location.search, navigate]);
 
   // AC-KAN-34-07: the message is announced (role="alert") and gets focus.
   useEffect(() => {
@@ -93,5 +111,6 @@ export const useSignInViewModel = (): SignInViewModel => {
     serverErrorKey,
     shouldShowPasswordRecoveryLink:
       serverErrorKey === SIGN_IN_ERROR_KEY.TOO_MANY_ATTEMPTS,
+    shouldShowSignUpSuccess: signUpEmail !== null && serverErrorKey === null,
   };
 };

@@ -6,7 +6,7 @@ import {
 } from "firebase/auth";
 import type { ReactElement } from "react";
 import { useLocation, useNavigate, type RouteObject } from "react-router";
-import type { Session } from "@/modules/auth";
+import type { Session, SignInLocationState } from "@/modules/auth";
 import { landingRoutes } from "@/modules/landing/landing.routes";
 import { ARIA_ROLE, FUNCTION_NAME, ROUTE_PATH } from "@/shared/constants";
 import { callFunction } from "@/shared/lib/firebase";
@@ -27,7 +27,6 @@ import {
   mockSignUpFunctions,
 } from "./signUpFunctionMocks";
 import { SIGN_UP_ERROR_REASON } from "../constants/SubscriberSignUpServer.constants";
-import type { SignUpCompletedLocationState } from "../models/SignUpCompletedLocationState.interface";
 
 vi.mock("@/services/firebase/callFunction", () => ({ callFunction: vi.fn() }));
 // Spies on the only ways the browser could start a session (AC-KAN-27-02).
@@ -50,7 +49,7 @@ const BACK_ACTION = "back";
 const SignInStub = (): ReactElement => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signUpEmail } = location.state as SignUpCompletedLocationState;
+  const { signUpEmail } = location.state as SignInLocationState;
   return (
     <>
       <p>{`sign-in for ${signUpEmail}`}</p>

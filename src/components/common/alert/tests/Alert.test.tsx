@@ -28,5 +28,8 @@ describe("Alert", () => {
 
     rerender(<Alert variant={ALERT_VARIANT.WARNING}>{MESSAGE}</Alert>);
     expect(screen.getByRole("alert")).toHaveClass("bg-warning/10");
+
+    rerender(<Alert variant={ALERT_VARIANT.SUCCESS}>{MESSAGE}</Alert>);
+    expect(screen.getByRole("alert")).toHaveClass("bg-success/10");
   });
 });

@@ -6,6 +6,7 @@ import type { AlertProps } from "./models/alert.model";
 const variantStyles: Record<string, string> = {
   [ALERT_VARIANT.DESTRUCTIVE]:
     "border-destructive/50 bg-destructive/10 text-destructive",
+  [ALERT_VARIANT.SUCCESS]: "border-success/50 bg-success/10 text-foreground",
   [ALERT_VARIANT.WARNING]: "border-warning/50 bg-warning/10 text-foreground",
 };
 
