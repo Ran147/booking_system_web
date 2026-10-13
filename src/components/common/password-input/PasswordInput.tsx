@@ -1,54 +1,64 @@
 import { Eye, EyeOff } from "lucide-react";
-import type { MouseEvent, ReactElement } from "react";
+import { forwardRef, type ForwardedRef, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/utils/cn";
+import { I18N_NAMESPACE } from "@/constants";
+import { PASSWORD_INPUT_TYPE } from "./constants/passwordInput.constants";
+import type { PasswordInputProps } from "./models/passwordInput.model";
+import { usePasswordInput } from "./usePasswordInput";
 import { Button } from "../button";
 import {
   BUTTON_SIZE,
   BUTTON_VARIANT,
 } from "../button/constants/button.constants";
-import { Input } from "../ui/input";
-import { PASSWORD_INPUT_TYPE } from "./constants/passwordInput.constants";
-import type { PasswordInputProps } from "./models/passwordInput.model";
+import { InputField } from "../input-field";
 
-// Keeps the focus (and the cursor) in the input when the toggle is clicked
-// with a pointer (KAN-35). Keyboard users still reach the toggle with Tab.
-const keepInputFocus = (mouseEvent: MouseEvent<HTMLButtonElement>): void => {
-  mouseEvent.preventDefault();
-};
+// Shared by sign-in (US-33), sign-up (KAN-25), change password (KAN-53,
+// HU-171) and password recovery.
+export const PasswordInput = forwardRef(
+  (
+    {
+      disabled,
+      isVisible,
+      onToggleVisibility,
+      visibilityResetKey,
+      ...inputFieldProperties
+    }: PasswordInputProps,
+    reference: ForwardedRef<HTMLInputElement>,
+  ): ReactElement => {
+    const { t } = useTranslation(I18N_NAMESPACE.COMMON);
+    const { handleToggleMouseDown, handleToggleVisibility, isPasswordVisible } =
+      usePasswordInput({ isVisible, onToggleVisibility, visibilityResetKey });
+    const VisibilityIcon = isPasswordVisible ? EyeOff : Eye;
 
-export const PasswordInput = ({
-  className,
-  disabled,
-  isVisible,
-  onToggleVisibility,
-  ...inputProperties
-}: PasswordInputProps): ReactElement => {
-  const { t } = useTranslation();
-
-  return (
-    <div className={cn("relative", className)}>
-      <Input
-        {...inputProperties}
-        className="pr-10"
+    return (
+      <InputField
+        {...inputFieldProperties}
         disabled={disabled}
+        endAdornment={
+          <Button
+            ariaLabel={t(
+              isPasswordVisible ? "auth.password.hide" : "auth.password.show",
+            )}
+            aria-pressed={isPasswordVisible}
+            disabled={disabled}
+            onClick={handleToggleVisibility}
+            onMouseDown={handleToggleMouseDown}
+            size={BUTTON_SIZE.ICON}
+            type="button"
+            variant={BUTTON_VARIANT.GHOST}
+          >
+            <VisibilityIcon aria-hidden="true" className="size-4" />
+          </Button>
+        }
+        ref={reference}
         type={
-          isVisible ? PASSWORD_INPUT_TYPE.VISIBLE : PASSWORD_INPUT_TYPE.HIDDEN
+          isPasswordVisible
+            ? PASSWORD_INPUT_TYPE.VISIBLE
+            : PASSWORD_INPUT_TYPE.HIDDEN
         }
       />
-      <Button
-        aria-pressed={isVisible}
-        ariaLabel={
-          isVisible ? t("auth.password.hide") : t("auth.password.show")
-        }
-        className="absolute inset-y-0 right-0 h-full"
-        disabled={disabled}
-        leftIcon={isVisible ? EyeOff : Eye}
-        onClick={onToggleVisibility}
-        onMouseDown={keepInputFocus}
-        size={BUTTON_SIZE.ICON}
-        variant={BUTTON_VARIANT.GHOST}
-      />
-    </div>
-  );
-};
+    );
+  },
+);
+
+PasswordInput.displayName = "PasswordInput";

@@ -1,59 +1,117 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { useState, type ReactElement } from "react";
+import { render } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { I18nextProvider } from "react-i18next";
-import { describe, expect, it } from "vitest";
-import { testI18n } from "@/test-utils/testI18n";
+import { testI18n } from "@/test-utils";
+import { createPasswordInputPage } from "./PasswordInput.page";
 import { PasswordInput } from "../PasswordInput";
+import type { PasswordInputProps } from "../models/passwordInput.model";
 
-const LABEL_PASSWORD = "Contraseña";
-const TYPED_PASSWORD = "Secreta-123";
+const PASSWORD_LABEL = "Contraseña";
+const TYPED_PASSWORD = "Reserva!2026";
 
-const ControlledPasswordInput = (): ReactElement => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  return (
+const renderPasswordInput = (
+  passwordInputProps: Partial<PasswordInputProps> = {},
+): ((nextProps: Partial<PasswordInputProps>) => void) => {
+  const buildTree = (props: Partial<PasswordInputProps>): ReactElement => (
     <I18nextProvider i18n={testI18n}>
-      <label htmlFor="password">{LABEL_PASSWORD}</label>
-      <PasswordInput
-        id="password"
-        isVisible={isVisible}
-        onToggleVisibility={() => setIsVisible((wasVisible) => !wasVisible)}
-      />
+      <PasswordInput label={PASSWORD_LABEL} name="password" {...props} />
     </I18nextProvider>
   );
+  const { rerender } = render(buildTree(passwordInputProps));
+  return (nextProps): void => {
+    rerender(buildTree(nextProps));
+  };
 };
 
 describe("PasswordInput", () => {
-  it("toggles between masked and readable text keeping the value and the focus", async () => {
-    const user = userEvent.setup();
-    render(<ControlledPasswordInput />);
-    const passwordInput = screen.getByLabelText(LABEL_PASSWORD);
+  it("masks the password until the person shows it", async () => {
+    renderPasswordInput();
+    const passwordInputPage = createPasswordInputPage();
 
-    await user.type(passwordInput, TYPED_PASSWORD);
-    expect(passwordInput).toHaveAttribute("type", "password");
+    await passwordInputPage.typePassword(PASSWORD_LABEL, TYPED_PASSWORD);
 
-    await user.click(
-      screen.getByRole("button", { name: testI18n.t("auth.password.show") }),
+    expect(passwordInputPage.getPasswordField(PASSWORD_LABEL)).toHaveAttribute(
+      "type",
+      "password",
     );
-
-    expect(passwordInput).toHaveAttribute("type", "text");
-    expect(passwordInput).toHaveValue(TYPED_PASSWORD);
-    expect(passwordInput).toHaveFocus();
+    expect(passwordInputPage.getShowButton()).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
-  it("changes its accessible name and pressed state with the visibility", async () => {
-    const user = userEvent.setup();
-    render(<ControlledPasswordInput />);
-    const showButton = screen.getByRole("button", {
-      name: testI18n.t("auth.password.show"),
+  it("shows and hides the password keeping the typed value", async () => {
+    renderPasswordInput();
+    const passwordInputPage = createPasswordInputPage();
+    await passwordInputPage.typePassword(PASSWORD_LABEL, TYPED_PASSWORD);
+
+    await passwordInputPage.clickToggle();
+
+    const passwordField = passwordInputPage.getPasswordField(PASSWORD_LABEL);
+    expect(passwordField).toHaveAttribute("type", "text");
+    expect(passwordField).toHaveValue(TYPED_PASSWORD);
+    expect(passwordInputPage.getHideButton()).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await passwordInputPage.clickToggle();
+
+    expect(passwordField).toHaveAttribute("type", "password");
+    expect(passwordField).toHaveValue(TYPED_PASSWORD);
+  });
+
+  it("controlled: follows isVisible and asks the owner to toggle", async () => {
+    const handleToggleVisibility = vi.fn();
+    const rerenderPasswordInput = renderPasswordInput({
+      isVisible: false,
+      onToggleVisibility: handleToggleVisibility,
     });
-    expect(showButton).toHaveAttribute("aria-pressed", "false");
+    const passwordInputPage = createPasswordInputPage();
 
-    await user.click(showButton);
+    await passwordInputPage.clickToggle();
 
-    expect(
-      screen.getByRole("button", { name: testI18n.t("auth.password.hide") }),
-    ).toHaveAttribute("aria-pressed", "true");
+    expect(handleToggleVisibility).toHaveBeenCalledTimes(1);
+    expect(passwordInputPage.getPasswordField(PASSWORD_LABEL)).toHaveAttribute(
+      "type",
+      "password",
+    );
+
+    rerenderPasswordInput({
+      isVisible: true,
+      onToggleVisibility: handleToggleVisibility,
+    });
+
+    expect(passwordInputPage.getPasswordField(PASSWORD_LABEL)).toHaveAttribute(
+      "type",
+      "text",
+    );
+  });
+
+  it("hides the password again when visibilityResetKey changes", async () => {
+    const rerenderPasswordInput = renderPasswordInput({
+      visibilityResetKey: 0,
+    });
+    const passwordInputPage = createPasswordInputPage();
+    await passwordInputPage.clickToggle();
+    expect(passwordInputPage.getPasswordField(PASSWORD_LABEL)).toHaveAttribute(
+      "type",
+      "text",
+    );
+
+    rerenderPasswordInput({ visibilityResetKey: 1 });
+
+    expect(passwordInputPage.getPasswordField(PASSWORD_LABEL)).toHaveAttribute(
+      "type",
+      "password",
+    );
+  });
+
+  it("disables the toggle together with the field", () => {
+    renderPasswordInput({ disabled: true });
+    const passwordInputPage = createPasswordInputPage();
+
+    expect(passwordInputPage.getPasswordField(PASSWORD_LABEL)).toBeDisabled();
+    expect(passwordInputPage.getShowButton()).toBeDisabled();
   });
 });

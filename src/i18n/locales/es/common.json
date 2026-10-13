@@ -2,7 +2,23 @@
   "auth": {
     "password": {
       "hide": "Ocultar contraseña",
-      "show": "Mostrar contraseña"
+      "ruleMet": "Cumplido:",
+      "ruleMissing": "Pendiente:",
+      "rules": {
+        "digit": "Incluye un número",
+        "lowercase": "Incluye una letra minúscula",
+        "minimumLength": "Tiene al menos {{count}} caracteres",
+        "symbol": "Incluye un símbolo",
+        "uppercase": "Incluye una letra mayúscula"
+      },
+      "show": "Mostrar contraseña",
+      "strength": {
+        "medium": "media",
+        "strong": "fuerte",
+        "weak": "débil"
+      },
+      "strengthEmpty": "Escribe una contraseña para ver su seguridad.",
+      "strengthLabel": "Seguridad de la contraseña: {{level}}"
     },
     "signIn": {
       "accountDisabled": "Tu cuenta está desactivada. Si crees que es un error, contacta a quien te dio acceso.",

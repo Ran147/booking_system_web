@@ -2,7 +2,23 @@
   "auth": {
     "password": {
       "hide": "Hide password",
-      "show": "Show password"
+      "ruleMet": "Met:",
+      "ruleMissing": "Missing:",
+      "rules": {
+        "digit": "Includes a number",
+        "lowercase": "Includes a lowercase letter",
+        "minimumLength": "Has at least {{count}} characters",
+        "symbol": "Includes a symbol",
+        "uppercase": "Includes an uppercase letter"
+      },
+      "show": "Show password",
+      "strength": {
+        "medium": "medium",
+        "strong": "strong",
+        "weak": "weak"
+      },
+      "strengthEmpty": "Type a password to see its strength.",
+      "strengthLabel": "Password strength: {{level}}"
     },
     "signIn": {
       "accountDisabled": "Your account is disabled. If you think this is a mistake, contact whoever gave you access.",
