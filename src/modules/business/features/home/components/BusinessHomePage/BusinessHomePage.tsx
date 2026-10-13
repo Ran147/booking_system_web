@@ -1,7 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Badge, BADGE_VARIANT, PortalHomeTemplate } from "@/components/common";
+import { PortalHomeTemplate } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
 import { useBusinessHomeViewModel } from "@/modules/business/features/home";
 import type { BusinessHomePageProps } from "./BusinessHomePage.types";
@@ -34,13 +34,6 @@ export const BusinessHomePage = ({
 
   return (
     <PortalHomeTemplate
-      badge={
-        <Badge variant={BADGE_VARIANT.OUTLINE}>
-          {viewModel.isSubscriber
-            ? t("home.roleBadge")
-            : t("home.roleCollaboratorBadge")}
-        </Badge>
-      }
       description={t("home.subtitle")}
       greeting={t("home.welcome")}
       metrics={viewModel.metrics}

@@ -114,7 +114,7 @@ export const useBusinessSidebarViewModel = (
       badgeLabel: t("business:home.status.available"),
       badgeVariant: BADGE_VARIANT.DEFAULT,
       description: t("business:layout.sidebar.servicesDescription"),
-      href: `/business/${ROUTE_PATH.BUSINESS.SERVICE_NEW}`,
+      href: `/business/${ROUTE_PATH.BUSINESS.SERVICES}`,
       icon: Scissors,
       id: "services",
       isAvailable: true,

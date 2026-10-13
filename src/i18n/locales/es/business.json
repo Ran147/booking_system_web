@@ -92,7 +92,7 @@
       "reportsDescription": "Ocupación y métricas operativas",
       "schedule": "Agenda",
       "scheduleDescription": "Turnos, reservas y bloqueos de horario",
-      "services": "Crear servicio",
+      "services": "Servicios",
       "servicesDescription": "Catálogo de servicios y precios",
       "settings": "Configuración",
       "settingsDescription": "Ajustes del sistema y perfil",
@@ -144,6 +144,19 @@
       "submitting": "Guardando…",
       "subtitle": "Completa los datos para agregar un nuevo servicio al catálogo de tu negocio.",
       "title": "Nuevo servicio"
+    },
+    "list": {
+      "actions": "Acciones",
+      "createServiceAction": "Crear servicio",
+      "description": "Administra el catálogo de servicios de tu negocio.",
+      "duration": "Duración",
+      "emptyDescription": "No hay servicios registrados en este momento. Haz clic en 'Crear servicio' para agregar el primero.",
+      "emptyTitle": "No hay servicios registrados",
+      "name": "Servicio",
+      "price": "Precio",
+      "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La creación de servicios está deshabilitada.",
+      "status": "Estado",
+      "title": "Servicios"
     }
   }
 }

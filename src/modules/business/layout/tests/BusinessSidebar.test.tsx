@@ -31,6 +31,10 @@ const testRoutes: RouteObject[] = [
         index: true,
       },
       {
+        element: <div>Services List Page Outlet</div>,
+        path: ROUTE_PATH.BUSINESS.SERVICES,
+      },
+      {
         element: <div>New Service Form Outlet</div>,
         path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
       },
@@ -76,7 +80,7 @@ describe("BusinessSidebar (KAN-29)", () => {
     ).toBeInTheDocument();
   });
 
-  it("KAN-29: AC-KAN-29-03 displays descriptive navigation options", async () => {
+  it("KAN-29: AC-KAN-29-03 displays navigation options without subtext descriptions", async () => {
     renderRoutesWithProviders(testRoutes, {
       initialPath: ROUTE_PATH.BUSINESS.ROOT,
       session: SUBSCRIBER_SESSION,
@@ -86,13 +90,13 @@ describe("BusinessSidebar (KAN-29)", () => {
     expect(await page.findDashboardItem()).toBeInTheDocument();
     expect(await page.findCreateServiceItem()).toBeInTheDocument();
     expect(
-      screen.getByText(
+      screen.queryByText(
         testI18n.t("business:layout.sidebar.servicesDescription"),
       ),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
-  it("KAN-29: AC-KAN-29-04 navigates to create service when clicking available tool", async () => {
+  it("KAN-29: AC-KAN-29-04 navigates to services catalog when clicking available tool", async () => {
     renderRoutesWithProviders(testRoutes, {
       initialPath: ROUTE_PATH.BUSINESS.ROOT,
       session: SUBSCRIBER_SESSION,
@@ -102,7 +106,7 @@ describe("BusinessSidebar (KAN-29)", () => {
     await page.clickCreateServiceItem();
 
     expect(
-      await screen.findByText("New Service Form Outlet"),
+      await screen.findByText("Services List Page Outlet"),
     ).toBeInTheDocument();
   });
 

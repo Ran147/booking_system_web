@@ -54,7 +54,7 @@ describe("BusinessHomePage (KAN2-11)", () => {
     ).toBeInTheDocument();
   });
 
-  it("KAN2-11: AC-KAN2-11-05 displays collaborator role badge for collaborator session", async () => {
+  it("KAN2-11: AC-KAN2-11-05 renders dashboard for collaborator session without role badge on dashboard", async () => {
     renderWithProviders(<BusinessHomePage />, {
       initialPath: ROUTE_PATH.BUSINESS.ROOT,
       session: COLLABORATOR_SESSION,
@@ -63,7 +63,10 @@ describe("BusinessHomePage (KAN2-11)", () => {
 
     expect(await page.findPageTitle()).toBeInTheDocument();
     expect(
-      screen.getByText(testI18n.t("business:home.roleCollaboratorBadge")),
-    ).toBeInTheDocument();
+      screen.queryByText(testI18n.t("business:home.roleBadge")),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(testI18n.t("business:home.roleCollaboratorBadge")),
+    ).not.toBeInTheDocument();
   });
 });

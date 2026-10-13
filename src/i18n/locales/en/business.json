@@ -92,7 +92,7 @@
       "reportsDescription": "Occupancy and operational metrics",
       "schedule": "Schedule",
       "scheduleDescription": "Appointments, bookings and schedule blocks",
-      "services": "Create service",
+      "services": "Services",
       "servicesDescription": "Service catalog and pricing",
       "settings": "Settings",
       "settingsDescription": "System settings and profile",
@@ -144,6 +144,19 @@
       "submitting": "Saving…",
       "subtitle": "Fill in the details to add a new service to your business catalog.",
       "title": "New service"
+    },
+    "list": {
+      "actions": "Actions",
+      "createServiceAction": "Create service",
+      "description": "Manage your business's service catalog.",
+      "duration": "Duration",
+      "emptyDescription": "There are no services registered at this time. Click 'Create service' to add the first one.",
+      "emptyTitle": "No services registered",
+      "name": "Service",
+      "price": "Price",
+      "readOnlyNotice": "Your business is inactive or suspended. Service creation is disabled.",
+      "status": "Status",
+      "title": "Services"
     }
   }
 }
