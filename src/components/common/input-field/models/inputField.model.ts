@@ -5,6 +5,8 @@ import type { InputHTMLAttributes, ReactNode } from "react";
  */
 export interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   readonly className?: string;
+  /** Control dentro del campo, al final (por ejemplo mostrar / ocultar contraseña). */
+  readonly endAdornment?: ReactNode;
   readonly error?: string;
   readonly helperText?: string;
   readonly id?: string;
@@ -12,6 +14,4 @@ export interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   readonly label?: string;
   readonly name?: string;
   readonly required?: boolean;
-  /** Control shown inside the field, at its end (for example show / hide password). */
-  readonly trailingElement?: ReactNode;
 }

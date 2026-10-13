@@ -1,5 +1,7 @@
 /**
- * Propiedades del atomo PasswordStrengthMeter (KAN-25, KAN-37, KAN-124).
+ * Propiedades del atomo PasswordStrengthMeter. Solo recibe la contraseña: las
+ * reglas y el nivel salen de evaluatePasswordStrength (@/domain), las mismas
+ * que usan los esquemas de validacion.
  */
 export interface PasswordStrengthMeterProps {
   readonly className?: string;

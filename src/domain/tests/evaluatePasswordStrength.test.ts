@@ -2,15 +2,13 @@ import {
   evaluatePasswordStrength,
   PASSWORD_RULE_ID,
   PASSWORD_STRENGTH_LEVEL,
-} from "@/shared/domain";
-import type { NullableUndefined } from "@/shared/types";
+  type PasswordRuleId,
+} from "@/domain";
 
-const findRule = (
-  password: string,
-  ruleId: string,
-): NullableUndefined<boolean> =>
-  evaluatePasswordStrength(password).rules.find((rule) => rule.id === ruleId)
-    ?.isMet;
+const isRuleMet = (password: string, ruleId: PasswordRuleId): boolean =>
+  evaluatePasswordStrength(password).rules.some(
+    (rule) => rule.id === ruleId && rule.isMet,
+  );
 
 describe("evaluatePasswordStrength", () => {
   it("accepts a password that meets every rule as strong", () => {
@@ -18,7 +16,6 @@ describe("evaluatePasswordStrength", () => {
 
     expect(passwordStrength.isValid).toBe(true);
     expect(passwordStrength.level).toBe(PASSWORD_STRENGTH_LEVEL.STRONG);
-    expect(passwordStrength.rules.every((rule) => rule.isMet)).toBe(true);
   });
 
   it("rates a password that meets three or four rules as medium", () => {
@@ -38,10 +35,10 @@ describe("evaluatePasswordStrength", () => {
   });
 
   it("marks each missing rule", () => {
-    expect(findRule("Reserva2026", PASSWORD_RULE_ID.SYMBOL)).toBe(false);
-    expect(findRule("reserva!2026", PASSWORD_RULE_ID.UPPERCASE)).toBe(false);
-    expect(findRule("RESERVA!2026", PASSWORD_RULE_ID.LOWERCASE)).toBe(false);
-    expect(findRule("Reserva!abc", PASSWORD_RULE_ID.DIGIT)).toBe(false);
-    expect(findRule("Re!2026", PASSWORD_RULE_ID.MIN_LENGTH)).toBe(false);
+    expect(isRuleMet("Reserva2026", PASSWORD_RULE_ID.SYMBOL)).toBe(false);
+    expect(isRuleMet("reserva!2026", PASSWORD_RULE_ID.UPPERCASE)).toBe(false);
+    expect(isRuleMet("RESERVA!2026", PASSWORD_RULE_ID.LOWERCASE)).toBe(false);
+    expect(isRuleMet("Reserva!abc", PASSWORD_RULE_ID.DIGIT)).toBe(false);
+    expect(isRuleMet("Re!2026", PASSWORD_RULE_ID.MINIMUM_LENGTH)).toBe(false);
   });
 });

@@ -1,4 +1,26 @@
 {
+  "auth": {
+    "password": {
+      "hide": "Hide password",
+      "ruleMet": "Met:",
+      "ruleMissing": "Missing:",
+      "rules": {
+        "digit": "Includes a number",
+        "lowercase": "Includes a lowercase letter",
+        "minimumLength": "Has at least {{count}} characters",
+        "symbol": "Includes a symbol",
+        "uppercase": "Includes an uppercase letter"
+      },
+      "show": "Show password",
+      "strength": {
+        "medium": "medium",
+        "strong": "strong",
+        "weak": "weak"
+      },
+      "strengthEmpty": "Type a password to see its strength.",
+      "strengthLabel": "Password strength: {{level}}"
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelled",
     "completed": "Completed",
@@ -23,28 +45,6 @@
     "previousAction": "Previous",
     "summary_one": "Page {{pageNumber}} · {{count}} result",
     "summary_other": "Page {{pageNumber}} · {{count}} results"
-  },
-  "password": {
-    "hideAction": "Hide password",
-    "showAction": "Show password"
-  },
-  "passwordStrength": {
-    "emptyLabel": "Type a password to see its strength.",
-    "level": {
-      "medium": "medium",
-      "strong": "strong",
-      "weak": "weak"
-    },
-    "levelLabel": "Password strength: {{level}}",
-    "rule": {
-      "digit": "At least one number",
-      "lowercase": "At least one lowercase letter",
-      "minLength": "At least 8 characters",
-      "symbol": "At least one symbol",
-      "uppercase": "At least one uppercase letter"
-    },
-    "ruleMet": "Met:",
-    "ruleMissing": "Missing:"
   },
   "signInPlaceholder": {
     "description": "Sign-in is not available yet.",

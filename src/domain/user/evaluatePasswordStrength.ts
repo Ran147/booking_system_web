@@ -13,6 +13,7 @@ export interface PasswordRuleResult {
 }
 
 export interface PasswordStrength {
+  /** Every rule is met: the only password the schemas accept. */
   readonly isValid: boolean;
   readonly level: PasswordStrengthLevel;
   readonly rules: readonly PasswordRuleResult[];
@@ -23,7 +24,7 @@ const resolveStrengthLevel = (
   ruleCount: number,
 ): PasswordStrengthLevel => {
   if (metRuleCount === ruleCount) return PASSWORD_STRENGTH_LEVEL.STRONG;
-  if (metRuleCount >= PASSWORD_STRENGTH_THRESHOLD.MEDIUM_MIN_MET_RULES) {
+  if (metRuleCount >= PASSWORD_STRENGTH_THRESHOLD.MEDIUM_MINIMUM_MET_RULES) {
     return PASSWORD_STRENGTH_LEVEL.MEDIUM;
   }
   return PASSWORD_STRENGTH_LEVEL.WEAK;
@@ -34,7 +35,7 @@ export const evaluatePasswordStrength = (
 ): PasswordStrength => {
   const rules: readonly PasswordRuleResult[] = [
     {
-      id: PASSWORD_RULE_ID.MIN_LENGTH,
+      id: PASSWORD_RULE_ID.MINIMUM_LENGTH,
       isMet: password.length >= PASSWORD_RULE.MIN_LENGTH,
     },
     {

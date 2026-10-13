@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
-import { ARIA_ROLE } from "@/shared/constants";
-import type { PasswordRuleId } from "@/shared/domain";
-import { testI18n } from "@/shared/test-utils";
+import { ARIA_ROLE } from "@/constants";
+import { PASSWORD_RULE, type PasswordRuleId } from "@/domain";
+import { testI18n } from "@/test-utils";
 
 export interface PasswordStrengthMeterPageObject {
   readonly getLevelText: () => string;
@@ -14,6 +14,10 @@ export const createPasswordStrengthMeterPage =
       screen.getByRole(ARIA_ROLE.STATUS).textContent ?? "",
     getRuleItem: (ruleId: PasswordRuleId): HTMLElement =>
       screen
-        .getByText(testI18n.t(`common:passwordStrength.rule.${ruleId}`))
+        .getByText(
+          testI18n.t(`common:auth.password.rules.${ruleId}`, {
+            count: PASSWORD_RULE.MIN_LENGTH,
+          }),
+        )
         .closest("li") as HTMLElement,
   });

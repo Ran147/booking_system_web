@@ -4,8 +4,8 @@ import {
   PASSWORD_RULE_ID,
   PASSWORD_STRENGTH_LEVEL,
   type PasswordStrengthLevel,
-} from "@/shared/domain";
-import { testI18n } from "@/shared/test-utils";
+} from "@/domain";
+import { testI18n } from "@/test-utils";
 import { createPasswordStrengthMeterPage } from "./PasswordStrengthMeter.page";
 import { PasswordStrengthMeter } from "../PasswordStrengthMeter";
 
@@ -18,21 +18,21 @@ const renderMeter = (password: string): void => {
 };
 
 const levelText = (level: PasswordStrengthLevel): string =>
-  testI18n.t("common:passwordStrength.levelLabel", {
-    level: testI18n.t(`common:passwordStrength.level.${level}`),
+  testI18n.t("common:auth.password.strengthLabel", {
+    level: testI18n.t(`common:auth.password.strength.${level}`),
   });
 
 describe("PasswordStrengthMeter", () => {
-  it("KAN-25: asks for a password while the field is empty", () => {
+  it("asks for a password while the field is empty", () => {
     renderMeter("");
     const meterPage = createPasswordStrengthMeterPage();
 
     expect(meterPage.getLevelText()).toBe(
-      testI18n.t("common:passwordStrength.emptyLabel"),
+      testI18n.t("common:auth.password.strengthEmpty"),
     );
   });
 
-  it("KAN-25: shows the strength level as text, not colour only", () => {
+  it("shows the strength level as text, not colour only", () => {
     renderMeter("reserva2026");
     const meterPage = createPasswordStrengthMeterPage();
 
@@ -41,19 +41,19 @@ describe("PasswordStrengthMeter", () => {
     );
   });
 
-  it("KAN-25: marks which rules are met and which are missing", () => {
+  it("marks which rules are met and which are missing", () => {
     renderMeter("reserva2026");
     const meterPage = createPasswordStrengthMeterPage();
 
     expect(meterPage.getRuleItem(PASSWORD_RULE_ID.LOWERCASE)).toHaveTextContent(
-      testI18n.t("common:passwordStrength.ruleMet"),
+      testI18n.t("common:auth.password.ruleMet"),
     );
     expect(meterPage.getRuleItem(PASSWORD_RULE_ID.SYMBOL)).toHaveTextContent(
-      testI18n.t("common:passwordStrength.ruleMissing"),
+      testI18n.t("common:auth.password.ruleMissing"),
     );
   });
 
-  it("KAN-25: rates a password that meets every rule as strong", () => {
+  it("rates a password that meets every rule as strong", () => {
     renderMeter("Reserva!2026");
     const meterPage = createPasswordStrengthMeterPage();
 

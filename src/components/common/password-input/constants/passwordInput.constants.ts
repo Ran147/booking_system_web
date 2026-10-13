@@ -1,4 +1,4 @@
-export const PASSWORD_INPUT_TYPE = {
-  PASSWORD: "password",
-  TEXT: "text",
-} as const;
+export const PASSWORD_INPUT_TYPE = Object.freeze({
+  HIDDEN: "password",
+  VISIBLE: "text",
+});

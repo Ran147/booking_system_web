@@ -1,9 +1,9 @@
 import { Check, X } from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { I18N_NAMESPACE } from "@/shared/constants";
-import { evaluatePasswordStrength } from "@/shared/domain";
-import { cn } from "@/shared/utils/cn";
+import { ARIA_ROLE, I18N_NAMESPACE } from "@/constants";
+import { evaluatePasswordStrength, PASSWORD_RULE } from "@/domain";
+import { cn } from "@/utils/cn";
 import {
   PASSWORD_STRENGTH_FILLED_SEGMENTS,
   PASSWORD_STRENGTH_SEGMENT_CLASS_NAME,
@@ -11,6 +11,8 @@ import {
 } from "./constants/passwordStrengthMeter.constants";
 import type { PasswordStrengthMeterProps } from "./models/passwordStrengthMeter.model";
 
+// Shared by sign-up (KAN-25), change password (KAN-53, HU-171) and password
+// recovery.
 export const PasswordStrengthMeter = ({
   className,
   id,
@@ -36,14 +38,17 @@ export const PasswordStrengthMeter = ({
           />
         ))}
       </div>
-      <p className="text-xs font-medium text-foreground" role="status">
+      <p
+        className="text-xs font-medium text-foreground"
+        role={ARIA_ROLE.STATUS}
+      >
         {hasPassword
-          ? t("passwordStrength.levelLabel", {
-              level: t(`passwordStrength.level.${level}`),
+          ? t("auth.password.strengthLabel", {
+              level: t(`auth.password.strength.${level}`),
             })
-          : t("passwordStrength.emptyLabel")}
+          : t("auth.password.strengthEmpty")}
       </p>
-      <ul className="flex flex-col gap-1">
+      <ul className="grid gap-1 sm:grid-cols-2">
         {rules.map((rule) => (
           <li
             className={cn(
@@ -60,11 +65,13 @@ export const PasswordStrengthMeter = ({
             <span className="sr-only">
               {t(
                 rule.isMet
-                  ? "passwordStrength.ruleMet"
-                  : "passwordStrength.ruleMissing",
+                  ? "auth.password.ruleMet"
+                  : "auth.password.ruleMissing",
               )}
             </span>
-            {t(`passwordStrength.rule.${rule.id}`)}
+            {t(`auth.password.rules.${rule.id}`, {
+              count: PASSWORD_RULE.MIN_LENGTH,
+            })}
           </li>
         ))}
       </ul>

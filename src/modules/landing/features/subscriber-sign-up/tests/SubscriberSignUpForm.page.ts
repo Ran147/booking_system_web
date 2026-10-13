@@ -68,7 +68,7 @@ export const createSubscriberSignUpFormPage =
       },
       clickShowPassword: async (): Promise<void> => {
         const [passwordShowButton] = screen.getAllByRole(ARIA_ROLE.BUTTON, {
-          name: testI18n.t("common:password.showAction"),
+          name: testI18n.t("common:auth.password.show"),
         });
         await user.click(passwordShowButton as HTMLElement);
       },

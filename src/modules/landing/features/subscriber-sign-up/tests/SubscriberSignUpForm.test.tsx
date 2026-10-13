@@ -88,12 +88,12 @@ describe("SubscriberSignUpForm (KAN-25)", () => {
 
     await signUpPage.typeInto("password", "reserva");
     expect(signUpPage.getStrengthStatus()).toHaveTextContent(
-      testI18n.t("common:passwordStrength.level.weak"),
+      testI18n.t("common:auth.password.strength.weak"),
     );
 
     await signUpPage.typeInto("password", "!2026A");
     expect(signUpPage.getStrengthStatus()).toHaveTextContent(
-      testI18n.t("common:passwordStrength.level.strong"),
+      testI18n.t("common:auth.password.strength.strong"),
     );
   });
 
