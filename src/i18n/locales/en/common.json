@@ -1,5 +1,12 @@
 {
   "auth": {
+    "idle": {
+      "signOutAction": "Sign out",
+      "signedOut": "We signed you out because of inactivity. Sign in again to continue.",
+      "stayConnectedAction": "Stay signed in",
+      "warningMessage": "Your session will end in {{count}} seconds because of inactivity.",
+      "warningTitle": "Are you still there?"
+    },
     "password": {
       "hide": "Hide password",
       "ruleMet": "Met:",
