@@ -3,6 +3,7 @@ import { render, type RenderResult } from "@testing-library/react";
 import { I18nextProvider } from "react-i18next";
 import {
   createMemoryRouter,
+  parsePath,
   RouterProvider,
   type RouteObject,
 } from "react-router";
@@ -12,6 +13,8 @@ import { testI18n } from "./testI18n";
 
 export interface RenderRoutesWithProvidersOptions {
   initialPath: string;
+  // Router state of the first entry, as when another page navigated here.
+  initialState?: unknown;
   session: Session;
 }
 
@@ -19,13 +22,13 @@ export interface RenderRoutesWithProvidersOptions {
 // redirects) instead of a single element.
 export const renderRoutesWithProviders = (
   routes: RouteObject[],
-  { initialPath, session }: RenderRoutesWithProvidersOptions,
+  { initialPath, initialState, session }: RenderRoutesWithProvidersOptions,
 ): RenderResult => {
   const testQueryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
   const testRouter = createMemoryRouter(routes, {
-    initialEntries: [initialPath],
+    initialEntries: [{ ...parsePath(initialPath), state: initialState }],
   });
 
   return render(
