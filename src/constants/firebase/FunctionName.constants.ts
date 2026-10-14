@@ -3,6 +3,7 @@ export const FUNCTION_NAME = {
   CREATE_BOOKING: "createBooking",
   DELETE_SERVICE: "deleteService",
   EXPORT_COLLECTION: "exportCollection",
+  REQUEST_PASSWORD_RESET: "requestPasswordReset",
   VERIFY_RECAPTCHA: "verifyRecaptcha",
 } as const;
 

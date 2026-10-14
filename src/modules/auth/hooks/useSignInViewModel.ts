@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { DEFAULT_LANGUAGE } from "@/constants";
@@ -75,6 +75,7 @@ export const useSignInViewModel = (): SignInViewModel => {
     );
   };
 
+  const emailValue = useWatch({ control: form.control, name: "email" });
   const isSubmitting = form.formState.isSubmitting || signInMutation.isPending;
 
   return {
@@ -87,6 +88,8 @@ export const useSignInViewModel = (): SignInViewModel => {
     isSubmitDisabled: !recaptchaToken || isSubmitting,
     isSubmitting,
     language: i18n.resolvedLanguage ?? DEFAULT_LANGUAGE,
+    // AC-KAN-36-01: the recovery page starts with the email typed here.
+    passwordRecoveryLocationState: { email: emailValue },
     recaptchaResetSignal,
     recaptchaSiteKey,
     serverErrorAlertReference,
