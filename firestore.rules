@@ -144,6 +144,13 @@ service cloud.firestore {
       allow read: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // Global parameters (KAN-182). Any signed-in user reads them (the idle
+    // timeout, KAN-38); only the admin stories write them, so no client write.
+    match /platformSettings/{platformSettingsId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     match /auditLog/{auditLogEntryId} {
       allow read: if isSuperAdmin();
       allow write: if false; // functions only
