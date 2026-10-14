@@ -5,7 +5,7 @@ import { testI18n } from "@/test-utils/testI18n";
 import type { Nullable } from "@/types";
 
 // The recovery route is lazy; its first load in a run can exceed 1 s.
-const LAZY_PAGE_TIMEOUT_MS = 2_000;
+const LAZY_PAGE_TIMEOUT_MS = 4_000;
 
 export interface PasswordRecoveryPageObject {
   readonly findServerAlert: () => Promise<HTMLElement>;

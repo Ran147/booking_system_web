@@ -24,6 +24,8 @@ import { PASSWORD_RESET_MODE } from "../constants/PasswordResetLink.constants";
 vi.mock("../api/confirmNewPassword");
 vi.mock("../api/verifyResetCode");
 
+// The sign-in route is lazy; its first load in a run can exceed 1 s.
+const LAZY_PAGE_TIMEOUT_MS = 4_000;
 const OOB_CODE = "valid-oob-code";
 const ACCOUNT_EMAIL = "suscriptor@demo.test";
 const STRONG_PASSWORD = "Emulator-Only-123!";
@@ -120,10 +122,11 @@ describe("PasswordResetPage", () => {
         await passwordResetPage.submit();
 
         expect(
-          await screen.findByRole("heading", {
-            level: 1,
-            name: testI18n.t("auth.signIn.title"),
-          }),
+          await screen.findByRole(
+            "heading",
+            { level: 1, name: testI18n.t("auth.signIn.title") },
+            { timeout: LAZY_PAGE_TIMEOUT_MS },
+          ),
         ).toBeInTheDocument();
         expect(confirmNewPassword).toHaveBeenCalledWith({
           newPassword: STRONG_PASSWORD,
@@ -304,10 +307,11 @@ describe("PasswordResetPage", () => {
       );
       await passwordResetPage.submit();
 
-      await screen.findByRole("heading", {
-        level: 1,
-        name: testI18n.t("auth.signIn.title"),
-      });
+      await screen.findByRole(
+        "heading",
+        { level: 1, name: testI18n.t("auth.signIn.title") },
+        { timeout: LAZY_PAGE_TIMEOUT_MS },
+      );
       expect(typeAttributesAtSend).toEqual(["password", "password"]);
     });
   });

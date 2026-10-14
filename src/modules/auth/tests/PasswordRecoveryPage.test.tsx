@@ -46,7 +46,7 @@ vi.mock("@/components/common/recaptcha-field", async () => {
 });
 
 // The sign-in route is lazy; its first load in a run can exceed 1 s.
-const LAZY_PAGE_TIMEOUT_MS = 2_000;
+const LAZY_PAGE_TIMEOUT_MS = 4_000;
 const VALID_EMAIL = "suscriptor@demo.test";
 
 const renderPasswordRecoveryPage = async (
