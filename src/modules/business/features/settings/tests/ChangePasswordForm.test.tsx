@@ -113,6 +113,32 @@ describe("ChangePasswordForm", () => {
     expect(changeCurrentUserPassword).not.toHaveBeenCalled();
   });
 
+  it("KAN-53: rejects a new password equal to the current password next to the new-password field", async () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createChangePasswordFormPage();
+    const repeatedPassword = "SamePassword1!";
+    await page.fillForm({
+      confirmPassword: repeatedPassword,
+      currentPassword: repeatedPassword,
+      newPassword: repeatedPassword,
+    });
+
+    await page.clickSubmit();
+
+    const errorMessage = await screen.findByText(
+      testI18n.t("business:settings.password.sameAsCurrent"),
+    );
+    expect(page.getNewPasswordInput()).toHaveAttribute("aria-invalid", "true");
+    expect(page.getNewPasswordInput()).toHaveAttribute(
+      "aria-describedby",
+      expect.stringContaining(errorMessage.id),
+    );
+    expect(changeCurrentUserPassword).not.toHaveBeenCalled();
+  });
+
   it("KAN-53: reports too many Firebase attempts without exposing details", async () => {
     vi.mocked(changeCurrentUserPassword).mockRejectedValue(
       new FirebaseError(FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS, "technical"),
@@ -155,6 +181,67 @@ describe("ChangePasswordForm", () => {
     expect(page.getCurrentPasswordInput()).toHaveValue(
       VALID_FORM_VALUES.currentPassword,
     );
+    expect(page.getNewPasswordInput()).toHaveValue(
+      VALID_FORM_VALUES.newPassword,
+    );
+    expect(page.getConfirmPasswordInput()).toHaveValue(
+      VALID_FORM_VALUES.confirmPassword,
+    );
+  });
+
+  it("KAN-53: reports an expired session without exposing Firebase details", async () => {
+    vi.mocked(changeCurrentUserPassword).mockRejectedValue(
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.USER_TOKEN_EXPIRED,
+        "technical token detail",
+      ),
+    );
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createChangePasswordFormPage();
+    await page.fillForm(VALID_FORM_VALUES);
+
+    await page.clickSubmit();
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      testI18n.t("business:settings.password.sessionExpired"),
+    );
+    expect(alert).not.toHaveTextContent("technical token detail");
+  });
+
+  it("KAN-53: disables all controls and prevents a duplicate submission while pending", async () => {
+    let resolvePasswordChange: () => void = () => undefined;
+    vi.mocked(changeCurrentUserPassword).mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolvePasswordChange = resolve;
+        }),
+    );
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createChangePasswordFormPage();
+    await page.fillForm(VALID_FORM_VALUES);
+
+    await page.clickSubmit();
+
+    const submittingButton = screen.getByRole("button", {
+      name: testI18n.t("business:settings.password.submitting"),
+    });
+    expect(submittingButton).toBeDisabled();
+    expect(submittingButton).toHaveAttribute("aria-busy", "true");
+    expect(page.getCurrentPasswordInput()).toBeDisabled();
+    expect(page.getNewPasswordInput()).toBeDisabled();
+    expect(page.getConfirmPasswordInput()).toBeDisabled();
+    await page.clickSubmitting();
+    expect(changeCurrentUserPassword).toHaveBeenCalledOnce();
+
+    resolvePasswordChange();
+    await waitFor(() => expect(page.getSubmitButton()).toBeEnabled());
   });
 
   it("KAN-53: toggles each password field independently", async () => {

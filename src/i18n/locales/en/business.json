@@ -98,6 +98,7 @@
       "description": "Update the password you use to access your account.",
       "newPasswordLabel": "New password",
       "sameAsCurrent": "The new password must be different from the current password.",
+      "sessionExpired": "Your session is no longer valid. Sign in again before changing your password.",
       "strengthLabel": "Password strength",
       "submitAction": "Change password",
       "submitting": "Changing…",

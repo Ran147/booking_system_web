@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import {
   Button,
   Form,
-  FormControl,
   FormField,
   FormItem,
   PasswordInput,
@@ -32,18 +31,16 @@ export const ChangePasswordForm = (): ReactElement => {
           name="currentPassword"
           render={({ field, fieldState }) => (
             <FormItem>
-              <FormControl>
-                <PasswordInput
-                  autoComplete="current-password"
-                  disabled={isSubmitting}
-                  error={resolveFieldErrorMessage(fieldState.error?.message)}
-                  key={`current-${visibilityResetKey}`}
-                  label={t("settings.password.currentPasswordLabel")}
-                  required
-                  visibilityResetKey={visibilityResetKey}
-                  {...field}
-                />
-              </FormControl>
+              <PasswordInput
+                autoComplete="current-password"
+                disabled={isSubmitting}
+                error={resolveFieldErrorMessage(fieldState.error?.message)}
+                key={`current-${visibilityResetKey}`}
+                label={t("settings.password.currentPasswordLabel")}
+                required
+                visibilityResetKey={visibilityResetKey}
+                {...field}
+              />
             </FormItem>
           )}
         />
@@ -53,18 +50,16 @@ export const ChangePasswordForm = (): ReactElement => {
           name="newPassword"
           render={({ field, fieldState }) => (
             <FormItem>
-              <FormControl>
-                <PasswordInput
-                  autoComplete="new-password"
-                  disabled={isSubmitting}
-                  error={resolveFieldErrorMessage(fieldState.error?.message)}
-                  key={`new-${visibilityResetKey}`}
-                  label={t("settings.password.newPasswordLabel")}
-                  required
-                  visibilityResetKey={visibilityResetKey}
-                  {...field}
-                />
-              </FormControl>
+              <PasswordInput
+                autoComplete="new-password"
+                disabled={isSubmitting}
+                error={resolveFieldErrorMessage(fieldState.error?.message)}
+                key={`new-${visibilityResetKey}`}
+                label={t("settings.password.newPasswordLabel")}
+                required
+                visibilityResetKey={visibilityResetKey}
+                {...field}
+              />
             </FormItem>
           )}
         />
@@ -76,18 +71,16 @@ export const ChangePasswordForm = (): ReactElement => {
           name="confirmPassword"
           render={({ field, fieldState }) => (
             <FormItem>
-              <FormControl>
-                <PasswordInput
-                  autoComplete="new-password"
-                  disabled={isSubmitting}
-                  error={resolveFieldErrorMessage(fieldState.error?.message)}
-                  key={`confirm-${visibilityResetKey}`}
-                  label={t("settings.password.confirmPasswordLabel")}
-                  required
-                  visibilityResetKey={visibilityResetKey}
-                  {...field}
-                />
-              </FormControl>
+              <PasswordInput
+                autoComplete="new-password"
+                disabled={isSubmitting}
+                error={resolveFieldErrorMessage(fieldState.error?.message)}
+                key={`confirm-${visibilityResetKey}`}
+                label={t("settings.password.confirmPasswordLabel")}
+                required
+                visibilityResetKey={visibilityResetKey}
+                {...field}
+              />
             </FormItem>
           )}
         />

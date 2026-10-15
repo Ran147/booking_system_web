@@ -4,6 +4,7 @@ import { testI18n } from "@/test-utils";
 
 export interface ChangePasswordFormPageObject {
   clickSubmit: () => Promise<void>;
+  clickSubmitting: () => Promise<void>;
   fillForm: (values: {
     confirmPassword: string;
     currentPassword: string;
@@ -12,6 +13,7 @@ export interface ChangePasswordFormPageObject {
   getConfirmPasswordInput: () => HTMLInputElement;
   getCurrentPasswordInput: () => HTMLInputElement;
   getNewPasswordInput: () => HTMLInputElement;
+  getSubmitButton: () => HTMLButtonElement;
   toggleCurrentPasswordVisibility: () => Promise<void>;
 }
 
@@ -42,6 +44,13 @@ export const createChangePasswordFormPage =
           }),
         );
       },
+      clickSubmitting: async (): Promise<void> => {
+        await user.click(
+          screen.getByRole("button", {
+            name: testI18n.t("business:settings.password.submitting"),
+          }),
+        );
+      },
       fillForm: async ({
         confirmPassword,
         currentPassword,
@@ -54,6 +63,10 @@ export const createChangePasswordFormPage =
       getConfirmPasswordInput,
       getCurrentPasswordInput,
       getNewPasswordInput,
+      getSubmitButton: (): HTMLButtonElement =>
+        screen.getByRole("button", {
+          name: testI18n.t("business:settings.password.submitAction"),
+        }),
       toggleCurrentPasswordVisibility: async (): Promise<void> => {
         const [currentPasswordToggle] = screen.getAllByRole("button", {
           name: testI18n.t("auth.password.show"),

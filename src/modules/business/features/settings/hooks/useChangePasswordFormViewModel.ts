@@ -83,6 +83,16 @@ export const useChangePasswordFormViewModel =
         return;
       }
 
+      if (
+        mutationError.code === FIREBASE_ERROR_CODE.INVALID_USER_TOKEN ||
+        mutationError.code === FIREBASE_ERROR_CODE.REQUIRES_RECENT_LOGIN ||
+        mutationError.code === FIREBASE_ERROR_CODE.USER_MISMATCH ||
+        mutationError.code === FIREBASE_ERROR_CODE.USER_TOKEN_EXPIRED
+      ) {
+        setSubmitErrorMessage(t("business:settings.password.sessionExpired"));
+        return;
+      }
+
       setSubmitErrorMessage(
         mutationError.code === FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS
           ? t("business:settings.password.tooManyAttempts")
