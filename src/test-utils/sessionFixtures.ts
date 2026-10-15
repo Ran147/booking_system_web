@@ -1,4 +1,4 @@
-import { SESSION_STATUS, type Session } from "@/features/auth";
+import { SESSION_STATUS, type Session } from "@/modules/auth";
 import { USER_ROLE } from "@/shared/domain";
 
 export const SUBSCRIBER_SESSION = {
