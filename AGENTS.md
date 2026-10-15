@@ -37,6 +37,7 @@ Before writing or modifying any code, read these documents in order:
 
 ```text
 src/
+├── app/                     # App, providers (Query, i18n, Theme, Auth) y router
 ├── assets/                  # Logos, marcas y recursos visuales estaticos
 ├── components/              # Bloques de UI reutilizables
 │   ├── common/              # Atomos en carpetas kebab-case (button/, badge/, card/, modal/, spinner/)
@@ -47,10 +48,9 @@ src/
 │   │   └── index.ts         # Export barrel unificado de componentes comunes
 │   └── layout/              # Estructuras visuales (navbar/, sidebar/, footer/)
 ├── constants/               # Constantes globales congeladas (Object.freeze) ordenadas A-Z
-├── context/                 # React Context globales (AuthContext, ThemeContext)
-│   └── models/              # Contratos JSDoc de los ContextValues
 ├── domain/                  # Entidades del dominio y maquinas de estado canonicas
 ├── hooks/                   # Custom hooks transversales (useTheme, useDebounce)
+├── i18n/                    # Configuracion de i18next y locales/{es,en}
 ├── modules/                 # Paginas de negocio organizadas por dominio
 │   ├── landing/             # Portal publico: home, pricing (US-07), contact, onboarding
 │   ├── business/            # Portal dueno de negocio (B2B): services, schedule, subscription, customers, reports
@@ -58,6 +58,8 @@ src/
 │   ├── admin/               # Portal Super Admin: businesses, plans, parameters, dashboard, tickets, audit
 │   └── auth/                # Modulo compartido de login, registro, recuperacion y reCAPTCHA
 ├── services/                # Conexion a Firebase, Firestore queries, Cloud Functions y Mock Gateway
+├── shared/                  # DEPRECADO: solo reexports hacia las carpetas de arriba; no agregar codigo nuevo
+├── test-utils/              # renderWithProviders, fixtures de sesion y setup de Vitest
 ├── types/                   # Tipos TypeScript transversales (Nullable, CursorPage)
 └── utils/                   # Funciones puras (formateadores de divisa/fecha, validaciones)
 ```

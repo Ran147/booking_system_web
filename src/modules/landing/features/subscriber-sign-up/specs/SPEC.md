@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | landing |
-| Feature folder | `src/portals/landing/features/subscriber-sign-up/` |
+| Feature folder | `src/modules/landing/features/subscriber-sign-up/` |
 | Stories | KAN-25, KAN-27 |
 | Status | Draft |
-| Depends on | Q7 decided 2026-09-28 (the form is reached from the KAN-24 payment email); Q4 decided 2026-09-28 (the business `slug` is set here); Q2 decided 2026-09-28 (the new business is `pending` until approval); KAN-20 plan checkout (`PlanCheckout`, KAN-24 email); KAN-28 sign-in (`src/features/auth`, KAN-33 "under review" screen); KAN-174 admin businesses (approval PROP-1, KAN-176) |
+| Depends on | Q7 decided 2026-09-28 (the form is reached from the KAN-24 payment email); Q4 decided 2026-09-28 (the business `slug` is set here); Q2 decided 2026-09-28 (the new business is `pending` until approval); KAN-20 plan checkout (`PlanCheckout`, KAN-24 email); KAN-28 sign-in (`src/modules/auth`, KAN-33 "under review" screen); KAN-174 admin businesses (approval PROP-1, KAN-176) |
 
 ## Intent
 A future subscriber (business owner) who has paid a plan on the landing (KAN-22) opens the link of the payment email (KAN-24) and creates their platform account and their business: personal data, a password whose strength they can see, the business name and its `slug` (the address `/<slug>` of its customer pages). They are then sent to sign-in; until the super admin approves the business (Q2), signing in shows an "under review" screen.

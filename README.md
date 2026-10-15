@@ -9,7 +9,7 @@ SaaS multi-tenant de reservas. Cada negocio (suscriptor) publica sus servicios y
 | `customer` | `/<slug-del-negocio>` (por ejemplo `/barberia-centro/...`, Q4) | Clientes del negocio, rol `customer` |
 | `admin` | `/admin` | Super administrador, rol `super_admin` |
 
-Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/shared/domain`): ningún negocio puede usarlos.
+Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/domain`): ningún negocio puede usarlos.
 
 Este repositorio es el **esqueleto base**: configuración, fundamentos compartidos y los cuatro portales como carcasas vacías. Cada carpeta de feature tiene su `specs/SPEC.md` con los criterios de aceptación de la épica; la primera historia implementada es US-07 (catálogo de planes en la landing).
 
@@ -137,14 +137,15 @@ src/app/               # App, providers (Query, i18n, Theme, Auth) y router
 src/modules/<portal>/  # landing, business, customer, admin y auth: rutas, layout y features/
 src/components/common/ # componentes atómicos compartidos (botón, input, modal, spinner…)
 src/constants/         # constantes congeladas con Object.freeze, ordenadas A-Z
-src/context/  src/domain/  src/hooks/  src/services/  src/types/  src/utils/
+src/domain/  src/hooks/  src/services/  src/types/  src/utils/
 src/i18n/              # configuración de i18next y locales/{es,en}
 src/styles/tokens.css  # tokens de diseño (claro / oscuro)
+src/test-utils/        # renderWithProviders, fixtures de sesión y configuración de Vitest
 tests/rules/           # tests de reglas de Firestore (emulador)
 firestore.rules        # la frontera de seguridad multi-tenant
 ```
 
-Las carpetas `src/portals/`, `src/shared/` y `src/features/` son de la estructura anterior y se están migrando a la de arriba: no se agrega código nuevo en ellas. La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
+La carpeta `src/shared/` es de la estructura anterior: solo quedan unos reexports pequeños (`export * from "@/constants"`, etc.) para que los PRs viejos sigan compilando. **No se agrega código nuevo en ella**: el código nuevo importa de `@/constants`, `@/types`, `@/domain`, `@/components/common`, `@/utils`, `@/services/firebase` y `@/test-utils`. Se borrará por completo cuando los PRs abiertos se actualicen (`docs/specs/2026-10-14-refactor-limpiar-duplicados.md`). La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
 
 ## Skills, specs y decisiones
 

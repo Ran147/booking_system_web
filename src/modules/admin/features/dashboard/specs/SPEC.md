@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | admin |
-| Feature folder | `src/portals/admin/features/dashboard/` |
+| Feature folder | `src/modules/admin/features/dashboard/` |
 | Stories | KAN-187, KAN-188 |
 | Status | Draft |
 | Depends on | KAN-174 businesses spec (business profile link), KAN-32 subscription spec (`Payment`, `Subscription`), KAN-180 plans spec (`PlatformSettings.gracePeriodDays`); Q5 decided 2026-09-28 (no renewal retries in the MVP); Q2 decided 2026-09-28 (`pending` and `rejected` businesses; checkout payment refunded on rejection) |

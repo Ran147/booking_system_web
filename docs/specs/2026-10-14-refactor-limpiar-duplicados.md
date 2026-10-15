@@ -64,7 +64,7 @@ Cuando los PRs abiertos hayan entrado o se hayan actualizado:
 
 ## 6. Verificación
 
-`format:check`, `lint`, `typecheck`, `test:run` y `build`. Además, comparar que **no cambia el número de tests** (hoy 287 en `develop`, sin contar US-36 ni US-38) y que `git grep "src/shared"` solo encuentra los reexports que quedan.
+`format:check`, `lint`, `typecheck`, `test:run` y `build`. Además, comparar que **no cambia el número de tests** (hoy 46 archivos y 262 pruebas en `develop`) y que `git grep "src/shared"` solo encuentra los reexports que quedan.
 
 ## 7. Commits previstos
 

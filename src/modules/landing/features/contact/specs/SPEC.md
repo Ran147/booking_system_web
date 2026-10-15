@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | landing |
-| Feature folder | `src/portals/landing/features/contact/` |
+| Feature folder | `src/modules/landing/features/contact/` |
 | Stories | KAN-15, KAN-16, KAN-17, KAN-18, KAN-19 |
 | Status | Draft |
 | Depends on | KAN-1 Home (contact form KAN-5, shared contact data KAN-10, KAN-11, KAN-13), KAN-189 support tickets (admin) for signed-in subscribers |

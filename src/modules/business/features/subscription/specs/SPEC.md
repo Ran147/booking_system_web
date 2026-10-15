@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/subscription/` |
+| Feature folder | `src/modules/business/features/subscription/` |
 | Stories | KAN-43, KAN-44, KAN-45, KAN-46, KAN-47, KAN-48, KAN-49, KAN-50 |
 | Status | Draft |
 | Depends on | KAN-28 (subscriber sign-in); KAN-180 epic (plans, `limits`, active / inactive plans KAN-184); KAN-182 (`PlatformSettings`, grace days); Q7 and Q2 decided 2026-09-28 (plan checkout KAN-20; the first subscription is created `active` when the super admin approves the business, KAN-176, PROP-1); Q5 decided 2026-09-28 (the simulated gateway only fakes a successful or a failed payment; renewal retries deferred, out of MVP); KAN-29 (sidebar banners) |

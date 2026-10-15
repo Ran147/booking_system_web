@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | admin |
-| Feature folder | `src/portals/admin/features/audit-log/` |
+| Feature folder | `src/modules/admin/features/audit-log/` |
 | Stories | KAN-194, KAN-195 |
 | Status | Draft |
 | Depends on | Q3 decided 2026-09-28 (`AUDIT_LOG_ACTION_TYPE`); the admin specs that produce the audited actions (KAN-174 businesses: PROP-1, PROP-2, KAN-179; KAN-180 plans: KAN-181 to KAN-184) |

@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | landing |
-| Feature folder | `src/portals/landing/features/plan-checkout/` |
+| Feature folder | `src/modules/landing/features/plan-checkout/` |
 | Stories | KAN-21, KAN-22, KAN-23, KAN-24 |
 | Status | Draft |
 | Depends on | Q7 decided 2026-09-28 (plan checkout from the landing with the simulated gateway); Q5 decided 2026-09-28 (the gateway only fakes a success or a failure); Q2 decided 2026-09-28 (the new business waits for approval); KAN-1 Home (terms KAN-9) (plan catalog KAN-7); KAN-180 plans (admin: `Plan`, `limits` KAN-181, `active`/`inactive` KAN-184); KAN-26 subscriber sign-up (KAN-25, reached from the KAN-24 email); KAN-174 admin businesses (approval PROP-1, KAN-176) |
