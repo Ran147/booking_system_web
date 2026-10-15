@@ -11,13 +11,18 @@ export const readPendingLanguageSync = (): Nullable<PendingLanguageSync> => {
 
   try {
     const parsedValue = JSON.parse(storedValue) as Record<string, unknown>;
-    return typeof parsedValue.userId === "string" &&
+    if (
+      typeof parsedValue.userId === "string" &&
       isLanguage(parsedValue.language)
-      ? { language: parsedValue.language, userId: parsedValue.userId }
-      : null;
+    ) {
+      return { language: parsedValue.language, userId: parsedValue.userId };
+    }
   } catch {
-    return null;
+    // Invalid local state is discarded below so it cannot block profile sync.
   }
+
+  clearPendingLanguageSync();
+  return null;
 };
 
 export const savePendingLanguageSync = (

@@ -164,6 +164,19 @@ describe("firestore.rules: users", () => {
     );
   });
 
+  it("KAN-51: does not add customer language writes before KAN-172", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(
+      customer
+        .firestore()
+        .doc(CUSTOMER_PROFILE_PATH)
+        .update({ language: "es" }),
+    );
+  });
+
   it("KAN-51: denies an unsupported language", async () => {
     const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
       businessId: "business-a",
