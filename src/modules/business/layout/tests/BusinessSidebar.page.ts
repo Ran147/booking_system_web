@@ -6,6 +6,9 @@ import type { Nullable } from "@/types";
 export interface BusinessSidebarPageObject {
   readonly clickClosePlaceholderModal: () => Promise<void>;
   readonly clickCreateServiceItem: () => Promise<void>;
+  readonly clickMobileSettingsItem: () => Promise<void>;
+  readonly clickOpenMenuButton: () => Promise<void>;
+  readonly clickSettingsItem: () => Promise<void>;
   readonly clickScheduleItem: () => Promise<void>;
   readonly clickSignOutButton: () => Promise<void>;
   readonly findBrandName: (name: string) => Promise<HTMLElement>;
@@ -13,6 +16,7 @@ export interface BusinessSidebarPageObject {
   readonly findDashboardItem: () => Promise<HTMLElement>;
   readonly findPlaceholderModalHeading: () => Promise<HTMLElement>;
   readonly findRoleBadge: (roleLabel: string) => Promise<HTMLElement>;
+  readonly findSettingsItem: () => Promise<HTMLElement>;
   readonly findSidebarNav: () => Promise<HTMLElement>;
   readonly queryCollaboratorsItem: () => Nullable<HTMLElement>;
   readonly queryPlaceholderModalHeading: () => Nullable<HTMLElement>;
@@ -62,6 +66,32 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     await user.click(item);
   };
 
+  const findSettingsItem = (): Promise<HTMLElement> =>
+    screen.findByRole("button", {
+      name: new RegExp(testI18n.t("business:layout.sidebar.settings"), "i"),
+    });
+
+  const clickSettingsItem = async (): Promise<void> => {
+    await user.click(await findSettingsItem());
+  };
+
+  const clickOpenMenuButton = async (): Promise<void> => {
+    await user.click(
+      await screen.findByRole("button", {
+        name: testI18n.t("business:layout.sidebar.openMenu"),
+      }),
+    );
+  };
+
+  const clickMobileSettingsItem = async (): Promise<void> => {
+    const drawer = await screen.findByRole("dialog");
+    await user.click(
+      within(drawer).getByRole("button", {
+        name: new RegExp(testI18n.t("business:layout.sidebar.settings"), "i"),
+      }),
+    );
+  };
+
   const findPlaceholderModalHeading = (): Promise<HTMLElement> =>
     screen.findByRole("heading", {
       level: 2,
@@ -109,6 +139,9 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
   return {
     clickClosePlaceholderModal,
     clickCreateServiceItem,
+    clickMobileSettingsItem,
+    clickOpenMenuButton,
+    clickSettingsItem,
     clickScheduleItem,
     clickSignOutButton,
     findBrandName,
@@ -116,6 +149,7 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     findDashboardItem,
     findPlaceholderModalHeading,
     findRoleBadge,
+    findSettingsItem,
     findSidebarNav,
     queryCollaboratorsItem,
     queryPlaceholderModalHeading,
