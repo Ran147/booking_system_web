@@ -1,4 +1,40 @@
 {
+  "auth": {
+    "password": {
+      "hide": "Ocultar contraseña",
+      "ruleMet": "Cumplido:",
+      "ruleMissing": "Pendiente:",
+      "rules": {
+        "digit": "Incluye un número",
+        "lowercase": "Incluye una letra minúscula",
+        "minimumLength": "Tiene al menos {{count}} caracteres",
+        "symbol": "Incluye un símbolo",
+        "uppercase": "Incluye una letra mayúscula"
+      },
+      "show": "Mostrar contraseña",
+      "strength": {
+        "medium": "media",
+        "strong": "fuerte",
+        "weak": "débil"
+      },
+      "strengthEmpty": "Escribe una contraseña para ver su seguridad.",
+      "strengthLabel": "Seguridad de la contraseña: {{level}}"
+    },
+    "signIn": {
+      "accountDisabled": "Tu cuenta está desactivada. Si crees que es un error, contacta a quien te dio acceso.",
+      "emailLabel": "Correo electrónico",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "invalidCredentials": "El correo o la contraseña no son correctos.",
+      "passwordLabel": "Contraseña",
+      "recaptchaLabel": "Verificación de seguridad",
+      "recoverPasswordAction": "Recuperar contraseña",
+      "submitAction": "Iniciar sesión",
+      "submittingLabel": "Iniciando sesión…",
+      "subtitle": "Ingresa con tu correo y tu contraseña.",
+      "title": "Iniciar sesión",
+      "tooManyAttempts": "Hiciste demasiados intentos. Espera unos minutos o recupera tu contraseña."
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelada",
     "completed": "Completada",
@@ -27,10 +63,6 @@
     "previousAction": "Anterior",
     "summary_one": "Página {{pageNumber}} · {{count}} resultado",
     "summary_other": "Página {{pageNumber}} · {{count}} resultados"
-  },
-  "signInPlaceholder": {
-    "description": "El inicio de sesión todavía no está disponible.",
-    "title": "Iniciar sesión"
   },
   "status": {
     "loading": "Cargando…"

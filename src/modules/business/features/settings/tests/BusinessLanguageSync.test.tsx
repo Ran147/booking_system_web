@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { LANGUAGE, STORAGE_KEY } from "@/constants";
 import { BusinessLayout } from "@/modules/business/layout/BusinessLayout";
 import {
@@ -24,8 +24,10 @@ describe("useBusinessLanguageSync", () => {
       session: SUBSCRIBER_SESSION,
     });
 
-    expect(await screen.findByText("Business portal")).toBeInTheDocument();
-    expect(localStorage.getItem(STORAGE_KEY.LANGUAGE)).toBe(LANGUAGE.EN);
+    await waitFor(() =>
+      expect(localStorage.getItem(STORAGE_KEY.LANGUAGE)).toBe(LANGUAGE.EN),
+    );
+    expect(testI18n.resolvedLanguage).toBe(LANGUAGE.EN);
   });
 
   it("KAN-51: preserves a local choice whose profile synchronization failed", async () => {
@@ -45,7 +47,7 @@ describe("useBusinessLanguageSync", () => {
       session: SUBSCRIBER_SESSION,
     });
 
-    expect(await screen.findByText("Business portal")).toBeInTheDocument();
+    await waitFor(() => expect(fetchUserLanguage).toHaveBeenCalledOnce());
     expect(testI18n.resolvedLanguage).toBe(LANGUAGE.EN);
   });
 });

@@ -154,6 +154,19 @@ service cloud.firestore {
       }
     }
 
+    // Each user reads only their own profile; sign-in needs User.language
+    // (AC-KAN-129-02). Business portal users may update only their language
+    // preference (KAN-51), including active collaborators.
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && isBusinessPortalUser()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['language'])
+        && request.resource.data.language in ['es', 'en'];
+    }
+
     match /auditLog/{auditLogEntryId} {
       allow read: if isSuperAdmin();
       allow write: if false; // functions only

@@ -8,3 +8,4 @@ export {
   ServiceImageUploader,
   type ServiceImageUploaderProps,
 } from "./ServiceImageUploader";
+export { ServiceListPage, type ServiceListPageProps } from "./ServiceListPage";

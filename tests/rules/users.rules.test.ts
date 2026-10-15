@@ -7,13 +7,18 @@ import {
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
 
+// Runs only against the emulator: npm run test:rules.
+// Sign-in reads the user's own profile for User.language (US-33, P-2), and
+// KAN-51 lets business portal users update only their own language.
 const PROJECT_ID = "demo-booking-system";
-const COLLABORATOR_USER_PATH = "users/collaborator-user-a";
-const USER_PATH = "users/subscriber-a";
+const COLLABORATOR_PROFILE_PATH = "users/collaborator-user-a";
+const CUSTOMER_PROFILE_PATH = "users/customer-1";
+const OTHER_PROFILE_PATH = "users/customer-2";
+const SUBSCRIBER_PROFILE_PATH = "users/subscriber-a";
 
 let testEnvironment: RulesTestEnvironment;
 
-describe("firestore.rules: user language", () => {
+describe("firestore.rules: users", () => {
   beforeAll(async () => {
     testEnvironment = await initializeTestEnvironment({
       firestore: { rules: readFileSync("firestore.rules", "utf8") },
@@ -24,29 +29,68 @@ describe("firestore.rules: user language", () => {
   beforeEach(async () => {
     await testEnvironment.clearFirestore();
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
-      const firestore = context.firestore();
-      await firestore.doc(USER_PATH).set({
+      const adminFirestore = context.firestore();
+      await adminFirestore
+        .doc(CUSTOMER_PROFILE_PATH)
+        .set({ email: "cliente@demo.test", language: "en" });
+      await adminFirestore
+        .doc(OTHER_PROFILE_PATH)
+        .set({ email: "otro@demo.test", language: "es" });
+      await adminFirestore.doc(SUBSCRIBER_PROFILE_PATH).set({
         fullName: "Subscriber A",
         language: "es",
       });
-      await firestore.doc(COLLABORATOR_USER_PATH).set({
+      await adminFirestore.doc(COLLABORATOR_PROFILE_PATH).set({
         fullName: "Collaborator A",
         language: "es",
       });
-      await firestore.doc("businesses/business-inactive").set({
+      await adminFirestore.doc("businesses/business-inactive").set({
         ownerUserId: "subscriber-a",
         status: "inactive",
       });
-      await firestore
+      await adminFirestore
         .doc("businesses/business-a/collaborators/collaborator-a")
-        .set({
-          status: "active",
-        });
+        .set({ status: "active" });
     });
   });
 
   afterAll(async () => {
     await testEnvironment.cleanup();
+  });
+
+  it("AC-KAN-129-02: lets a signed-in user read their own profile", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertSucceeds(customer.firestore().doc(CUSTOMER_PROFILE_PATH).get());
+  });
+
+  it("AC-KAN-129-02: denies reading another user's profile", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(customer.firestore().doc(OTHER_PROFILE_PATH).get());
+  });
+
+  it("AC-KAN-129-02: denies reading a profile without signing in", async () => {
+    const visitor = testEnvironment.unauthenticatedContext();
+
+    await assertFails(visitor.firestore().doc(CUSTOMER_PROFILE_PATH).get());
+  });
+
+  it("US-33: denies creating a profile from the client", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-3", {
+      role: "customer",
+    });
+
+    await assertFails(
+      customer
+        .firestore()
+        .doc("users/customer-3")
+        .set({ email: "nuevo@demo.test", language: "es" }),
+    );
   });
 
   it("KAN-51: lets a subscriber update their own language", async () => {
@@ -56,7 +100,10 @@ describe("firestore.rules: user language", () => {
     });
 
     await assertSucceeds(
-      subscriber.firestore().doc(USER_PATH).update({ language: "en" }),
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
     );
   });
 
@@ -67,7 +114,10 @@ describe("firestore.rules: user language", () => {
     });
 
     await assertSucceeds(
-      subscriber.firestore().doc(USER_PATH).update({ language: "en" }),
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
     );
   });
 
@@ -84,7 +134,7 @@ describe("firestore.rules: user language", () => {
     await assertSucceeds(
       collaborator
         .firestore()
-        .doc(COLLABORATOR_USER_PATH)
+        .doc(COLLABORATOR_PROFILE_PATH)
         .update({ language: "en" }),
     );
   });
@@ -96,15 +146,21 @@ describe("firestore.rules: user language", () => {
     });
 
     await assertFails(
-      subscriber.firestore().doc(USER_PATH).update({ language: "en" }),
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
     );
   });
 
   it("KAN-51: denies an unauthenticated language update", async () => {
-    const unauthenticated = testEnvironment.unauthenticatedContext();
+    const visitor = testEnvironment.unauthenticatedContext();
 
     await assertFails(
-      unauthenticated.firestore().doc(USER_PATH).update({ language: "en" }),
+      visitor
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
     );
   });
 
@@ -115,7 +171,10 @@ describe("firestore.rules: user language", () => {
     });
 
     await assertFails(
-      subscriber.firestore().doc(USER_PATH).update({ language: "fr" }),
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "fr" }),
     );
   });
 
@@ -126,7 +185,10 @@ describe("firestore.rules: user language", () => {
     });
 
     await assertFails(
-      subscriber.firestore().doc(USER_PATH).update({ fullName: "Changed" }),
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ fullName: "Changed" }),
     );
   });
 });

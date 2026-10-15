@@ -5,3 +5,4 @@ export {
   SERVICE_IMAGE_LIMIT,
 } from "./ServiceForm.constants";
 export { DEFAULT_SERVICE_FORM_VALUES } from "./ServiceFormDefaults.constants";
+export { SERVICE_TABLE_COLUMN_COUNT } from "./ServiceList.constants";
