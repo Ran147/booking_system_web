@@ -146,6 +146,11 @@
     "title": "Panel del negocio"
   },
   "settings": {
+    "businessProfile": {
+      "action": "Abrir perfil del negocio",
+      "description": "Administra el nombre, logo, contacto y redes sociales que ven tus clientes.",
+      "title": "Perfil del negocio"
+    },
     "description": "Administra las preferencias personales de tu cuenta.",
     "language": {
       "description": "Los textos, fechas, horas y precios utilizarán el idioma seleccionado.",

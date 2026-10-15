@@ -5,6 +5,7 @@ import {
   STORAGE_KEY,
   type Language,
 } from "@/constants";
+import { USER_ROLE } from "@/domain";
 import { useSession } from "@/modules/auth";
 import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
 import { useSaveUserLanguageMutation } from "../api/useSaveUserLanguageMutation";
@@ -38,6 +39,9 @@ export const useSettingsPageViewModel = (): SettingsPageViewModel => {
     currentLanguage: resolveLanguage(i18n.resolvedLanguage ?? i18n.language),
     handleLanguageChange,
     isSaving: mutation.isPending,
+    isSubscriber:
+      session.status === SESSION_STATUS.SIGNED_IN &&
+      session.role === USER_ROLE.SUBSCRIBER,
     languageOptions: [
       { label: t("language.spanishLabel"), value: LANGUAGE.ES },
       { label: t("language.englishLabel"), value: LANGUAGE.EN },

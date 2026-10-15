@@ -10,6 +10,7 @@ import {
   SelectField,
 } from "@/components";
 import { I18N_NAMESPACE, type Language } from "@/constants";
+import { BusinessProfileSettingsSection } from "./components";
 import { useSettingsPageViewModel } from "./hooks/useSettingsPageViewModel";
 
 export const SettingsPage = (): ReactElement => {
@@ -17,6 +18,7 @@ export const SettingsPage = (): ReactElement => {
   const {
     currentLanguage,
     handleLanguageChange,
+    isSubscriber,
     isSaving,
     languageOptions,
     showSaveError,
@@ -56,6 +58,7 @@ export const SettingsPage = (): ReactElement => {
           )}
         </CardContent>
       </Card>
+      {isSubscriber ? <BusinessProfileSettingsSection /> : null}
     </PageTemplate>
   );
 };

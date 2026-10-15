@@ -146,6 +146,11 @@
     "title": "Business dashboard"
   },
   "settings": {
+    "businessProfile": {
+      "action": "Open business profile",
+      "description": "Manage the name, logo, contact details and social networks your customers see.",
+      "title": "Business profile"
+    },
     "description": "Manage your personal account preferences.",
     "language": {
       "description": "Text, dates, times and prices will use the selected language.",

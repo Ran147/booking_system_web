@@ -27,6 +27,8 @@ export interface SettingsPageViewModel {
   handleLanguageChange: (language: Language) => void;
   /** Whether the profile update is currently running. */
   isSaving: boolean;
+  /** Whether subscriber-only business configuration may be shown. */
+  isSubscriber: boolean;
   /** Translated options rendered by the language selector. */
   languageOptions: readonly SelectFieldOption[];
   /** Whether the latest profile synchronization failed. */

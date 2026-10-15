@@ -1,5 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
-import { LANGUAGE, STORAGE_KEY } from "@/constants";
+import { LANGUAGE, ROUTE_PATH, STORAGE_KEY } from "@/constants";
 import {
   COLLABORATOR_SESSION,
   renderWithProviders,
@@ -83,6 +83,29 @@ describe("SettingsPage", () => {
     });
 
     expect(createSettingsPage().getLanguageSelector()).toHaveValue(LANGUAGE.ES);
+  });
+
+  it("KAN-199: shows the canonical business-profile link to a subscriber", () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    expect(createSettingsPage().getBusinessProfileLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+    );
+  });
+
+  it("KAN-199: hides the business-profile link from a collaborator", () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: COLLABORATOR_SESSION,
+    });
+
+    expect(
+      createSettingsPage().queryBusinessProfileLink(),
+    ).not.toBeInTheDocument();
   });
 
   it("KAN-51: saves an active collaborator's own language", async () => {
