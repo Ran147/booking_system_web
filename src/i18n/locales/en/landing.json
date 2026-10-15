@@ -72,5 +72,32 @@
   "placeholder": {
     "description": "Book services from your favorite businesses. This page is under construction.",
     "title": "Welcome to Booking System"
+  },
+  "terms": {
+    "backToHome": "Back to home",
+    "clauses": {
+      "acceptance": {
+        "body": "By accessing and using Booking System, you agree to comply with and be bound by these terms and conditions. If you do not agree with any part of these terms, you should discontinue using the platform immediately.",
+        "title": "1. Acceptance of Terms"
+      },
+      "cancellations": {
+        "body": "Cancellation and rescheduling policies for appointments are defined individually by each subscribed business. Booking System facilitates automated notifications but is not liable for business-specific cancellation penalties.",
+        "title": "4. Cancellations and Rescheduling"
+      },
+      "liability": {
+        "body": "Booking System strives to provide continuous 24/7 service availability. However, we do not guarantee uninterrupted access and are not liable for business losses arising from temporary downtime, third-party internet outages, or force majeure.",
+        "title": "5. Limitation of Liability"
+      },
+      "services": {
+        "body": "Booking System provides cloud software for appointments, client scheduling, and subscription administration. We act as an intermediary technical provider and do not guarantee the direct quality of services delivered by independent businesses.",
+        "title": "2. Platform Services & Responsibilities"
+      },
+      "subscriptions": {
+        "body": "Subscribers may select monthly or annual plans. Payments are processed securely and billed at the start of each period. Subscribers may upgrade, downgrade, or cancel their subscription plan at any time through their business portal.",
+        "title": "3. Subscriptions, Fees & Billing"
+      }
+    },
+    "lastUpdated": "Last updated: October 12, 2026",
+    "title": "Terms and Conditions of Service"
   }
 }
