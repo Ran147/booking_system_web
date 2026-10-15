@@ -22,9 +22,10 @@ export const readPendingThemeSync = (): Nullable<SaveUserThemeInput> => {
       return { theme: parsedValue.theme, userId: parsedValue.userId };
     }
   } catch {
-    localStorage.removeItem(STORAGE_KEY.THEME_PENDING_SYNC);
+    // Invalid local state is discarded below so it cannot block profile sync.
   }
 
+  clearPendingThemeSync();
   return null;
 };
 

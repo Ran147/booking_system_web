@@ -64,6 +64,18 @@ describe("useThemeController", () => {
     expect(result.current.themeMode).toBe(THEME_MODE.SYSTEM);
   });
 
+  it("KAN-52: restores the stored theme when the provider mounts again", () => {
+    localStorage.setItem(STORAGE_KEY.THEME, THEME_MODE.DARK);
+
+    const { result, unmount } = renderHook(() => useThemeController());
+    expect(result.current.themeMode).toBe(THEME_MODE.DARK);
+
+    unmount();
+    const remountedController = renderHook(() => useThemeController());
+
+    expect(remountedController.result.current.themeMode).toBe(THEME_MODE.DARK);
+  });
+
   it("KAN-52: follows operating system changes in system mode", async () => {
     const { result } = renderHook(() => useThemeController());
 
@@ -73,5 +85,15 @@ describe("useThemeController", () => {
 
     await waitFor(() => expect(result.current.isDarkApplied).toBe(true));
     expect(document.documentElement).toHaveClass(THEME_CLASS.DARK);
+  });
+
+  it("KAN-52: stores the system preference", () => {
+    localStorage.setItem(STORAGE_KEY.THEME, THEME_MODE.DARK);
+    const { result } = renderHook(() => useThemeController());
+
+    act(() => result.current.setThemeMode(THEME_MODE.SYSTEM));
+
+    expect(result.current.themeMode).toBe(THEME_MODE.SYSTEM);
+    expect(localStorage.getItem(STORAGE_KEY.THEME)).toBe(THEME_MODE.SYSTEM);
   });
 });

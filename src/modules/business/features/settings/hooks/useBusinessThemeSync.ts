@@ -3,7 +3,10 @@ import { useTheme } from "@/app/providers/theme/useTheme";
 import { useSession } from "@/modules/auth";
 import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
 import { useUserThemeQuery } from "../api/useUserThemeQuery";
-import { readPendingThemeSync } from "../utils/themePreferenceStorage";
+import {
+  clearPendingThemeSync,
+  readPendingThemeSync,
+} from "../utils/themePreferenceStorage";
 
 export const useBusinessThemeSync = (): void => {
   const { setThemeMode } = useTheme();
@@ -13,12 +16,19 @@ export const useBusinessThemeSync = (): void => {
   const themeQuery = useUserThemeQuery(userId);
 
   useEffect(() => {
+    const profileTheme = themeQuery.data?.theme;
     const pendingThemeSync = readPendingThemeSync();
-    if (pendingThemeSync?.userId === userId) {
+    const hasPendingPreferenceForUser = pendingThemeSync?.userId === userId;
+
+    if (hasPendingPreferenceForUser) {
+      if (profileTheme === pendingThemeSync.theme) {
+        clearPendingThemeSync();
+      }
+
       setThemeMode(pendingThemeSync.theme);
       return;
     }
 
-    if (themeQuery.data?.theme) setThemeMode(themeQuery.data.theme);
+    if (profileTheme) setThemeMode(profileTheme);
   }, [setThemeMode, themeQuery.data?.theme, userId]);
 };

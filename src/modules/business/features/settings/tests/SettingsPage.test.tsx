@@ -56,6 +56,20 @@ describe("SettingsPage", () => {
     expect(setThemeMode).toHaveBeenCalledWith(THEME_MODE.LIGHT);
   });
 
+  it("KAN-52: changes to system and persists the authenticated user's theme", async () => {
+    renderSettingsPage(THEME_MODE.DARK);
+
+    await createSettingsPage().selectSystemTheme();
+
+    expect(setThemeMode).toHaveBeenCalledWith(THEME_MODE.SYSTEM);
+    await waitFor(() =>
+      expect(saveUserTheme).toHaveBeenCalledWith({
+        theme: THEME_MODE.SYSTEM,
+        userId: SUBSCRIBER_SESSION.userId,
+      }),
+    );
+  });
+
   it("KAN-52: keeps local behavior and reports a profile save failure", async () => {
     vi.mocked(saveUserTheme).mockRejectedValue(new Error("offline"));
     localStorage.setItem(STORAGE_KEY.LANGUAGE, "es");

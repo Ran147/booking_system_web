@@ -6,6 +6,7 @@ interface SettingsPageObject {
   getSaveError: () => HTMLElement;
   selectDarkTheme: () => Promise<void>;
   selectLightTheme: () => Promise<void>;
+  selectSystemTheme: () => Promise<void>;
   selectTheme: (accessibleName: string) => Promise<void>;
 }
 
@@ -23,5 +24,7 @@ export const createSettingsPage = (): SettingsPageObject => {
       selectTheme(testI18n.t("theme.darkLabel")),
     selectLightTheme: (): Promise<void> =>
       selectTheme(testI18n.t("theme.lightLabel")),
+    selectSystemTheme: (): Promise<void> =>
+      selectTheme(testI18n.t("theme.systemLabel")),
   };
 };
