@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { MY_BOOKINGS_TAB } from "@/modules/customer/features/my-bookings";
 import { Button, InputField, SelectField } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
-import type { BookingFiltersProps } from "./BookingFilters.types";
+import type { BookingFiltersProps } from "./BookingFilters.interface";
 
 export const BookingFilters = ({
   filtersViewModel,
