@@ -1,12 +1,8 @@
 import { z } from "zod";
-import { VALIDATION_MESSAGE_KEY } from "@/constants";
+import { emailFieldSchema } from "./EmailField.schema";
 
 export const passwordRecoveryFormSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, VALIDATION_MESSAGE_KEY.REQUIRED)
-    .email(VALIDATION_MESSAGE_KEY.EMAIL_INVALID),
+  email: emailFieldSchema,
 });
 
 export type PasswordRecoveryFormValues = z.infer<

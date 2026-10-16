@@ -180,6 +180,8 @@ describe("PasswordResetPage", () => {
     it.each([
       ["expired", FIREBASE_ERROR_CODE.EXPIRED_ACTION_CODE],
       ["already used or malformed", FIREBASE_ERROR_CODE.INVALID_ACTION_CODE],
+      ["of a disabled account", FIREBASE_ERROR_CODE.USER_DISABLED],
+      ["of a deleted account", FIREBASE_ERROR_CODE.USER_NOT_FOUND],
     ])(
       "AC-KAN-37-05 / AC-KAN-132-04: a %s link shows linkInvalid and no form",
       async (_caseName, errorCode) => {
@@ -265,6 +267,52 @@ describe("PasswordResetPage", () => {
       expect(passwordResetPage.getNewPasswordInput()).toHaveValue(
         STRONG_PASSWORD,
       );
+    });
+
+    it.each([
+      [
+        "weak-password",
+        FIREBASE_ERROR_CODE.WEAK_PASSWORD,
+        "auth.passwordReset.weakPassword",
+      ],
+      [
+        "too-many-requests",
+        FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS,
+        "auth.passwordReset.tooManyRequests",
+      ],
+    ] as const)(
+      "a %s answer on save shows its own message, not the unknown error",
+      async (_caseName, errorCode, expectedMessageKey) => {
+        vi.mocked(confirmNewPassword).mockRejectedValue(
+          new FirebaseError(errorCode, errorCode),
+        );
+        const passwordResetPage = renderPasswordResetPage();
+        await screen.findByLabelText(
+          testI18n.t("auth.passwordReset.newPasswordLabel"),
+        );
+
+        await fillValidForm(passwordResetPage);
+        await passwordResetPage.submit();
+
+        expect(await passwordResetPage.findServerAlert()).toHaveTextContent(
+          testI18n.t(expectedMessageKey),
+        );
+        expect(passwordResetPage.getNewPasswordInput()).toHaveValue(
+          STRONG_PASSWORD,
+        );
+      },
+    );
+
+    it("trying the link check again shows the loading state until it answers", async () => {
+      rejectLinkCheckWith(FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED);
+      const passwordResetPage = renderPasswordResetPage();
+      await passwordResetPage.findServerAlert();
+
+      vi.mocked(verifyResetCode).mockReturnValue(new Promise(() => undefined));
+      await passwordResetPage.clickRetry();
+
+      expect(await screen.findByRole("status")).toBeInTheDocument();
+      expect(passwordResetPage.getNewPasswordInput).toThrow();
     });
 
     it("a network failure while checking the link offers to try again", async () => {

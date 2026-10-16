@@ -30,7 +30,6 @@
       "title": "Recover password"
     },
     "passwordReset": {
-      "checkingLabel": "Checking the link…",
       "confirmationLabel": "Confirm the new password",
       "linkInvalid": "The link has expired, was already used or is not valid.",
       "newPasswordLabel": "New password",
@@ -41,7 +40,9 @@
       "submittingLabel": "Saving…",
       "subtitle": "Choose a new password for your account.",
       "success": "Your password was changed. You can now sign in.",
-      "title": "Create a new password"
+      "title": "Create a new password",
+      "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
+      "weakPassword": "That password does not meet the security policy. Choose a longer or harder-to-guess one."
     },
     "signIn": {
       "accountDisabled": "Your account is disabled. If you think this is a mistake, contact whoever gave you access.",

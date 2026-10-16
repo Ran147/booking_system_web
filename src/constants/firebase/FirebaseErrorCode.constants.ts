@@ -18,5 +18,6 @@ export const FIREBASE_ERROR_CODE = {
   UNKNOWN: "unknown",
   USER_DISABLED: "auth/user-disabled",
   USER_NOT_FOUND: "auth/user-not-found",
+  WEAK_PASSWORD: "auth/weak-password",
   WRONG_PASSWORD: "auth/wrong-password",
 } as const;

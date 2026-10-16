@@ -34,6 +34,8 @@ const resolveLinkState = (
   if (!hasUsableLink || isLinkMarkedInvalid) {
     return PASSWORD_RESET_LINK_STATE.INVALID;
   }
+  // A retry keeps isError until it answers: show the check again meanwhile.
+  if (codeQuery.isFetching) return PASSWORD_RESET_LINK_STATE.CHECKING;
   if (codeQuery.isError) {
     return codeQuery.error.messageKey === PASSWORD_RESET_ERROR_KEY.LINK_INVALID
       ? PASSWORD_RESET_LINK_STATE.INVALID
