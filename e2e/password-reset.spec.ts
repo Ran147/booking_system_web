@@ -1,5 +1,4 @@
 import { expect, test, type Page } from "@playwright/test";
-import { seedEmulators } from "./seedEmulators";
 import { SEED_USER } from "../scripts/constants/SeedEmulator.constants";
 import { FIREBASE_EMULATOR } from "../src/constants/firebase/FirebaseEmulator.constants";
 import common from "../src/i18n/locales/es/common.json" with { type: "json" };
@@ -8,8 +7,6 @@ import common from "../src/i18n/locales/es/common.json" with { type: "json" };
 // emulator keeps the reset links it was asked to send, so the test reads the
 // link from there instead of an inbox.
 test.describe.configure({ mode: "serial" });
-
-test.beforeAll(seedEmulators);
 
 const AUTH_EMULATOR_URL = FIREBASE_EMULATOR.AUTH_URL;
 const PROJECT_ID = FIREBASE_EMULATOR.DEMO_PROJECT_ID;
