@@ -8,7 +8,7 @@ import {
 } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
 import { BOOKING_STATUS, BOOKING_STATUS_TONE } from "@/shared/domain";
-import type { BookingDetailSummaryProps } from "./BookingDetailSummary.types";
+import type { BookingDetailSummaryProps } from "./BookingDetailSummary.interface";
 
 export const BookingDetailSummary = ({
   detail,

@@ -1,2 +1,2 @@
 export { BookingList } from "./BookingList";
-export type { BookingListProps } from "./BookingList.types";
+export type { BookingListProps } from "./BookingList.interface";

@@ -1,2 +1,2 @@
 export { BookingDetailSummary } from "./BookingDetailSummary";
-export type { BookingDetailSummaryProps } from "./BookingDetailSummary.types";
+export type { BookingDetailSummaryProps } from "./BookingDetailSummary.interface";

@@ -13,7 +13,7 @@ import {
 } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
 import { BOOKING_STATUS_TONE } from "@/shared/domain";
-import type { BookingListProps } from "./BookingList.types";
+import type { BookingListProps } from "./BookingList.interface";
 
 export const BookingList = ({ rows }: BookingListProps): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.CUSTOMER);
