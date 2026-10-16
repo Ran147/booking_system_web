@@ -50,7 +50,7 @@ Se implementan los de la spec funcional tal cual. Si producto cambia alguno, se 
 ### 4. Diseño
 
 #### 4.1 Dominio (PR A)
-- `Booking` añade `collaboratorId: Nullable<string>`, `collaboratorName: Nullable<string>` (D-1) y `rescheduleHistory` (lista de `{ from, to, changedAt }` con `Date`; vacía por defecto). Nombres en inglés sin abreviaturas; claves ordenadas A–Z.
+- `Booking` añade `collaboratorId: Nullable<string>`, `collaboratorName: Nullable<string>` (D-1) y `rescheduleHistory` (lista de `{ changedAt, previousEndsAt, previousStartsAt }` con `Date`; vacía por defecto). Nombres en inglés sin abreviaturas; claves ordenadas A–Z.
 - Sin campos nuevos en `Business`. Moneda y `timeZone` se leen del negocio.
 
 #### 4.2 Seguridad (PR A)
