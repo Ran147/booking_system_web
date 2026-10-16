@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { BUSINESS_PROFILE } from "@/constants";
-import { BUSINESS_STATUS, SOCIAL_NETWORK } from "@/domain";
+import { BUSINESS_STATUS } from "./BusinessStatus.constants";
+import { SOCIAL_NETWORK } from "./SocialNetwork.constants";
 
 const nullableStringSchema = z
   .string()
@@ -8,6 +9,7 @@ const nullableStringSchema = z
   .optional()
   .transform((value) => value ?? null);
 
+/** Validates the public fields stored in a Firestore business document. */
 export const BusinessPublicProfileDocumentSchema = z.object({
   contactEmail: nullableStringSchema,
   contactPhone: nullableStringSchema,

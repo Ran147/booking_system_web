@@ -1,5 +1,30 @@
 {
   "layout": {
+    "businessNotFound": "We could not find the requested business.",
+    "footer": {
+      "contact": {
+        "emailLabel": "Send an email to {{email}}",
+        "phoneLabel": "Call {{phone}}",
+        "title": "Contact"
+      },
+      "landmarkLabel": "Business footer",
+      "social": {
+        "linkLabel": "Open {{businessName}} on {{network}} in a new tab",
+        "network": {
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "tiktok": "TikTok",
+          "website": "Website",
+          "whatsapp": "WhatsApp"
+        },
+        "title": "Social media"
+      },
+      "terms": {
+        "linkLabel": "Open the terms and conditions in a new tab",
+        "navigationLabel": "Legal information",
+        "text": "Terms and conditions"
+      }
+    },
     "title": "Customer portal"
   },
   "placeholder": {
