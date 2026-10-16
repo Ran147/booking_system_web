@@ -17,6 +17,7 @@ export {
 } from "./firestore/FirestoreCollection.constants";
 export {
   FIRESTORE_OPERATOR,
+  FIRESTORE_ORDER,
   FIRESTORE_QUERY,
 } from "./firestore/FirestoreQuery.constants";
 export {
