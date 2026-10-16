@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | landing |
-| Feature folder | `src/portals/landing/features/home/` |
+| Feature folder | `src/modules/landing/features/home/` |
 | Stories | KAN-2, KAN-3, KAN-4, KAN-5, KAN-6, KAN-7, KAN-9, KAN-12 (KAN-8, KAN-10, KAN-11, KAN-13 moved to KAN-196) |
 | Status | Draft |
-| Depends on | KAN-20 plan checkout (plan details KAN-21; checkout KAN-22, Q7 decided 2026-09-28), KAN-28 / KAN-128 sign-in (`src/features/auth`), KAN-14 contact (shared contact data), KAN-180 plans (admin, source of `Plan`) |
+| Depends on | KAN-20 plan checkout (plan details KAN-21; checkout KAN-22, Q7 decided 2026-09-28), KAN-28 / KAN-128 sign-in (`src/modules/auth`), KAN-14 contact (shared contact data), KAN-180 plans (admin, source of `Plan`) |
 
 ## Intent
 The public landing page for business owners who are evaluating the platform. A visitor understands what the platform offers, sees the available plans and their prices, trusts it through testimonials, starts contracting a plan (Q7), and can sign in, read the legal terms or contact the platform team from one page.
@@ -26,7 +26,7 @@ No actor writes platform data from this page. The contact form only sends a mess
 - Contact form protected by reCAPTCHA (KAN-5).
 - Testimonials (KAN-6).
 - Catalog of `active` plans with price, features and limits, with a contract action on each plan (KAN-7, KAN-2).
-- Footer: moved to Epic KAN-196 ([Landing] Footer, specified in `src/portals/landing/layout/specs/SPEC.md`).
+- Footer: moved to Epic KAN-196 ([Landing] Footer, specified in `src/modules/landing/layout/specs/SPEC.md`).
 - Terms and conditions page reachable from the home page (KAN-9).
 
 ## Out of scope
@@ -52,7 +52,7 @@ No actor writes platform data from this page. The contact form only sends a mess
 
 ### KAN-3 — Navbar with a Sign In option
 - [ ] **AC-KAN-3-01** · happy · Given a visitor on any landing page, when the page loads, then a navbar shows the logo (KAN-12), links to the home sections (AS-3) and a Sign In action labelled `landing:home.navbar.signIn`. [KAN-3]
-- [ ] **AC-KAN-3-02** · happy · Given a visitor, when they activate Sign In, then the sign-in page of `src/features/auth` opens. [KAN-3, KAN-28]
+- [ ] **AC-KAN-3-02** · happy · Given a visitor, when they activate Sign In, then the sign-in page of `src/modules/auth` opens. [KAN-3, KAN-28]
 - [ ] **AC-KAN-3-03** · error · Given the sign-in page fails to load (network error while loading the route), when the visitor activates Sign In, then `common:errors.network` is shown with a retry action and the navbar stays usable. [KAN-3]
 - [ ] **AC-KAN-3-04** · edge · Given a signed-in subscriber, customer or super admin opens the landing home, when the navbar renders, then Sign In is replaced by `landing:home.navbar.goToPortal`, which opens the home of their own portal. See AS-2. [KAN-3]
 - [ ] **AC-KAN-3-05** · edge · Given a phone-width viewport, when the navbar renders, then its links collapse into a menu button that opens and closes with keyboard and pointer and announces its expanded state. [KAN-3]
@@ -90,7 +90,7 @@ No actor writes platform data from this page. The contact form only sends a mess
 - [ ] **AC-KAN-7-09** · edge · Given a signed-in user, when they activate contract, then they see `landing:planCheckout.detail.signedInNotice` as in AC-KAN-21-11. [KAN-7, KAN-21]
 
 ### KAN-8 — Footer with general information (Moved to KAN-196)
-Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/modules/landing/layout/specs/SPEC.md`.
 
 ### KAN-9 — Terms and conditions
 - [ ] **AC-KAN-9-01** · happy · Given a visitor, when they activate `landing:home.footer.terms`, then the terms and conditions page opens with a title, the last-updated date and the full text in the active language. [KAN-9]
@@ -98,10 +98,10 @@ Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.c
 - [ ] **AC-KAN-9-03** · edge · Given a visitor opens the terms URL directly, when the page loads, then it renders without requiring sign-in, and a way back to the home page is available. [KAN-9]
 
 ### KAN-10 — Links to the company's social networks (Moved to KAN-196)
-Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/modules/landing/layout/specs/SPEC.md`.
 
 ### KAN-11 — Phone number (Moved to KAN-196)
-Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/modules/landing/layout/specs/SPEC.md`.
 
 ### KAN-12 — Company logo
 - [ ] **AC-KAN-12-01** · happy · Given any landing page, when the navbar renders, then the platform logo is shown with the alternative text `landing:home.navbar.logoAlt`, and activating it opens the landing home. [KAN-12]
@@ -109,7 +109,7 @@ Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.c
 - [ ] **AC-KAN-12-03** · edge · Given the active theme is dark, when the logo renders, then the variant for dark backgrounds is used so it stays legible. See AS-12. [KAN-12]
 
 ### KAN-13 — Contact email (Moved to KAN-196)
-Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/portals/landing/layout/specs/SPEC.md`.
+Story moved to Epic KAN-196 (`[Landing] Footer`) in `docs/backlog/Jira-export2.csv`. See active criteria in `src/modules/landing/layout/specs/SPEC.md`.
 
 ## BLOCKED
 None. Q7 was decided on 2026-09-28: the call to action and each plan card lead to the plan checkout (AC-KAN-2-05, AC-KAN-7-07).

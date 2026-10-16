@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/customer-sign-up/` |
+| Feature folder | `src/modules/customer/features/customer-sign-up/` |
 | Stories | KAN-123, KAN-124, KAN-125, KAN-126, KAN-127 |
 | Status | Draft |
-| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory to book; full name and phone are collected); `business-home` spec (KAN-116 visitor path); KAN-128 customer login (`src/features/auth`); `forms-validation-standards` password rules; `auth-and-roles` (role claim, reCAPTCHA, `GuestOnly`) |
+| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory to book; full name and phone are collected); `business-home` spec (KAN-116 visitor path); KAN-128 customer login (`src/modules/auth`); `forms-validation-standards` password rules; `auth-and-roles` (role claim, reCAPTCHA, `GuestOnly`) |
 
 ## Intent
 A person who wants to book and manage bookings creates a customer account with their full name, phone, email and a password; an account is mandatory to book (Q6). They see how strong their password is, can show or hide it, verify their email, and are then sent to sign in.

@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/support/` |
+| Feature folder | `src/modules/business/features/support/` |
 | Stories | PROP-3 (proposed, not in Jira yet) |
 | Status | Draft |
-| Depends on | KAN-189 admin support tickets (`src/portals/admin/features/support-tickets` spec: replies KAN-191, resolve KAN-192); KAN-28 subscriber sign-in; KAN-32 subscription (KAN-49 read-only); `domain-glossary` §3 and §4.4 (`SupportTicket`) |
+| Depends on | KAN-189 admin support tickets (`src/modules/admin/features/support-tickets` spec: replies KAN-191, resolve KAN-192); KAN-28 subscriber sign-in; KAN-32 subscription (KAN-49 read-only); `domain-glossary` §3 and §4.4 (`SupportTicket`) |
 
 ## Intent
 A subscriber who has a problem with the platform opens a support ticket from the business portal, follows its status and reads the super admin's replies in one place. It is the missing subscriber side of the admin support epic (KAN-189), which assumes tickets "created by business owners" but has no story for creating them.
