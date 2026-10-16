@@ -78,6 +78,7 @@ Before implementing or reviewing code, agents **must** consult and follow every 
 | `constants-standards` | `.agents/skills/constants-standards/SKILL.md` | Centralizing technical literals & magic numbers into `@/constants/` with `Object.freeze()` and strict alphabetical sorting A-Z at every level. |
 | `dynamic-theming-standards`| `.agents/skills/dynamic-theming-standards/SKILL.md`| Styling with Tailwind v4 semantic tokens (`bg-background`, `text-foreground`, `bg-card`), forbidding static palette colors, ensuring Dark/Light mode (RNF-05). |
 | `git-workflow` | `.agents/skills/git-workflow/SKILL.md` | Managing branches (`US-XX` from `develop`), atomic Spanish commit subjects without accents, and opening PRs against `develop`. |
+| `responder-pr` | `.agents/skills/responder-pr/SKILL.md` | Atender los comentarios de revision de un PR propio: recogerlos, verificarlos contra el codigo, corregir y redactar respuestas sin publicar nada sin confirmacion. |
 | `revisor-agente` | `.agents/skills/revisor-agente/SKILL.md` | Auditing PRs or branches against project skills, running automated checks (format, lint, types, tests), and generating canonical review reports. |
 | `i18n-standards` | `.agents/skills/i18n-standards/SKILL.md` | Managing user-visible text in `src/i18n/locales/{es,en}/*.json` with `t(...)` keys and Intl currency/date formatting. |
 | `auth-and-roles` | `.agents/skills/auth-and-roles/SKILL.md` | Firebase Auth, RBAC permissions, route guards, idle session logout, reCAPTCHA, and tenant isolation. |

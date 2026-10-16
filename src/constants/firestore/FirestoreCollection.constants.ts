@@ -1,6 +1,7 @@
 export const FIRESTORE_COLLECTION = {
   AUDIT_LOG: "auditLog",
   BOOKINGS: "bookings",
+  BUSINESS_SLUGS: "businessSlugs",
   BUSINESSES: "businesses",
   COLLABORATORS: "collaborators",
   CUSTOMERS: "customers",
