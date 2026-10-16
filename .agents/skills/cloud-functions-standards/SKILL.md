@@ -116,7 +116,10 @@ Throw `HttpsError` for every **expected** failure. Anything else (a bug, a Fires
 
 - `request.auth` is `undefined` for visitors. A function that needs a user throws `unauthenticated` first.
 - Roles and tenant come **only from the token claims** (`request.auth.token.role`, `request.auth.token.businessId`, `auth-and-roles` §1). If the payload also carries a `businessId`, it must equal the claim, or the call fails with `permission-denied`.
-- Read the claims through small helpers in `functions/src/shared/` (`assertSubscriber`, `assertSuperAdmin`, …) so every function checks them the same way.
+- Read the claims through small helpers in `functions/src/shared/` so every function checks them the same way:
+  - `assertSubscriber(request.auth)` when the business comes only from the claims (`callerClaims.businessId`): checks the role and returns the claims.
+  - `assertSubscriberOf(request.auth, businessId)` when the payload carries a `businessId`: also checks that it equals the claim.
+  - `assertSuperAdmin(request.auth)`, … for the other roles.
 - Collaborator permissions are read from their `Collaborator` document inside the function, never from the payload (`auth-and-roles` §1).
 - **reCAPTCHA on public actions:** the token is verified **inside the same function** that performs the action, with the shared helper `assertRecaptcha(recaptchaToken)`, before step 4. Calling a separate `verifyRecaptcha` first and the action second can be skipped by a script that calls only the action. The `verifyRecaptcha` callable may stay for forms that verify before a client-only action (Firebase Auth sign-in).
 - Claims are set only here, with `auth.setCustomUserClaims`, and only **after** the Firestore transaction commits (§6).
@@ -124,6 +127,7 @@ Throw `HttpsError` for every **expected** failure. Anything else (a bug, a Fires
 ## 6. Transactions, idempotency and rollback
 
 - More than one document read or written ⇒ `firestore.runTransaction`. All reads come before all writes.
+- **Indexes:** a query with only `==` / `in` filters (like the one in §10) is served by the automatic single-field indexes. Adding a range filter (`<`, `>=`, …) or an `orderBy` on another field needs a composite index in `firestore.indexes.json`. The emulator does not check indexes, so declare it in the same PR, before the query reaches a real project.
 - Re-check inside the transaction every rule that a concurrent call could break (a slug still free, a link still unused, a slot still open). Checks done before the transaction are only for a fast, friendly error.
 - **Uniqueness** across documents uses a lock document whose id is the unique value (`businessSlugs/{slug}`): the transaction `get`s it, fails with `already-exists` if it exists, and `create`s it otherwise.
 - **Idempotency:** an action the client may retry (network error, double click) is safe to run twice. Either the state makes the second run fail cleanly (`signUpCompletedAt` already set ⇒ `failed-precondition`), or the payload carries an `attemptId` stored with the result and checked first (payments).
