@@ -30,6 +30,9 @@ export const MY_BOOKINGS_TAB = {
 export type MyBookingsTab =
   (typeof MY_BOOKINGS_TAB)[keyof typeof MY_BOOKINGS_TAB];
 
+// A signed-out session has no user id; the list query stays disabled.
+export const NO_CUSTOMER_USER_ID = "";
+
 export const OPEN_BOOKING_STATUSES: readonly BookingStatus[] = [
   BOOKING_STATUS.CONFIRMED,
   BOOKING_STATUS.PENDING,

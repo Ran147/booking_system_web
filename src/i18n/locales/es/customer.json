@@ -2,6 +2,33 @@
   "layout": {
     "title": "Portal del cliente"
   },
+  "myBookings": {
+    "description": "Consulta tus próximas citas y el historial de tus reservas.",
+    "history": {
+      "empty": "Todavía no tienes reservas pasadas."
+    },
+    "list": {
+      "columns": {
+        "actions": "Acciones",
+        "business": "Negocio",
+        "date": "Fecha y hora",
+        "service": "Servicio",
+        "status": "Estado"
+      },
+      "detailAction": "Ver detalle",
+      "label": "Mis reservas"
+    },
+    "retryAction": "Reintentar",
+    "tabs": {
+      "history": "Historial",
+      "label": "Tipo de reservas",
+      "upcoming": "Próximas"
+    },
+    "title": "Mis reservas",
+    "upcoming": {
+      "empty": "No tienes reservas próximas."
+    }
+  },
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"

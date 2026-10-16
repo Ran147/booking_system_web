@@ -2,6 +2,33 @@
   "layout": {
     "title": "Customer portal"
   },
+  "myBookings": {
+    "description": "See your upcoming appointments and the history of your bookings.",
+    "history": {
+      "empty": "You have no past bookings yet."
+    },
+    "list": {
+      "columns": {
+        "actions": "Actions",
+        "business": "Business",
+        "date": "Date and time",
+        "service": "Service",
+        "status": "Status"
+      },
+      "detailAction": "View details",
+      "label": "My bookings"
+    },
+    "retryAction": "Try again",
+    "tabs": {
+      "history": "History",
+      "label": "Booking type",
+      "upcoming": "Upcoming"
+    },
+    "title": "My bookings",
+    "upcoming": {
+      "empty": "You have no upcoming bookings."
+    }
+  },
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
