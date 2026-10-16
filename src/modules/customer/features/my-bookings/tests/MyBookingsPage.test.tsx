@@ -11,6 +11,7 @@ import {
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { createMyBookingsPage } from "./MyBookingsPage.page";
 import * as fetchBookingBusinessModule from "../api/fetchBookingBusiness";
+import * as fetchCustomerBusinessIdsModule from "../api/fetchCustomerBusinessIds";
 import * as fetchMyBookingsPageModule from "../api/fetchMyBookingsPage";
 import { MyBookingsPage } from "../components/MyBookingsPage";
 import { MY_BOOKINGS_TAB } from "../constants";
@@ -67,6 +68,10 @@ const renderMyBookings = (initialPath = MY_BOOKINGS_PATH): void => {
 describe("MyBookingsPage (KAN-151, KAN-153)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(
+      fetchCustomerBusinessIdsModule,
+      "fetchCustomerBusinessIds",
+    ).mockResolvedValue([MEXICO_BUSINESS.id, SPAIN_BUSINESS.id]);
     vi.spyOn(
       fetchBookingBusinessModule,
       "fetchBookingBusiness",

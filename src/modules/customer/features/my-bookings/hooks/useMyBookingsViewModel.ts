@@ -1,44 +1,48 @@
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router";
 import { ERROR_MESSAGE_KEY, PAGINATION, type ViewState } from "@/constants";
 import { SESSION_STATUS, useSession } from "@/modules/auth";
 import { mapFirebaseError } from "@/services";
 import { useCursorPagination } from "@/shared/hooks";
-import type { Nullable } from "@/shared/types";
 import { formatDateTime } from "@/shared/utils/format";
 import { resolveViewState } from "@/shared/utils/resolveViewState";
+import { useMyBookingsFilters } from "./useMyBookingsFilters";
 import { useBookingBusinessesQueries, useMyBookingsQuery } from "../api";
-import {
-  MY_BOOKINGS_QUERY_PARAM,
-  MY_BOOKINGS_TAB,
-  NO_CUSTOMER_USER_ID,
-  type MyBookingsTab,
-} from "../constants";
+import { NO_CUSTOMER_USER_ID } from "../constants";
 import type { MyBookingRow, MyBookingsViewModel } from "../models";
 import { buildBookingDetailPath } from "../utils/buildBookingDetailPath";
 
-const readTab = (rawTab: Nullable<string>): MyBookingsTab =>
-  rawTab === MY_BOOKINGS_TAB.HISTORY
-    ? MY_BOOKINGS_TAB.HISTORY
-    : MY_BOOKINGS_TAB.UPCOMING;
+// The date range is read in the business time zone when the list is filtered
+// by one business; otherwise in the browser's (a range across businesses has
+// no single zone).
+const readBrowserTimeZone = (): string =>
+  Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const useMyBookingsViewModel = (): MyBookingsViewModel => {
   const { i18n } = useTranslation();
   const session = useSession();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = readTab(searchParams.get(MY_BOOKINGS_QUERY_PARAM.TAB));
-  const pagination = useCursorPagination([activeTab]);
   const customerUserId =
     session.status === SESSION_STATUS.SIGNED_IN
       ? session.userId
       : NO_CUSTOMER_USER_ID;
+  const filtersViewModel = useMyBookingsFilters(customerUserId);
+  const { activeTab, filters, isRangeInvalid, selectedBusiness } =
+    filtersViewModel;
+  const timeZone = selectedBusiness?.timeZone ?? readBrowserTimeZone();
+  const isWaitingForBusiness =
+    filters.businessId !== null && selectedBusiness === null;
+  const pagination = useCursorPagination([activeTab, filters, timeZone]);
 
-  const bookingsQuery = useMyBookingsQuery({
-    customerUserId,
-    pageCursor: pagination.currentCursor,
-    pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
-    tab: activeTab,
-  });
+  const bookingsQuery = useMyBookingsQuery(
+    {
+      customerUserId,
+      filters,
+      pageCursor: pagination.currentCursor,
+      pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
+      tab: activeTab,
+      timeZone,
+    },
+    !isRangeInvalid && !isWaitingForBusiness,
+  );
   const bookings = bookingsQuery.data?.items ?? [];
   const businessQueries = useBookingBusinessesQueries(
     bookings.map((booking) => booking.businessId),
@@ -87,8 +91,8 @@ export const useMyBookingsViewModel = (): MyBookingsViewModel => {
     : ERROR_MESSAGE_KEY.UNKNOWN;
 
   return {
-    activeTab,
     errorMessageKey,
+    filtersViewModel,
     handleNextPage: (): void => {
       // While the next page loads the old data (and its cursor) is still
       // there: a second click would repeat the same cursor.
@@ -101,9 +105,6 @@ export const useMyBookingsViewModel = (): MyBookingsViewModel => {
     handleRetry: (): void => {
       void bookingsQuery.refetch();
       businessQueries.forEach((query) => void query.refetch());
-    },
-    handleTabChange: (tabId: string): void => {
-      setSearchParams({ [MY_BOOKINGS_QUERY_PARAM.TAB]: readTab(tabId) });
     },
     hasNextPage:
       Boolean(bookingsQuery.data?.nextCursor) &&
