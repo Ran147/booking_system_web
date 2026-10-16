@@ -42,6 +42,7 @@ export interface RoleGateTargets {
  * @property {RefObject<NullableRef<HTMLDivElement>>} serverErrorAlertReference - Recibe el foco al mostrar un error.
  * @property {Nullable<SignInErrorKey>} serverErrorKey - Mensaje del servidor, si hay.
  * @property {boolean} shouldShowPasswordRecoveryLink - Solo con demasiados intentos.
+ * @property {boolean} shouldShowSignUpSuccess - Viene de un registro recién terminado y no hay error (AC-KAN-27-01).
  */
 export interface SignInViewModel {
   readonly form: UseFormReturn<SignInFormValues>;
@@ -60,6 +61,7 @@ export interface SignInViewModel {
   readonly serverErrorAlertReference: RefObject<NullableRef<HTMLDivElement>>;
   readonly serverErrorKey: Nullable<SignInErrorKey>;
   readonly shouldShowPasswordRecoveryLink: boolean;
+  readonly shouldShowSignUpSuccess: boolean;
 }
 
 /**

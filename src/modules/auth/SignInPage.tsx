@@ -1,18 +1,21 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ALERT_VARIANT,
+  Alert,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
 } from "@/components/common";
+import { ARIA_ROLE, I18N_NAMESPACE } from "@/constants";
 import { SignInErrorAlert } from "./components/SignInErrorAlert";
 import { SignInForm } from "./components/SignInForm";
 import { useSignInViewModel } from "./hooks/useSignInViewModel";
 
 // One sign-in screen for every role (KAN-28, KAN-128).
 export const SignInPage = (): ReactElement => {
-  const { t } = useTranslation();
+  const { t } = useTranslation([I18N_NAMESPACE.COMMON, I18N_NAMESPACE.LANDING]);
   const signInViewModel = useSignInViewModel();
 
   return (
@@ -25,6 +28,11 @@ export const SignInPage = (): ReactElement => {
           <CardDescription>{t("auth.signIn.subtitle")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          {signInViewModel.shouldShowSignUpSuccess && (
+            <Alert role={ARIA_ROLE.STATUS} variant={ALERT_VARIANT.SUCCESS}>
+              {t("landing:subscriberSignUp.success")}
+            </Alert>
+          )}
           <SignInErrorAlert
             alertReference={signInViewModel.serverErrorAlertReference}
             errorKey={signInViewModel.serverErrorKey}

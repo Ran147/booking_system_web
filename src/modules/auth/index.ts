@@ -9,3 +9,4 @@ export { useIdleTimeout } from "./hooks/useIdleTimeout";
 export { useSession } from "./hooks/useSession";
 export { passwordFieldSchema } from "./models/PasswordField.schema";
 export type { Session } from "./models/Session.types";
+export type { SignInLocationState } from "./models/SignInLocationState.interface";
