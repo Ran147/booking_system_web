@@ -7,6 +7,9 @@ export const PASSWORD_RESET = Object.freeze({
   EMULATOR_FLAG_ENABLED: "true",
   EMULATOR_HOST_ENV_VAR: "FIREBASE_AUTH_EMULATOR_HOST",
   LOCALE_HEADER: "X-Firebase-Locale",
+  // The answer takes at least this long whether or not the account exists, so
+  // the response time does not reveal it (AC-KAN-36-02).
+  MINIMUM_RESPONSE_MS: 1500,
   PRODUCTION_URL:
     "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode",
   REQUEST_TYPE: "PASSWORD_RESET",
@@ -17,4 +20,6 @@ export const PASSWORD_RESET = Object.freeze({
 // error code to a translated key and never shows these.
 export const PASSWORD_RESET_ERROR = Object.freeze({
   INVALID_PAYLOAD: "email and recaptchaToken are required",
+  MISSING_WEB_API_KEY:
+    "FIREBASE_WEB_API_KEY is not set: the reset email cannot be requested",
 } as const);

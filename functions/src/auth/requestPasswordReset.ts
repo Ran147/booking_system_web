@@ -1,13 +1,19 @@
 import { logger } from "firebase-functions";
 import { onCall } from "firebase-functions/v2/https";
 import { assertRecaptcha, RECAPTCHA_SECRETS } from "./assertRecaptcha.js";
-import { PASSWORD_RESET_ERROR } from "./constants/PasswordReset.constants.js";
+import {
+  PASSWORD_RESET,
+  PASSWORD_RESET_ERROR,
+} from "./constants/PasswordReset.constants.js";
 import type {
   RequestPasswordResetPayload,
   RequestPasswordResetResponse,
 } from "./models/RequestPasswordReset.mutation.js";
 import { requestPasswordResetPayloadSchema } from "./models/RequestPasswordReset.schema.js";
-import { sendPasswordResetEmail } from "./sendPasswordResetEmail.js";
+import {
+  readWebApiKey,
+  sendPasswordResetEmail,
+} from "./sendPasswordResetEmail.js";
 import { FIREBASE_AUTH_ERROR_CODE } from "../shared/constants/FirebaseAuthErrorCode.constants.js";
 import { FIRESTORE_COLLECTION } from "../shared/constants/FirestoreCollection.constants.js";
 import { LANGUAGE } from "../shared/constants/Language.constants.js";
@@ -49,6 +55,31 @@ const findUserId = async (email: string): Promise<NullableRef<string>> => {
   }
 };
 
+const sendResetEmailIfAccountExists = async (
+  email: string,
+  webApiKey: string,
+): Promise<void> => {
+  try {
+    const userId = await findUserId(email);
+    if (userId) {
+      await sendPasswordResetEmail(
+        email,
+        await readAccountLanguage(userId),
+        webApiKey,
+      );
+    }
+  } catch (error) {
+    // An infrastructure failure must not tell the visitor anything about the
+    // account either.
+    logger.error("Password reset request failed", error);
+  }
+};
+
+const waitForMinimumResponseTime = (): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, PASSWORD_RESET.MINIMUM_RESPONSE_MS);
+  });
+
 export const requestPasswordReset = onCall<
   RequestPasswordResetPayload,
   Promise<RequestPasswordResetResponse>
@@ -59,17 +90,14 @@ export const requestPasswordReset = onCall<
     PASSWORD_RESET_ERROR.INVALID_PAYLOAD,
   );
   await assertRecaptcha(recaptchaToken);
+  const webApiKey = readWebApiKey();
 
-  try {
-    const userId = await findUserId(email);
-    if (userId) {
-      await sendPasswordResetEmail(email, await readAccountLanguage(userId));
-    }
-  } catch (error) {
-    // An infrastructure failure must not tell the visitor anything about the
-    // account either.
-    logger.error("Password reset request failed", error);
-  }
+  // Both paths last the same: an existing account costs a Firestore read and a
+  // call to Google, and that extra time would reveal it (AC-KAN-36-02).
+  await Promise.all([
+    sendResetEmailIfAccountExists(email, webApiKey),
+    waitForMinimumResponseTime(),
+  ]);
 
   return { isRequested: true };
 });

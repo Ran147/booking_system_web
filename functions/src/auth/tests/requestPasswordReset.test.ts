@@ -32,6 +32,7 @@ const TEST_PROJECT_ID = process.env.GCLOUD_PROJECT ?? "demo-booking-system";
 const EXISTING_EMAIL = "suscriptor@demo.test";
 const UNKNOWN_EMAIL = "nadie@demo.test";
 const SEND_OOB_CODE_PATH = "accounts:sendOobCode";
+const TIMER_TOLERANCE_MS = 100;
 
 const callRequestPasswordReset =
   functionsTestEnvironment.wrap(requestPasswordReset);
@@ -197,6 +198,67 @@ describe("requestPasswordReset", () => {
       expect(assertRecaptcha).not.toHaveBeenCalled();
     },
   );
+
+  it("KAN-36: takes the same minimum time for an existing and an unknown account (AC-KAN-36-02)", async () => {
+    await createAccount("es");
+    const measureCall = async (email: string): Promise<number> => {
+      const startedAt = Date.now();
+      await callRequestPasswordReset(
+        buildCallableRequest(buildPayload({ email })),
+      );
+      return Date.now() - startedAt;
+    };
+
+    const existingDuration = await measureCall(EXISTING_EMAIL);
+    const unknownDuration = await measureCall(UNKNOWN_EMAIL);
+
+    const minimumDuration =
+      PASSWORD_RESET.MINIMUM_RESPONSE_MS - TIMER_TOLERANCE_MS;
+    expect(existingDuration).toBeGreaterThanOrEqual(minimumDuration);
+    expect(unknownDuration).toBeGreaterThanOrEqual(minimumDuration);
+  });
+
+  it.each([
+    ["is not set", undefined],
+    ["is empty", "   "],
+  ])(
+    "KAN-36: fails visibly outside the emulator when the web API key %s",
+    async (_caseName, webApiKey) => {
+      await createAccount("es");
+      vi.stubEnv(PASSWORD_RESET.EMULATOR_ENV_VAR, "false");
+      vi.stubEnv(PASSWORD_RESET.WEB_API_KEY_ENV_VAR, webApiKey);
+
+      const httpsError = await captureHttpsError(
+        callRequestPasswordReset(buildCallableRequest(buildPayload())),
+      );
+
+      expect(httpsError.code).toBe("internal");
+      expect(await readSentResetEmails()).toEqual([]);
+    },
+  );
+
+  it("KAN-36: outside the emulator asks Google with the configured web API key", async () => {
+    await createAccount("es");
+    vi.stubEnv(PASSWORD_RESET.EMULATOR_ENV_VAR, "false");
+    vi.stubEnv(PASSWORD_RESET.WEB_API_KEY_ENV_VAR, "real-web-api-key");
+    const originalFetch = globalThis.fetch;
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation((requestUrl, init) =>
+        String(requestUrl).includes(SEND_OOB_CODE_PATH)
+          ? Promise.resolve(new Response("{}", { status: 200 }))
+          : originalFetch(requestUrl, init),
+      );
+
+    await callRequestPasswordReset(buildCallableRequest(buildPayload()));
+
+    const sentUrls = fetchSpy.mock.calls
+      .map(([requestUrl]) => String(requestUrl))
+      .filter((requestUrl) => requestUrl.includes(SEND_OOB_CODE_PATH));
+    expect(sentUrls).toEqual([
+      `${PASSWORD_RESET.PRODUCTION_URL}?key=real-web-api-key`,
+    ]);
+  });
 
   it("KAN-36: still answers when Firebase refuses to send the email", async () => {
     await createAccount("es");
