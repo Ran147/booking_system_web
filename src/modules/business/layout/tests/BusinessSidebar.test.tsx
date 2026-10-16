@@ -38,6 +38,10 @@ const testRoutes: RouteObject[] = [
         element: <div>New Service Form Outlet</div>,
         path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
       },
+      {
+        element: <div>Settings Page Outlet</div>,
+        path: ROUTE_PATH.BUSINESS.SETTINGS,
+      },
     ],
     element: <BusinessLayout />,
     path: ROUTE_PATH.BUSINESS.ROOT,
@@ -132,6 +136,44 @@ describe("BusinessSidebar (KAN-29)", () => {
     expect(page.queryPlaceholderModalHeading()).not.toBeInTheDocument();
   });
 
+  it("KAN-51: navigates to settings without opening the placeholder dialog", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    await page.clickSettingsItem();
+
+    expect(await screen.findByText("Settings Page Outlet")).toBeInTheDocument();
+    expect(page.queryPlaceholderModalHeading()).not.toBeInTheDocument();
+  });
+
+  it("KAN-51: marks settings as active at its registered route", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    expect(await page.findSettingsItem()).toHaveClass("bg-primary/10");
+    expect(screen.getByText("Settings Page Outlet")).toBeInTheDocument();
+  });
+
+  it("KAN-51: navigates from the mobile drawer and closes it", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    await page.clickOpenMenuButton();
+    await page.clickMobileSettingsItem();
+
+    expect(await screen.findByText("Settings Page Outlet")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("KAN-29: AC-KAN-29-05 adapts navigation items for collaborator role by omitting subscriber-only tools", async () => {
     renderRoutesWithProviders(testRoutes, {
       initialPath: ROUTE_PATH.BUSINESS.ROOT,
@@ -149,6 +191,17 @@ describe("BusinessSidebar (KAN-29)", () => {
     expect(page.queryCollaboratorsItem()).not.toBeInTheDocument();
     expect(page.querySettingsItem()).not.toBeInTheDocument();
     expect(page.querySubscriptionItem()).not.toBeInTheDocument();
+  });
+
+  it("KAN-51: keeps direct settings access for collaborators without exposing the sidebar item", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+      session: COLLABORATOR_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    expect(await screen.findByText("Settings Page Outlet")).toBeInTheDocument();
+    expect(page.querySettingsItem()).not.toBeInTheDocument();
   });
 
   it("KAN-29: AC-KAN-29-08 allows user to sign out from the sidebar", async () => {

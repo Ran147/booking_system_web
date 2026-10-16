@@ -8,10 +8,13 @@ import {
 } from "@firebase/rules-unit-testing";
 
 // Runs only against the emulator: npm run test:rules.
-// Sign-in reads the user's own profile for User.language (US-33, P-2).
+// Sign-in reads the user's own profile for User.language (US-33, P-2), and
+// KAN-51 lets business portal users update only their own language.
 const PROJECT_ID = "demo-booking-system";
+const COLLABORATOR_PROFILE_PATH = "users/collaborator-user-a";
 const CUSTOMER_PROFILE_PATH = "users/customer-1";
 const OTHER_PROFILE_PATH = "users/customer-2";
+const SUBSCRIBER_PROFILE_PATH = "users/subscriber-a";
 
 let testEnvironment: RulesTestEnvironment;
 
@@ -33,6 +36,21 @@ describe("firestore.rules: users", () => {
       await adminFirestore
         .doc(OTHER_PROFILE_PATH)
         .set({ email: "otro@demo.test", language: "es" });
+      await adminFirestore.doc(SUBSCRIBER_PROFILE_PATH).set({
+        fullName: "Subscriber A",
+        language: "es",
+      });
+      await adminFirestore.doc(COLLABORATOR_PROFILE_PATH).set({
+        fullName: "Collaborator A",
+        language: "es",
+      });
+      await adminFirestore.doc("businesses/business-inactive").set({
+        ownerUserId: "subscriber-a",
+        status: "inactive",
+      });
+      await adminFirestore
+        .doc("businesses/business-a/collaborators/collaborator-a")
+        .set({ status: "active" });
     });
   });
 
@@ -62,7 +80,91 @@ describe("firestore.rules: users", () => {
     await assertFails(visitor.firestore().doc(CUSTOMER_PROFILE_PATH).get());
   });
 
-  it("denies writing a profile from the client", async () => {
+  it("US-33: denies creating a profile from the client", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-3", {
+      role: "customer",
+    });
+
+    await assertFails(
+      customer
+        .firestore()
+        .doc("users/customer-3")
+        .set({ email: "nuevo@demo.test", language: "es" }),
+    );
+  });
+
+  it("KAN-51: lets a subscriber update their own language", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertSucceeds(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-51: lets an inactive business subscriber update their language", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-inactive",
+      role: "subscriber",
+    });
+
+    await assertSucceeds(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-51: lets an active collaborator update their own language", async () => {
+    const collaborator = testEnvironment.authenticatedContext(
+      "collaborator-user-a",
+      {
+        businessId: "business-a",
+        collaboratorId: "collaborator-a",
+        role: "collaborator",
+      },
+    );
+
+    await assertSucceeds(
+      collaborator
+        .firestore()
+        .doc(COLLABORATOR_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-51: denies updating another user's language", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-b", {
+      businessId: "business-b",
+      role: "subscriber",
+    });
+
+    await assertFails(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-51: denies an unauthenticated language update", async () => {
+    const visitor = testEnvironment.unauthenticatedContext();
+
+    await assertFails(
+      visitor
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-51: does not add customer language writes before KAN-172", async () => {
     const customer = testEnvironment.authenticatedContext("customer-1", {
       role: "customer",
     });
@@ -71,7 +173,35 @@ describe("firestore.rules: users", () => {
       customer
         .firestore()
         .doc(CUSTOMER_PROFILE_PATH)
-        .set({ email: "cliente@demo.test", language: "es" }),
+        .update({ language: "es" }),
+    );
+  });
+
+  it("KAN-51: denies an unsupported language", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertFails(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "fr" }),
+    );
+  });
+
+  it("KAN-51: denies changing other user fields", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertFails(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ fullName: "Changed" }),
     );
   });
 });

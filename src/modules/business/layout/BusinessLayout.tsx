@@ -13,11 +13,13 @@ import { PlaceholderDialog } from "@/components/common/portal-home-template/comp
 import { I18N_NAMESPACE } from "@/constants";
 import { BusinessSidebar } from "./components";
 import { useBusinessSidebarViewModel } from "./hooks";
+import { useBusinessLanguageSync } from "../features/settings/hooks/useBusinessLanguageSync";
 
 export const BusinessLayout = (): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const location = useLocation();
   const viewModel = useBusinessSidebarViewModel();
+  useBusinessLanguageSync();
 
   const placeholderQuickAccessItem = viewModel.activePlaceholderItem
     ? {
