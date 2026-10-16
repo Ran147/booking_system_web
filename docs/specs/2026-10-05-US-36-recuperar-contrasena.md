@@ -247,7 +247,7 @@ export interface PasswordResetViewModel {
 - `GuestOnly`: ya cubierto; las rutas nuevas quedan dentro del mismo layout.
 - `localeParity.test.ts`: las claves nuevas existen en `es` y `en`.
 - `e2e/password-reset.spec.ts`: ver D-9.
-- `requestPasswordReset` se prueba con el e2e: se pide la recuperación de `suscriptor@demo.test` y de un correo inexistente, y los dos muestran el mismo mensaje (no hay infraestructura de tests unitarios en `functions/`).
+- `requestPasswordReset` tiene tests contra los emuladores (`functions/src/auth/tests/requestPasswordReset.test.ts`, `npm run test:functions`): cuenta existente y desconocida responden igual, idioma del perfil, reCAPTCHA rechazado y carga inválida. El e2e (`e2e/password-reset.spec.ts`) recorre el flujo completo con una cuenta propia del test.
 
 ---
 
