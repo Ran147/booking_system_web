@@ -2,10 +2,15 @@ import { lazy, Suspense, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { PageTemplate } from "@/shared/components";
 import { I18N_NAMESPACE } from "@/shared/constants";
-import { HeroSection } from "../features/home/components/HeroSection";
+import { HeroSection } from "../features/home";
 
 const PlanCatalogSection = lazy(async () => {
   const { PlanCatalogSection: Component } = await import("../features/home");
+  return { default: Component };
+});
+
+const TestimonialsSection = lazy(async () => {
+  const { TestimonialsSection: Component } = await import("../features/home");
   return { default: Component };
 });
 
@@ -22,6 +27,7 @@ export const LandingPlaceholderPage = (): ReactElement => {
       <HeroSection />
       <Suspense fallback={null}>
         <PlanCatalogSection />
+        <TestimonialsSection />
       </Suspense>
     </PageTemplate>
   );

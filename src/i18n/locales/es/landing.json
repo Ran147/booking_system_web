@@ -64,6 +64,31 @@
       "seeDetails": "Comenzar",
       "subtitle": "Selecciona el plan ideal para gestionar las reservas y citas de tu negocio.",
       "title": "Planes y Precios"
+    },
+    "testimonials": {
+      "badge": "Historias de clientes",
+      "items": {
+        "item1": {
+          "authorName": "Carlos Mendoza",
+          "businessName": "Barbería Vintage",
+          "quote": "Booking System transformó nuestra rutina diaria. Las ausencias se redujeron un 80% gracias a los recordatorios automáticos, y los clientes adoran reservar en cualquier momento.",
+          "rating": "5"
+        },
+        "item2": {
+          "authorName": "Valeria Castro",
+          "businessName": "Glow Beauty & Spa",
+          "quote": "Gestionar cuatro estilistas solía ser un caos de agendas. Ahora cada colaboradora tiene su calendario sincronizado y las clientas eligen a su especialista preferida sin esfuerzo.",
+          "rating": "5"
+        },
+        "item3": {
+          "authorName": "Dr. Fernando Ruiz",
+          "businessName": "Centro de Fisioterapia Ruiz",
+          "quote": "La plataforma es moderna, confiable y muy fácil de usar para nuestros pacientes. Nos ha ahorrado decenas de horas administrativas cada semana.",
+          "rating": "5"
+        }
+      },
+      "subtitle": "Descubre cómo profesionales y negocios de servicios optimizan su gestión diaria de citas.",
+      "title": "La confianza de cientos de negocios en crecimiento"
     }
   },
   "layout": {
