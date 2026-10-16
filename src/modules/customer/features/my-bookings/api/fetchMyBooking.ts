@@ -1,16 +1,16 @@
 import { doc, getDoc } from "firebase/firestore";
 import { FIRESTORE_COLLECTION } from "@/constants";
 import { firestore } from "@/services";
-import type { NullableUndefined } from "@/shared/types";
+import type { Nullable } from "@/shared/types";
 import { mapMyBooking } from "./bookingDocument.schema";
 import type { MyBooking } from "../models";
 
-// Resolves to undefined when the booking does not exist. A booking of another
+// Resolves to null when the booking does not exist. A booking of another
 // customer is rejected by the rules (permission-denied).
 export const fetchMyBooking = async (
   businessId: string,
   bookingId: string,
-): Promise<NullableUndefined<MyBooking>> => {
+): Promise<Nullable<MyBooking>> => {
   const bookingDocument = await getDoc(
     doc(
       firestore,
@@ -21,5 +21,5 @@ export const fetchMyBooking = async (
     ),
   );
 
-  return bookingDocument.exists() ? mapMyBooking(bookingDocument) : undefined;
+  return bookingDocument.exists() ? mapMyBooking(bookingDocument) : null;
 };

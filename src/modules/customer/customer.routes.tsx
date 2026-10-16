@@ -30,6 +30,14 @@ export const customerRoutes: RouteObject[] = [
             },
             path: ROUTE_PATH.CUSTOMER.MY_BOOKINGS,
           },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { BookingDetailPage } =
+                await import("./features/my-bookings");
+              return { Component: BookingDetailPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.BOOKING_DETAIL,
+          },
         ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
       },
