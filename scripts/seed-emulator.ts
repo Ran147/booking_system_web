@@ -31,6 +31,7 @@ import {
   SEED_USER,
   SEED_WEEKDAY,
 } from "./constants/SeedEmulator.constants";
+import { seedCustomerBookings } from "./seedCustomerBookings";
 import { seedSignUpCheckouts } from "./seedSignUpCheckout";
 import { FIRESTORE_COLLECTION } from "../src/constants/firestore/FirestoreCollection.constants";
 import { DEFAULT_LANGUAGE } from "../src/constants/i18n/Language.constants";
@@ -381,6 +382,7 @@ const seedEmulator = async (): Promise<void> => {
   await seedPlans(firestore);
   await seedBusiness(firestore);
   await seedPendingBusiness(firestore);
+  await seedCustomerBookings(firestore);
 
   printCredentials();
   await seedSignUpCheckouts(firestore);
