@@ -63,7 +63,7 @@ export * from "./user/UserRole.constants";
 | `useSession()` | `Session`: `{ status: "loading" }`, `{ status: "signed_out" }` or `{ status: "signed_in", userId, role, businessId, collaboratorId }` |
 | `useCurrentBusiness()` | `{ businessId }` for the signed-in subscriber or collaborator; throws outside the business portal |
 | `RequireRole` | Route guard (§3) |
-| `useIdleTimeout` | Inactivity logout (§5) |
+| `IdleSessionGuard` | Inactivity logout with a warning dialog, mounted once in `RootLayout` (§5) |
 | `useSignOut()` | Signs out, clears the query cache and goes to sign-in |
 
 ```ts
@@ -346,63 +346,47 @@ Rules keep their literals: the rules language cannot import TypeScript constants
 - **Sign-in (KAN-28, KAN-33 to KAN-35, KAN-128):** email + password, `PasswordInput` with show / hide, translated errors mapped from Firebase codes (`api-mutation-standards`). Never reveal whether the email exists.
 - **Password recovery (KAN-36, KAN-37):** `sendPasswordResetEmail`; the same neutral message is shown whether or not the email exists.
 - **reCAPTCHA:** Firebase App Check with the reCAPTCHA Enterprise provider protects Firestore and Functions for the whole app. Public forms (sign-in, sign-up, contact, recovery) also include `RecaptchaField`; its token is verified by the `verifyRecaptcha` callable before the action runs.
-- **Inactivity logout (KAN-38):** `useIdleTimeout` signs the user out after `PlatformSettings.idleTimeoutMinutes` (KAN-182) without activity, with a warning dialog first. The fallback value is `DEFAULT_PLATFORM_SETTINGS.IDLE_TIMEOUT_MINUTES`.
+- **Inactivity logout (KAN-38, KAN-133):** `IdleSessionGuard` (mounted once in `RootLayout`, only with a signed-in session) signs the user out after `PlatformSettings.idleTimeoutMinutes` (KAN-182) without activity, with a warning dialog 60 seconds before. `useIdleSession` keeps the time of the last activity and compares it with `Date.now()` every second, so a sleeping computer or a background tab signs out on wake-up and no timer drifts. `useIdleTabSync` shares activity and the sign-out between the tabs of one browser. The fallback value is `DEFAULT_PLATFORM_SETTINGS.IDLE_TIMEOUT_MINUTES`, used when `platformSettings/current` cannot be read.
 - **Sign-out (KAN-29, KAN-110):** `signOut(auth)`, then `queryClient.clear()`, then navigate to sign-in.
 
 ```ts
-// src/features/auth/hooks/useIdleTimeout.ts
-import { useEffect, useRef } from "react";
-import { BROWSER_EVENT } from "@/shared/constants";
-import type { NullableRef } from "@/shared/types";
+// src/modules/auth/hooks/useIdleSession.ts (the core of the clock)
+const checkIdleTime = useCallback((): void => {
+  const limitMs = idleTimeoutMinutes * IDLE_SESSION.MILLISECONDS_PER_MINUTE;
+  const elapsedMs = Date.now() - lastActivityAtReference.current;
 
-const ACTIVITY_EVENTS = [
-  BROWSER_EVENT.KEY_DOWN,
-  BROWSER_EVENT.POINTER_DOWN,
-  BROWSER_EVENT.SCROLL,
-] as const;
+  if (elapsedMs >= limitMs) {
+    onExpireReference.current(); // sign out, once
+    return;
+  }
+  // Inside the last WARNING_SECONDS the warning dialog counts down.
+}, [idleTimeoutMinutes]);
 
-export const useIdleTimeout = (
-  idleTimeoutMs: number,
-  onIdle: () => void,
-): void => {
-  const timeoutIdRef = useRef<NullableRef<number>>(null);
-
-  useEffect(() => {
-    const restartTimer = (): void => {
-      if (timeoutIdRef.current !== null) {
-        window.clearTimeout(timeoutIdRef.current);
-      }
-      timeoutIdRef.current = window.setTimeout(onIdle, idleTimeoutMs);
-    };
-
-    restartTimer();
-    ACTIVITY_EVENTS.forEach((activityEvent) => {
-      window.addEventListener(activityEvent, restartTimer, { passive: true });
-    });
-
-    return (): void => {
-      if (timeoutIdRef.current !== null) {
-        window.clearTimeout(timeoutIdRef.current);
-      }
-      ACTIVITY_EVENTS.forEach((activityEvent) => {
-        window.removeEventListener(activityEvent, restartTimer);
-      });
-    };
-  }, [idleTimeoutMs, onIdle]);
-};
+useEffect(() => {
+  const intervalIdentifier = window.setInterval(
+    checkIdleTime,
+    IDLE_SESSION.TICK_MS,
+  );
+  document.addEventListener(BROWSER_EVENT.VISIBILITY_CHANGE, checkIdleTime);
+  return (): void => {
+    window.clearInterval(intervalIdentifier);
+    document.removeEventListener(BROWSER_EVENT.VISIBILITY_CHANGE, checkIdleTime);
+  };
+}, [checkIdleTime]);
 ```
 
 ```ts
-// src/features/auth/index.ts
+// src/modules/auth/index.ts
+export { IdleSessionGuard } from "./components/IdleSessionGuard";
 export { RequireRole } from "./components/RequireRole";
 export { SESSION_STATUS } from "./constants/SessionStatus.constants";
 export { useCurrentBusiness } from "./hooks/useCurrentBusiness";
-export { useIdleTimeout } from "./hooks/useIdleTimeout";
 export { useSession } from "./hooks/useSession";
+export { useSignOut } from "./hooks/useSignOut";
 export type { Session } from "./models/Session.types";
 ```
 
-`AuthProvider`, `GuestOnly` and `useSignOut` follow the same patterns (`theming-standards` §4 shows the provider layout) and are exported here as they are built.
+`AuthProvider` and `GuestOnly` follow the same patterns (`theming-standards` §4 shows the provider layout) and are exported here as they are built.
 
 ---
 
