@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/business-home/` |
+| Feature folder | `src/modules/customer/features/business-home/` |
 | Stories | KAN-112, KAN-113, KAN-114, KAN-115, KAN-116 |
 | Status | Draft |
-| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`, `Business.slug`); Q6 decided 2026-09-28 (a customer account is mandatory to book); Q2 and Q7 decided 2026-09-28 (the `slug` is set at subscriber sign-up, KAN-25; a `pending` or `rejected` business has no public page); PROP-4 business profile (where the subscriber edits `logoUrl` and `description`); customer sign-up spec (KAN-122) and customer sign-in (KAN-128, `src/features/auth`) for the visitor path of KAN-116; KAN-30 service management (catalog data, discounts KAN-60); KAN-64 business hours; `service-selection` spec (KAN-134); customer layout spec (KAN-96, KAN-117) |
+| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`, `Business.slug`); Q6 decided 2026-09-28 (a customer account is mandatory to book); Q2 and Q7 decided 2026-09-28 (the `slug` is set at subscriber sign-up, KAN-25; a `pending` or `rejected` business has no public page); PROP-4 business profile (where the subscriber edits `logoUrl` and `description`); customer sign-up spec (KAN-122) and customer sign-in (KAN-128, `src/modules/auth`) for the visitor path of KAN-116; KAN-30 service management (catalog data, discounts KAN-60); KAN-64 business hours; `service-selection` spec (KAN-134); customer layout spec (KAN-96, KAN-117) |
 
 ## Intent
 A person who opens a business's page in the customer portal learns what the business is and what it offers: general information, the catalog of active services with their details and current promotions. A signed-in customer can start a booking directly from the service they want; a visitor who tries to book is asked to sign in or sign up first and then continues at the same service (Q6).

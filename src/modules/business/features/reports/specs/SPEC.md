@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/reports/` |
+| Feature folder | `src/modules/business/features/reports/` |
 | Stories | KAN-103, KAN-104, KAN-105, KAN-106 |
 | Status | Draft |
 | Depends on | Q1 decided 2026-09-28 (collaborator filter of KAN-103, occupancy KAN-105, permission `view_reports` KAN-86); KAN-77 collaborators; KAN-63 schedule (booking statuses set by KAN-72, KAN-73, KAN-74); KAN-30 services (service filter); KAN-32 subscription (KAN-49: reports stay readable when read-only) |
