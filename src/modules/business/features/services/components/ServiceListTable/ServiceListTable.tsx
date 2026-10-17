@@ -19,6 +19,7 @@ import type { ServiceListTableProps } from "./types/ServiceListTable.types";
 export const ServiceListTable = ({
   currency,
   isReadOnly,
+  onEditService,
   services,
 }: ServiceListTableProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
@@ -91,6 +92,7 @@ export const ServiceListTable = ({
                     ariaLabel={t("services.list.editAction")}
                     disabled={isReadOnly}
                     leftIcon={Pencil}
+                    onClick={() => onEditService?.(serviceItem.id)}
                     size="sm"
                     type="button"
                     variant="ghost"

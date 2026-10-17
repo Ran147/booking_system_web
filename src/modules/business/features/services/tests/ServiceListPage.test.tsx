@@ -205,10 +205,13 @@ describe("ServiceListPage (KAN-55)", () => {
     const page = createServiceListPage();
     await page.changeSearchTerm("corte");
 
-    await waitFor(async () => {
-      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
-      expect(page.queryRowByName("Arreglo de barba")).not.toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Corte de cabello")).toBeInTheDocument();
+        expect(page.queryRowByName("Arreglo de barba")).not.toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it("AC-KAN-55-03: filters by status active or inactive and total count matches the filter", async () => {

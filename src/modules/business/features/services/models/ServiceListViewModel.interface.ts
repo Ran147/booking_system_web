@@ -7,6 +7,7 @@ export interface UseServiceListViewModelOptions {
   readonly businessStatus?: BusinessStatus;
   readonly currency?: string;
   readonly onCreateService?: () => void;
+  readonly onEditService?: (serviceId: string) => void;
 }
 
 export interface ServiceListViewModel {
@@ -14,6 +15,7 @@ export interface ServiceListViewModel {
   readonly filters: ServiceListFilters;
   readonly handleClearFilters: () => void;
   readonly handleCreateService: () => void;
+  readonly handleEditService: (serviceId: string) => void;
   readonly handleNextPage: () => void;
   readonly handlePreviousPage: () => void;
   readonly handleRetry: () => void;

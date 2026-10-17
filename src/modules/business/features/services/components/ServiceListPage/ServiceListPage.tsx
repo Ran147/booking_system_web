@@ -133,6 +133,7 @@ export const ServiceListPage = ({
             <ServiceListTable
               currency={viewModel.currency}
               isReadOnly={viewModel.isReadOnly}
+              onEditService={viewModel.handleEditService}
               services={viewModel.services}
             />
             <CursorPagination
