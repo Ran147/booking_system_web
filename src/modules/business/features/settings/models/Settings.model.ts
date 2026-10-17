@@ -15,7 +15,7 @@ export interface UserThemePreference {
 
 /** Contract exposed by the KAN-52 settings page ViewModel. */
 export interface SettingsPageViewModel {
-  readonly handleThemeChange: (nextTheme: ThemeMode) => void;
+  readonly handleThemeChange: (nextTheme: string) => void;
   readonly isSaving: boolean;
   readonly showSaveError: boolean;
   readonly themeMode: ThemeMode;

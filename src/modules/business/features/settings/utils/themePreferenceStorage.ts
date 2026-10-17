@@ -1,9 +1,7 @@
-import { STORAGE_KEY, THEME_MODE, type ThemeMode } from "@/constants";
+import { STORAGE_KEY } from "@/constants";
 import type { Nullable } from "@/types";
 import type { SaveUserThemeInput } from "../models";
-
-const isThemeMode = (value: unknown): value is ThemeMode =>
-  Object.values(THEME_MODE).some((themeMode) => themeMode === value);
+import { isThemeMode } from "./isThemeMode";
 
 export const readPendingThemeSync = (): Nullable<SaveUserThemeInput> => {
   const storedValue = localStorage.getItem(STORAGE_KEY.THEME_PENDING_SYNC);
@@ -35,4 +33,16 @@ export const savePendingThemeSync = (input: SaveUserThemeInput): void => {
 
 export const clearPendingThemeSync = (): void => {
   localStorage.removeItem(STORAGE_KEY.THEME_PENDING_SYNC);
+};
+
+export const clearPendingThemeSyncIfMatches = (
+  expectedPendingThemeSync: SaveUserThemeInput,
+): void => {
+  const currentPendingThemeSync = readPendingThemeSync();
+  if (
+    currentPendingThemeSync?.theme === expectedPendingThemeSync.theme &&
+    currentPendingThemeSync.userId === expectedPendingThemeSync.userId
+  ) {
+    clearPendingThemeSync();
+  }
 };

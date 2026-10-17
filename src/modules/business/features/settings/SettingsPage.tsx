@@ -9,7 +9,7 @@ import {
   PageTemplate,
   RadioGroup,
 } from "@/components";
-import { I18N_NAMESPACE, type ThemeMode } from "@/constants";
+import { I18N_NAMESPACE } from "@/constants";
 import { useSettingsPageViewModel } from "./hooks/useSettingsPageViewModel";
 
 export const SettingsPage = (): ReactElement => {
@@ -36,9 +36,7 @@ export const SettingsPage = (): ReactElement => {
           <RadioGroup
             disabled={isSaving}
             label={t("settings.theme.label")}
-            onValueChange={(nextValue): void => {
-              handleThemeChange(nextValue as ThemeMode);
-            }}
+            onValueChange={handleThemeChange}
             options={themeOptions}
             value={themeMode}
           />

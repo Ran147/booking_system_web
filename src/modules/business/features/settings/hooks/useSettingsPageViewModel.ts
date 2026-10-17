@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/app/providers/theme/useTheme";
-import { THEME_MODE, type ThemeMode } from "@/constants";
+import { THEME_MODE } from "@/constants";
 import { useSession } from "@/modules/auth";
 import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
 import { useSaveUserThemeMutation } from "../api/useSaveUserThemeMutation";
 import type { SettingsPageViewModel } from "../models";
+import { isThemeMode } from "../utils/isThemeMode";
 import {
   clearPendingThemeSync,
   savePendingThemeSync,
@@ -18,7 +19,9 @@ export const useSettingsPageViewModel = (): SettingsPageViewModel => {
   const userId =
     session.status === SESSION_STATUS.SIGNED_IN ? session.userId : "";
 
-  const handleThemeChange = (nextTheme: ThemeMode): void => {
+  const handleThemeChange = (nextTheme: string): void => {
+    if (!isThemeMode(nextTheme)) return;
+
     const input = { theme: nextTheme, userId };
     setThemeMode(nextTheme);
     savePendingThemeSync(input);

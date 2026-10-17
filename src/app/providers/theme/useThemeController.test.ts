@@ -1,10 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import {
-  STORAGE_KEY,
-  THEME_CLASS,
-  THEME_MODE,
-  THEME_MEDIA_QUERY,
-} from "@/constants";
+import { STORAGE_KEY, THEME_CLASS, THEME_MODE } from "@/constants";
 import { useThemeController } from "./useThemeController";
 
 describe("useThemeController", () => {
@@ -15,14 +10,14 @@ describe("useThemeController", () => {
     document.documentElement.classList.remove(THEME_CLASS.DARK);
     vi.stubGlobal(
       "matchMedia",
-      vi.fn((mediaQuery: string) => ({
+      vi.fn(() => ({
         addEventListener: (
           _eventName: string,
           eventListener: (event: MediaQueryListEvent) => void,
         ): void => {
           handleSystemThemeChange = eventListener;
         },
-        matches: mediaQuery === THEME_MEDIA_QUERY.PREFERS_DARK ? false : false,
+        matches: false,
         removeEventListener: vi.fn(),
       })),
     );
