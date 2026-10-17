@@ -94,6 +94,7 @@ None. Q1 was decided on 2026-09-28: the collaborator in the booking detail is sp
 - KAN-154 does not say which filters; they are assumptions (AS-5).
 - KAN-108 (navbar, KAN-96) and KAN-150 both describe reaching the bookings; the navbar only links here.
 - AC-KAN-152-06 is covered by the adapter test (`bookingDocument.schema.test.ts`); AC-KAN-152-08 holds by construction (D-1: the name is a snapshot in the booking).
+- **Open (from the PR #35 review):** the cancellation `note` (AS-4) is dropped when the browser validates the document, but the collection group rule of PR #34 lets the customer read the whole booking, so the note still travels to the browser. Rules cannot hide fields. When cancellation is built (KAN-72, KAN-159) the note must be stored outside the document the customer reads, for example in a private document of the business. Until then no real note exists (nothing writes it); the seed writes one only to test AS-4.
 - AC-KAN-152-03 waits for KAN-155 (reschedule and cancel do not exist yet). AC-KAN-152-09 no longer applies: with the snapshot (D-1) the collaborator name comes in the same read as the booking, so it cannot fail on its own.
 - AC-KAN-151-04 and AC-KAN-153-05 hold by the query design (`buildMyBookingsQuery`, checked against the emulator seed); they have no component test yet.
 

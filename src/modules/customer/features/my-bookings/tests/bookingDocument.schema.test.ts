@@ -70,6 +70,12 @@ describe("mapMyBooking (KAN-150)", () => {
     expect(booking.collaboratorName).toBeNull();
   });
 
+  it("reads a booking without a cancellation field as not cancelled", () => {
+    const booking = mapMyBooking(buildDocument({ cancellation: undefined }));
+
+    expect(booking.cancellation).toBeNull();
+  });
+
   it("rejects a document with an unknown status", () => {
     expect(() => mapMyBooking(buildDocument({ status: "unknown" }))).toThrow();
   });

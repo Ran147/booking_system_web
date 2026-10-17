@@ -3,6 +3,9 @@ import { FIRESTORE_COLLECTION } from "@/constants";
 import { BUSINESS_FIELD } from "../constants";
 import type { MyBookingsQueryParams } from "../models";
 
+// Position of the tab in the key of a list: [bookings, user, tab, ...].
+const LIST_KEY_TAB_INDEX = 2;
+
 export const myBookingsQueryKeys = {
   all: (customerUserId: string): QueryKey =>
     [FIRESTORE_COLLECTION.BOOKINGS, customerUserId] as const,
@@ -37,3 +40,6 @@ export const myBookingsQueryKeys = {
       pageSize,
     ] as const,
 };
+
+export const readListKeyTab = (queryKey: QueryKey): unknown =>
+  queryKey[LIST_KEY_TAB_INDEX];

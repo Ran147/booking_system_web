@@ -173,6 +173,39 @@ describe("BookingDetailPage (KAN-152)", () => {
     ).toBeInTheDocument();
   });
 
+  it("retrying after the business failed does not ask for a booking of no business", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(fetchBookingBusinessBySlugModule, "fetchBookingBusinessBySlug")
+      .mockRejectedValueOnce(new FirebaseError("unavailable", "offline"))
+      .mockResolvedValue(BUSINESS);
+    const fetchSpy = vi
+      .spyOn(fetchMyBookingModule, "fetchMyBooking")
+      .mockResolvedValue(BOOKING);
+    renderDetail();
+    await screen.findByRole("alert");
+
+    await user.click(
+      screen.getByRole("button", {
+        name: testI18n.t("customer:myBookings.retryAction"),
+      }),
+    );
+
+    expect(await screen.findByText("Corte de cabello")).toBeInTheDocument();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith(BUSINESS.id, "booking-1");
+  });
+
+  it("shows the price with the default currency when the business has none", async () => {
+    vi.spyOn(
+      fetchBookingBusinessBySlugModule,
+      "fetchBookingBusinessBySlug",
+    ).mockResolvedValue({ ...BUSINESS, currency: null });
+    vi.spyOn(fetchMyBookingModule, "fetchMyBooking").mockResolvedValue(BOOKING);
+    renderDetail();
+
+    expect(await screen.findByText(/250,00/)).toBeInTheDocument();
+  });
+
   it("shows a network error with a retry that loads the booking", async () => {
     const user = userEvent.setup();
     vi.spyOn(fetchMyBookingModule, "fetchMyBooking")

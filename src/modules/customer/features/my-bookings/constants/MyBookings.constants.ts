@@ -18,6 +18,10 @@ export const CLOSED_BOOKING_STATUSES: readonly BookingStatus[] = [
   BOOKING_STATUS.NO_SHOW,
 ];
 
+// Used for the price of a business that has no currency saved. Where the
+// currency of a business comes from is still to be defined by the team.
+export const DEFAULT_BUSINESS_CURRENCY = "MXN";
+
 export const MY_BOOKINGS_QUERY_PARAM = {
   TAB: "tab",
 } as const;

@@ -22,7 +22,8 @@ const bookingDocumentSchema = z.object({
       ]),
       isPenalized: z.boolean(),
     })
-    .nullable(),
+    .nullable()
+    .default(null),
   collaboratorName: z.string().nullable().default(null),
   endsAt: timestampSchema,
   serviceSnapshot: z.object({

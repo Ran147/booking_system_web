@@ -90,6 +90,9 @@ export const useMyBookingsViewModel = (): MyBookingsViewModel => {
     activeTab,
     errorMessageKey,
     handleNextPage: (): void => {
+      // While the next page loads the old data (and its cursor) is still
+      // there: a second click would repeat the same cursor.
+      if (bookingsQuery.isPlaceholderData) return;
       if (bookingsQuery.data?.nextCursor) {
         pagination.goToNextPage(bookingsQuery.data.nextCursor);
       }
@@ -102,7 +105,9 @@ export const useMyBookingsViewModel = (): MyBookingsViewModel => {
     handleTabChange: (tabId: string): void => {
       setSearchParams({ [MY_BOOKINGS_QUERY_PARAM.TAB]: readTab(tabId) });
     },
-    hasNextPage: Boolean(bookingsQuery.data?.nextCursor),
+    hasNextPage:
+      Boolean(bookingsQuery.data?.nextCursor) &&
+      !bookingsQuery.isPlaceholderData,
     hasPreviousPage: pagination.hasPreviousPage,
     pageNumber: pagination.pageNumber,
     rows,

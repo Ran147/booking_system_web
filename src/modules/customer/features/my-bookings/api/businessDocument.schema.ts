@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { BookingBusiness } from "../models";
 
 const businessDocumentSchema = z.object({
-  currency: z.string(),
+  currency: z.string().nullish(),
   name: z.string(),
   slug: z.string(),
   timeZone: z.string(),
@@ -11,7 +11,14 @@ const businessDocumentSchema = z.object({
 
 export const mapBookingBusiness = (
   businessDocument: DocumentSnapshot,
-): BookingBusiness => ({
-  ...businessDocumentSchema.parse(businessDocument.data()),
-  id: businessDocument.id,
-});
+): BookingBusiness => {
+  const business = businessDocumentSchema.parse(businessDocument.data());
+
+  return {
+    currency: business.currency ?? null,
+    id: businessDocument.id,
+    name: business.name,
+    slug: business.slug,
+    timeZone: business.timeZone,
+  };
+};

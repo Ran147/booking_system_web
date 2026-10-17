@@ -12,7 +12,7 @@ import { mapFirebaseError } from "@/services";
 import type { Nullable } from "@/shared/types";
 import { formatDateTime, formatPrice } from "@/shared/utils/format";
 import { useBookingBusinessBySlugQuery, useMyBookingQuery } from "../api";
-import { NO_CUSTOMER_USER_ID } from "../constants";
+import { DEFAULT_BUSINESS_CURRENCY, NO_CUSTOMER_USER_ID } from "../constants";
 import type { BookingDetailView, BookingDetailViewModel } from "../models";
 
 const NOT_FOUND_MESSAGE_KEYS: readonly ErrorMessageKey[] = [
@@ -76,7 +76,7 @@ export const useBookingDetailViewModel = (): BookingDetailViewModel => {
           ),
           priceLabel: formatPrice(
             booking.priceInCents,
-            business.currency,
+            business.currency ?? DEFAULT_BUSINESS_CURRENCY,
             i18n.language,
           ),
           serviceName: booking.serviceName,
@@ -94,7 +94,9 @@ export const useBookingDetailViewModel = (): BookingDetailViewModel => {
     errorMessageKey,
     handleRetry: (): void => {
       void businessQuery.refetch();
-      void bookingQuery.refetch();
+      // The booking query waits for the business: retrying it before there is
+      // one would ask for a booking of no business.
+      if (business) void bookingQuery.refetch();
     },
     isRetryable:
       failedQuery !== undefined &&

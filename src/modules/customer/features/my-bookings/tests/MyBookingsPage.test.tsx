@@ -166,6 +166,51 @@ describe("MyBookingsPage (KAN-151, KAN-153)", () => {
     );
   });
 
+  it("a second click on next while the page loads does not repeat the cursor", async () => {
+    const cursor = {
+      ref: { path: "businesses/business-a/bookings/booking-20" },
+    } as QueryDocumentSnapshot;
+    const fetchSpy = vi
+      .spyOn(fetchMyBookingsPageModule, "fetchMyBookingsPage")
+      .mockResolvedValueOnce(
+        buildPage([buildBooking()], { nextCursor: cursor, totalCount: 25 }),
+      )
+      .mockReturnValue(new Promise(() => undefined));
+    renderMyBookings();
+    const page = createMyBookingsPage();
+    await page.findRows();
+
+    await page.clickNextPage();
+    await page.clickNextPage();
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(await page.findPaginationSummary()).toHaveTextContent("Página 2");
+    expect(
+      screen.getByRole("button", {
+        name: testI18n.t("common:pagination.nextAction"),
+      }),
+    ).toBeDisabled();
+  });
+
+  it("changing the tab does not keep the bookings of the other tab on screen", async () => {
+    vi.spyOn(
+      fetchMyBookingsPageModule,
+      "fetchMyBookingsPage",
+    ).mockImplementation(({ tab }) =>
+      tab === MY_BOOKINGS_TAB.UPCOMING
+        ? Promise.resolve(buildPage([buildBooking()]))
+        : new Promise(() => undefined),
+    );
+    renderMyBookings();
+    const page = createMyBookingsPage();
+    await page.findRows();
+
+    await page.clickHistoryTab();
+
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+    expect(screen.queryByText("Corte de cabello")).not.toBeInTheDocument();
+  });
+
   it("AC-KAN-151-03: shows the empty message when there are no upcoming bookings", async () => {
     vi.spyOn(
       fetchMyBookingsPageModule,

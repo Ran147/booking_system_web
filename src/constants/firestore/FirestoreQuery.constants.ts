@@ -14,5 +14,7 @@ export const FIRESTORE_ORDER = {
 } as const satisfies Record<string, OrderByDirection>;
 
 export const FIRESTORE_QUERY = {
-  PREFIX_UPPER_BOUND: "",
+  // U+F8FF, the highest character of the index: written as an escape so no
+  // editor drops it as an invisible character.
+  PREFIX_UPPER_BOUND: "",
 } as const;

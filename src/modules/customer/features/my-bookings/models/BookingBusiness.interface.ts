@@ -1,5 +1,8 @@
+import type { Nullable } from "@/shared/types";
+
 export interface BookingBusiness {
-  currency: string;
+  // Businesses created by the real sign-up have no currency yet.
+  currency: Nullable<string>;
   id: string;
   name: string;
   slug: string;
