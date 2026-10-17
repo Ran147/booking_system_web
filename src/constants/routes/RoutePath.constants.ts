@@ -31,6 +31,8 @@ export const ROUTE_PATH = {
   LANDING: {
     CONTACT: "/contact",
     HOME: "/",
+    PLAN_CHECKOUT: "/plans/:planId/checkout",
+    PLAN_DETAIL: "/plans/:planId",
     PLANS: "/plans",
     SIGN_UP: "/sign-up",
     TERMS: "/terms",
