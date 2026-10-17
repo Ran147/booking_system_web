@@ -191,7 +191,7 @@
       "description": "Manage your business's service catalog.",
       "duration": "Duration",
       "durationMinutes": "{{minutes}} min",
-      "editAction": "Edit service",
+      "editAction": "Edit",
       "emptyDescription": "There are no services registered at this time. Click 'Create service' to add the first one.",
       "emptyTitle": "No services registered",
       "filterStatusActive": "Active",

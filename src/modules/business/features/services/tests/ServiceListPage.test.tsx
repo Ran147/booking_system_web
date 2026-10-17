@@ -205,10 +205,50 @@ describe("ServiceListPage (KAN-55)", () => {
     const page = createServiceListPage();
     await page.changeSearchTerm("corte");
 
-    await waitFor(async () => {
-      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
-      expect(page.queryRowByName("Arreglo de barba")).not.toBeInTheDocument();
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Arreglo de barba")).not.toBeInTheDocument();
+        expect(page.queryRowByName("Corte de cabello")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+  });
+
+  it("preserves trailing whitespace while typing search term with multiple words", async () => {
+    vi.spyOn(fetchServicePageModule, "fetchServicePage").mockImplementation(
+      async ({ filters }) => {
+        const normalized = normalizeSearchTerm(filters.searchTerm);
+        const filtered = MOCK_SERVICES.filter((serviceItem) =>
+          normalizeSearchTerm(serviceItem.name).startsWith(normalized),
+        );
+        return {
+          items: filtered,
+          nextCursor: null,
+          totalCount: filtered.length,
+        };
+      },
+    );
+
+    renderWithProviders(<ServiceListPage />, {
+      initialPath: "/business/services",
+      session: SUBSCRIBER_SESSION,
     });
+
+    const page = createServiceListPage();
+    await page.changeSearchTerm("corte ");
+
+    const searchInput = screen.getByRole("searchbox", {
+      name: testI18n.t("business:services.list.searchLabel"),
+    });
+
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Arreglo de barba")).not.toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+
+    expect(searchInput).toHaveValue("corte ");
   });
 
   it("AC-KAN-55-03: filters by status active or inactive and total count matches the filter", async () => {
@@ -234,11 +274,14 @@ describe("ServiceListPage (KAN-55)", () => {
     const page = createServiceListPage();
     await page.changeStatusFilter(SERVICE_STATUS.INACTIVE);
 
-    await waitFor(async () => {
-      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
-      expect(page.queryRowByName("Corte de cabello")).not.toBeInTheDocument();
-      expect(page.queryRowByName("Tinte capilar")).not.toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Arreglo de barba")).toBeInTheDocument();
+        expect(page.queryRowByName("Corte de cabello")).not.toBeInTheDocument();
+        expect(page.queryRowByName("Tinte capilar")).not.toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it("AC-KAN-55-04: shows network error and retry action when loading fails", async () => {
@@ -262,9 +305,12 @@ describe("ServiceListPage (KAN-55)", () => {
 
     await page.clickRetry();
 
-    await waitFor(async () => {
-      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Corte de cabello")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
     expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 
@@ -313,9 +359,12 @@ describe("ServiceListPage (KAN-55)", () => {
 
     await page.clickClearFilters();
 
-    await waitFor(async () => {
-      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Corte de cabello")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it("AC-KAN-55-07: moves to next and previous page with cursor pagination, and resetting filters returns to page 1", async () => {
@@ -349,15 +398,39 @@ describe("ServiceListPage (KAN-55)", () => {
 
     await page.clickNextPage();
 
-    await waitFor(async () => {
-      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Arreglo de barba")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
 
     await page.clickPreviousPage();
 
-    await waitFor(async () => {
-      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Corte de cabello")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+
+    await page.clickNextPage();
+
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Arreglo de barba")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+
+    await page.changeStatusFilter(SERVICE_STATUS.ACTIVE);
+
+    await waitFor(
+      () => {
+        expect(page.queryRowByName("Corte de cabello")).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it("AC-KAN-55-08: allows viewing and searching services when business is inactive/suspended, but edit and create are disabled", async () => {

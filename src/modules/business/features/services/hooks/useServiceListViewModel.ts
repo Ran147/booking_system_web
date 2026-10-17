@@ -83,9 +83,8 @@ export const useServiceListViewModel = (
 
   const handleSearchChange = (newSearchTerm: string): void => {
     const nextParameters = new URLSearchParams(searchParameters);
-    const trimmedTerm = newSearchTerm.trim();
-    if (trimmedTerm.length > 0) {
-      nextParameters.set(SEARCH_PARAM.SEARCH, trimmedTerm);
+    if (newSearchTerm.trim().length > 0) {
+      nextParameters.set(SEARCH_PARAM.SEARCH, newSearchTerm);
     } else {
       nextParameters.delete(SEARCH_PARAM.SEARCH);
     }
