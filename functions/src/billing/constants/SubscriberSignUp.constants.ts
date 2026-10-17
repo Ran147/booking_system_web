@@ -44,15 +44,23 @@ export type SignUpErrorReason =
 // and the reason to a translated key and never shows these.
 export const SIGN_UP_ERROR = Object.freeze({
   ACCOUNT_EXISTS: "An account already exists for the checkout email",
+  ACCOUNT_NOT_DELETED:
+    "The new Auth user could not be deleted while undoing a sign-up",
   CLAIMS_NOT_SET: "The subscriber claims could not be set after sign-up",
   INVALID_PAYLOAD:
     "The sign-up payload is missing fields or breaks the field rules",
   LINK_EXPIRED: "The sign-up link has expired",
   LINK_INVALID: "The sign-up link is unknown or was already used",
   PLAN_NOT_FOUND: "The plan of the checkout does not exist",
+  SIGN_UP_NOT_UNDONE:
+    "The sign-up documents could not be deleted while undoing a sign-up",
   SLUG_RESERVED: "The business slug is reserved",
   SLUG_TAKEN: "The business slug is already taken",
 } as const);
+
+// Times completeSubscriberSignUp tries to set the claims before it undoes the
+// sign-up (SPEC "Order and rollback").
+export const SIGN_UP_CLAIMS_ATTEMPTS = 3;
 
 // Sign-up link of the KAN-24 email (plan-checkout SPEC "Data", AS-6). Only
 // the hash of the token is stored on the PlanCheckout.

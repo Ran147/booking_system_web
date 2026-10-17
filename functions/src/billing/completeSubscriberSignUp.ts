@@ -1,8 +1,13 @@
-import { FieldValue, type Transaction } from "firebase-admin/firestore";
+import {
+  type DocumentReference,
+  FieldValue,
+  type Transaction,
+} from "firebase-admin/firestore";
 import { logger } from "firebase-functions";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import {
   PAYMENT_RESULT,
+  SIGN_UP_CLAIMS_ATTEMPTS,
   SIGN_UP_ERROR,
   SIGN_UP_ERROR_REASON,
 } from "./constants/SubscriberSignUp.constants.js";
@@ -27,6 +32,12 @@ interface SignUpAccount {
   readonly email: string;
   readonly fullName: string;
   readonly userId: string;
+}
+
+// Paths of the documents one sign-up stores, so they can be undone.
+interface SignUpDocuments {
+  readonly businessId: string;
+  readonly paymentId: string;
 }
 
 // An existing email fails with a neutral reason (AS-5); the link stays valid.
@@ -59,7 +70,7 @@ const writeSignUpDocuments = async (
   transaction: Transaction,
   signUpPayload: CompleteSubscriberSignUpPayload,
   signUpAccount: SignUpAccount,
-): Promise<string> => {
+): Promise<SignUpDocuments> => {
   const { planCheckout, planCheckoutReference } = await findSignUpCheckout(
     signUpPayload.signUpToken,
     transaction,
@@ -104,20 +115,97 @@ const writeSignUpDocuments = async (
   });
   // The checkout payment appears in the business's payment history
   // (KAN-46, KAN-178).
-  transaction.create(
-    businessReference.collection(FIRESTORE_COLLECTION.PAYMENTS).doc(),
-    {
-      amountInCents: planCheckout.amountInCents,
-      createdAt: planCheckout.paidAt,
-      paymentReference: planCheckout.paymentReference ?? null,
-      planId: planCheckout.planId,
-      refundedAt: null,
-      result: PAYMENT_RESULT.SUCCEEDED,
-    },
-  );
+  const paymentReference = businessReference
+    .collection(FIRESTORE_COLLECTION.PAYMENTS)
+    .doc();
+  transaction.create(paymentReference, {
+    amountInCents: planCheckout.amountInCents,
+    createdAt: planCheckout.paidAt,
+    paymentReference: planCheckout.paymentReference ?? null,
+    planId: planCheckout.planId,
+    refundedAt: null,
+    result: PAYMENT_RESULT.SUCCEEDED,
+  });
   transaction.update(planCheckoutReference, { signUpCompletedAt: createdAt });
 
-  return businessReference.id;
+  return { businessId: businessReference.id, paymentId: paymentReference.id };
+};
+
+// Deletes the new Auth user. A failure here is logged and not thrown, so the
+// caller re-throws the error that started the rollback.
+const deleteAccount = async (userId: string): Promise<void> => {
+  try {
+    await auth.deleteUser(userId);
+  } catch (error) {
+    logger.error(SIGN_UP_ERROR.ACCOUNT_NOT_DELETED, { error, userId });
+  }
+};
+
+// Undoes a stored sign-up: the documents, the slug lock and the used mark of
+// the link, then the Auth user, so the visitor can sign up again with the
+// same link (AC-KAN-25-22). Failures are logged, never thrown.
+const undoSignUp = async (
+  planCheckoutReference: DocumentReference,
+  signUpPayload: CompleteSubscriberSignUpPayload,
+  signUpAccount: SignUpAccount,
+  signUpDocuments: SignUpDocuments,
+): Promise<void> => {
+  const businessReference = firestore
+    .collection(FIRESTORE_COLLECTION.BUSINESSES)
+    .doc(signUpDocuments.businessId);
+  const batch = firestore.batch();
+  batch.delete(
+    businessReference
+      .collection(FIRESTORE_COLLECTION.PAYMENTS)
+      .doc(signUpDocuments.paymentId),
+  );
+  batch.delete(businessReference);
+  batch.delete(
+    firestore.collection(FIRESTORE_COLLECTION.USERS).doc(signUpAccount.userId),
+  );
+  batch.delete(
+    firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESS_SLUGS)
+      .doc(signUpPayload.businessSlug),
+  );
+  batch.update(planCheckoutReference, { signUpCompletedAt: null });
+  try {
+    await batch.commit();
+  } catch (error) {
+    logger.error(SIGN_UP_ERROR.SIGN_UP_NOT_UNDONE, {
+      ...signUpDocuments,
+      error,
+      userId: signUpAccount.userId,
+    });
+  }
+  await deleteAccount(signUpAccount.userId);
+};
+
+// Sets the subscriber claims, trying again a few times: a transient Auth
+// failure must not leave an account that cannot open its portal.
+const setSubscriberClaims = async (
+  userId: string,
+  businessId: string,
+): Promise<void> => {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await auth.setCustomUserClaims(userId, {
+        businessId,
+        role: USER_ROLE.SUBSCRIBER,
+      });
+      return;
+    } catch (error) {
+      logger.warn(SIGN_UP_ERROR.CLAIMS_NOT_SET, {
+        attempt,
+        businessId,
+        error,
+        userId,
+      });
+      if (attempt >= SIGN_UP_CLAIMS_ATTEMPTS) {
+        throw error;
+      }
+    }
+  }
 };
 
 // Creates the subscriber's account and their pending business from a paid
@@ -141,7 +229,9 @@ export const completeSubscriberSignUp = onCall<
       reason: SIGN_UP_ERROR_REASON.SLUG_RESERVED,
     });
   }
-  const { planCheckout } = await findSignUpCheckout(signUpPayload.signUpToken);
+  const { planCheckout, planCheckoutReference } = await findSignUpCheckout(
+    signUpPayload.signUpToken,
+  );
 
   const fullName = [signUpPayload.firstName, signUpPayload.lastName].join(
     STRING.SPACE,
@@ -160,24 +250,27 @@ export const completeSubscriberSignUp = onCall<
   // Firebase Auth is outside the transaction: if the transaction fails, the
   // new Auth user is deleted, so no account is left without its business and
   // the link stays valid (AC-KAN-25-22).
-  const businessId = await firestore
+  const signUpDocuments = await firestore
     .runTransaction((transaction) =>
       writeSignUpDocuments(transaction, signUpPayload, signUpAccount),
     )
     .catch(async (error: unknown) => {
-      await auth.deleteUser(userId);
+      await deleteAccount(userId);
       throw error;
     });
 
+  // Without claims the account cannot open its portal, so if they cannot be
+  // set the whole sign-up is undone and the visitor can try again.
   try {
-    await auth.setCustomUserClaims(userId, {
-      businessId,
-      role: USER_ROLE.SUBSCRIBER,
-    });
+    await setSubscriberClaims(userId, signUpDocuments.businessId);
   } catch (error) {
-    // The account and the business are stored; the claims can be set again
-    // from them, so the sign-up is not undone.
-    logger.error(SIGN_UP_ERROR.CLAIMS_NOT_SET, { businessId, error, userId });
+    await undoSignUp(
+      planCheckoutReference,
+      signUpPayload,
+      signUpAccount,
+      signUpDocuments,
+    );
+    throw error;
   }
 
   return { email: planCheckout.email };

@@ -1,5 +1,13 @@
 import { HttpsError } from "firebase-functions/v2/https";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import {
   SIGN_UP_LINK_STATE,
   TEST_CHECKOUT_EMAIL,
@@ -20,7 +28,10 @@ import {
   readErrorReason,
 } from "../../shared/tests/emulatorTestHelpers.js";
 import { completeSubscriberSignUp } from "../completeSubscriberSignUp.js";
-import { SIGN_UP_ERROR_REASON } from "../constants/SubscriberSignUp.constants.js";
+import {
+  SIGN_UP_CLAIMS_ATTEMPTS,
+  SIGN_UP_ERROR_REASON,
+} from "../constants/SubscriberSignUp.constants.js";
 
 // Google is not called from tests: assertRecaptcha has its own test, and here
 // it accepts every token unless a test makes it reject one.
@@ -48,6 +59,10 @@ describe("completeSubscriberSignUp", () => {
   let planCheckoutId: string;
 
   beforeAll(assertEmulatorsRunning);
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   beforeEach(async () => {
     await clearEmulators();
@@ -208,6 +223,71 @@ describe("completeSubscriberSignUp", () => {
     expect(await countAuthUsers()).toBe(0);
     expect(await countDocuments(FIRESTORE_COLLECTION.BUSINESSES)).toBe(0);
     expect(await countDocuments(FIRESTORE_COLLECTION.USERS)).toBe(0);
+  });
+
+  it("KAN-25: keeps the SLUG_TAKEN error when the new Auth user cannot be deleted (AC-KAN-25-22)", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESS_SLUGS)
+      .doc("peluqueria-dona-ana")
+      .set({ businessId: "other-business" });
+    vi.spyOn(auth, "deleteUser").mockRejectedValueOnce(
+      new Error("Auth is down"),
+    );
+
+    const httpsError = await captureHttpsError(
+      callCompleteSubscriberSignUp(buildCallableRequest(buildSignUpPayload())),
+    );
+
+    expect(httpsError.code).toBe("already-exists");
+    expect(readErrorReason(httpsError)).toBe(SIGN_UP_ERROR_REASON.SLUG_TAKEN);
+  });
+
+  it("KAN-25: tries the claims again when setting them fails once (AC-KAN-25-16)", async () => {
+    const setCustomUserClaims = auth.setCustomUserClaims.bind(auth);
+    vi.spyOn(auth, "setCustomUserClaims")
+      .mockRejectedValueOnce(new Error("Auth is down"))
+      .mockImplementation(setCustomUserClaims);
+
+    const signUpResponse = await callCompleteSubscriberSignUp(
+      buildCallableRequest(buildSignUpPayload()),
+    );
+
+    expect(signUpResponse).toEqual({ email: TEST_CHECKOUT_EMAIL });
+    const userRecord = await auth.getUserByEmail(TEST_CHECKOUT_EMAIL);
+    expect(userRecord.customClaims).toMatchObject({ role: "subscriber" });
+  });
+
+  it("KAN-25: undoes the whole sign-up and keeps the link valid when the claims cannot be set (AC-KAN-25-22)", async () => {
+    vi.spyOn(auth, "setCustomUserClaims").mockRejectedValue(
+      new Error("Auth is down"),
+    );
+
+    await expect(
+      callCompleteSubscriberSignUp(buildCallableRequest(buildSignUpPayload())),
+    ).rejects.toThrow("Auth is down");
+
+    expect(auth.setCustomUserClaims).toHaveBeenCalledTimes(
+      SIGN_UP_CLAIMS_ATTEMPTS,
+    );
+    expect(await countAuthUsers()).toBe(0);
+    expect(await countDocuments(FIRESTORE_COLLECTION.BUSINESSES)).toBe(0);
+    expect(await countDocuments(FIRESTORE_COLLECTION.USERS)).toBe(0);
+    expect(await countDocuments(FIRESTORE_COLLECTION.BUSINESS_SLUGS)).toBe(0);
+    expect(
+      (await firestore.collectionGroup(FIRESTORE_COLLECTION.PAYMENTS).get())
+        .size,
+    ).toBe(0);
+    const checkoutSnapshot = await firestore
+      .collection(FIRESTORE_COLLECTION.PLAN_CHECKOUTS)
+      .doc(planCheckoutId)
+      .get();
+    expect(checkoutSnapshot.data()?.signUpCompletedAt).toBeNull();
+
+    vi.mocked(auth.setCustomUserClaims).mockRestore();
+    const signUpResponse = await callCompleteSubscriberSignUp(
+      buildCallableRequest(buildSignUpPayload()),
+    );
+    expect(signUpResponse).toEqual({ email: TEST_CHECKOUT_EMAIL });
   });
 
   it("KAN-25: gives the slug to only one of two sign-ups that race for it (AC-KAN-25-18)", async () => {
