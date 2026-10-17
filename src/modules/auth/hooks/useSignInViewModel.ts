@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
 import { DEFAULT_LANGUAGE } from "@/constants";
@@ -21,6 +21,7 @@ import {
 } from "../models/SignInForm.schema";
 import type { SignInViewModel } from "../models/signIn.model";
 import { readSignUpEmail } from "../utils/readSignUpEmail";
+import { toLocationWithoutState } from "../utils/toLocationWithoutState";
 
 /**
  * Estado, envío, errores y navegación del inicio de sesión (US-33).
@@ -55,21 +56,11 @@ export const useSignInViewModel = (): SignInViewModel => {
   const hasSignUpState = readSignUpEmail(location.state) !== null;
   useEffect(() => {
     if (!hasSignUpState) return;
-    void navigate(
-      {
-        hash: location.hash,
-        pathname: location.pathname,
-        search: location.search,
-      },
-      { replace: true, state: null },
-    );
-  }, [
-    hasSignUpState,
-    location.hash,
-    location.pathname,
-    location.search,
-    navigate,
-  ]);
+    void navigate(toLocationWithoutState(location), {
+      replace: true,
+      state: null,
+    });
+  }, [hasSignUpState, location, navigate]);
 
   // AC-KAN-34-07: the message is announced (role="alert") and gets focus.
   useEffect(() => {
@@ -103,6 +94,7 @@ export const useSignInViewModel = (): SignInViewModel => {
     );
   };
 
+  const emailValue = useWatch({ control: form.control, name: "email" });
   const isSubmitting = form.formState.isSubmitting || signInMutation.isPending;
 
   return {
@@ -115,6 +107,8 @@ export const useSignInViewModel = (): SignInViewModel => {
     isSubmitDisabled: !recaptchaToken || isSubmitting,
     isSubmitting,
     language: i18n.resolvedLanguage ?? DEFAULT_LANGUAGE,
+    // AC-KAN-36-01: the recovery page starts with the email typed here.
+    passwordRecoveryLocationState: { email: emailValue },
     recaptchaResetSignal,
     recaptchaSiteKey,
     serverErrorAlertReference,

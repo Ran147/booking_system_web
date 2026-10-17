@@ -1,5 +1,6 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { EMULATOR } from "../../shared/constants/Emulator.constants.js";
 import { RECAPTCHA_VERIFICATION } from "../../shared/constants/Recaptcha.constants.js";
 import { assertRecaptcha } from "../assertRecaptcha.js";
 
@@ -24,10 +25,7 @@ const answerWith = (verificationResult: unknown): void => {
 describe("assertRecaptcha", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
-    vi.stubEnv(
-      RECAPTCHA_VERIFICATION.EMULATOR_ENV_VAR,
-      RECAPTCHA_VERIFICATION.EMULATOR_FLAG_ENABLED,
-    );
+    vi.stubEnv(EMULATOR.ENV_VAR, EMULATOR.FLAG_ENABLED);
   });
 
   afterEach(() => {

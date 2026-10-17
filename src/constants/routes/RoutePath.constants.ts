@@ -12,6 +12,7 @@ export const ROUTE_PATH = {
   },
   AUTH: {
     PASSWORD_RECOVERY: "/password-recovery",
+    PASSWORD_RESET: "/password-reset",
     SIGN_IN: "/sign-in",
   },
   BUSINESS: {
