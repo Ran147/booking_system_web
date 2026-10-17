@@ -4,6 +4,7 @@ import {
   RECAPTCHA_VERIFICATION,
   RECAPTCHA_VERIFICATION_ERROR,
 } from "../shared/constants/Recaptcha.constants.js";
+import { isEmulator } from "../shared/isEmulator.js";
 
 // Verifies a reCAPTCHA token inside the function that runs the protected
 // action, so a script cannot skip the check (auth-and-roles §5,
@@ -12,10 +13,6 @@ import {
 // - unavailable: Google could not be reached.
 
 const recaptchaSecretKey = defineSecret(RECAPTCHA_VERIFICATION.SECRET_NAME);
-
-const isEmulator = (): boolean =>
-  process.env[RECAPTCHA_VERIFICATION.EMULATOR_ENV_VAR] ===
-  RECAPTCHA_VERIFICATION.EMULATOR_FLAG_ENABLED;
 
 // Every function that calls assertRecaptcha declares these in its options:
 // onCall({ secrets: RECAPTCHA_SECRETS }, ...).

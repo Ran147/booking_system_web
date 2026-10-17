@@ -36,6 +36,9 @@ export const SignInPage = (): ReactElement => {
           <SignInErrorAlert
             alertReference={signInViewModel.serverErrorAlertReference}
             errorKey={signInViewModel.serverErrorKey}
+            passwordRecoveryLocationState={
+              signInViewModel.passwordRecoveryLocationState
+            }
             shouldShowPasswordRecoveryLink={
               signInViewModel.shouldShowPasswordRecoveryLink
             }

@@ -29,6 +29,7 @@ export const SignInForm = ({
     isSubmitDisabled,
     isSubmitting,
     language,
+    passwordRecoveryLocationState,
     recaptchaResetSignal,
     recaptchaSiteKey,
   } = signInViewModel;
@@ -58,6 +59,7 @@ export const SignInForm = ({
                 <FormLabel>{t("auth.signIn.passwordLabel")}</FormLabel>
                 <AppLink
                   className="text-sm"
+                  state={passwordRecoveryLocationState}
                   to={ROUTE_PATH.AUTH.PASSWORD_RECOVERY}
                 >
                   {t("auth.signIn.forgotPassword")}
