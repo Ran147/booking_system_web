@@ -8,6 +8,7 @@ import type { SignInErrorAlertProps } from "../models/signIn.model";
 export const SignInErrorAlert = ({
   alertReference,
   errorKey,
+  passwordRecoveryLocationState,
   shouldShowPasswordRecoveryLink,
 }: SignInErrorAlertProps): Nullable<ReactElement> => {
   const { t } = useTranslation([
@@ -21,7 +22,10 @@ export const SignInErrorAlert = ({
     <Alert className="flex flex-col gap-1" ref={alertReference}>
       <p>{t(errorKey)}</p>
       {shouldShowPasswordRecoveryLink && (
-        <AppLink to={ROUTE_PATH.AUTH.PASSWORD_RECOVERY}>
+        <AppLink
+          state={passwordRecoveryLocationState}
+          to={ROUTE_PATH.AUTH.PASSWORD_RECOVERY}
+        >
           {t("auth.signIn.recoverPasswordAction")}
         </AppLink>
       )}

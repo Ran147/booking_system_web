@@ -2,7 +2,7 @@ import type { RouteObject } from "react-router";
 import { ROUTE_PATH } from "@/constants";
 import { GuestOnly } from "./components/GuestOnly";
 
-// Shared by every role. GuestOnly sends a signed-in user to their portal.
+// Sign-in, recovery and reset are shared by every role. GuestOnly sends a signed-in user to their portal.
 export const authRoutes: RouteObject[] = [
   {
     children: [
@@ -12,6 +12,21 @@ export const authRoutes: RouteObject[] = [
           return { Component: SignInPage };
         },
         path: ROUTE_PATH.AUTH.SIGN_IN,
+      },
+      {
+        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+          const { PasswordRecoveryPage } =
+            await import("./PasswordRecoveryPage");
+          return { Component: PasswordRecoveryPage };
+        },
+        path: ROUTE_PATH.AUTH.PASSWORD_RECOVERY,
+      },
+      {
+        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+          const { PasswordResetPage } = await import("./PasswordResetPage");
+          return { Component: PasswordResetPage };
+        },
+        path: ROUTE_PATH.AUTH.PASSWORD_RESET,
       },
     ],
     element: <GuestOnly />,

@@ -357,7 +357,12 @@ export default tseslint.config(
   // Tool config files must use export default; typescript-eslint documents
   // its default import (`tseslint.configs`), which import-x warns about
   {
-    files: ["*.config.{js,ts}", "functions/*.config.{js,ts}"],
+    files: [
+      "*.config.{js,ts}",
+      "functions/*.config.{js,ts}",
+      // Playwright reads the setup function from the default export.
+      "e2e/globalSetup.ts",
+    ],
     rules: {
       "import-x/no-default-export": "off",
       "import-x/no-named-as-default-member": "off",
