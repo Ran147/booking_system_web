@@ -59,14 +59,14 @@ The business always comes from the session, never from the URL. A subscriber nev
 - [x] **AC-KAN-54-09** · edge · Given the subscriber adds several additional features, when they reorder or remove one before saving, then the saved service keeps exactly the remaining features in the chosen order; empty feature rows are discarded. See AS-6. [KAN-54]
 
 ### KAN-55 — View and filter services
-- [ ] **AC-KAN-55-01** · happy · Given a subscriber whose business has services, when they open the service list, then they see one page of their own business's services with name, price in the business currency, duration and a status badge, and a total count. [KAN-55]
-- [ ] **AC-KAN-55-02** · happy · Given the list, when the subscriber types part of a service name, then only services whose name starts with that text are listed, ignoring case and accents. See AS-7. [KAN-55]
-- [ ] **AC-KAN-55-03** · happy · Given the list, when the subscriber filters by status `active` or `inactive`, then only services with that status are listed and the total count matches the filter. [KAN-55]
-- [ ] **AC-KAN-55-04** · error · Given loading the list fails because of the network, when the subscriber opens it, then an error state with `common:errors.network` and a retry action is shown instead of an empty list. [KAN-55]
-- [ ] **AC-KAN-55-05** · edge · Given a business with no services, when the subscriber opens the list, then an empty state with `business:services.list.emptyTitle` and a create action is shown. [KAN-55]
-- [ ] **AC-KAN-55-06** · edge · Given a search or filter with no matches, when it is applied, then `business:services.list.noResults` is shown and the filters can be cleared. [KAN-55]
-- [ ] **AC-KAN-55-07** · edge · Given more services than one page holds, when the subscriber moves to the next or previous page, then the next or previous page is shown and changing a filter or search returns to the first page. [KAN-55]
-- [ ] **AC-KAN-55-08** · edge · Given a subscriber whose business is `inactive` or `suspended`, when they open the list, then they can still view and search their services, and the create, edit and status actions are disabled. [KAN-55, KAN-49]
+- [x] **AC-KAN-55-01** · happy · Given a subscriber whose business has services, when they open the service list, then they see one page of their own business's services with name, price in the business currency, duration and a status badge, and a total count. [KAN-55]
+- [x] **AC-KAN-55-02** · happy · Given the list, when the subscriber types part of a service name, then only services whose name starts with that text are listed, ignoring case and accents. See AS-7. [KAN-55]
+- [x] **AC-KAN-55-03** · happy · Given the list, when the subscriber filters by status `active` or `inactive`, then only services with that status are listed and the total count matches the filter. [KAN-55]
+- [x] **AC-KAN-55-04** · error · Given loading the list fails because of the network, when the subscriber opens it, then an error state with `common:errors.network` and a retry action is shown instead of an empty list. [KAN-55]
+- [x] **AC-KAN-55-05** · edge · Given a business with no services, when the subscriber opens the list, then an empty state with `business:services.list.emptyTitle` and a create action is shown. [KAN-55]
+- [x] **AC-KAN-55-06** · edge · Given a search or filter with no matches, when it is applied, then `business:services.list.noResults` is shown and the filters can be cleared. [KAN-55]
+- [x] **AC-KAN-55-07** · edge · Given more services than one page holds, when the subscriber moves to the next or previous page, then the next or previous page is shown and changing a filter or search returns to the first page. [KAN-55]
+- [x] **AC-KAN-55-08** · edge · Given a subscriber whose business is `inactive` or `suspended`, when they open the list, then they can still view and search their services, and the create, edit and status actions are disabled. [KAN-55, KAN-49]
 
 ### KAN-56 — Edit a service
 - [ ] **AC-KAN-56-01** · happy · Given a subscriber and one of their services, when they change any of its fields and save, then the service shows the new values in the list and in its detail. [KAN-56]

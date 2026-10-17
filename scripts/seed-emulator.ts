@@ -47,6 +47,7 @@ import {
   USER_ROLE,
   type UserRole,
 } from "../src/domain/user/UserRole.constants";
+import { normalizeSearchTerm } from "../src/utils/normalizeSearchTerm";
 
 interface SeedUser {
   EMAIL: string;
@@ -140,6 +141,7 @@ const buildServiceDocument = (
   durationMinutes: seedService.DURATION_MINUTES,
   name: seedService.NAME,
   priceInCents: seedService.PRICE_IN_CENTS,
+  searchName: normalizeSearchTerm(seedService.NAME),
   status: SERVICE_STATUS.ACTIVE,
 });
 

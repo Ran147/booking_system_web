@@ -17,6 +17,9 @@ export {
   type CreateServiceResponse,
   type ServiceFormValues,
   type ServiceFormViewModel,
+  type ServiceListFilters,
+  type ServiceListItem,
+  type ServiceListQueryParams,
   type ServiceListViewModel,
   type UseServiceListViewModelOptions,
 } from "./models";
