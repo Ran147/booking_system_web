@@ -1,4 +1,6 @@
+import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState, type ReactElement } from "react";
 import type * as ReactRouter from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { ROUTE_PATH } from "@/shared/constants";
@@ -10,8 +12,14 @@ import {
 } from "@/shared/test-utils";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { createLandingNavbarPage } from "./LandingNavbar.page";
-import { LandingNavbar } from "../components/LandingNavbar";
+import {
+  LandingNavbar,
+  LandingNavbarBranding,
+} from "../components/LandingNavbar";
+import { LANDING_NAVBAR_CONSTANTS } from "../constants/landingNavbar.constants";
 
+const BRAND_NAME = "Booking System";
+const BROKEN_IMAGE_URL = "https://example.com/broken-logo.png";
 const TARGET_SECTION_ID = "plans-section";
 const mockNavigate = vi.fn();
 
@@ -180,9 +188,58 @@ describe("LandingNavbar (KAN-3, KAN-12)", () => {
       testI18n.t("landing:home.navbar.logoAlt"),
     );
 
-    const homeLink = page.getNavigationLink(
-      `${testI18n.t("landing:home.navbar.links.home")}`,
+    const logoLink = page.getLogoLink();
+    expect(logoLink).toBeInTheDocument();
+    expect(logoLink).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
+    expect(page.getBrandName()).toHaveTextContent(
+      LANDING_NAVBAR_CONSTANTS.BRAND_NAME,
     );
-    expect(homeLink).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
+  });
+
+  it("KAN-12: AC-KAN-12-02 falls back to brand name and stylized mark when logo image fails to load", () => {
+    const logoAlt = testI18n.t("landing:home.navbar.logoAlt");
+
+    const BrandingTestHarness = (): ReactElement => {
+      const [hasImageError, setHasImageError] = useState(false);
+      return (
+        <LandingNavbarBranding
+          brandName={BRAND_NAME}
+          hasImageError={hasImageError}
+          logoAlt={logoAlt}
+          logoUrl={BROKEN_IMAGE_URL}
+          onImageError={(): void => setHasImageError(true)}
+        />
+      );
+    };
+
+    renderWithProviders(<BrandingTestHarness />, {
+      initialPath: ROUTE_PATH.LANDING.HOME,
+      session: SIGNED_OUT_SESSION,
+    });
+
+    const imageElement = screen.getByRole("img", { name: logoAlt });
+    expect(imageElement).toBeInTheDocument();
+    expect(imageElement).toHaveAttribute("src", BROKEN_IMAGE_URL);
+
+    fireEvent.error(imageElement);
+
+    const fallbackMark = screen.getByRole("img", { name: logoAlt });
+    expect(fallbackMark).toBeInTheDocument();
+    expect(fallbackMark).toHaveClass("bg-primary");
+    expect(screen.getByText(BRAND_NAME)).toBeInTheDocument();
+  });
+
+  it("KAN-12: AC-KAN-12-03 applies semantic dynamic theme tokens to ensure dark/light legibility and contrast", () => {
+    renderWithProviders(<LandingNavbar />, {
+      initialPath: ROUTE_PATH.LANDING.HOME,
+      session: SIGNED_OUT_SESSION,
+    });
+
+    const page = createLandingNavbarPage();
+    const logo = page.getLogo();
+
+    expect(logo).toHaveClass("bg-primary");
+    expect(logo).toHaveClass("text-primary-foreground");
+    expect(page.getBrandName()).toHaveClass("text-foreground");
   });
 });

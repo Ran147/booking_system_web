@@ -103,4 +103,18 @@ describe("useLandingNavbarViewModel", () => {
 
     vi.restoreAllMocks();
   });
+
+  it("handles logo image error state transition", () => {
+    const { result } = renderHook(() => useLandingNavbarViewModel(), {
+      wrapper: createWrapper(SIGNED_OUT_SESSION),
+    });
+
+    expect(result.current.hasLogoImageError).toBe(false);
+
+    act(() => {
+      result.current.handleLogoImageError();
+    });
+
+    expect(result.current.hasLogoImageError).toBe(true);
+  });
 });
