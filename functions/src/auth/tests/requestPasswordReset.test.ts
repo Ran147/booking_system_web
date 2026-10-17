@@ -8,6 +8,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { EMULATOR } from "../../shared/constants/Emulator.constants.js";
 import { FIRESTORE_COLLECTION } from "../../shared/constants/FirestoreCollection.constants.js";
 import { auth, firestore } from "../../shared/firebaseAdmin.js";
 import {
@@ -99,10 +100,7 @@ describe("requestPasswordReset", () => {
 
   beforeEach(async () => {
     await clearEmulators();
-    vi.stubEnv(
-      PASSWORD_RESET.EMULATOR_ENV_VAR,
-      PASSWORD_RESET.EMULATOR_FLAG_ENABLED,
-    );
+    vi.stubEnv(EMULATOR.ENV_VAR, EMULATOR.FLAG_ENABLED);
     vi.mocked(assertRecaptcha).mockReset().mockResolvedValue();
     resetEmailsBeforeTest = (await readAllResetEmails()).length;
   });
@@ -225,7 +223,7 @@ describe("requestPasswordReset", () => {
     "KAN-36: fails visibly outside the emulator when the web API key %s",
     async (_caseName, webApiKey) => {
       await createAccount("es");
-      vi.stubEnv(PASSWORD_RESET.EMULATOR_ENV_VAR, "false");
+      vi.stubEnv(EMULATOR.ENV_VAR, "false");
       vi.stubEnv(PASSWORD_RESET.WEB_API_KEY_ENV_VAR, webApiKey);
 
       const httpsError = await captureHttpsError(
@@ -239,7 +237,7 @@ describe("requestPasswordReset", () => {
 
   it("KAN-36: outside the emulator asks Google with the configured web API key", async () => {
     await createAccount("es");
-    vi.stubEnv(PASSWORD_RESET.EMULATOR_ENV_VAR, "false");
+    vi.stubEnv(EMULATOR.ENV_VAR, "false");
     vi.stubEnv(PASSWORD_RESET.WEB_API_KEY_ENV_VAR, "real-web-api-key");
     const originalFetch = globalThis.fetch;
     const fetchSpy = vi

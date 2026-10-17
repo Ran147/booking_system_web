@@ -3,8 +3,6 @@
 export const PASSWORD_RESET = Object.freeze({
   DEFAULT_WEB_API_KEY: "demo-web-api-key",
   EMULATOR_AUTH_PATH: "identitytoolkit.googleapis.com/v1/accounts:sendOobCode",
-  EMULATOR_ENV_VAR: "FUNCTIONS_EMULATOR",
-  EMULATOR_FLAG_ENABLED: "true",
   EMULATOR_HOST_ENV_VAR: "FIREBASE_AUTH_EMULATOR_HOST",
   LOCALE_HEADER: "X-Firebase-Locale",
   // The answer takes at least this long whether or not the account exists, so
