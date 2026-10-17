@@ -1,5 +1,12 @@
 {
   "auth": {
+    "idle": {
+      "signOutAction": "Cerrar sesión",
+      "signedOut": "Cerramos tu sesión por inactividad. Inicia sesión de nuevo para continuar.",
+      "stayConnectedAction": "Seguir conectado",
+      "warningMessage": "Tu sesión se cerrará en {{count}} segundos por inactividad.",
+      "warningTitle": "¿Sigues ahí?"
+    },
     "password": {
       "hide": "Ocultar contraseña",
       "ruleMet": "Cumplido:",

@@ -21,6 +21,7 @@ import {
 } from "../models/SignInForm.schema";
 import type { SignInViewModel } from "../models/signIn.model";
 import { readSignUpEmail } from "../utils/readSignUpEmail";
+import { toLocationWithoutState } from "../utils/toLocationWithoutState";
 
 /**
  * Estado, envío, errores y navegación del inicio de sesión (US-33).
@@ -55,21 +56,11 @@ export const useSignInViewModel = (): SignInViewModel => {
   const hasSignUpState = readSignUpEmail(location.state) !== null;
   useEffect(() => {
     if (!hasSignUpState) return;
-    void navigate(
-      {
-        hash: location.hash,
-        pathname: location.pathname,
-        search: location.search,
-      },
-      { replace: true, state: null },
-    );
-  }, [
-    hasSignUpState,
-    location.hash,
-    location.pathname,
-    location.search,
-    navigate,
-  ]);
+    void navigate(toLocationWithoutState(location), {
+      replace: true,
+      state: null,
+    });
+  }, [hasSignUpState, location, navigate]);
 
   // AC-KAN-34-07: the message is announced (role="alert") and gets focus.
   useEffect(() => {
