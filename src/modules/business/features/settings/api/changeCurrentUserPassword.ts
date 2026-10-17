@@ -1,12 +1,13 @@
-import { FirebaseError } from "firebase/app";
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
 } from "firebase/auth";
-import { FIREBASE_ERROR_CODE } from "@/constants";
 import { auth } from "@/services";
-import type { ChangePasswordPayload } from "../models";
+import {
+  createAuthenticatedUserRequiredError,
+  type ChangePasswordPayload,
+} from "../models";
 
 export const changeCurrentUserPassword = async ({
   currentPassword,
@@ -15,10 +16,7 @@ export const changeCurrentUserPassword = async ({
   const currentUser = auth.currentUser;
 
   if (!currentUser?.email) {
-    throw new FirebaseError(
-      FIREBASE_ERROR_CODE.USER_MISMATCH,
-      "Authenticated user with email required",
-    );
+    throw createAuthenticatedUserRequiredError();
   }
 
   const credential = EmailAuthProvider.credential(

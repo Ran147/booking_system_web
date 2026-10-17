@@ -11,6 +11,7 @@ import {
 import { createChangePasswordFormPage } from "./ChangePasswordForm.page";
 import { SettingsPage } from "../SettingsPage";
 import { changeCurrentUserPassword } from "../api/changeCurrentUserPassword";
+import { createAuthenticatedUserRequiredError } from "../models";
 
 vi.mock("../api/changeCurrentUserPassword");
 
@@ -210,6 +211,28 @@ describe("ChangePasswordForm", () => {
       testI18n.t("business:settings.password.sessionExpired"),
     );
     expect(alert).not.toHaveTextContent("technical token detail");
+  });
+
+  it("KAN-53: reports a missing authenticated user as an expired session", async () => {
+    vi.mocked(changeCurrentUserPassword).mockRejectedValue(
+      createAuthenticatedUserRequiredError(),
+    );
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createChangePasswordFormPage();
+    await page.fillForm(VALID_FORM_VALUES);
+
+    await page.clickSubmit();
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      testI18n.t("business:settings.password.sessionExpired"),
+    );
+    expect(alert).not.toHaveTextContent(
+      "change-password/authenticated-user-required",
+    );
   });
 
   it("KAN-53: disables all controls and prevents a duplicate submission while pending", async () => {

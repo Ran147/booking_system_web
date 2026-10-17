@@ -7,6 +7,7 @@ import {
 import { FIREBASE_ERROR_CODE } from "@/constants";
 import { auth } from "@/services";
 import { changeCurrentUserPassword } from "../api/changeCurrentUserPassword";
+import { CHANGE_PASSWORD_ERROR_CODE } from "../constants/ChangePassword.constants";
 
 vi.mock("firebase/auth", () => ({
   EmailAuthProvider: { credential: vi.fn() },
@@ -77,7 +78,9 @@ describe("changeCurrentUserPassword", () => {
         currentPassword: "CurrentPassword1!",
         newPassword: "NewPassword1!",
       }),
-    ).rejects.toMatchObject({ code: FIREBASE_ERROR_CODE.USER_MISMATCH });
+    ).rejects.toMatchObject({
+      code: CHANGE_PASSWORD_ERROR_CODE.AUTHENTICATED_USER_REQUIRED,
+    });
     expect(EmailAuthProvider.credential).not.toHaveBeenCalled();
     expect(reauthenticateWithCredential).not.toHaveBeenCalled();
     expect(updatePassword).not.toHaveBeenCalled();
@@ -91,7 +94,9 @@ describe("changeCurrentUserPassword", () => {
         currentPassword: "CurrentPassword1!",
         newPassword: "NewPassword1!",
       }),
-    ).rejects.toMatchObject({ code: FIREBASE_ERROR_CODE.USER_MISMATCH });
+    ).rejects.toMatchObject({
+      code: CHANGE_PASSWORD_ERROR_CODE.AUTHENTICATED_USER_REQUIRED,
+    });
     expect(EmailAuthProvider.credential).not.toHaveBeenCalled();
     expect(reauthenticateWithCredential).not.toHaveBeenCalled();
     expect(updatePassword).not.toHaveBeenCalled();

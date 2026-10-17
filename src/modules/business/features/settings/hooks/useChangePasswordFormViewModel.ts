@@ -6,13 +6,16 @@ import { toast } from "@/components";
 import {
   FIREBASE_ERROR_CODE,
   I18N_NAMESPACE,
+  STRING,
   VALIDATION_MESSAGE_KEY,
   type ValidationMessageKey,
 } from "@/constants";
 import type { MutationError, Nullable, NullableUndefined } from "@/types";
 import { useChangePasswordMutation } from "../api/useChangePasswordMutation";
 import {
+  CHANGE_PASSWORD_ERROR_CODE,
   CHANGE_PASSWORD_ERROR_KEY,
+  CHANGE_PASSWORD_FORM_MODE,
   DEFAULT_CHANGE_PASSWORD_VALUES,
 } from "../constants/ChangePassword.constants";
 import {
@@ -43,11 +46,11 @@ export const useChangePasswordFormViewModel =
     const [visibilityResetKey, setVisibilityResetKey] = useState(0);
     const form = useForm<ChangePasswordFormValues>({
       defaultValues: DEFAULT_CHANGE_PASSWORD_VALUES,
-      mode: "onBlur",
+      mode: CHANGE_PASSWORD_FORM_MODE.VALIDATION,
       resolver: zodResolver(changePasswordFormSchema),
     });
     const newPassword =
-      useWatch({ control: form.control, name: "newPassword" }) ?? "";
+      useWatch({ control: form.control, name: "newPassword" }) ?? STRING.EMPTY;
 
     const resolveFieldErrorMessage = (
       messageKey?: string,
@@ -84,6 +87,8 @@ export const useChangePasswordFormViewModel =
       }
 
       if (
+        mutationError.code ===
+          CHANGE_PASSWORD_ERROR_CODE.AUTHENTICATED_USER_REQUIRED ||
         mutationError.code === FIREBASE_ERROR_CODE.INVALID_USER_TOKEN ||
         mutationError.code === FIREBASE_ERROR_CODE.REQUIRES_RECENT_LOGIN ||
         mutationError.code === FIREBASE_ERROR_CODE.USER_MISMATCH ||
