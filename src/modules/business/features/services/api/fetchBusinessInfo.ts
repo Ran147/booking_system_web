@@ -1,4 +1,5 @@
 import { doc, getDoc } from "firebase/firestore";
+import { z } from "zod";
 import { FIRESTORE_COLLECTION } from "@/constants";
 import { BUSINESS_STATUS, type BusinessStatus } from "@/domain";
 import { firestore } from "@/services/firebase";
@@ -8,6 +9,20 @@ export interface BusinessInfo {
   readonly currency: string;
   readonly status: BusinessStatus;
 }
+
+const businessInfoDocumentSchema = z.object({
+  currency: z.string().optional().default(DEFAULT_SERVICE_LIST_CURRENCY),
+  status: z
+    .enum([
+      BUSINESS_STATUS.ACTIVE,
+      BUSINESS_STATUS.INACTIVE,
+      BUSINESS_STATUS.PENDING,
+      BUSINESS_STATUS.REJECTED,
+      BUSINESS_STATUS.SUSPENDED,
+    ])
+    .optional()
+    .default(BUSINESS_STATUS.ACTIVE),
+});
 
 export const fetchBusinessInfo = async (
   businessId: string,
@@ -26,10 +41,12 @@ export const fetchBusinessInfo = async (
     };
   }
 
-  const documentData = documentSnapshot.data();
+  const documentData = businessInfoDocumentSchema.parse(
+    documentSnapshot.data() ?? {},
+  );
+
   return {
-    currency:
-      (documentData.currency as string) ?? DEFAULT_SERVICE_LIST_CURRENCY,
-    status: (documentData.status as BusinessStatus) ?? BUSINESS_STATUS.ACTIVE,
+    currency: documentData.currency,
+    status: documentData.status,
   };
 };
