@@ -1,7 +1,7 @@
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { signOut } from "firebase/auth";
-import { auth, mapFirebaseError } from "@/shared/lib/firebase";
-import type { MutationError } from "@/shared/types";
+import { auth, mapFirebaseError } from "@/services/firebase";
+import type { MutationError } from "@/types";
 
 // A new business is contracted signed out (AS-8). The session context updates
 // itself when Firebase Auth signs out.

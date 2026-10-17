@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PLAN_STATUS } from "@/shared/domain";
+import { PLAN_STATUS } from "@/domain";
 import { PLAN_BILLING_PERIOD } from "../constants/PlanDetail.constants";
 
 // plans/{planId} as the admin writes it (KAN-180 spec "Data"). Limits are

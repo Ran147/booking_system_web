@@ -1,9 +1,9 @@
 import { Check } from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/shared/components";
-import { I18N_NAMESPACE } from "@/shared/constants";
-import type { Nullable } from "@/shared/types";
+import { Button } from "@/components/common";
+import { I18N_NAMESPACE } from "@/constants";
+import type { Nullable } from "@/types";
 import { ContractErrorAlert } from "./ContractErrorAlert";
 import { SignedInContractNotice } from "./SignedInContractNotice";
 import type {

@@ -1,4 +1,4 @@
-import { FIRESTORE_COLLECTION } from "@/shared/constants";
+import { FIRESTORE_COLLECTION } from "@/constants";
 
 // Not the catalog's key: the catalog query falls back to sample plans.
 export const planDetailQueryKeys = {

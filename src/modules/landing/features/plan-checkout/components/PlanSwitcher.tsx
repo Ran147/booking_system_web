@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLink } from "@/shared/components";
-import { I18N_NAMESPACE } from "@/shared/constants";
-import { cn } from "@/shared/utils/cn";
+import { AppLink } from "@/components/common";
+import { I18N_NAMESPACE } from "@/constants";
+import { cn } from "@/utils/cn";
 import type { PlanSwitcherOption } from "../models/PlanDetailViewModel.interface";
 
 export interface PlanSwitcherProps {

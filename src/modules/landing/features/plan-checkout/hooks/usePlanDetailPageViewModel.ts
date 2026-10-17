@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { generatePath, useNavigate, useParams } from "react-router";
-import { SESSION_STATUS, useSession } from "@/modules/auth";
 import {
   ERROR_MESSAGE_KEY,
   I18N_NAMESPACE,
   ROUTE_PATH,
   STRING,
-} from "@/shared/constants";
-import type { Nullable } from "@/shared/types";
-import { formatPrice } from "@/shared/utils/format";
+} from "@/constants";
+import { SESSION_STATUS, useSession } from "@/modules/auth";
+import type { Nullable } from "@/types";
+import { formatPrice } from "@/utils/format";
 import { useActivePlanDetailsQuery } from "../api/useActivePlanDetailsQuery";
 import { useSignOutMutation } from "../api/useSignOutMutation";
 import { useVerifyPlanIsActiveMutation } from "../api/useVerifyPlanIsActiveMutation";

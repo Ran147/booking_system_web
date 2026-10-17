@@ -1,5 +1,5 @@
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
-import type { MutationError } from "@/shared/types";
+import type { MutationError } from "@/types";
 import { fetchActivePlanDetails } from "./fetchActivePlanDetails";
 
 // Reads the plans again when the visitor contracts, so a plan deactivated

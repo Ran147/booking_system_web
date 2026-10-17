@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/shared/components";
-import { ARIA_ROLE, I18N_NAMESPACE } from "@/shared/constants";
+import { Button } from "@/components/common";
+import { ARIA_ROLE, I18N_NAMESPACE } from "@/constants";
 
 export interface SignedInContractNoticeProps {
   readonly isSigningOut: boolean;

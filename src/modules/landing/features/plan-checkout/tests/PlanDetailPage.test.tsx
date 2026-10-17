@@ -2,20 +2,20 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { signOut } from "firebase/auth";
 import type { RouteObject } from "react-router";
-import type { Session } from "@/modules/auth";
-import { landingRoutes } from "@/modules/landing/landing.routes";
 import {
   ARIA_ROLE,
   ERROR_MESSAGE_KEY,
   LANGUAGE,
   ROUTE_PATH,
-} from "@/shared/constants";
+} from "@/constants";
+import type { Session } from "@/modules/auth";
+import { landingRoutes } from "@/modules/landing/landing.routes";
 import {
   SIGNED_OUT_SESSION,
   SUBSCRIBER_SESSION,
   renderRoutesWithProviders,
   testI18n,
-} from "@/shared/test-utils";
+} from "@/test-utils";
 import { fetchActivePlanDetails } from "../api/fetchActivePlanDetails";
 import type { PlanDetail } from "../models/PlanDetail.interface";
 

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLink } from "@/shared/components";
-import { ARIA_ROLE, I18N_NAMESPACE, ROUTE_PATH } from "@/shared/constants";
+import { AppLink } from "@/components/common";
+import { ARIA_ROLE, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import type { ContractError } from "../models/PlanDetailViewModel.interface";
 
 export interface ContractErrorAlertProps {

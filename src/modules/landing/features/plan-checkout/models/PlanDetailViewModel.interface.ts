@@ -1,5 +1,5 @@
-import type { ErrorMessageKey } from "@/shared/constants";
-import type { Nullable } from "@/shared/types";
+import type { ErrorMessageKey } from "@/constants";
+import type { Nullable } from "@/types";
 import type { PlanDetailState } from "../constants/PlanDetail.constants";
 
 /**

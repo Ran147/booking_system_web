@@ -1,11 +1,7 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLink, Button, ErrorState, Spinner } from "@/shared/components";
-import {
-  ERROR_MESSAGE_KEY,
-  I18N_NAMESPACE,
-  ROUTE_PATH,
-} from "@/shared/constants";
+import { AppLink, Button, ErrorState, Spinner } from "@/components/common";
+import { ERROR_MESSAGE_KEY, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import { PlanDetailContent } from "./PlanDetailContent";
 import { PlanSwitcher } from "./PlanSwitcher";
 import { PLAN_DETAIL_STATE } from "../constants/PlanDetail.constants";

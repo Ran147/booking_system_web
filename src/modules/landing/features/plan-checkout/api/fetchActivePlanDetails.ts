@@ -1,8 +1,8 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { FIRESTORE_COLLECTION } from "@/shared/constants";
-import { PLAN_STATUS } from "@/shared/domain";
-import { firestore, mapFirebaseError } from "@/shared/lib/firebase";
-import type { MutationError } from "@/shared/types";
+import { FIRESTORE_COLLECTION } from "@/constants";
+import { PLAN_STATUS } from "@/domain";
+import { firestore, mapFirebaseError } from "@/services/firebase";
+import type { MutationError } from "@/types";
 import type { PlanDetail } from "../models/PlanDetail.interface";
 import { planDocumentSchema } from "../models/PlanDocument.schema";
 
