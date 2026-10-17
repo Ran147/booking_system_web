@@ -38,6 +38,13 @@
     },
     "title": "Perfil público del negocio"
   },
+  "businessStatus": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "En revisión",
+    "rejected": "Rechazado",
+    "suspended": "Suspendido"
+  },
   "errors": {
     "readOnly": "Tu negocio está inactivo o suspendido. No se pueden realizar cambios."
   },
@@ -65,8 +72,7 @@
       },
       "businessStatus": {
         "helper": "Estado del tenant",
-        "label": "Estado del negocio",
-        "value": "Activo"
+        "label": "Estado del negocio"
       },
       "todayBookings": {
         "helper": "Próximas citas",
@@ -139,11 +145,28 @@
       "subscription": "Suscripción",
       "subscriptionDescription": "Plan contratado y facturación"
     },
+    "statusGate": {
+      "retryAction": "Reintentar",
+      "signOutAction": "Cerrar sesión"
+    },
     "title": "Portal del negocio"
+  },
+  "pendingApproval": {
+    "businessLabel": "Negocio",
+    "description": "Recibimos tu pago y tu registro. Un administrador de la plataforma está revisando tu negocio; cuando lo apruebe te avisaremos por correo y podrás usar tu panel completo.",
+    "signUpDateLabel": "Fecha de registro",
+    "title": "Tu negocio está en revisión"
   },
   "placeholder": {
     "description": "Aquí gestionarás los servicios, la agenda y los clientes de tu negocio.",
     "title": "Panel del negocio"
+  },
+  "rejected": {
+    "businessLabel": "Negocio",
+    "contactLabel": "Si tienes dudas, escríbenos a",
+    "description": "Un administrador de la plataforma revisó tu negocio y no lo aprobó.",
+    "reasonLabel": "Motivo",
+    "title": "Tu solicitud fue rechazada"
   },
   "services": {
     "form": {

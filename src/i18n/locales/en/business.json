@@ -38,6 +38,13 @@
     },
     "title": "Business public profile"
   },
+  "businessStatus": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Under review",
+    "rejected": "Rejected",
+    "suspended": "Suspended"
+  },
   "errors": {
     "readOnly": "Your business is inactive or suspended. Changes cannot be made."
   },
@@ -65,8 +72,7 @@
       },
       "businessStatus": {
         "helper": "Tenant status",
-        "label": "Business status",
-        "value": "Active"
+        "label": "Business status"
       },
       "todayBookings": {
         "helper": "Upcoming bookings",
@@ -139,11 +145,28 @@
       "subscription": "Subscription",
       "subscriptionDescription": "Subscribed plan and billing"
     },
+    "statusGate": {
+      "retryAction": "Retry",
+      "signOutAction": "Sign out"
+    },
     "title": "Business portal"
+  },
+  "pendingApproval": {
+    "businessLabel": "Business",
+    "description": "We received your payment and your sign-up. A platform administrator is reviewing your business; once it is approved we will email you and you will have full access to your dashboard.",
+    "signUpDateLabel": "Sign-up date",
+    "title": "Your business is under review"
   },
   "placeholder": {
     "description": "This is where you will manage your business's services, schedule and customers.",
     "title": "Business dashboard"
+  },
+  "rejected": {
+    "businessLabel": "Business",
+    "contactLabel": "If you have questions, write to us at",
+    "description": "A platform administrator reviewed your business and did not approve it.",
+    "reasonLabel": "Reason",
+    "title": "Your request was rejected"
   },
   "services": {
     "form": {
