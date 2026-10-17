@@ -3,12 +3,16 @@ import { FirebaseError } from "firebase/app";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/components/common";
 import { FIREBASE_ERROR_CODE } from "@/constants";
-import { BUSINESS_STATUS } from "@/domain";
+import { BUSINESS_STATUS, SERVICE_STATUS } from "@/domain";
+import type { Booking } from "@/domain/booking/Booking.interface";
 import { renderWithProviders, SUBSCRIBER_SESSION } from "@/shared/test-utils";
 import { createServiceFormPage } from "./ServiceFormPage.page";
 import * as createServiceModule from "../api/createService";
 import * as fetchBusinessStatusModule from "../api/fetchBusinessStatus";
+import * as fetchServiceDetailModule from "../api/fetchServiceDetail";
+import * as updateServiceModule from "../api/updateService";
 import { ServiceFormPage } from "../components/ServiceFormPage";
+import type { ServiceDetail } from "../models";
 
 describe("ServiceFormPage (KAN-54)", () => {
   beforeEach(() => {
@@ -307,5 +311,273 @@ describe("ServiceFormPage (KAN-54)", () => {
         }),
       }),
     );
+  });
+});
+
+const MOCK_EXISTING_SERVICE: ServiceDetail = {
+  description: "Servicio existente de corte",
+  durationMinutes: 30,
+  features: ["Lavado previo"],
+  id: "service-test-456",
+  imageUrl: null,
+  name: "Corte Estándar",
+  priceInCents: 2000,
+  status: SERVICE_STATUS.ACTIVE,
+};
+
+describe("ServiceFormPage (KAN-56)", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(
+      fetchBusinessStatusModule,
+      "fetchBusinessStatus",
+    ).mockResolvedValue(BUSINESS_STATUS.ACTIVE);
+    vi.spyOn(fetchServiceDetailModule, "fetchServiceDetail").mockResolvedValue({
+      ...MOCK_EXISTING_SERVICE,
+    });
+    window.URL.createObjectURL = vi
+      .fn()
+      .mockReturnValue("blob:mock-preview-url");
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("AC-KAN-56-01: saves updated field values and shows them in service detail and list", async () => {
+    const updateSpy = vi
+      .spyOn(updateServiceModule, "updateService")
+      .mockResolvedValueOnce({ serviceId: "service-test-456" });
+    const toastSuccessSpy = vi.spyOn(toast, "success");
+
+    renderWithProviders(<ServiceFormPage serviceId="service-test-456" />, {
+      initialPath: "/business/services/service-test-456/edit",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    const page = createServiceFormPage();
+
+    await waitFor(() => {
+      expect(page.getNameInput()).toHaveValue("Corte Estándar");
+    });
+
+    expect(page.getTitleHeading()).toHaveTextContent("Editar servicio");
+    expect(page.getDescriptionInput()).toHaveValue(
+      "Servicio existente de corte",
+    );
+    expect(page.getPriceInput()).toHaveValue(20);
+    expect(page.getDurationInput()).toHaveValue(30);
+
+    await page.changeName("Corte Premium Modificado");
+    await page.changePrice(35);
+    await page.changeDuration(50);
+    await page.changeDescription("Servicio completo actualizado");
+
+    await page.clickAddFeature();
+    await page.changeFeature(1, "Peinado extra");
+
+    await page.clickSubmit();
+
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(updateSpy).toHaveBeenCalledWith({
+      businessId: "business-test",
+      formValues: {
+        description: "Servicio completo actualizado",
+        durationMinutes: 50,
+        features: ["Lavado previo", "Peinado extra"],
+        imageUrl: null,
+        name: "Corte Premium Modificado",
+        price: 35,
+      },
+      serviceId: "service-test-456",
+    });
+
+    expect(toastSuccessSpy).toHaveBeenCalledWith("Servicio actualizado.");
+  });
+
+  it("AC-KAN-56-02: shows validation:required or validation:outOfRange when editing invalid values", async () => {
+    const updateSpy = vi.spyOn(updateServiceModule, "updateService");
+
+    renderWithProviders(
+      <ServiceFormPage
+        initialService={MOCK_EXISTING_SERVICE}
+        serviceId="service-test-456"
+      />,
+      {
+        initialPath: "/business/services/service-test-456/edit",
+        session: SUBSCRIBER_SESSION,
+      },
+    );
+
+    const page = createServiceFormPage();
+
+    await waitFor(() => {
+      expect(page.getNameInput()).toHaveValue("Corte Estándar");
+    });
+
+    await page.changeName("");
+    await page.changePrice(-10);
+    await page.changeDuration(0);
+
+    await page.clickSubmit();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Este campo es obligatorio."),
+      ).toBeInTheDocument();
+      const outOfRangeErrors = screen.getAllByText(
+        "El valor está fuera del rango permitido.",
+      );
+      expect(outOfRangeErrors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it("AC-KAN-56-03: disables edit action and shows readOnly notice when business is inactive/suspended", async () => {
+    const updateSpy = vi.spyOn(updateServiceModule, "updateService");
+
+    renderWithProviders(
+      <ServiceFormPage
+        businessStatus={BUSINESS_STATUS.INACTIVE}
+        initialService={MOCK_EXISTING_SERVICE}
+        serviceId="service-test-456"
+      />,
+      {
+        initialPath: "/business/services/service-test-456/edit",
+        session: SUBSCRIBER_SESSION,
+      },
+    );
+
+    const page = createServiceFormPage();
+
+    expect(page.getReadOnlyAlert()).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Tu negocio está inactivo o suspendido. No se pueden realizar cambios.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(page.getSubmitButton()).toBeDisabled();
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it("AC-KAN-56-04: shows common:errors.notFound when service was deleted in the meantime", async () => {
+    vi.spyOn(updateServiceModule, "updateService").mockRejectedValueOnce(
+      new FirebaseError(FIREBASE_ERROR_CODE.NOT_FOUND, "No document to update"),
+    );
+    const toastErrorSpy = vi.spyOn(toast, "error");
+
+    renderWithProviders(
+      <ServiceFormPage
+        initialService={MOCK_EXISTING_SERVICE}
+        serviceId="service-test-456"
+      />,
+      {
+        initialPath: "/business/services/service-test-456/edit",
+        session: SUBSCRIBER_SESSION,
+      },
+    );
+
+    const page = createServiceFormPage();
+
+    await page.changeName("Servicio Modificado Pero Ya Eliminado");
+    await page.clickSubmit();
+
+    await waitFor(() => {
+      expect(toastErrorSpy).toHaveBeenCalledWith(
+        "No encontramos lo que buscabas.",
+      );
+    });
+  });
+
+  it("AC-KAN-56-05: keeps edited form values and shows common:errors.network when save fails", async () => {
+    vi.spyOn(updateServiceModule, "updateService").mockRejectedValueOnce(
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.UNAVAILABLE,
+        "Network connection failed",
+      ),
+    );
+    const toastErrorSpy = vi.spyOn(toast, "error");
+
+    renderWithProviders(
+      <ServiceFormPage
+        initialService={MOCK_EXISTING_SERVICE}
+        serviceId="service-test-456"
+      />,
+      {
+        initialPath: "/business/services/service-test-456/edit",
+        session: SUBSCRIBER_SESSION,
+      },
+    );
+
+    const page = createServiceFormPage();
+
+    await page.changeName("Nombre Modificado Con Red Caída");
+    await page.changePrice(40);
+    await page.changeDuration(45);
+
+    await page.clickSubmit();
+
+    await waitFor(() => {
+      expect(toastErrorSpy).toHaveBeenCalledWith(
+        "Sin conexión. Revisa tu internet e inténtalo de nuevo.",
+      );
+    });
+
+    expect(page.getNameInput()).toHaveValue("Nombre Modificado Con Red Caída");
+    expect(page.getPriceInput()).toHaveValue(40);
+    expect(page.getDurationInput()).toHaveValue(45);
+  });
+
+  it("AC-KAN-56-06: editing price or duration does not mutate existing booking snapshots", async () => {
+    const updateSpy = vi
+      .spyOn(updateServiceModule, "updateService")
+      .mockResolvedValueOnce({ serviceId: "service-test-456" });
+
+    const existingBooking: Booking = {
+      businessId: "business-test",
+      cancellation: null,
+      customerId: "cust-1",
+      customerUserId: "user-1",
+      endsAt: new Date("2026-11-01T11:00:00Z"),
+      id: "booking-existing-1",
+      serviceId: "service-test-456",
+      serviceSnapshot: {
+        durationMinutes: 30,
+        name: "Corte Estándar",
+        priceInCents: 2000,
+      },
+      startsAt: new Date("2026-11-01T10:30:00Z"),
+      status: "confirmed",
+    };
+
+    renderWithProviders(
+      <ServiceFormPage
+        initialService={MOCK_EXISTING_SERVICE}
+        serviceId="service-test-456"
+      />,
+      {
+        initialPath: "/business/services/service-test-456/edit",
+        session: SUBSCRIBER_SESSION,
+      },
+    );
+
+    const page = createServiceFormPage();
+
+    await page.changePrice(50);
+    await page.changeDuration(60);
+    await page.clickSubmit();
+
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(existingBooking.serviceSnapshot.priceInCents).toBe(2000);
+    expect(existingBooking.serviceSnapshot.durationMinutes).toBe(30);
+    expect(existingBooking.serviceSnapshot.name).toBe("Corte Estándar");
   });
 });

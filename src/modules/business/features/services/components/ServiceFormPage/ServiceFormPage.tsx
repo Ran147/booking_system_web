@@ -1,13 +1,14 @@
 import { AlertTriangle, ArrowLeft } from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  Spinner,
 } from "@/components/common";
 import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import { useServiceFormViewModel } from "@/modules/business/features/services";
@@ -16,11 +17,16 @@ import type { ServiceFormPageProps } from "./types";
 
 export const ServiceFormPage = ({
   businessStatus,
+  initialService,
   onCancel,
   onSuccess,
+  serviceId,
 }: ServiceFormPageProps): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const navigate = useNavigate();
+  const routeParameters = useParams<{ serviceId?: string }>();
+
+  const effectiveServiceId = serviceId ?? routeParameters.serviceId;
 
   const handleDefaultCancel = (): void => {
     if (onCancel) {
@@ -30,9 +36,9 @@ export const ServiceFormPage = ({
     }
   };
 
-  const handleDefaultSuccess = (serviceId: string): void => {
+  const handleDefaultSuccess = (savedServiceId: string): void => {
     if (onSuccess) {
-      onSuccess(serviceId);
+      onSuccess(savedServiceId);
     } else {
       navigate(`/business/${ROUTE_PATH.BUSINESS.SERVICES}`);
     }
@@ -40,9 +46,27 @@ export const ServiceFormPage = ({
 
   const viewModel = useServiceFormViewModel({
     businessStatus,
+    initialService,
     onCancel: handleDefaultCancel,
     onSuccess: handleDefaultSuccess,
+    serviceId: effectiveServiceId,
   });
+
+  const pageTitle = viewModel.isEditMode
+    ? t("services.form.editTitle")
+    : t("services.form.title");
+
+  const pageSubtitle = viewModel.isEditMode
+    ? t("services.form.editSubtitle")
+    : t("services.form.subtitle");
+
+  if (viewModel.isLoading) {
+    return (
+      <div className="container mx-auto flex h-64 max-w-3xl items-center justify-center px-4 py-8">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8 space-y-6">
@@ -61,11 +85,9 @@ export const ServiceFormPage = ({
 
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground font-headline">
-          {t("services.form.title")}
+          {pageTitle}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          {t("services.form.subtitle")}
-        </p>
+        <p className="text-sm text-muted-foreground">{pageSubtitle}</p>
       </div>
 
       {viewModel.isReadOnly && (
@@ -87,7 +109,7 @@ export const ServiceFormPage = ({
       <Card className="border border-border bg-card shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-card-foreground">
-            {t("services.form.title")}
+            {pageTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>

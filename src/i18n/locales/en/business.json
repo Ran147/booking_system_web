@@ -158,6 +158,9 @@
       "durationHelp": "Between 5 and 480 minutes, in 5-minute increments.",
       "durationLabel": "Duration (minutes)",
       "durationPlaceholder": "60",
+      "editSubtitle": "Update the details and pricing for this service in your catalog.",
+      "editSuccess": "Service updated.",
+      "editTitle": "Edit service",
       "featureItemLabel": "Feature {{index}}",
       "featurePlaceholder": "e.g. Includes wash and styling",
       "featuresDescription": "Add up to 10 features or benefits of the service.",
@@ -186,16 +189,31 @@
     },
     "list": {
       "actions": "Actions",
+      "clearFiltersAction": "Clear filters",
       "createServiceAction": "Create service",
       "description": "Manage your business's service catalog.",
       "duration": "Duration",
+      "durationMinutes": "{{minutes}} min",
+      "editAction": "Edit service",
       "emptyDescription": "There are no services registered at this time. Click 'Create service' to add the first one.",
       "emptyTitle": "No services registered",
+      "filterStatusActive": "Active",
+      "filterStatusAll": "All statuses",
+      "filterStatusInactive": "Inactive",
+      "filterStatusLabel": "Filter by status",
       "name": "Service",
+      "noResults": "No services match the selected filters.",
+      "noResultsDescription": "Try adjusting your search or clearing the filters to see all services.",
       "price": "Price",
-      "readOnlyNotice": "Your business is inactive or suspended. Service creation is disabled.",
+      "readOnlyNotice": "Your business is inactive or suspended. Service creation and editing is disabled.",
+      "retryAction": "Retry",
+      "searchLabel": "Search services",
+      "searchPlaceholder": "Search by name…",
       "status": "Status",
-      "title": "Services"
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "title": "Services",
+      "totalCount": "{{count}} services total"
     }
   }
 }

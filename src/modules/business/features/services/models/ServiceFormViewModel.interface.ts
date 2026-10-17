@@ -15,6 +15,8 @@ export interface ServiceFormViewModel {
   readonly handleRemoveImage: () => void;
   readonly handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
   readonly imageError: Nullable<string>;
+  readonly isEditMode: boolean;
+  readonly isLoading: boolean;
   readonly isReadOnly: boolean;
   readonly isSubmitting: boolean;
   readonly selectedImagePreview: Nullable<string>;
