@@ -7,3 +7,7 @@ export {
   type ServiceFormValues,
 } from "./ServiceForm.schema";
 export type { ServiceFormViewModel } from "./ServiceFormViewModel.interface";
+export type {
+  ServiceListViewModel,
+  UseServiceListViewModelOptions,
+} from "./ServiceListViewModel.interface";

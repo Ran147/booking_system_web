@@ -9,7 +9,7 @@ SaaS multi-tenant de reservas. Cada negocio (suscriptor) publica sus servicios y
 | `customer` | `/<slug-del-negocio>` (por ejemplo `/barberia-centro/...`, Q4) | Clientes del negocio, rol `customer` |
 | `admin` | `/admin` | Super administrador, rol `super_admin` |
 
-Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/shared/domain`): ningún negocio puede usarlos.
+Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/domain`): ningún negocio puede usarlos.
 
 Este repositorio es el **esqueleto base**: configuración, fundamentos compartidos y los cuatro portales como carcasas vacías. Cada carpeta de feature tiene su `specs/SPEC.md` con los criterios de aceptación de la épica; la primera historia implementada es US-07 (catálogo de planes en la landing).
 
@@ -49,14 +49,19 @@ Este repositorio es el **esqueleto base**: configuración, fundamentos compartid
    1. Crear un proyecto en la [consola de Firebase](https://console.firebase.google.com) (por ejemplo `booking-system-dev`).
    2. Activar **Authentication** (correo y contraseña), **Firestore**, **Functions** (requiere plan Blaze) y **App Check** con reCAPTCHA Enterprise.
    3. En *Configuración del proyecto → Tus apps*, registrar una app web y copiar sus valores en las variables `VITE_FIREBASE_*` de `.env.local`. La clave del sitio de reCAPTCHA Enterprise va en `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY`.
-   4. Vincular la CLI al proyecto: `npx firebase login` y `npx firebase use --add` (reemplaza el alias `default` de `.firebaserc`, que hoy apunta a `demo-booking-system`).
-   5. Poner `VITE_USE_EMULATORS=false` en `.env.local` para hablar con el proyecto real.
+   4. Crear una clave de **reCAPTCHA v2 (casilla «No soy un robot»)** en la [consola de reCAPTCHA](https://www.google.com/recaptcha/admin) para los formularios públicos (login). La clave del sitio va en `VITE_RECAPTCHA_SITE_KEY`; la clave secreta se guarda como secreto de Functions: `npx firebase functions:secrets:set RECAPTCHA_SECRET_KEY`. Nunca va en un archivo del repositorio.
+   5. Vincular la CLI al proyecto: `npx firebase login` y `npx firebase use --add` (reemplaza el alias `default` de `.firebaserc`, que hoy apunta a `demo-booking-system`).
+   6. Poner `VITE_USE_EMULATORS=false` en `.env.local` para hablar con el proyecto real.
 
-5. Levantar los emuladores (Auth, Firestore, Functions, Storage, Hosting; interfaz en http://127.0.0.1:4000):
+5. Compilar las Cloud Functions (el login llama a `verifyRecaptcha`) y levantar los emuladores (Auth, Firestore, Functions, Storage, Hosting; interfaz en http://127.0.0.1:4000):
 
    ```bash
+   npm --prefix functions ci   # solo la primera vez
+   npm --prefix functions run build
    npm run emulators
    ```
+
+   Con los emuladores, el login usa las claves de prueba públicas de reCAPTCHA de Google: la casilla siempre aprueba y no hace falta configurar ningún secreto.
 
 6. En otra terminal, levantar la app (http://localhost:5173):
 
@@ -80,6 +85,8 @@ npx firebase emulators:exec --only auth,firestore --project demo-booking-system 
 
 Los datos del emulador se borran al apagarlo; con `npm run emulators` hay que volver a correr el seed cada vez. Usuarios (contraseña de prueba `Emulator-Only-123!`, **solo para el emulador**): `admin@demo.test` (super admin), `suscriptor@demo.test` (suscriptor de «Barbería Centro»), `colaborador@demo.test` (colaborador de «Barbería Centro»), `pendiente@demo.test` (suscriptor de «Estética Luna», pendiente de aprobación) y `cliente@demo.test` (cliente).
 
+Para probar el registro del suscriptor (KAN-25), el seed también crea dos pagos de plan con links conocidos: uno válido para `nuevo-suscriptor@demo.test` (`/sign-up?token=seed-valid-sign-up-token`) y uno vencido (`/sign-up?token=seed-expired-sign-up-token`). También reserva los slugs de los dos negocios en `businessSlugs`. El registro llama a Cloud Functions, así que los emuladores deben incluir `functions` (`npm run emulators`). Si se vuelve a correr el seed, el link válido queda sin usar otra vez, pero el usuario de Auth creado antes sigue existiendo hasta que se apaguen los emuladores.
+
 ### Cloud Functions
 
 `functions/` es un paquete aparte (TypeScript, Node 22):
@@ -90,7 +97,7 @@ npm ci
 npm run build
 ```
 
-`functions/src/index.ts` todavía no exporta ninguna función. Las carpetas `audit/`, `billing/`, `bookings/`, `exports/`, `notifications/` y `shared/` están listas para sus specs.
+`functions/src/index.ts` exporta `verifyRecaptcha` (`auth/`), la callable que valida el token de reCAPTCHA de los formularios públicos. En los emuladores usa la clave secreta de prueba de Google; desplegada lee el secreto `RECAPTCHA_SECRET_KEY`. Las carpetas `audit/`, `billing/`, `bookings/`, `exports/`, `notifications/` y `shared/` están listas para sus specs.
 
 ## Scripts
 
@@ -107,9 +114,10 @@ npm run build
 | `npm run test:run` | Tests unitarios y de componentes, una sola vez |
 | `npm run test:coverage` | Tests con cobertura (mínimo 70 % de líneas en portales, features y dominio) |
 | `npm run test:rules` | Tests de `firestore.rules` contra el emulador (`tests/rules/`); no forman parte de `test:run` |
-| `npm run test:e2e` | Tests end-to-end con Playwright (`e2e/`), solo flujos críticos. La primera vez: `npx playwright install chromium` |
+| `npm run test:e2e` | Tests end-to-end con Playwright (`e2e/`), solo flujos críticos. Compila las functions, levanta los emuladores (Java 21+), carga la semilla y sirve el build. La primera vez: `npm --prefix functions ci` y `npx playwright install chromium` |
 | `npm run emulators` | Firebase Emulator Suite |
 | `npm run seed` | Carga datos de prueba en los emuladores (ver «Datos de prueba») |
+| `npm run test:functions` | Tests de Cloud Functions contra los emuladores de Auth y Firestore |
 
 Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run` (y `npm run test:rules` si cambió `firestore.rules`, `npm run test:e2e` si cambió un flujo crítico). No hay CI por ahora: estos chequeos se corren localmente.
 
@@ -132,14 +140,15 @@ src/app/               # App, providers (Query, i18n, Theme, Auth) y router
 src/modules/<portal>/  # landing, business, customer, admin y auth: rutas, layout y features/
 src/components/common/ # componentes atómicos compartidos (botón, input, modal, spinner…)
 src/constants/         # constantes congeladas con Object.freeze, ordenadas A-Z
-src/context/  src/domain/  src/hooks/  src/services/  src/types/  src/utils/
+src/domain/  src/hooks/  src/services/  src/types/  src/utils/
 src/i18n/              # configuración de i18next y locales/{es,en}
 src/styles/tokens.css  # tokens de diseño (claro / oscuro)
+src/test-utils/        # renderWithProviders, fixtures de sesión y configuración de Vitest
 tests/rules/           # tests de reglas de Firestore (emulador)
 firestore.rules        # la frontera de seguridad multi-tenant
 ```
 
-Las carpetas `src/portals/`, `src/shared/` y `src/features/` son de la estructura anterior y se están migrando a la de arriba: no se agrega código nuevo en ellas. La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
+La carpeta `src/shared/` es de la estructura anterior: solo quedan unos reexports pequeños (`export * from "@/constants"`, etc.) para que los PRs viejos sigan compilando. **No se agrega código nuevo en ella**: el código nuevo importa de `@/constants`, `@/types`, `@/domain`, `@/components/common`, `@/utils`, `@/services/firebase` y `@/test-utils`. Se borrará por completo cuando los PRs abiertos se actualicen (`docs/specs/2026-10-14-refactor-limpiar-duplicados.md`). La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
 
 ## Skills, specs y decisiones
 

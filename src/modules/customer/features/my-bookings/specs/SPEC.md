@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/my-bookings/` |
+| Feature folder | `src/modules/customer/features/my-bookings/` |
 | Stories | KAN-151, KAN-152, KAN-153, KAN-154 |
 | Status | Draft |
 | Depends on | KAN-145 booking checkout (bookings exist), KAN-96 navbar (KAN-108 entry point), KAN-155 booking changes (actions launched from the detail), KAN-128 customer sign-in; Q1 decided 2026-09-28 (`Booking.collaboratorId`, KAN-77 collaborators); Q4 decided 2026-09-28 (a link back to a business's pages goes to `/<businessSlug>`) |

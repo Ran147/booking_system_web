@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/profile/` |
+| Feature folder | `src/modules/customer/features/profile/` |
 | Stories | KAN-169, KAN-170, KAN-171, KAN-172, KAN-173 |
 | Status | Draft |
 | Depends on | KAN-122 customer sign-up (personal data fields captured at sign-up); Q6 decided 2026-09-28 (full name and phone are required), KAN-128 customer sign-in and password recovery, KAN-96 navbar (KAN-109 entry point), `i18n-standards` (languages), `theming-standards` (theme modes) |
