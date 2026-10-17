@@ -8,6 +8,9 @@ export const IDLE_SESSION = Object.freeze({
   CHANNEL_NAME: "booking-idle",
   MILLISECONDS_PER_MINUTE: 60_000,
   MILLISECONDS_PER_SECOND: 1_000,
+  // Shorter than the warning plus one minute, the warning would come back at
+  // once after "stay connected" and the app would be unusable (US-38, D-4).
+  MIN_TIMEOUT_MINUTES: 2,
   REMOTE_ACTIVITY_THROTTLE_MS: 5_000,
   TICK_MS: 1_000,
   // AS-4: the warning appears 60 seconds before the sign-out.

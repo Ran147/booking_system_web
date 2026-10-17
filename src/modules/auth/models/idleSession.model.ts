@@ -32,7 +32,7 @@ export interface IdleMessage {
  * @typedef {Object} UseIdleSessionParameters
  * @property {number} idleTimeoutMinutes - Minutos sin actividad hasta cerrar la sesión.
  * @property {(activityAt: number) => void} onLocalActivity - Avisa a las otras pestañas.
- * @property {() => void} onExpire - Se llama una vez al llegar al límite.
+ * @property {() => void} onExpire - Se llama en cada comprobación mientras el tiempo esté vencido; quien cierra la sesión evita duplicados y puede reintentar si falla.
  */
 export interface UseIdleSessionParameters {
   readonly idleTimeoutMinutes: number;
@@ -52,11 +52,13 @@ export interface IdleSession {
 
 /**
  * @typedef {Object} IdleTabSync
- * @property {(activityAt: number) => void} broadcastActivity - Comparte la actividad (limitado a una vez cada 5 s).
+ * @property {(activityAt: number) => void} broadcastActivity - Comparte la actividad: una vez cada 5 s como máximo, y al terminar el intervalo envía la última.
+ * @property {(activityAt: number) => void} broadcastActivityNow - Comparte la actividad al instante, sin límite ("Seguir conectado").
  * @property {() => void} broadcastSignedOut - Avisa que esta pestaña cerró la sesión.
  */
 export interface IdleTabSync {
   readonly broadcastActivity: (activityAt: number) => void;
+  readonly broadcastActivityNow: (activityAt: number) => void;
   readonly broadcastSignedOut: () => void;
 }
 

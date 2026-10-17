@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { Nullable } from "@/types";
+import type { Nullable, NullableRef } from "@/types";
 import {
   IDLE_MESSAGE_TYPE,
   IDLE_SESSION,
@@ -30,6 +30,8 @@ export const useIdleTabSync = ({
 }: UseIdleTabSyncParameters): IdleTabSync => {
   const channelReference = useRef<Nullable<BroadcastChannel>>(null);
   const lastBroadcastAtReference = useRef(0);
+  const pendingActivityAtReference = useRef<NullableRef<number>>(null);
+  const trailingTimerReference = useRef<NullableRef<number>>(null);
   const onRemoteActivityReference = useRef(onRemoteActivity);
   const onRemoteSignedOutReference = useRef(onRemoteSignedOut);
 
@@ -57,16 +59,14 @@ export const useIdleTabSync = ({
     return (): void => {
       channel.close();
       channelReference.current = null;
+      if (trailingTimerReference.current !== null) {
+        window.clearTimeout(trailingTimerReference.current);
+        trailingTimerReference.current = null;
+      }
     };
   }, []);
 
-  const broadcastActivity = useCallback((activityAt: number): void => {
-    if (
-      activityAt - lastBroadcastAtReference.current <
-      IDLE_SESSION.REMOTE_ACTIVITY_THROTTLE_MS
-    ) {
-      return;
-    }
+  const postActivity = useCallback((activityAt: number): void => {
     lastBroadcastAtReference.current = activityAt;
     channelReference.current?.postMessage({
       activityAt,
@@ -74,11 +74,52 @@ export const useIdleTabSync = ({
     } satisfies IdleMessage);
   }, []);
 
+  const clearTrailingBroadcast = useCallback((): void => {
+    pendingActivityAtReference.current = null;
+    if (trailingTimerReference.current !== null) {
+      window.clearTimeout(trailingTimerReference.current);
+      trailingTimerReference.current = null;
+    }
+  }, []);
+
+  // At most one message every REMOTE_ACTIVITY_THROTTLE_MS, but the last
+  // activity of the interval is sent when it ends: otherwise the other tabs
+  // would count from an activity older than the real one.
+  const broadcastActivity = useCallback(
+    (activityAt: number): void => {
+      const elapsedMs = activityAt - lastBroadcastAtReference.current;
+      if (elapsedMs >= IDLE_SESSION.REMOTE_ACTIVITY_THROTTLE_MS) {
+        clearTrailingBroadcast();
+        postActivity(activityAt);
+        return;
+      }
+
+      pendingActivityAtReference.current = activityAt;
+      if (trailingTimerReference.current !== null) return;
+      trailingTimerReference.current = window.setTimeout(() => {
+        const pendingActivityAt = pendingActivityAtReference.current;
+        clearTrailingBroadcast();
+        if (pendingActivityAt !== null) postActivity(pendingActivityAt);
+      }, IDLE_SESSION.REMOTE_ACTIVITY_THROTTLE_MS - elapsedMs);
+    },
+    [clearTrailingBroadcast, postActivity],
+  );
+
+  // "Stay connected" must reach the other tabs at once: they may be counting
+  // down to the same sign-out (AC-KAN-38-06).
+  const broadcastActivityNow = useCallback(
+    (activityAt: number): void => {
+      clearTrailingBroadcast();
+      postActivity(activityAt);
+    },
+    [clearTrailingBroadcast, postActivity],
+  );
+
   const broadcastSignedOut = useCallback((): void => {
     channelReference.current?.postMessage({
       type: IDLE_MESSAGE_TYPE.SIGNED_OUT,
     } satisfies IdleMessage);
   }, []);
 
-  return { broadcastActivity, broadcastSignedOut };
+  return { broadcastActivity, broadcastActivityNow, broadcastSignedOut };
 };

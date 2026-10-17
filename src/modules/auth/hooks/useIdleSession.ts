@@ -29,7 +29,6 @@ export const useIdleSession = ({
   const [mountedAt] = useState(() => Date.now());
   const lastActivityAtReference = useRef(mountedAt);
   const lastLocalActivityAtReference = useRef(0);
-  const hasExpiredReference = useRef(false);
   const isWarningShownReference = useRef(false);
   const onExpireReference = useRef(onExpire);
   const onLocalActivityReference = useRef(onLocalActivity);
@@ -45,11 +44,10 @@ export const useIdleSession = ({
     const limitMs = idleTimeoutMinutes * IDLE_SESSION.MILLISECONDS_PER_MINUTE;
     const elapsedMs = Date.now() - lastActivityAtReference.current;
 
+    // Called on every check while expired: the one that ends the session
+    // ignores the repeats and tries again if ending it failed.
     if (elapsedMs >= limitMs) {
-      if (!hasExpiredReference.current) {
-        hasExpiredReference.current = true;
-        onExpireReference.current();
-      }
+      onExpireReference.current();
       return;
     }
 

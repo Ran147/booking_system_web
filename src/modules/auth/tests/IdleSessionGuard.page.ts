@@ -8,6 +8,7 @@ export interface IdleSessionGuardPageObject {
   readonly clickSignOut: () => Promise<void>;
   readonly clickStayConnected: () => Promise<void>;
   readonly getStayConnectedButton: () => HTMLElement;
+  readonly pressEscape: () => Promise<void>;
   readonly pressKey: () => Promise<void>;
   readonly queryWarning: () => Nullable<HTMLElement>;
   readonly readCurrentPath: () => string;
@@ -39,6 +40,9 @@ export const createIdleSessionGuardPage = (
       await user.click(getStayConnectedButton());
     },
     getStayConnectedButton,
+    pressEscape: async (): Promise<void> => {
+      await user.keyboard("{Escape}");
+    },
     pressKey: async (): Promise<void> => {
       await user.keyboard("a");
     },

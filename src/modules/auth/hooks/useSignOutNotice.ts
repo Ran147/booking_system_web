@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import type { Nullable } from "@/types";
 import { SIGN_OUT_REASON } from "../constants/IdleSession.constants";
 import type { SignOutLocationState } from "../models/SignOutLocationState.interface";
+import { toLocationWithoutState } from "../utils/toLocationWithoutState";
 
 /**
  * Dice si la persona llegó al login porque se cerró su sesión por inactividad
@@ -23,11 +24,11 @@ export const useSignOutNotice = (): boolean => {
   useEffect(() => {
     if (!wasSignedOutByInactivity || hasClearedStateReference.current) return;
     hasClearedStateReference.current = true;
-    void navigate(`${location.pathname}${location.search}`, {
+    void navigate(toLocationWithoutState(location), {
       replace: true,
       state: null,
     });
-  }, [location.pathname, location.search, navigate, wasSignedOutByInactivity]);
+  }, [location, navigate, wasSignedOutByInactivity]);
 
   return wasSignedOutByInactivity;
 };

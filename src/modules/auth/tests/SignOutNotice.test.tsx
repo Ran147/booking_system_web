@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { ARIA_ROLE, ROUTE_PATH } from "@/constants";
 import { renderRoutesWithProviders } from "@/test-utils/renderRoutesWithProviders";
 import { SIGNED_OUT_SESSION } from "@/test-utils/sessionFixtures";
@@ -28,6 +28,20 @@ describe("sign-in after an inactivity sign-out", () => {
     expect(screen.getByRole(ARIA_ROLE.ALERT)).toHaveTextContent(
       testI18n.t("auth.idle.signedOut"),
     );
+  });
+
+  it("keeps the #hash of the address when the notice is cleared", async () => {
+    const { router } = renderRoutesWithProviders(authRoutes, {
+      initialPath: `${ROUTE_PATH.AUTH.SIGN_IN}#section`,
+      initialState: { reason: SIGN_OUT_REASON.IDLE },
+      session: SIGNED_OUT_SESSION,
+    });
+    await findSignInTitle();
+
+    await waitFor(() => {
+      expect(router.state.location.state).toBeNull();
+    });
+    expect(router.state.location.hash).toBe("#section");
   });
 
   it("shows nothing when the user arrives at sign-in on their own", async () => {

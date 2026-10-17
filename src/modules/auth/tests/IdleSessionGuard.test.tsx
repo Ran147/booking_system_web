@@ -100,6 +100,18 @@ const renderGuard = async (
   return createIdleSessionGuardPage(vi.advanceTimersByTime);
 };
 
+interface ActivityMessage {
+  readonly activityAt: number;
+  readonly type: string;
+}
+
+const readActivityMessages = (
+  channel: FakeBroadcastChannel,
+): ActivityMessage[] =>
+  (channel.postedMessages as ActivityMessage[]).filter(
+    (message) => message.type === IDLE_MESSAGE_TYPE.ACTIVITY,
+  );
+
 const readOwnChannel = (): FakeBroadcastChannel => {
   const [ownChannel] = FakeBroadcastChannel.instances;
   if (!ownChannel) throw new Error("The guard did not open its channel");
@@ -169,6 +181,33 @@ describe("IdleSessionGuard", () => {
       expect(signOut).not.toHaveBeenCalled();
     });
 
+    it("AC-KAN-38-06: stay connected tells the other tabs at once", async () => {
+      const guardPage = await renderGuard();
+      const ownChannel = readOwnChannel();
+      await advance(IDLE_TIMEOUT_MINUTES * MINUTE_MS - WARNING_MS + 1_000);
+      const messagesBefore = readActivityMessages(ownChannel).length;
+
+      await guardPage.clickStayConnected();
+
+      const activityMessages = readActivityMessages(ownChannel);
+      expect(activityMessages).toHaveLength(messagesBefore + 1);
+      expect(activityMessages.at(-1)?.activityAt).toBeGreaterThan(
+        Date.now() - 1_000,
+      );
+    });
+
+    it("AC-KAN-38-06: closing the warning with Escape tells the other tabs too", async () => {
+      const guardPage = await renderGuard();
+      const ownChannel = readOwnChannel();
+      await advance(IDLE_TIMEOUT_MINUTES * MINUTE_MS - WARNING_MS + 1_000);
+      const messagesBefore = readActivityMessages(ownChannel).length;
+
+      await guardPage.pressEscape();
+
+      expect(guardPage.queryWarning()).toBeNull();
+      expect(readActivityMessages(ownChannel)).toHaveLength(messagesBefore + 1);
+    });
+
     it("AC-KAN-38-02: using the page before the warning delays it", async () => {
       const guardPage = await renderGuard();
       await advance(3 * MINUTE_MS);
@@ -215,6 +254,23 @@ describe("IdleSessionGuard", () => {
       await advance(IDLE_TIMEOUT_MINUTES * MINUTE_MS + 1_000);
 
       expect(guardPage.readCurrentPath()).toContain(ROUTE_PATH.AUTH.SIGN_IN);
+    });
+
+    it("tries to sign out again when Firebase failed the first time", async () => {
+      vi.mocked(signOut)
+        .mockRejectedValueOnce(new Error("offline"))
+        .mockResolvedValue();
+      await renderGuard();
+
+      await advance(IDLE_TIMEOUT_MINUTES * MINUTE_MS + 500);
+      await advance(IDLE_SESSION.TICK_MS * 3);
+
+      const callsAfterRetry = vi.mocked(signOut).mock.calls.length;
+      expect(callsAfterRetry).toBeGreaterThanOrEqual(2);
+
+      // Once it worked it stops trying.
+      await advance(IDLE_SESSION.TICK_MS * 5);
+      expect(signOut).toHaveBeenCalledTimes(callsAfterRetry);
     });
 
     it.each(["AC-KAN-38-04", "AC-KAN-133-02"])(
@@ -307,6 +363,25 @@ describe("IdleSessionGuard", () => {
 
       expect(signOut).toHaveBeenCalledTimes(1);
       expect(guardPage.readSignOutReason()).toBe(SIGN_OUT_REASON.IDLE);
+    });
+
+    it("sends the last activity of the interval when the 5 seconds end", async () => {
+      const guardPage = await renderGuard();
+      const ownChannel = readOwnChannel();
+
+      await guardPage.pressKey();
+      await advance(1_500);
+      await guardPage.pressKey();
+      const secondPressAt = Date.now();
+      expect(readActivityMessages(ownChannel)).toHaveLength(1);
+
+      await advance(IDLE_SESSION.REMOTE_ACTIVITY_THROTTLE_MS);
+
+      const activityMessages = readActivityMessages(ownChannel);
+      expect(activityMessages).toHaveLength(2);
+      expect(activityMessages.at(-1)?.activityAt).toBeGreaterThanOrEqual(
+        secondPressAt - 100,
+      );
     });
 
     it("sharing the sign-out tells the other tabs once, and activity at most every 5 seconds", async () => {

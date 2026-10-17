@@ -1,15 +1,19 @@
 import { platformSettingsSchema } from "../models/PlatformSettings.schema";
 
 describe("platformSettingsSchema", () => {
-  it("AC-KAN-38-07: accepts a positive whole number of minutes", () => {
-    expect(platformSettingsSchema.parse({ idleTimeoutMinutes: 20 })).toEqual({
-      idleTimeoutMinutes: 20,
+  it.each([20, 2])("AC-KAN-38-07: accepts %i minutes", (idleTimeoutMinutes) => {
+    expect(platformSettingsSchema.parse({ idleTimeoutMinutes })).toEqual({
+      idleTimeoutMinutes,
     });
   });
 
   it.each([
     ["missing", {}],
     ["zero", { idleTimeoutMinutes: 0 }],
+    [
+      "one, which would bring the warning back at once",
+      { idleTimeoutMinutes: 1 },
+    ],
     ["negative", { idleTimeoutMinutes: -5 }],
     ["fractional", { idleTimeoutMinutes: 1.5 }],
     ["not a number", { idleTimeoutMinutes: "20" }],

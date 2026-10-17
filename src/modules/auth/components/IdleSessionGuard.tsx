@@ -14,41 +14,51 @@ const SignedInIdleSessionGuard = (): Nullable<ReactElement> => {
   const location = useLocation();
   const signOutUser = useSignOut();
   const idleTimeoutMinutes = useIdleTimeoutMinutes();
-  const hasSignedOutReference = useRef(false);
+  const isEndingSessionReference = useRef(false);
   const currentPath = `${location.pathname}${location.search}`;
 
-  // Runs once: both the local timeout and a sign-out from another tab end here.
-  const signOutByInactivity = (): void => {
-    if (hasSignedOutReference.current) return;
-    hasSignedOutReference.current = true;
+  // The one place that ends the session, whether the time ran out here, the
+  // person pressed "Sign out" or another tab did it. It runs once at a time;
+  // if Firebase could not sign out, the next check tries again.
+  const endSession = (shouldTellOtherTabs: boolean): void => {
+    if (isEndingSessionReference.current) return;
+    isEndingSessionReference.current = true;
+    if (shouldTellOtherTabs) broadcastSignedOut();
+
     void signOutUser({
       reason: SIGN_OUT_REASON.IDLE,
       redirectPath: currentPath,
+    }).then((wasSignedOut) => {
+      if (!wasSignedOut) isEndingSessionReference.current = false;
     });
   };
 
-  const { broadcastActivity, broadcastSignedOut } = useIdleTabSync({
-    onRemoteActivity: (activityAt) => registerActivity(activityAt),
-    onRemoteSignedOut: signOutByInactivity,
-  });
+  const { broadcastActivity, broadcastActivityNow, broadcastSignedOut } =
+    useIdleTabSync({
+      onRemoteActivity: (activityAt) => registerActivity(activityAt),
+      onRemoteSignedOut: () => endSession(false),
+    });
   const { registerActivity, remainingWarningSeconds } = useIdleSession({
     idleTimeoutMinutes,
-    onExpire: () => {
-      broadcastSignedOut();
-      signOutByInactivity();
-    },
+    onExpire: () => endSession(true),
     onLocalActivity: broadcastActivity,
   });
+
+  // "Stay connected" and closing the warning (Escape, click outside) count as
+  // activity here and in the other tabs, which may be counting down to the
+  // same sign-out (AC-KAN-38-06).
+  const stayConnected = (): void => {
+    const activityAt = Date.now();
+    registerActivity(activityAt);
+    broadcastActivityNow(activityAt);
+  };
 
   if (remainingWarningSeconds === null) return null;
 
   return (
     <IdleWarningDialog
-      onSignOut={() => {
-        broadcastSignedOut();
-        signOutByInactivity();
-      }}
-      onStayConnected={() => registerActivity()}
+      onSignOut={() => endSession(true)}
+      onStayConnected={stayConnected}
       remainingSeconds={remainingWarningSeconds}
     />
   );
