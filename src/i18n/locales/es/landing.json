@@ -36,6 +36,19 @@
       "tagline": "Simplifica la agenda de tu negocio, automatiza tus recordatorios y permite que tus clientes reserven en línea 24/7 sin complicaciones.",
       "title": "Impulsa tu negocio con reservas inteligentes y sin esfuerzo"
     },
+    "intro": {
+      "badge": "¿Por qué elegir Booking System?",
+      "features": {
+        "notifications": "Recordatorios automáticos por WhatsApp y correo electrónico para reducir ausencias.",
+        "payments": "Opciones de pago integradas y control transparente de planes de suscripción.",
+        "scheduling": "Disponibilidad de agenda en tiempo real y reservas en línea 24/7 para tus clientes."
+      },
+      "fullText": "Nuestra solución fue diseñada pensando en barberías, centros de estética, consultorios médicos y profesionales independientes. Con gestión centralizada de agendas, recordatorios automáticos, soporte para múltiples colaboradores y reportes de rendimiento, recuperas el control de tu tiempo mientras brindas una experiencia impecable a tus clientes.",
+      "readLess": "Leer menos",
+      "readMore": "Leer más",
+      "summary": "Booking System es la plataforma integral de gestión de reservas diseñada para optimizar citas, eliminar conflictos de agenda e impulsar el crecimiento de tu negocio de servicios.",
+      "title": "Gestión de citas inteligente para negocios modernos"
+    },
     "navbar": {
       "goToPortal": "Ir a mi panel",
       "landmarkLabel": "Barra de navegación principal",
