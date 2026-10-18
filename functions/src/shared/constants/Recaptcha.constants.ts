@@ -4,8 +4,6 @@
 // need no secret; deployed functions read RECAPTCHA_SECRET_KEY from Secret
 // Manager.
 export const RECAPTCHA_VERIFICATION = Object.freeze({
-  EMULATOR_ENV_VAR: "FUNCTIONS_EMULATOR",
-  EMULATOR_FLAG_ENABLED: "true",
   FORM_FIELD: Object.freeze({
     RESPONSE: "response",
     SECRET: "secret",

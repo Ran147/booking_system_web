@@ -49,6 +49,13 @@ export const businessRoutes: RouteObject[] = [
           },
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { ServiceFormPage } = await import("./features/services");
+              return { Component: ServiceFormPage };
+            },
+            path: ROUTE_PATH.BUSINESS.SERVICE_EDIT,
+          },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { SettingsPage } = await import("./features/settings");
               return { Component: SettingsPage };
             },

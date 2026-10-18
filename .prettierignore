@@ -2,7 +2,7 @@ dist
 coverage
 functions/lib
 node_modules
-src/shared/components/ui
+src/components/common/ui
 docs/backlog/*.csv
 
 # Hand-written Markdown (skills, specs, docs) keeps its compact tables

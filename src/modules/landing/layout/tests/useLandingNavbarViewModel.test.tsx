@@ -3,8 +3,8 @@ import type { FC, ReactElement, ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
-import type { Session } from "@/features/auth";
-import { AuthContext } from "@/features/auth/context/AuthContext";
+import type { Session } from "@/modules/auth";
+import { AuthContext } from "@/modules/auth/context/AuthContext";
 import { ROUTE_PATH } from "@/shared/constants";
 import {
   SIGNED_OUT_SESSION,
@@ -102,5 +102,19 @@ describe("useLandingNavbarViewModel", () => {
     expect(result.current.isMobileMenuOpen).toBe(false);
 
     vi.restoreAllMocks();
+  });
+
+  it("handles logo image error state transition", () => {
+    const { result } = renderHook(() => useLandingNavbarViewModel(), {
+      wrapper: createWrapper(SIGNED_OUT_SESSION),
+    });
+
+    expect(result.current.hasLogoImageError).toBe(false);
+
+    act(() => {
+      result.current.handleLogoImageError();
+    });
+
+    expect(result.current.hasLogoImageError).toBe(true);
   });
 });

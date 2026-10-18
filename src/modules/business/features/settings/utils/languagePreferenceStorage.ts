@@ -37,3 +37,16 @@ export const savePendingLanguageSync = (
 export const clearPendingLanguageSync = (): void => {
   localStorage.removeItem(STORAGE_KEY.LANGUAGE_PENDING_SYNC);
 };
+
+export const clearPendingLanguageSyncIfMatches = (
+  expectedPendingLanguageSync: PendingLanguageSync,
+): void => {
+  const currentPendingLanguageSync = readPendingLanguageSync();
+  if (
+    currentPendingLanguageSync?.language ===
+      expectedPendingLanguageSync.language &&
+    currentPendingLanguageSync.userId === expectedPendingLanguageSync.userId
+  ) {
+    clearPendingLanguageSync();
+  }
+};

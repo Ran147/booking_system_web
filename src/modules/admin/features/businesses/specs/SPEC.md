@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | admin |
-| Feature folder | `src/portals/admin/features/businesses/` |
+| Feature folder | `src/modules/admin/features/businesses/` |
 | Stories | KAN-175, KAN-176, KAN-177, KAN-178, KAN-179; PROP-1, PROP-2 (proposed, not in Jira yet) |
 | Status | Draft |
 | Depends on | Q2 + Q3 decided 2026-09-28 (new businesses are `pending` until the super admin approves or rejects them; audited actions); Q7 decided 2026-09-28 (plan checkout, KAN-20 spec; subscriber sign-up, KAN-26 spec); KAN-193 audit log; KAN-32 subscription spec (`Payment` records, KAN-45/KAN-46); KAN-180 plans spec (`Plan`); `features/auth` spec (KAN-28, idle logout KAN-38) |
@@ -27,7 +27,7 @@ The super admin needs one place to see every business on the platform, approve o
 
 ## Out of scope
 - The plan checkout and the subscriber sign-up that create the `pending` business (KAN-22 to KAN-25, landing specs).
-- The "under review" and "rejected" screens the subscriber sees (KAN-33, `src/features/auth` spec, and the business layout spec).
+- The "under review" and "rejected" screens the subscriber sees (KAN-33, `src/modules/auth` spec, and the business layout spec).
 - Editing a business's profile, services, bookings or customers from the admin portal.
 - Real refunds or manual payments by the super admin (the gateway is simulated; a rejection only marks the payment refunded, AS-10).
 - Reversing a rejection (`rejected` is terminal; the owner would pay again with a new sign-up, AS-12).

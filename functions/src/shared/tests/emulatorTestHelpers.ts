@@ -55,6 +55,21 @@ export const buildCallableRequest = <Payload>(
     rawRequest: {},
   }) as unknown as CallableRequest<Payload>;
 
+// A callable request from an authenticated caller with custom claims.
+export const buildAuthenticatedCallableRequest = <Payload>(
+  payload: Payload,
+  auth: {
+    readonly token?: Record<string, unknown>;
+    readonly uid: string;
+  },
+): CallableRequest<Payload> =>
+  ({
+    acceptsStreaming: false,
+    auth,
+    [CALLABLE_REQUEST_PAYLOAD_FIELD]: payload,
+    rawRequest: {},
+  }) as unknown as CallableRequest<Payload>;
+
 // Awaits a call that must fail and returns its HttpsError.
 export const captureHttpsError = async (
   pendingCall: Promise<unknown>,

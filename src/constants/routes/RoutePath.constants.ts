@@ -12,6 +12,7 @@ export const ROUTE_PATH = {
   },
   AUTH: {
     PASSWORD_RECOVERY: "/password-recovery",
+    PASSWORD_RESET: "/password-reset",
     SIGN_IN: "/sign-in",
   },
   BUSINESS: {
@@ -20,6 +21,7 @@ export const ROUTE_PATH = {
     REPORTS: "reports",
     ROOT: "/business",
     SCHEDULE: "schedule",
+    SERVICE_EDIT: "services/:serviceId/edit",
     SERVICE_NEW: "services/new",
     SERVICES: "services",
     SETTINGS: "settings",

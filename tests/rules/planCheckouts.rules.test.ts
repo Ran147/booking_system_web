@@ -75,6 +75,21 @@ describe("firestore.rules: subscriber sign-up documents", () => {
     );
   });
 
+  it("KAN-22: denies a visitor storing a paid plan checkout without the payment function", async () => {
+    const visitorFirestore = testEnvironment
+      .unauthenticatedContext()
+      .firestore();
+
+    await assertFails(
+      visitorFirestore.doc("planCheckouts/attempt-2").set({
+        amountInCents: 0,
+        email: "visitor@example.com",
+        planId: "plan-pro",
+        signUpCompletedAt: null,
+      }),
+    );
+  });
+
   it("KAN-25: denies a visitor reading or taking a business slug", async () => {
     const visitorFirestore = testEnvironment
       .unauthenticatedContext()

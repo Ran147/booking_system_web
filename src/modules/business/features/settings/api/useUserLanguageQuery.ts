@@ -7,6 +7,7 @@ export const useUserLanguageQuery = (
   userId: string,
 ): UseQueryResult<UserLanguagePreference, Error> =>
   useQuery({
+    enabled: Boolean(userId),
     queryFn: () => fetchUserLanguage(userId),
     queryKey: userLanguageQueryKeys.detail(userId),
   });

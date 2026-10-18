@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/layout/` |
+| Feature folder | `src/modules/customer/layout/` |
 | Stories | KAN-107, KAN-108, KAN-109, KAN-110 (epic KAN-96 — Navbar); KAN-118, KAN-119, KAN-120, KAN-121 (epic KAN-117 — Footer) |
 | Status | Draft |
-| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`, `Business.slug`); KAN-128 sign-in (`src/features/auth`); KAN-150 my bookings; KAN-168 profile; landing KAN-9 terms page |
+| Depends on | Q4 decided 2026-09-28 (business pages under `/:businessSlug`, `Business.slug`); KAN-128 sign-in (`src/modules/auth`); KAN-150 my bookings; KAN-168 profile; landing KAN-9 terms page |
 
 ## Intent
 A person on a business's pages in the customer portal always knows which business they are booking with, can reach their bookings and profile, and can sign in or out from the top of the page. At the bottom of every page they find the business's contact details, social networks and the terms that apply.
@@ -26,7 +26,7 @@ A person on a business's pages in the customer portal always knows which busines
 
 ## Out of scope
 - Creating a business slug (set at subscriber sign-up, KAN-25, Q7) or changing it (never allowed).
-- The sign-in form, password recovery and idle logout themselves (KAN-128, `src/features/auth`).
+- The sign-in form, password recovery and idle logout themselves (KAN-128, `src/modules/auth`).
 - The content of the my-bookings (KAN-150) and profile (KAN-168) screens.
 - Language and theme switches (KAN-172, KAN-173 in the profile epic).
 - Editing the business's name, logo, contact data or social links (no business-portal story defines it; see Backlog issues).

@@ -7,7 +7,7 @@ import { LINK_TARGET } from "../constants";
 import { createLandingFooterPage } from "./LandingFooter.page";
 import { LandingFooter } from "../components/LandingFooter";
 
-const TARGET_SECTION_ID = "#planes-section";
+const TARGET_SECTION_ID = "#plans-section";
 const REL_NOOPENER_NOREFERRER = "noopener noreferrer";
 const DEFAULT_PHONE_RAW = "+506 2222-0000";
 const DEFAULT_EMAIL_RAW = "soporte@bookingsystem.com";
@@ -35,7 +35,7 @@ describe("LandingFooter (KAN-8)", () => {
     ).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
     expect(
       page.getNavigationLink(testI18n.t("landing:footer.links.plans")),
-    ).toHaveAttribute("href", ROUTE_PATH.LANDING.PLANS);
+    ).toHaveAttribute("href", `${ROUTE_PATH.LANDING.HOME}#plans-section`);
     expect(
       page.getNavigationLink(testI18n.t("landing:footer.links.contact")),
     ).toHaveAttribute("href", ROUTE_PATH.LANDING.CONTACT);
@@ -63,7 +63,7 @@ describe("LandingFooter (KAN-8)", () => {
     const originalQuerySelector = document.querySelector;
 
     const mockTargetSection = document.createElement("section");
-    mockTargetSection.id = "planes-section";
+    mockTargetSection.id = "plans-section";
     mockTargetSection.scrollIntoView = scrollIntoViewMock;
     mockTargetSection.focus = focusMock;
 
@@ -88,7 +88,12 @@ describe("LandingFooter (KAN-8)", () => {
 
     await userEvent.click(plansLink);
 
-    expect(plansLink).toHaveAttribute("href", ROUTE_PATH.LANDING.PLANS);
+    expect(plansLink).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.LANDING.HOME}#plans-section`,
+    );
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: "smooth" });
+    expect(focusMock).toHaveBeenCalled();
 
     vi.restoreAllMocks();
   });
