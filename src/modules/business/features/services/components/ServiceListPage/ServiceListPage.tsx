@@ -19,6 +19,7 @@ export const ServiceListPage = ({
   businessStatus,
   currency,
   onCreateService,
+  onEditService,
 }: ServiceListPageProps): ReactElement => {
   const { t } = useTranslation([
     I18N_NAMESPACE.BUSINESS,
@@ -28,6 +29,7 @@ export const ServiceListPage = ({
     businessStatus,
     currency,
     onCreateService,
+    onEditService,
   });
 
   return (
@@ -133,6 +135,7 @@ export const ServiceListPage = ({
             <ServiceListTable
               currency={viewModel.currency}
               isReadOnly={viewModel.isReadOnly}
+              onEditService={viewModel.handleEditService}
               services={viewModel.services}
             />
             <CursorPagination

@@ -1,8 +1,13 @@
 import { screen, waitFor } from "@testing-library/react";
 import type { QueryDocumentSnapshot } from "firebase/firestore";
+import type { RouteObject } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BUSINESS_STATUS, SERVICE_STATUS } from "@/domain";
-import { renderWithProviders, SUBSCRIBER_SESSION } from "@/shared/test-utils";
+import {
+  renderRoutesWithProviders,
+  renderWithProviders,
+  SUBSCRIBER_SESSION,
+} from "@/shared/test-utils";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { formatPrice, normalizeSearchTerm } from "@/utils";
 import { createServiceListPage } from "./ServiceListPage.page";
@@ -125,6 +130,64 @@ describe("ServiceListPage (KAN-55)", () => {
     await page.clickCreateService();
 
     expect(handleCreateService).toHaveBeenCalledTimes(1);
+  });
+
+  it("navigates to /business/services/<serviceId>/edit when clicking edit service action", async () => {
+    vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+      items: [MOCK_SERVICES[0]!],
+      nextCursor: null,
+      totalCount: 1,
+    });
+
+    const routes: RouteObject[] = [
+      {
+        element: <ServiceListPage />,
+        path: "/business/services",
+      },
+      {
+        element: <div>Página de edición de servicio</div>,
+        path: "/business/services/:serviceId/edit",
+      },
+    ];
+
+    const { router } = renderRoutesWithProviders(routes, {
+      initialPath: "/business/services",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    const page = createServiceListPage();
+    expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+
+    await page.clickEditService("Corte de cabello");
+
+    expect(router.state.location.pathname).toBe(
+      "/business/services/service-haircut/edit",
+    );
+    expect(
+      screen.getByText("Página de edición de servicio"),
+    ).toBeInTheDocument();
+  });
+
+  it("invokes onEditService callback when provided instead of default navigation", async () => {
+    vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+      items: [MOCK_SERVICES[0]!],
+      nextCursor: null,
+      totalCount: 1,
+    });
+
+    const handleEditService = vi.fn();
+
+    renderWithProviders(<ServiceListPage onEditService={handleEditService} />, {
+      initialPath: "/business/services",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    const page = createServiceListPage();
+    expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+
+    await page.clickEditService("Corte de cabello");
+
+    expect(handleEditService).toHaveBeenCalledWith("service-haircut");
   });
 
   it("displays read-only warning and disables create action when business is inactive", async () => {

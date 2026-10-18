@@ -10,9 +10,12 @@ export const PortalSidebar = ({
   activePath,
   ariaLabel,
   badge,
+  banner,
   brandInitials,
   brandName,
   className = "",
+  collaboratorName,
+  logoUrl,
   navItems,
   onItemClick,
   onSignOut,
@@ -28,6 +31,8 @@ export const PortalSidebar = ({
           badge={badge}
           brandInitials={brandInitials}
           brandName={brandName}
+          collaboratorName={collaboratorName}
+          logoUrl={logoUrl}
         />
         <PortalSidebarNavList
           activePath={activePath}
@@ -36,6 +41,7 @@ export const PortalSidebar = ({
           onItemClick={onItemClick}
         />
       </div>
+      {banner && <div className="mt-auto pt-3">{banner}</div>}
       {onSignOut && (
         <PortalSidebarFooter
           onSignOut={onSignOut}

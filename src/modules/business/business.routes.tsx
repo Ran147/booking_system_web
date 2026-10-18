@@ -56,6 +56,13 @@ export const businessRoutes: RouteObject[] = [
             ],
             element: <BusinessLayout />,
           },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { ServiceFormPage } = await import("./features/services");
+              return { Component: ServiceFormPage };
+            },
+            path: ROUTE_PATH.BUSINESS.SERVICE_EDIT,
+          },
         ],
         element: <BusinessStatusGate />,
       },

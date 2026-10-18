@@ -81,6 +81,14 @@ export const useServiceListViewModel = (
     }
   };
 
+  const handleEditService = (serviceId: string): void => {
+    if (options.onEditService) {
+      options.onEditService(serviceId);
+    } else {
+      navigate(`/business/${ROUTE_PATH.BUSINESS.SERVICES}/${serviceId}/edit`);
+    }
+  };
+
   const handleSearchChange = (newSearchTerm: string): void => {
     const nextParameters = new URLSearchParams(searchParameters);
     if (newSearchTerm.trim().length > 0) {
@@ -148,6 +156,7 @@ export const useServiceListViewModel = (
     filters,
     handleClearFilters,
     handleCreateService,
+    handleEditService,
     handleNextPage,
     handlePreviousPage,
     handleRetry,

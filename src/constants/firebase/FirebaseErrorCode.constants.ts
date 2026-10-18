@@ -1,6 +1,7 @@
 export const FIREBASE_ERROR_CODE = {
   EXPIRED_ACTION_CODE: "auth/expired-action-code",
   FAILED_PRECONDITION: "functions/failed-precondition",
+  FIRESTORE_NOT_FOUND: "not-found",
   // The Functions SDK reports a request that never reached the server (no
   // network) as internal: it cannot tell it apart from a backend crash.
   FUNCTIONS_INTERNAL: "functions/internal",

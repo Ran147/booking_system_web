@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { LayoutDashboard, Users } from "lucide-react";
 import { describe, expect, it, vi } from "vitest";
 import { Badge, BADGE_VARIANT } from "@/components/common";
@@ -99,5 +99,41 @@ describe("PortalSidebar (Reusable Layout Component)", () => {
     const page = createPortalSidebarPage();
 
     expect(page.querySignOut()).not.toBeInTheDocument();
+  });
+
+  it("resets image error fallback when a new logoUrl is provided", () => {
+    const { rerender } = render(
+      <PortalSidebar
+        ariaLabel="Navegación principal"
+        brandName="Mi Portal"
+        logoUrl="https://example.com/broken.png"
+        navItems={mockNavItems}
+        onItemClick={vi.fn()}
+      />,
+    );
+
+    const initialImage = screen.getByRole("img", { name: "Mi Portal" });
+    fireEvent.error(initialImage);
+
+    expect(screen.getByText("MP")).toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+
+    // Now update logoUrl to a new URL
+    rerender(
+      <PortalSidebar
+        ariaLabel="Navegación principal"
+        brandName="Mi Portal"
+        logoUrl="https://example.com/new-valid-logo.png"
+        navItems={mockNavItems}
+        onItemClick={vi.fn()}
+      />,
+    );
+
+    const newImage = screen.getByRole("img", { name: "Mi Portal" });
+    expect(newImage).toHaveAttribute(
+      "src",
+      "https://example.com/new-valid-logo.png",
+    );
+    expect(screen.queryByText("MP")).not.toBeInTheDocument();
   });
 });

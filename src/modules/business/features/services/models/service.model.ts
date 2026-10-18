@@ -49,4 +49,23 @@
  * @property {import('@/constants').ViewState} viewState - Estado de la vista (loading, error, empty, ready).
  */
 
+/**
+ * @typedef {Object} ServiceDetail
+ * @property {string} description - Descripción del servicio.
+ * @property {number} durationMinutes - Duración en minutos del servicio.
+ * @property {readonly string[]} features - Características adicionales.
+ * @property {string} id - Identificador único de Firestore.
+ * @property {import('@/types').Nullable<string>} imageUrl - URL de imagen del servicio.
+ * @property {string} name - Nombre del servicio.
+ * @property {number} priceInCents - Precio en centavos en la moneda del negocio.
+ * @property {"active" | "inactive"} status - Estado del servicio en el catálogo.
+ */
+
+/**
+ * @typedef {Object} UpdateServicePayload
+ * @property {string} businessId - Identificador del negocio tenant.
+ * @property {import('./ServiceForm.schema').ServiceFormValues} formValues - Valores del formulario de edición.
+ * @property {string} serviceId - Identificador único del servicio.
+ */
+
 export {};

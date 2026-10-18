@@ -27,7 +27,10 @@ export const LandingNavbar = ({
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <LandingNavbarBranding
           brandName={viewModel.brandName}
+          hasImageError={viewModel.hasLogoImageError}
           logoAlt={viewModel.logoAlt}
+          logoUrl={viewModel.logoUrl}
+          onImageError={viewModel.handleLogoImageError}
         />
 
         <LandingNavbarNavLinks

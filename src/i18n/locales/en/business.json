@@ -122,16 +122,27 @@
     "welcome": "Welcome to your dashboard"
   },
   "layout": {
+    "expiryWarning": {
+      "ariaLabel": "Subscription expiry notice",
+      "dismiss": "Dismiss warning",
+      "endsToday": "Your subscription ends today.",
+      "message": "Your subscription ends in {{count}} days ({{date}}).",
+      "pastDue": "Your subscription has a pending payment. Ends in {{count}} days ({{date}}).",
+      "pastDueNoCountdown": "Your subscription has a pending payment.",
+      "payLink": "Pay subscription"
+    },
     "sidebar": {
       "ariaLabel": "Business portal navigation",
       "brandFallback": "BP",
       "closeMenu": "Close menu",
+      "collaborator": "Collaborator: {{name}}",
       "collaborators": "Team",
       "collaboratorsDescription": "Collaborators and permission assignment",
       "customers": "Customers",
       "customersDescription": "Directory and customer management",
       "dashboard": "Dashboard",
       "dashboardDescription": "Business summary and statistics",
+      "logoAlt": "Logo of {{name}}",
       "openMenu": "Open navigation menu",
       "reports": "Reports",
       "reportsDescription": "Occupancy and operational metrics",
@@ -145,9 +156,26 @@
       "subscription": "Subscription",
       "subscriptionDescription": "Subscribed plan and billing"
     },
+    "signOut": {
+      "cancelAction": "Stay here",
+      "confirmAction": "Sign out",
+      "confirmTitle": "Unsaved changes",
+      "unsavedChangesConfirm": "Do you want to sign out? You have unsaved changes that will be lost."
+    },
     "statusGate": {
       "retryAction": "Retry",
       "signOutAction": "Sign out"
+    },
+    "subscriptionBanner": {
+      "ariaLabel": "Subscription status",
+      "endsOn": "Ends on {{date}}",
+      "loadError": "Could not load subscription",
+      "payLink": "Pay now",
+      "readOnlyNotice": "Read-only mode",
+      "renewsOn": "Renews on {{date}}",
+      "retry": "Retry",
+      "suspendedNotice": "Business suspended by administration",
+      "viewPlan": "Manage subscription"
     },
     "title": "Business portal"
   },
@@ -181,6 +209,9 @@
       "durationHelp": "Between 5 and 480 minutes, in 5-minute increments.",
       "durationLabel": "Duration (minutes)",
       "durationPlaceholder": "60",
+      "editSubtitle": "Update the details and pricing for this service in your catalog.",
+      "editSuccess": "Service updated.",
+      "editTitle": "Edit service",
       "featureItemLabel": "Feature {{index}}",
       "featurePlaceholder": "e.g. Includes wash and styling",
       "featuresDescription": "Add up to 10 features or benefits of the service.",
