@@ -36,6 +36,19 @@
       "tagline": "Simplify your business schedule, automate reminders, and allow your clients to book online 24/7 effortlessly.",
       "title": "Boost your business with smart and effortless bookings"
     },
+    "intro": {
+      "badge": "Why choose Booking System?",
+      "features": {
+        "notifications": "Automated reminders and timely notifications to minimize no-shows.",
+        "payments": "Integrated payment options and transparent subscription management.",
+        "scheduling": "Real-time agenda availability with 24/7 self-service scheduling for clients."
+      },
+      "fullText": "Our platform is tailored to empower barbershops, beauty salons, medical consultancies, and independent professionals. With centralized scheduling, automatic reminders, multi-collaborator support, and comprehensive reports, you regain control over your time while delivering an effortless booking experience for your clients.",
+      "readLess": "Read less",
+      "readMore": "Read more",
+      "summary": "Booking System is the all-in-one booking platform designed to streamline appointments, eliminate scheduling conflicts, and grow your service business effortlessly.",
+      "title": "Smart scheduling built for modern service businesses"
+    },
     "navbar": {
       "goToPortal": "Go to my dashboard",
       "landmarkLabel": "Main navigation",
