@@ -147,6 +147,8 @@ service cloud.firestore {
 
     // A deactivated plan keeps its subscribers (AC-KAN-176-06): the subscriber
     // can still read the plan of their own subscription (sidebar, KAN-40).
+    // "current" is the subscription document id the sidebar reads
+    // (BUSINESS_LAYOUT_CONSTANTS.CURRENT_DOCUMENT_ID) and the seed writes.
     function isSubscribedToPlan(planId) {
       return hasRole('subscriber')
         && request.auth.token.businessId is string
