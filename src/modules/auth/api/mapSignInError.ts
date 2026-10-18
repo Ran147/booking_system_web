@@ -1,0 +1,40 @@
+import { FirebaseError } from "firebase/app";
+import { FIREBASE_ERROR_CODE } from "@/constants";
+import {
+  SIGN_IN_ERROR_KEY,
+  type SignInErrorKey,
+} from "../constants/SignInErrorKey.constants";
+import type { SignInError } from "../models/SignIn.mutation";
+
+// US-33, D-2. Unknown email, wrong password and malformed email share one
+// message so the form never reveals whether an account exists (KAN-34).
+const MESSAGE_KEY_BY_CODE: Readonly<Record<string, SignInErrorKey>> = {
+  [FIREBASE_ERROR_CODE.FUNCTIONS_INTERNAL]: SIGN_IN_ERROR_KEY.NETWORK,
+  [FIREBASE_ERROR_CODE.FUNCTIONS_INVALID_ARGUMENT]:
+    SIGN_IN_ERROR_KEY.RECAPTCHA_REJECTED,
+  [FIREBASE_ERROR_CODE.FUNCTIONS_PERMISSION_DENIED]:
+    SIGN_IN_ERROR_KEY.RECAPTCHA_REJECTED,
+  [FIREBASE_ERROR_CODE.FUNCTIONS_UNAVAILABLE]: SIGN_IN_ERROR_KEY.NETWORK,
+  [FIREBASE_ERROR_CODE.INVALID_CREDENTIAL]:
+    SIGN_IN_ERROR_KEY.INVALID_CREDENTIALS,
+  [FIREBASE_ERROR_CODE.INVALID_EMAIL]: SIGN_IN_ERROR_KEY.INVALID_CREDENTIALS,
+  [FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED]: SIGN_IN_ERROR_KEY.NETWORK,
+  [FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS]: SIGN_IN_ERROR_KEY.TOO_MANY_ATTEMPTS,
+  [FIREBASE_ERROR_CODE.USER_DISABLED]: SIGN_IN_ERROR_KEY.ACCOUNT_DISABLED,
+  [FIREBASE_ERROR_CODE.USER_NOT_FOUND]: SIGN_IN_ERROR_KEY.INVALID_CREDENTIALS,
+  [FIREBASE_ERROR_CODE.WRONG_PASSWORD]: SIGN_IN_ERROR_KEY.INVALID_CREDENTIALS,
+};
+
+export const mapSignInError = (error: unknown): SignInError => {
+  if (error instanceof FirebaseError) {
+    return {
+      code: error.code,
+      messageKey: MESSAGE_KEY_BY_CODE[error.code] ?? SIGN_IN_ERROR_KEY.UNKNOWN,
+    };
+  }
+
+  return {
+    code: FIREBASE_ERROR_CODE.UNKNOWN,
+    messageKey: SIGN_IN_ERROR_KEY.UNKNOWN,
+  };
+};

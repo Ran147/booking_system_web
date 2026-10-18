@@ -1,6 +1,6 @@
 import { type MouseEvent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { I18N_NAMESPACE } from "@/shared/constants";
+import { I18N_NAMESPACE, ROUTE_PATH } from "@/shared/constants";
 import type { Nullable, NullableUndefined } from "@/shared/types";
 import {
   DEFAULT_LANDING_FOOTER_CONFIG,
@@ -127,6 +127,15 @@ export const useLandingFooterViewModel = (
     event: MouseEvent<HTMLAnchorElement>,
     href: string,
   ): void => {
+    if (
+      href === ROUTE_PATH.LANDING.HOME &&
+      window.location.pathname === ROUTE_PATH.LANDING.HOME
+    ) {
+      event.preventDefault();
+      window.scrollTo({ behavior: "smooth", top: 0 });
+      return;
+    }
+
     if (href.startsWith("#")) {
       event.preventDefault();
       const targetElement = document.querySelector<HTMLElement>(href);

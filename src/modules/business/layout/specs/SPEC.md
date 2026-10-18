@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/layout/` |
+| Feature folder | `src/modules/business/layout/` |
 | Stories | KAN-39, KAN-40, KAN-41, KAN-42 |
 | Status | Draft |
 | Depends on | KAN-28 (subscriber sign-in and session); KAN-38 (idle logout); KAN-32 (subscription data, payment page KAN-45, read-only KAN-49); KAN-182 (`PlatformSettings`); Q5 decided 2026-09-28 (no renewal retries in the MVP, so the `past_due` countdown follows the grace days only); Q1 decided 2026-09-28 (the collaborator uses this layout, sections limited by KAN-86); Q2 decided 2026-09-28 (a `pending` or `rejected` business shows the status screens of KAN-33, not this layout); PROP-4 business profile (where the logo is set) |

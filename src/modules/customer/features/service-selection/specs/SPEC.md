@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/service-selection/` |
+| Feature folder | `src/modules/customer/features/service-selection/` |
 | Stories | KAN-135, KAN-136, KAN-137, KAN-138 |
 | Status | Draft |
 | Depends on | Q1 decided 2026-09-28 (collaborators; `Service.collaboratorSelection`, KAN-61, services spec); Q4 decided 2026-09-28 (the flow lives under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory; the flow is private); `business-home` spec (KAN-111, KAN-116); `availability` spec (KAN-139) |
