@@ -53,6 +53,24 @@ export const updateServiceCollaborators = onCall<
       );
     }
 
+    const collaboratorsQuery = businessReference.collection(
+      FIRESTORE_COLLECTION.COLLABORATORS,
+    );
+    const collaboratorsSnapshot = await transaction.get(collaboratorsQuery);
+
+    const existingCollaboratorIds = new Set(
+      collaboratorsSnapshot.docs.map((collaboratorDoc) => collaboratorDoc.id),
+    );
+    const hasUnknownCollaborator = collaboratorIds.some(
+      (collaboratorId) => !existingCollaboratorIds.has(collaboratorId),
+    );
+    if (hasUnknownCollaborator) {
+      throw new HttpsError(
+        "invalid-argument",
+        UPDATE_SERVICE_COLLABORATORS_ERROR.INVALID_PAYLOAD,
+      );
+    }
+
     const effectiveSelection =
       collaboratorIds.length === 0
         ? null
@@ -61,11 +79,6 @@ export const updateServiceCollaborators = onCall<
     transaction.update(serviceReference, {
       collaboratorSelection: effectiveSelection,
     });
-
-    const collaboratorsQuery = businessReference.collection(
-      FIRESTORE_COLLECTION.COLLABORATORS,
-    );
-    const collaboratorsSnapshot = await transaction.get(collaboratorsQuery);
 
     collaboratorsSnapshot.forEach((collaboratorDoc) => {
       const collaboratorData = collaboratorDoc.data();

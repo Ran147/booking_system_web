@@ -13,7 +13,10 @@ export const ServiceDiscountsPage = ({
   businessInfo,
   initialService,
   onBack,
+  onNavigate,
   serviceId,
+  userPermissions,
+  userRole,
 }: ServiceDiscountsPageProps): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const navigate = useNavigate();
@@ -23,7 +26,10 @@ export const ServiceDiscountsPage = ({
   const viewModel = useServiceDiscountsViewModel({
     businessInfo,
     initialService,
+    onNavigate,
     serviceId: effectiveServiceId,
+    userPermissions,
+    userRole,
   });
 
   const handleBack = (): void => {

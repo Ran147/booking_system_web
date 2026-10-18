@@ -66,24 +66,17 @@ export const fetchServiceCollaboratorsData = async (
     where("status", "in", [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED]),
   );
 
-  let bookingsSnapshot;
-  try {
-    bookingsSnapshot = await getDocs(bookingsQuery);
-  } catch {
-    bookingsSnapshot = null;
-  }
+  const bookingsSnapshot = await getDocs(bookingsQuery);
 
   const bookingsCountByCollaborator: Record<string, number> = {};
-  if (bookingsSnapshot) {
-    bookingsSnapshot.forEach((documentSnapshot) => {
-      const bookingDocData = documentSnapshot.data();
-      const collaboratorId = bookingDocData.collaboratorId;
-      if (typeof collaboratorId === "string") {
-        bookingsCountByCollaborator[collaboratorId] =
-          (bookingsCountByCollaborator[collaboratorId] ?? 0) + 1;
-      }
-    });
-  }
+  bookingsSnapshot.forEach((documentSnapshot) => {
+    const bookingDocData = documentSnapshot.data();
+    const collaboratorId = bookingDocData.collaboratorId;
+    if (typeof collaboratorId === "string") {
+      bookingsCountByCollaborator[collaboratorId] =
+        (bookingsCountByCollaborator[collaboratorId] ?? 0) + 1;
+    }
+  });
 
   const collaborators: ServiceCollaboratorItem[] = [];
   collaboratorsSnapshot.forEach((documentSnapshot) => {

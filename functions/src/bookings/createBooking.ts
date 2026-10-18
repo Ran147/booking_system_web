@@ -6,45 +6,43 @@ import {
 import type {
   CreateBookingPayload,
   CreateBookingResponse,
-  ServiceSnapshot,
 } from "./models/CreateBooking.mutation.js";
 import { createBookingPayloadSchema } from "./models/CreateBooking.schema.js";
+import { buildServiceSnapshot } from "./utils/buildServiceSnapshot.js";
 import { BOOKING_STATUS } from "../shared/constants/BookingStatus.constants.js";
+import { BUSINESS_STATUS } from "../shared/constants/BusinessStatus.constants.js";
 import { FIRESTORE_COLLECTION } from "../shared/constants/FirestoreCollection.constants.js";
-import {
-  DISCOUNT_TYPE,
-  TIME_CONVERSION,
-} from "../shared/constants/ServiceDiscount.constants.js";
+import { TIME_CONVERSION } from "../shared/constants/ServiceDiscount.constants.js";
 import { SERVICE_STATUS } from "../shared/constants/ServiceStatus.constants.js";
+import { USER_ROLE } from "../shared/constants/UserRole.constants.js";
 import { firestore } from "../shared/firebaseAdmin.js";
 import { readPayload } from "../shared/readPayload.js";
 import type { Nullable } from "../shared/types/Nullable.js";
-
-const parseDate = (value: unknown): Nullable<Date> => {
-  if (!value) {
-    return null;
-  }
-  if (value instanceof Date) {
-    return value;
-  }
-  if (typeof (value as { toDate?: () => Date }).toDate === "function") {
-    return (value as { toDate: () => Date }).toDate();
-  }
-  if (typeof value === "string") {
-    return new Date(value);
-  }
-  return null;
-};
 
 export const createBooking = onCall<
   CreateBookingPayload,
   Promise<CreateBookingResponse>
 >(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      CREATE_BOOKING_ERROR.UNAUTHENTICATED,
+    );
+  }
+
+  if (request.auth.token.role !== USER_ROLE.CUSTOMER) {
+    throw new HttpsError(
+      "permission-denied",
+      CREATE_BOOKING_ERROR.PERMISSION_DENIED,
+    );
+  }
+
+  const authenticatedUserId = request.auth.uid;
+
   const {
     businessId,
     collaboratorId,
     customerId,
-    customerUserId,
     endsAt,
     serviceId,
     startsAt,
@@ -62,6 +60,18 @@ export const createBooking = onCall<
     .doc(serviceId);
 
   return firestore.runTransaction(async (transaction) => {
+    const businessSnapshot = await transaction.get(businessReference);
+    if (
+      !businessSnapshot.exists ||
+      businessSnapshot.data()?.status !== BUSINESS_STATUS.ACTIVE
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        CREATE_BOOKING_ERROR.SERVICE_UNAVAILABLE,
+        { reason: CREATE_BOOKING_ERROR_REASON.SERVICE_UNAVAILABLE },
+      );
+    }
+
     const serviceSnapshotDoc = await transaction.get(serviceReference);
     if (!serviceSnapshotDoc.exists) {
       throw new HttpsError(
@@ -92,63 +102,15 @@ export const createBooking = onCall<
       }
     }
 
-    // Evaluate discounts active right now (AC-KAN-60-03)
-    const now = Date.now();
-    let finalPriceInCents = Number(serviceData.priceInCents ?? 0);
-
-    const discounts: unknown[] = Array.isArray(serviceData.discounts)
-      ? serviceData.discounts
-      : [];
-
-    for (const discountItem of discounts) {
-      if (!discountItem || typeof discountItem !== "object") {
-        continue;
-      }
-      const discount = discountItem as {
-        endsAt: unknown;
-        startsAt: unknown;
-        type: string;
-        value: number;
-      };
-
-      const startDate = parseDate(discount.startsAt);
-      const endDate = parseDate(discount.endsAt);
-
-      if (startDate && endDate) {
-        // Set end of day for endDate if time is 00:00:00
-        const endTime = new Date(endDate);
-        if (
-          endTime.getHours() === 0 &&
-          endTime.getMinutes() === 0 &&
-          endTime.getSeconds() === 0
-        ) {
-          endTime.setHours(
-            TIME_CONVERSION.END_OF_DAY_HOUR,
-            TIME_CONVERSION.END_OF_DAY_MINUTE,
-            TIME_CONVERSION.END_OF_DAY_SECOND,
-            TIME_CONVERSION.END_OF_DAY_MILLISECOND,
-          );
-        }
-
-        if (now >= startDate.getTime() && now <= endTime.getTime()) {
-          if (discount.type === DISCOUNT_TYPE.PERCENTAGE) {
-            finalPriceInCents = Math.round(
-              finalPriceInCents *
-                (1 - discount.value / TIME_CONVERSION.PERCENTAGE_BASE),
-            );
-          } else if (discount.type === DISCOUNT_TYPE.FIXED_AMOUNT) {
-            finalPriceInCents = Math.max(0, finalPriceInCents - discount.value);
-          }
-          break;
-        }
-      }
-    }
-
-    const serviceSnapshot: ServiceSnapshot = {
-      durationMinutes: Number(serviceData.durationMinutes ?? 0),
-      name: String(serviceData.name ?? ""),
-      priceInCents: finalPriceInCents,
-    };
+    const serviceSnapshot = buildServiceSnapshot({
+      serviceData: {
+        discounts: serviceData?.discounts,
+        durationMinutes: serviceData?.durationMinutes,
+        name: serviceData?.name,
+        priceInCents: serviceData?.priceInCents,
+      },
+      timeZone: businessSnapshot.data()?.timeZone ?? "UTC",
+    });
 
     const startsAtDate = new Date(startsAt);
     const durationMilliseconds =
@@ -170,7 +132,7 @@ export const createBooking = onCall<
       collaboratorId: collaboratorId ?? null,
       collaboratorName,
       customerId,
-      customerUserId: customerUserId ?? null,
+      customerUserId: authenticatedUserId,
       endsAt: endsAtDate,
       id: bookingReference.id,
       rescheduleHistory: [],

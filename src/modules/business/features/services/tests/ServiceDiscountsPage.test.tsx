@@ -1,6 +1,6 @@
 import { waitFor, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BUSINESS_STATUS, SERVICE_STATUS } from "@/domain";
+import { BUSINESS_STATUS, SERVICE_STATUS, USER_ROLE } from "@/domain";
 import { renderWithProviders } from "@/test-utils/renderWithProviders";
 import { SUBSCRIBER_SESSION } from "@/test-utils/sessionFixtures";
 import * as fetchBusinessInfoModule from "../api/fetchBusinessInfo";
@@ -364,5 +364,25 @@ describe("ServiceDiscountsPage (KAN-60)", () => {
     );
 
     expect(await screen.findByText("25%")).toBeInTheDocument();
+  });
+
+  it("redirects collaborator without manage_services to business portal home", async () => {
+    const onNavigate = vi.fn();
+
+    renderWithProviders(
+      <ServiceDiscountsPage
+        initialService={MOCK_SERVICE}
+        onNavigate={onNavigate}
+        serviceId="service-123"
+        userPermissions={["manage_bookings"]}
+        userRole={USER_ROLE.COLLABORATOR}
+      />,
+      {
+        initialPath: "/business/services/service-123/discounts",
+        session: SUBSCRIBER_SESSION,
+      },
+    );
+
+    expect(onNavigate).toHaveBeenCalledWith("/business");
   });
 });

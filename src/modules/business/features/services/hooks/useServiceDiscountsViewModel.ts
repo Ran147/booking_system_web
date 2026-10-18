@@ -1,15 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { toast } from "@/components/common";
 import {
   ERROR_MESSAGE_KEY,
   I18N_NAMESPACE,
   MONEY,
   QUERY_DEFAULTS,
+  ROUTE_PATH,
 } from "@/constants";
-import { BUSINESS_STATUS, type ServiceDiscount } from "@/domain";
-import { useCurrentBusiness } from "@/modules/auth";
+import {
+  BUSINESS_STATUS,
+  COLLABORATOR_PERMISSION,
+  USER_ROLE,
+  type ServiceDiscount,
+  type UserRole,
+} from "@/domain";
+import { SESSION_STATUS, useCurrentBusiness, useSession } from "@/modules/auth";
 import type { Nullable } from "@/types";
 import {
   fetchBusinessInfo,
@@ -26,12 +34,18 @@ import type {
   DiscountFormState,
   ServiceDiscountsViewModel,
 } from "../models/ServiceDiscountsViewModel.interface";
-import { hasDateRangeOverlap } from "../utils/discountCalculations";
+import {
+  getCalendarDayUtcMidnight,
+  hasDateRangeOverlap,
+} from "../utils/discountCalculations";
 
 export interface UseServiceDiscountsViewModelOptions {
   readonly businessInfo?: BusinessInfo;
   readonly initialService?: ServiceDetail;
+  readonly onNavigate?: (path: string) => void;
   readonly serviceId?: string;
+  readonly userPermissions?: readonly string[];
+  readonly userRole?: UserRole;
 }
 
 const DEFAULT_FORM_STATE: DiscountFormState = Object.freeze({
@@ -49,12 +63,34 @@ export const useServiceDiscountsViewModel = (
     I18N_NAMESPACE.COMMON,
     I18N_NAMESPACE.VALIDATION,
   ]);
+  const navigate = useNavigate();
+  const session = useSession();
   const { businessId } = useCurrentBusiness();
   const updateDiscountsMutation = useUpdateServiceDiscountsMutation();
 
   const [formState, setFormState] =
     useState<DiscountFormState>(DEFAULT_FORM_STATE);
   const [formError, setFormError] = useState<Nullable<string>>(null);
+
+  const currentRole =
+    options.userRole ??
+    (session.status === SESSION_STATUS.SIGNED_IN ? session.role : null);
+
+  const permissions = options.userPermissions ?? [];
+
+  const isUnauthorizedCollaborator =
+    currentRole === USER_ROLE.COLLABORATOR &&
+    !permissions.includes(COLLABORATOR_PERMISSION.MANAGE_SERVICES);
+
+  useEffect(() => {
+    if (isUnauthorizedCollaborator) {
+      if (options.onNavigate) {
+        options.onNavigate(ROUTE_PATH.BUSINESS.ROOT);
+      } else {
+        navigate(ROUTE_PATH.BUSINESS.ROOT);
+      }
+    }
+  }, [isUnauthorizedCollaborator, navigate, options]);
 
   const businessInfoQuery = useQuery({
     enabled: options.businessInfo === undefined,
@@ -115,10 +151,17 @@ export const useServiceDiscountsViewModel = (
       return;
     }
 
-    const startsAtDate = new Date(`${formState.startsAt}T00:00:00`);
-    const endsAtDate = new Date(`${formState.endsAt}T23:59:59.999`);
+    const effectiveTimeZone = businessInfo?.timeZone ?? "UTC";
+    const startsAtMidnight = getCalendarDayUtcMidnight(
+      formState.startsAt,
+      effectiveTimeZone,
+    );
+    const endsAtMidnight = getCalendarDayUtcMidnight(
+      formState.endsAt,
+      effectiveTimeZone,
+    );
 
-    if (endsAtDate.getTime() < startsAtDate.getTime()) {
+    if (endsAtMidnight < startsAtMidnight) {
       setFormError(
         t("services.discounts.invalidDateRangeError", {
           ns: I18N_NAMESPACE.BUSINESS,
@@ -126,6 +169,9 @@ export const useServiceDiscountsViewModel = (
       );
       return;
     }
+
+    const startsAtDate = new Date(`${formState.startsAt}T12:00:00Z`);
+    const endsAtDate = new Date(`${formState.endsAt}T12:00:00Z`);
 
     const numericValue = Number(formState.value);
     const servicePriceInCents = service?.priceInCents ?? 0;
@@ -154,10 +200,15 @@ export const useServiceDiscountsViewModel = (
     }
 
     if (
-      hasDateRangeOverlap(discounts, {
-        endsAt: endsAtDate,
-        startsAt: startsAtDate,
-      })
+      hasDateRangeOverlap(
+        discounts,
+        {
+          endsAt: endsAtDate,
+          startsAt: startsAtDate,
+        },
+        undefined,
+        effectiveTimeZone,
+      )
     ) {
       setFormError(
         t("services.discounts.overlapError", { ns: I18N_NAMESPACE.BUSINESS }),

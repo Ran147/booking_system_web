@@ -49,7 +49,7 @@ export const DiscountsTable = ({
   const getStatusBadge = (
     discount: ServiceDiscount,
   ): { label: string; tone: (typeof TONE)[keyof typeof TONE] } => {
-    const status = getDiscountStatus(discount);
+    const status = getDiscountStatus(discount, new Date(), timeZone);
     if (status === DISCOUNT_STATUS.EXPIRED) {
       return {
         label: t("services.discounts.expiredBadge"),

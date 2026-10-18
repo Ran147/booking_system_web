@@ -6,36 +6,91 @@ import {
   type DiscountStatus,
 } from "../constants/ServiceDiscount.constants";
 
+const FIRST_ELEMENT_INDEX = 0;
+const SECOND_ELEMENT_INDEX = 1;
+const THIRD_ELEMENT_INDEX = 2;
+
 export const calculateDiscountedPrice = (
   priceInCents: number,
   discount: ServiceDiscount,
 ): number => {
+  const basePriceInCents = Math.max(0, priceInCents);
+
   if (discount.type === DISCOUNT_TYPE.PERCENTAGE) {
-    const deductionInCents = Math.round(
-      (priceInCents * discount.value) / TIME_CALCULATION.PERCENTAGE_BASE,
+    const clampedPercentage = Math.min(
+      TIME_CALCULATION.PERCENTAGE_BASE,
+      Math.max(0, discount.value),
     );
-    return Math.max(0, priceInCents - deductionInCents);
+    const deductionInCents = Math.round(
+      (basePriceInCents * clampedPercentage) / TIME_CALCULATION.PERCENTAGE_BASE,
+    );
+    return Math.max(0, basePriceInCents - deductionInCents);
   }
 
-  return Math.max(0, priceInCents - discount.value);
+  const clampedAmount = Math.max(0, discount.value);
+  return Math.max(0, basePriceInCents - clampedAmount);
+};
+
+export const getCalendarDayUtcMidnight = (
+  dateInput: Date | string,
+  timeZone: string = "UTC",
+): number => {
+  if (typeof dateInput === "string" && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+    const [yearString, monthString, dayString] = dateInput.split("-");
+    return Date.UTC(
+      Number(yearString),
+      Number(monthString) - 1,
+      Number(dayString),
+    );
+  }
+
+  const parsedDate =
+    typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (Number.isNaN(parsedDate.getTime())) {
+    return Number.NaN;
+  }
+
+  try {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      day: "2-digit",
+      month: "2-digit",
+      timeZone,
+      year: "numeric",
+    });
+    const [year, month, day] = formatter
+      .format(parsedDate)
+      .split("-")
+      .map(Number);
+    return Date.UTC(
+      year ?? FIRST_ELEMENT_INDEX,
+      (month ?? SECOND_ELEMENT_INDEX) - 1,
+      day ?? THIRD_ELEMENT_INDEX,
+    );
+  } catch {
+    return Date.UTC(
+      parsedDate.getUTCFullYear(),
+      parsedDate.getUTCMonth(),
+      parsedDate.getUTCDate(),
+    );
+  }
 };
 
 export const hasDateRangeOverlap = (
   existingDiscounts: readonly ServiceDiscount[],
-  candidateRange: { readonly endsAt: Date; readonly startsAt: Date },
+  candidateRange: {
+    readonly endsAt: Date | string;
+    readonly startsAt: Date | string;
+  },
   ignoredIndex?: number,
+  timeZone: string = "UTC",
 ): boolean => {
-  const candidateStartTime = new Date(candidateRange.startsAt).setHours(
-    0,
-    0,
-    0,
-    0,
+  const candidateStartTime = getCalendarDayUtcMidnight(
+    candidateRange.startsAt,
+    timeZone,
   );
-  const candidateEndTime = new Date(candidateRange.endsAt).setHours(
-    TIME_CALCULATION.END_OF_DAY_HOUR,
-    TIME_CALCULATION.END_OF_DAY_MINUTE,
-    TIME_CALCULATION.END_OF_DAY_SECOND,
-    TIME_CALCULATION.END_OF_DAY_MILLISECOND,
+  const candidateEndTime = getCalendarDayUtcMidnight(
+    candidateRange.endsAt,
+    timeZone,
   );
 
   return existingDiscounts.some((existingDiscount, discountIndex) => {
@@ -43,17 +98,13 @@ export const hasDateRangeOverlap = (
       return false;
     }
 
-    const existingStartTime = new Date(existingDiscount.startsAt).setHours(
-      0,
-      0,
-      0,
-      0,
+    const existingStartTime = getCalendarDayUtcMidnight(
+      existingDiscount.startsAt,
+      timeZone,
     );
-    const existingEndTime = new Date(existingDiscount.endsAt).setHours(
-      TIME_CALCULATION.END_OF_DAY_HOUR,
-      TIME_CALCULATION.END_OF_DAY_MINUTE,
-      TIME_CALCULATION.END_OF_DAY_SECOND,
-      TIME_CALCULATION.END_OF_DAY_MILLISECOND,
+    const existingEndTime = getCalendarDayUtcMidnight(
+      existingDiscount.endsAt,
+      timeZone,
     );
 
     return (
@@ -66,14 +117,16 @@ export const hasDateRangeOverlap = (
 export const getDiscountStatus = (
   discount: ServiceDiscount,
   currentDate: Date = new Date(),
+  timeZone: string = "UTC",
 ): DiscountStatus => {
-  const currentTimestamp = currentDate.getTime();
-  const startOfDayTimestamp = new Date(discount.startsAt).setHours(0, 0, 0, 0);
-  const endOfDayTimestamp = new Date(discount.endsAt).setHours(
-    TIME_CALCULATION.END_OF_DAY_HOUR,
-    TIME_CALCULATION.END_OF_DAY_MINUTE,
-    TIME_CALCULATION.END_OF_DAY_SECOND,
-    TIME_CALCULATION.END_OF_DAY_MILLISECOND,
+  const currentTimestamp = getCalendarDayUtcMidnight(currentDate, timeZone);
+  const startOfDayTimestamp = getCalendarDayUtcMidnight(
+    discount.startsAt,
+    timeZone,
+  );
+  const endOfDayTimestamp = getCalendarDayUtcMidnight(
+    discount.endsAt,
+    timeZone,
   );
 
   if (currentTimestamp > endOfDayTimestamp) {

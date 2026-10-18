@@ -6,6 +6,7 @@ import { firestore } from "../../shared/firebaseAdmin.js";
 import {
   assertEmulatorsRunning,
   buildAuthenticatedCallableRequest,
+  buildCallableRequest,
   captureHttpsError,
   clearEmulators,
   functionsTestEnvironment,
@@ -211,5 +212,90 @@ describe("createBooking", () => {
     expect(error.message).toBe(
       "business:services.snapshot.serviceUnavailableError",
     );
+  });
+
+  it("rejects unauthenticated caller with unauthenticated", async () => {
+    const error = await captureHttpsError(
+      callCreateBooking(
+        buildCallableRequest({
+          businessId: TEST_BUSINESS_ID,
+          customerId: TEST_CUSTOMER_ID,
+          serviceId: TEST_SERVICE_ID,
+          startsAt: new Date().toISOString(),
+        }),
+      ),
+    );
+
+    expect(error.code).toBe("unauthenticated");
+  });
+
+  it("rejects caller without customer role with permission-denied", async () => {
+    const error = await captureHttpsError(
+      callCreateBooking(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            customerId: TEST_CUSTOMER_ID,
+            serviceId: TEST_SERVICE_ID,
+            startsAt: new Date().toISOString(),
+          },
+          {
+            token: {
+              role: USER_ROLE.SUBSCRIBER,
+            },
+            uid: "subscriber-uid-1",
+          },
+        ),
+      ),
+    );
+
+    expect(error.code).toBe("permission-denied");
+  });
+
+  it("rejects booking when business is not active", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .update({ status: "inactive" });
+
+    const error = await captureHttpsError(
+      callCreateBooking(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            customerId: TEST_CUSTOMER_ID,
+            serviceId: TEST_SERVICE_ID,
+            startsAt: new Date().toISOString(),
+          },
+          CALLER_AUTH,
+        ),
+      ),
+    );
+
+    expect(error.code).toBe("failed-precondition");
+  });
+
+  it("always records authenticated caller uid as customerUserId ignoring payload value", async () => {
+    const response = await callCreateBooking(
+      buildAuthenticatedCallableRequest(
+        {
+          businessId: TEST_BUSINESS_ID,
+          customerId: TEST_CUSTOMER_ID,
+          customerUserId: "spoofed-user-id",
+          serviceId: TEST_SERVICE_ID,
+          startsAt: new Date().toISOString(),
+        },
+        CALLER_AUTH,
+      ),
+    );
+
+    const bookingDoc = await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.BOOKINGS)
+      .doc(response.bookingId)
+      .get();
+
+    expect(bookingDoc.data()?.customerUserId).toBe(CALLER_AUTH.uid);
   });
 });

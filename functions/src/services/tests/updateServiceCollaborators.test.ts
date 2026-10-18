@@ -276,4 +276,21 @@ describe("updateServiceCollaborators", () => {
 
     expect(error.code).toBe("permission-denied");
   });
+
+  it("rejects unknown collaborator IDs with invalid-argument", async () => {
+    const error = await captureHttpsError(
+      callUpdateServiceCollaborators(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            collaboratorIds: ["non-existent-collaborator"],
+            serviceId: TEST_SERVICE_ID,
+          },
+          SUBSCRIBER_AUTH,
+        ),
+      ),
+    );
+
+    expect(error.code).toBe("invalid-argument");
+  });
 });
