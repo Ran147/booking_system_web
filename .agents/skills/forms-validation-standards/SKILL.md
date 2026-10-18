@@ -46,6 +46,7 @@ This skill is the **single source of truth** for forms: schemas, field component
 | Success | Toast with a `…Success` key, then navigate or reset |
 | Unsaved changes | Forms in dialogs ask before closing when `formState.isDirty` |
 | Passwords | `PasswordInput` with show / hide (KAN-35) and `PasswordStrengthMeter` driven by `PASSWORD_RULE` (KAN-37) |
+| Full names and phones | `fullNameFieldSchema` and `phoneFieldSchema` (§6) |
 | Public forms | Sign-in, sign-up, contact and password recovery include `RecaptchaField`; submit stays disabled until there is a token (`auth-and-roles`) |
 | Money | Shown in currency units, stored as `priceInCents` (`domain-glossary`) |
 | Dates and times | Picked in the business `timeZone` |
@@ -337,7 +338,28 @@ export const passwordFieldSchema = z
 
 ---
 
-## 6. Enforced by
+## 6. Full name and phone rules (KAN-123)
+
+Every form that asks for a person's full name or a phone uses the same rule, so a value accepted in one form (customer sign-up) is never rejected in another (customer profile):
+
+| Field | Rule | Constant | Field schema (`@/modules/auth`) |
+| --- | --- | --- | --- |
+| Full name | 2 to 80 characters after trimming | `FULL_NAME_RULE` (`@/domain`) | `fullNameFieldSchema` |
+| Phone | Only digits, spaces, `+`, `-` and parentheses; 7 to 15 digits (E.164); up to 20 characters | `PHONE_RULE` and `isValidPhone` (`@/domain`) | `phoneFieldSchema` |
+
+- Count **digits**, not characters: `-------` is not a phone.
+- Whether the field is required is up to each form. An optional phone accepts the empty string too:
+
+  ```ts
+  phone: z.union([z.literal(STRING.EMPTY), phoneFieldSchema]),
+  ```
+
+- The format error is `validation:phoneInvalid`; length errors are `validation:tooShort` / `validation:tooLong`.
+- Cloud Functions read the mirrors in `functions/src/shared/constants/` (`FULL_NAME_RULE`, `PHONE_RULE`).
+
+---
+
+## 7. Enforced by
 
 | Rule | Tool |
 | --- | --- |
@@ -346,7 +368,7 @@ export const passwordFieldSchema = z
 | No `useState` per field in `.tsx` | ESLint rule from `component-architecture` |
 | Server re-validation | `firestore.rules` / function tests (`unit-testing-standards`) |
 
-## 7. Checklist
+## 8. Checklist
 
 - [ ] The form uses React Hook Form + Zod; the schema lives in `models/<FormName>.schema.ts` with its inferred type.
 - [ ] Messages are `VALIDATION_MESSAGE_KEY` values; limits come from constants; defaults use `satisfies`.
@@ -355,4 +377,5 @@ export const passwordFieldSchema = z
 - [ ] Server field errors are mapped with `setError`; general errors show a translated toast.
 - [ ] Public forms include `RecaptchaField`.
 - [ ] Passwords use `PasswordInput`, `PasswordStrengthMeter` and `passwordFieldSchema`.
+- [ ] Full names and phones use `fullNameFieldSchema` and `phoneFieldSchema` (§6).
 - [ ] The same rules are enforced on the server.
