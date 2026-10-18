@@ -51,10 +51,10 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 - [x] **AC-KAN-39-04** · edge · Given a business name longer than the sidebar width, when it is shown, then it is truncated with an ellipsis and the full name is available as accessible text and on hover. [KAN-39]
 - [x] **AC-KAN-39-05** · edge · Given the sidebar is collapsed or the screen is narrow, when it is shown, then only the logo (or initials) is visible and the business name stays available to screen readers. See AS-2. [KAN-39]
 - [x] **AC-KAN-39-06** · happy · Given a signed-in `active` collaborator, when any business-portal screen is shown, then the sidebar shows the name and logo of their business (from the session `businessId`) and their own full name. [KAN-39, KAN-86]
-- [x] **AC-KAN-39-07** · edge · Given a subscriber whose business is `pending` or `rejected`, when they open any business-portal URL, then the sidebar is not shown; the status screen of AC-KAN-33-09 or AC-KAN-33-11 is shown instead. [KAN-39, KAN-33]
+- [ ] **AC-KAN-39-07** · edge · Given a subscriber whose business is `pending` or `rejected`, when they open any business-portal URL, then the sidebar is not shown; the status screen of AC-KAN-33-09 or AC-KAN-33-11 is shown instead. Deferred to PR #41 (BusinessStatusGate). [KAN-39, KAN-33]
 
 ### KAN-40 — Subscription banner
-- [x] **AC-KAN-40-01** · happy · Given a subscriber with an `active` subscription, when the sidebar is shown, then a banner shows the plan name, a status badge `active` and the renewal date (`currentPeriodEndsAt`) formatted in the business `timeZone` (with access to the subscription page via the sidebar navigation item, avoiding redundant buttons in the banner). [KAN-40]
+- [x] **AC-KAN-40-01** · happy · Given a subscriber with an `active` subscription, when the sidebar is shown, then a banner shows the plan name, a status badge `active` and the renewal date (`currentPeriodEndsAt`) formatted in the business `timeZone`, with a link to the subscription page (KAN-43). See AS-11. [KAN-40]
 - [x] **AC-KAN-40-02** · happy · Given an `active` subscription with `cancelAtPeriodEnd` true, when the banner is shown, then it says the subscription ends on `currentPeriodEndsAt` (`business:layout.subscriptionBanner.endsOn`) instead of the renewal date. [KAN-40, KAN-47]
 - [x] **AC-KAN-40-03** · happy · Given a subscription that is `past_due`, when the banner is shown, then it shows the `past_due` badge in the attention tone and a link to pay (KAN-45). [KAN-40]
 - [x] **AC-KAN-40-04** · happy · Given a subscription that is `expired` or `cancelled`, when the banner is shown, then it shows that status in the negative tone, `business:layout.subscriptionBanner.readOnlyNotice` and a link to pay (KAN-45). [KAN-40, KAN-49]
@@ -77,7 +77,7 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 - [x] **AC-KAN-42-01** · happy · Given a signed-in subscriber, when they choose sign out in the sidebar, then the session ends, the cached data of their business is cleared and they land on the sign-in page. [KAN-42]
 - [x] **AC-KAN-42-02** · happy · Given the subscriber has signed out, when they press the browser back button or open a business-portal URL, then no business data is shown and they are redirected to sign-in. [KAN-42]
 - [x] **AC-KAN-42-03** · error · Given sign-out fails (for example a network error while revoking the session), when the subscriber chooses sign out, then the local session and cached data are cleared anyway, they land on sign-in, and `common:errors.network` is not shown as a blocking error. See AS-7. [KAN-42]
-- [x] **AC-KAN-42-04** · edge · Given a form with unsaved changes, when the subscriber chooses sign out, then a confirmation `business:layout.signOut.unsavedChangesConfirm` is shown; cancelling keeps them on the screen with their changes. See AS-8. [KAN-42]
+- [ ] **AC-KAN-42-04** · edge · Given a form with unsaved changes, when the subscriber chooses sign out, then a confirmation `business:layout.signOut.unsavedChangesConfirm` is shown; cancelling keeps them on the screen with their changes. See AS-8. [KAN-42]
 - [x] **AC-KAN-42-05** · edge · Given the portal is open in several tabs, when the subscriber signs out in one, then the other tabs also end up on sign-in without showing business data. [KAN-42]
 - [x] **AC-KAN-42-06** · edge · Given a business that is `inactive` or `suspended`, when the subscriber signs out, then sign-out works normally (the read-only rule does not apply to it). [KAN-42, KAN-49]
 - [x] **AC-KAN-42-07** · edge · Given a sign-out through the idle timeout (`PlatformSettings.idleTimeoutMinutes`, KAN-38), when it happens, then the result is the same as AC-KAN-42-01. [KAN-42, KAN-38]
@@ -98,9 +98,10 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 | AS-5 | "Por vencer" means the subscription will stop: cancelled at period end, or a failed renewal (`past_due`). An auto-renewing `active` subscription shows no warning. | AC-KAN-41-01, AC-KAN-41-04 |
 | AS-6 | The warning can be dismissed for the current session only; the `past_due` warning cannot be dismissed. | AC-KAN-41-06 |
 | AS-7 | Sign-out always clears the local session even if the server call fails, so a subscriber is never stuck signed in. | AC-KAN-42-03 |
-| AS-8 | Unsaved-changes confirmation on sign-out applies to forms of the business portal that track unsaved changes. | AC-KAN-42-04 |
+| AS-8 | Unsaved-changes confirmation on sign-out applies to forms of the business portal that track unsaved changes. Unit logic tested in ViewModel and Dialog; end-to-end pending portal forms integration. | AC-KAN-42-04 |
 | AS-9 | A `past_due` subscription becomes `expired` at `currentPeriodEndsAt` plus `PlatformSettings.gracePeriodDays` (fallback: the default of the admin plans spec, AS-6 there), counted in the business `timeZone`. No retry changes that date in the MVP (Q5). | AC-KAN-41-07 |
 | AS-10 | Subscription banners and warnings are for the subscriber only; a collaborator never sees subscription data (the subscription is subscriber-only, collaborators spec AS-3). | AC-KAN-40-08 |
+| AS-11 | In the sidebar layout, access to the subscription page for an active subscription is available through the sidebar navigation items and the expiry/past-due banners. | AC-KAN-40-01 |
 
 ## Backlog issues
 - No Jira story lets the subscriber set or change the logo shown here (KAN-39); the proposed story PROP-4 (business-profile spec, not in Jira yet) covers it. The logo field is not in `domain-glossary` yet; `logoUrl` is used as a proposed name. The business name is set at sign-up (KAN-25).

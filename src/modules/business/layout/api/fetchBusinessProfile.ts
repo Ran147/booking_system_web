@@ -15,16 +15,13 @@ export interface BusinessProfileData {
 const businessProfileDocumentSchema = z.object({
   logoUrl: z.string().nullable().optional().default(null),
   name: z.string().optional().default(""),
-  status: z
-    .enum([
-      BUSINESS_STATUS.ACTIVE,
-      BUSINESS_STATUS.INACTIVE,
-      BUSINESS_STATUS.PENDING,
-      BUSINESS_STATUS.REJECTED,
-      BUSINESS_STATUS.SUSPENDED,
-    ])
-    .optional()
-    .default(BUSINESS_STATUS.ACTIVE),
+  status: z.enum([
+    BUSINESS_STATUS.ACTIVE,
+    BUSINESS_STATUS.INACTIVE,
+    BUSINESS_STATUS.PENDING,
+    BUSINESS_STATUS.REJECTED,
+    BUSINESS_STATUS.SUSPENDED,
+  ]),
   timeZone: z.string().optional().default("UTC"),
 });
 
@@ -39,12 +36,7 @@ export const fetchBusinessProfile = async (
   const documentSnapshot = await getDoc(businessDocumentReference);
 
   if (!documentSnapshot.exists()) {
-    return {
-      logoUrl: null,
-      name: "",
-      status: BUSINESS_STATUS.ACTIVE,
-      timeZone: "UTC",
-    };
+    throw new Error(`Business not found: ${businessId}`);
   }
 
   const documentData = businessProfileDocumentSchema.parse(

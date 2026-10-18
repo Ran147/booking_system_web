@@ -41,18 +41,12 @@ export const BusinessLayout = (): ReactElement => {
   const sidebarBanners = (
     <div className="flex flex-col gap-2">
       <ExpiryWarningBanner
-        cancelAtPeriodEnd={viewModel.subscription?.cancelAtPeriodEnd}
-        currentPeriodEndsAt={viewModel.subscription?.currentPeriodEndsAt}
-        gracePeriodDays={viewModel.gracePeriodDays}
-        isCollaborator={viewModel.isCollaborator}
-        isDismissed={viewModel.isExpiryWarningDismissed}
-        isPlatformSettingsError={viewModel.isPlatformSettingsError}
-        isSubscriptionError={viewModel.isSubscriptionError}
+        canDismiss={viewModel.expiryWarning?.canDismiss}
+        message={viewModel.expiryWarning?.message}
         onDismiss={viewModel.handleDismissExpiryWarning}
         onNavigateToSubscription={viewModel.handleNavigateToSubscription}
         onPay={viewModel.handleNavigateToSubscription}
-        status={viewModel.subscription?.status}
-        timeZone={viewModel.timeZone}
+        type={viewModel.expiryWarning?.type}
       />
       <SubscriptionBanner
         businessStatus={viewModel.businessStatus}

@@ -19,7 +19,7 @@ export const PortalSidebarHeader = ({
   collaboratorName,
   logoUrl,
 }: PortalSidebarHeaderProps): ReactElement => {
-  const [imageError, setImageError] = useState<boolean>(false);
+  const [failedLogoUrl, setFailedLogoUrl] = useState<Nullable<string>>(null);
 
   const computedInitials =
     brandInitials ||
@@ -31,7 +31,8 @@ export const PortalSidebarHeader = ({
       .join("") ||
     "";
 
-  const showLogo = Boolean(logoUrl) && !imageError;
+  const hasImageError = Boolean(logoUrl) && failedLogoUrl === logoUrl;
+  const showLogo = Boolean(logoUrl) && !hasImageError;
 
   return (
     <div className="flex flex-col gap-3 border-b border-border/70 pb-5">
@@ -40,7 +41,7 @@ export const PortalSidebarHeader = ({
           <img
             alt={brandName}
             className="size-10 shrink-0 rounded-xl object-cover"
-            onError={() => setImageError(true)}
+            onError={() => setFailedLogoUrl(logoUrl)}
             src={logoUrl ?? ""}
           />
         ) : (

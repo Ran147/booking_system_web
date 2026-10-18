@@ -4,17 +4,30 @@ import { FIRESTORE_COLLECTION } from "@/constants";
 import { SUBSCRIPTION_STATUS, type SubscriptionStatus } from "@/domain";
 import { firestore } from "@/services/firebase";
 import type { Nullable } from "@/types";
+import { BUSINESS_LAYOUT_CONSTANTS } from "../constants";
+import { parseSubscriptionDate } from "../utils/subscriptionDates";
 
 export interface CurrentSubscriptionData {
   readonly cancelAtPeriodEnd: boolean;
-  readonly currentPeriodEndsAt: unknown;
+  readonly currentPeriodEndsAt: Nullable<Date>;
   readonly planId: string;
   readonly status: SubscriptionStatus;
 }
 
+const subscriptionDateSchema = z
+  .unknown()
+  .optional()
+  .transform((value): Nullable<Date> => {
+    if (!value) {
+      return null;
+    }
+    const parsedDate = parseSubscriptionDate(value);
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  });
+
 const currentSubscriptionDocumentSchema = z.object({
   cancelAtPeriodEnd: z.boolean().optional().default(false),
-  currentPeriodEndsAt: z.unknown().optional(),
+  currentPeriodEndsAt: subscriptionDateSchema.default(null),
   planId: z.string().optional().default(""),
   status: z
     .enum([
@@ -35,7 +48,7 @@ export const fetchCurrentSubscription = async (
     FIRESTORE_COLLECTION.BUSINESSES,
     businessId,
     FIRESTORE_COLLECTION.SUBSCRIPTION,
-    "current",
+    BUSINESS_LAYOUT_CONSTANTS.CURRENT_DOCUMENT_ID,
   );
   const documentSnapshot = await getDoc(subscriptionDocumentReference);
 

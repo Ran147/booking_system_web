@@ -1,14 +1,21 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react";
+import { signOut } from "firebase/auth";
+import type * as FirebaseAuth from "firebase/auth";
 import type { FC, ReactElement, ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "@/modules/auth";
 import { AuthContext } from "@/modules/auth/context/AuthContext";
 import { SUBSCRIBER_SESSION } from "@/shared/test-utils/sessionFixtures";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { useBusinessSidebarViewModel } from "../hooks";
+
+vi.mock("firebase/auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof FirebaseAuth>()),
+  signOut: vi.fn().mockResolvedValue(undefined),
+}));
 
 const createWrapper = (
   session: Session = SUBSCRIBER_SESSION,
@@ -30,6 +37,28 @@ const createWrapper = (
 };
 
 describe("useBusinessSidebarViewModel (KAN-42)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("KAN-42: AC-KAN-42-01 / AC-KAN-42-05 executes firebase signOut when user signs out", async () => {
+    const { result } = renderHook(
+      () =>
+        useBusinessSidebarViewModel({
+          hasUnsavedChanges: false,
+        }),
+      {
+        wrapper: createWrapper(SUBSCRIBER_SESSION),
+      },
+    );
+
+    await act(async () => {
+      result.current.handleSignOut();
+    });
+
+    expect(signOut).toHaveBeenCalled();
+  });
+
   it("KAN-42: AC-KAN-42-04 prompts confirmation dialog when hasUnsavedChanges is true", () => {
     const handleSignOut = vi.fn();
 

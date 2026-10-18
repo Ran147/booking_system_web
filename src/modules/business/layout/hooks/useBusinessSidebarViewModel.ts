@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3,
   Calendar,
@@ -9,20 +9,20 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { FIRESTORE_COLLECTION, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { BUSINESS_STATUS, USER_ROLE, type BusinessStatus } from "@/domain";
 import {
-  BUSINESS_STATUS,
-  USER_ROLE,
-  type BusinessStatus,
-  type UserRole,
-} from "@/domain";
-import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
-import { AuthContext } from "@/modules/auth/context/AuthContext";
+  SESSION_STATUS,
+  useCurrentBusiness,
+  useSession,
+  useSignOut,
+} from "@/modules/auth";
 import type { Nullable } from "@/types";
 import {
+  businessLayoutQueryKeys,
   fetchBusinessProfile,
   fetchCollaboratorProfile,
   fetchCurrentSubscription,
@@ -34,18 +34,20 @@ import {
   type PlatformSettingsData,
 } from "../api";
 import type { BusinessSidebarItem, BusinessSidebarViewModel } from "../models";
+import { calculateExpiryWarning } from "../utils";
 import type { UseBusinessSidebarViewModelOptions } from "./useBusinessSidebarViewModel.types";
 
 export const useBusinessSidebarViewModel = (
   options: UseBusinessSidebarViewModelOptions = {},
 ): BusinessSidebarViewModel => {
-  const { t } = useTranslation([
+  const { i18n, t } = useTranslation([
     I18N_NAMESPACE.BUSINESS,
     I18N_NAMESPACE.COMMON,
   ]);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const authContext = useContext(AuthContext);
+  const signOut = useSignOut();
+  const session = useSession();
+  const { businessId } = useCurrentBusiness();
 
   const [activePlaceholderItem, setActivePlaceholderItem] =
     useState<Nullable<BusinessSidebarItem>>(null);
@@ -55,27 +57,20 @@ export const useBusinessSidebarViewModel = (
   const [isSignOutConfirmOpen, setIsSignOutConfirmOpen] =
     useState<boolean>(false);
 
-  const session = authContext?.session;
-  const isSessionSignedIn = session?.status === SESSION_STATUS.SIGNED_IN;
-
-  const businessId =
-    isSessionSignedIn && session.businessId
-      ? session.businessId
-      : "business-test";
+  const isCollaborator =
+    session.status === SESSION_STATUS.SIGNED_IN &&
+    session.role === USER_ROLE.COLLABORATOR;
+  const isSubscriber =
+    session.status === SESSION_STATUS.SIGNED_IN &&
+    session.role === USER_ROLE.SUBSCRIBER;
 
   const collaboratorId =
-    isSessionSignedIn && session.collaboratorId ? session.collaboratorId : null;
-
-  const role: UserRole =
-    isSessionSignedIn && session.role ? session.role : USER_ROLE.SUBSCRIBER;
-
-  const isSubscriber = role === USER_ROLE.SUBSCRIBER;
-  const isCollaborator = role === USER_ROLE.COLLABORATOR;
+    isCollaborator && session.collaboratorId ? session.collaboratorId : null;
 
   const businessProfileQuery = useQuery<BusinessProfileData>({
     enabled: Boolean(businessId),
     queryFn: () => fetchBusinessProfile(businessId),
-    queryKey: [FIRESTORE_COLLECTION.BUSINESSES, businessId, "profile"],
+    queryKey: businessLayoutQueryKeys.profile(businessId),
   });
 
   const businessName =
@@ -97,12 +92,10 @@ export const useBusinessSidebarViewModel = (
   const collaboratorProfileQuery = useQuery<CollaboratorProfileData>({
     enabled: Boolean(isCollaborator && businessId && collaboratorId),
     queryFn: () => fetchCollaboratorProfile(businessId, collaboratorId ?? ""),
-    queryKey: [
-      FIRESTORE_COLLECTION.BUSINESSES,
+    queryKey: businessLayoutQueryKeys.collaboratorProfile(
       businessId,
-      FIRESTORE_COLLECTION.COLLABORATORS,
-      collaboratorId,
-    ],
+      collaboratorId ?? "",
+    ),
   });
 
   const collaboratorName =
@@ -112,12 +105,7 @@ export const useBusinessSidebarViewModel = (
   const subscriptionQuery = useQuery<Nullable<CurrentSubscriptionData>>({
     enabled: Boolean(isSubscriber && businessId),
     queryFn: () => fetchCurrentSubscription(businessId),
-    queryKey: [
-      FIRESTORE_COLLECTION.BUSINESSES,
-      businessId,
-      FIRESTORE_COLLECTION.SUBSCRIPTION,
-      "current",
-    ],
+    queryKey: businessLayoutQueryKeys.subscription(businessId),
   });
 
   const planId = subscriptionQuery.data?.planId ?? "";
@@ -125,13 +113,29 @@ export const useBusinessSidebarViewModel = (
   const planQuery = useQuery<string>({
     enabled: Boolean(isSubscriber && planId),
     queryFn: () => fetchPlanName(planId),
-    queryKey: [FIRESTORE_COLLECTION.PLANS, planId],
+    queryKey: businessLayoutQueryKeys.planName(planId),
   });
 
   const platformSettingsQuery = useQuery<PlatformSettingsData>({
     enabled: Boolean(isSubscriber),
     queryFn: fetchPlatformSettings,
-    queryKey: [FIRESTORE_COLLECTION.PLATFORM_SETTINGS, "current"],
+    queryKey: businessLayoutQueryKeys.platformSettings(),
+  });
+
+  const expiryWarning = calculateExpiryWarning({
+    cancelAtPeriodEnd: subscriptionQuery.data?.cancelAtPeriodEnd,
+    currentPeriodEndsAt: subscriptionQuery.data?.currentPeriodEndsAt,
+    gracePeriodDays: platformSettingsQuery.data?.gracePeriodDays ?? null,
+    isCollaborator,
+    isDismissed: isExpiryWarningDismissed,
+    isPlatformSettingsError: platformSettingsQuery.isError,
+    isSubscriptionError: subscriptionQuery.isError,
+    language: i18n.language,
+    referenceDate: options.referenceDate,
+    status: subscriptionQuery.data?.status,
+    t: (key: string, translationOptions?: Record<string, unknown>): string =>
+      String(t(key as never, translationOptions as never)),
+    timeZone,
   });
 
   const handleActionClick = (item: BusinessSidebarItem): void => {
@@ -152,17 +156,15 @@ export const useBusinessSidebarViewModel = (
   };
 
   const executeSignOut = (): void => {
-    try {
-      queryClient.clear();
-      if (options.onSignOut) {
+    if (options.onSignOut) {
+      try {
         options.onSignOut();
-        return;
+      } catch {
+        // Proceed even if custom handler throws
       }
-      navigate(ROUTE_PATH.AUTH.SIGN_IN);
-    } catch {
-      queryClient.clear();
-      navigate(ROUTE_PATH.AUTH.SIGN_IN);
+      return;
     }
+    void signOut();
   };
 
   const handleSignOut = (): void => {
@@ -283,6 +285,7 @@ export const useBusinessSidebarViewModel = (
     closeDrawer,
     closePlaceholderModal,
     collaboratorName,
+    expiryWarning,
     gracePeriodDays: platformSettingsQuery.data?.gracePeriodDays ?? null,
     handleActionClick,
     handleCancelSignOut,

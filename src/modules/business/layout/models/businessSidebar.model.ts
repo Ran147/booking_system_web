@@ -88,6 +88,20 @@ export interface BusinessSidebarProps {
  * @property {string} timeZone - Business time zone.
  * @property {() => void} toggleDrawer - Toggle responsive mobile drawer.
  */
+export type ExpiryWarningType = "active_ending_soon" | "past_due";
+
+/**
+ * @typedef {Object} ExpiryWarningBannerData
+ * @property {boolean} canDismiss - Whether the banner can be dismissed by the subscriber.
+ * @property {string} message - Display message formatted in business time zone.
+ * @property {ExpiryWarningType} type - Tone/type of warning: active_ending_soon or past_due.
+ */
+export interface ExpiryWarningBannerData {
+  readonly canDismiss: boolean;
+  readonly message: string;
+  readonly type: ExpiryWarningType;
+}
+
 export interface BusinessSidebarViewModel {
   readonly activePlaceholderItem: Nullable<BusinessSidebarItem>;
   readonly businessError: boolean;
@@ -96,6 +110,7 @@ export interface BusinessSidebarViewModel {
   readonly closeDrawer: () => void;
   readonly closePlaceholderModal: () => void;
   readonly collaboratorName: Nullable<string>;
+  readonly expiryWarning: Nullable<ExpiryWarningBannerData>;
   readonly gracePeriodDays: Nullable<number>;
   readonly handleActionClick: (item: BusinessSidebarItem) => void;
   readonly handleCancelSignOut: () => void;
