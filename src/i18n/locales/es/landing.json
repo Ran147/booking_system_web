@@ -1,4 +1,44 @@
 {
+  "contact": {
+    "channels": {
+      "cardDescription": "Comunícate directamente con nuestro equipo a través de cualquiera de los siguientes medios oficiales.",
+      "cardTitle": "Canales de atención directa",
+      "emailAriaLabel": "Enviar correo electrónico a {{email}}",
+      "emailLabel": "Correo electrónico",
+      "fallbackNotice": "En este momento todos nuestros canales de atención se gestionan a través del formulario.",
+      "phoneAriaLabel": "Llamar al teléfono {{phone}}",
+      "phoneLabel": "Teléfono",
+      "sectionAriaLabel": "Medios de contacto directo",
+      "social": {
+        "facebook": "Facebook de Booking System (abre en una nueva pestaña)",
+        "instagram": "Instagram de Booking System (abre en una nueva pestaña)",
+        "linkedin": "LinkedIn de Booking System (abre en una nueva pestaña)",
+        "x": "X de Booking System (abre en una nueva pestaña)"
+      },
+      "socialTitle": "Redes sociales oficiales"
+    },
+    "form": {
+      "dismissAction": "Cerrar",
+      "dismissAlert": "Cerrar alerta",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@correo.com",
+      "messageLabel": "Mensaje o consulta",
+      "messagePlaceholder": "Escribe tu consulta detallada aquí...",
+      "nameLabel": "Nombre completo",
+      "namePlaceholder": "Tu nombre y apellido",
+      "recaptchaLabel": "Verificación de seguridad",
+      "serverError": "Ocurrió un error al enviar el mensaje. Inténtalo nuevamente.",
+      "submitButton": "Enviar mensaje",
+      "subjectLabel": "Asunto",
+      "subjectPlaceholder": "¿En qué podemos ayudarte?",
+      "success": "¡Mensaje enviado con éxito! Nos comunicaremos contigo lo más pronto posible.",
+      "title": "Formulario de contacto"
+    },
+    "page": {
+      "description": "¿Tienes alguna pregunta sobre Booking System o deseas una demostración personalizada? Escríbenos y nuestro equipo te responderá.",
+      "title": "Contáctanos"
+    }
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
