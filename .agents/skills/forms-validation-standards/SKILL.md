@@ -345,10 +345,10 @@ Every form that asks for a person's full name or a phone uses the same rule, so 
 | Field | Rule | Constant | Field schema (`@/modules/auth`) |
 | --- | --- | --- | --- |
 | Full name | 2 to 80 characters after trimming | `FULL_NAME_RULE` (`@/domain`) | `fullNameFieldSchema` |
-| Phone | Only digits, spaces, `+`, `-` and parentheses; 7 to 15 digits (E.164); up to 20 characters | `PHONE_RULE` and `isValidPhone` (`@/domain`) | `phoneFieldSchema`, `optionalPhoneFieldSchema` |
+| Phone | Only digits, spaces, `-` and parentheses, with an optional `+` only at the start; 7 to 15 digits (E.164); up to 20 characters | `PHONE_RULE` and `isValidPhone` (`@/domain`) | `phoneFieldSchema`, `optionalPhoneFieldSchema` |
 
 - Count **digits**, not characters: `-------` is not a phone.
-- Whether the field is required is up to each form. A form with an optional phone uses `optionalPhoneFieldSchema`: it trims first, so an empty field or one with only spaces is stored as `""`, and anything else must be a valid phone. Do not build it with `z.union([z.literal(""), phoneFieldSchema])`: a field with only spaces would fail as `validation:required`.
+- Whether the field is required is up to each form. A form with an optional phone uses `optionalPhoneFieldSchema`: it trims first, so an empty field, one with only spaces or a missing value is stored as `""`, and anything else must be a valid phone. Do not build it with `z.union([z.literal(""), phoneFieldSchema])`: a field with only spaces would fail as `validation:required`.
 - The format error is `validation:phoneInvalid`; length errors are `validation:tooShort` / `validation:tooLong`.
 - Cloud Functions read the mirrors in `functions/src/shared/constants/` (`FULL_NAME_RULE`, `PHONE_RULE`).
 

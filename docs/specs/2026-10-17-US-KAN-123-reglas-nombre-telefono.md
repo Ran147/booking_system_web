@@ -32,12 +32,12 @@ Las reglas que cuentan caracteres y no dígitos aceptan valores como `-------` o
 
 ### 2. Solución
 
-Una sola regla, copiada tal cual de la del perfil del cliente (PR #10, KAN-170), que es la de la SPEC del registro del cliente (AS-3):
+Una sola regla, tomada de la del perfil del cliente (PR #10, KAN-170), que es la de la SPEC del registro del cliente (AS-3), con el `+` cerrado al inicio (P-2):
 
 | Campo | Regla |
 | --- | --- |
 | Nombre completo | 2 a 80 caracteres, sin espacios al inicio ni al final |
-| Teléfono | Solo dígitos, espacios, `+`, `-` y paréntesis; de 7 a 15 dígitos (15 es el máximo de un número internacional, E.164); hasta 20 caracteres |
+| Teléfono | Solo dígitos, espacios, `-` y paréntesis, con un `+` opcional solo al inicio; de 7 a 15 dígitos (15 es el máximo de un número internacional, E.164); hasta 20 caracteres |
 
 Que el campo sea obligatorio u opcional lo decide cada formulario; la regla solo dice si el formato es válido.
 
@@ -45,9 +45,9 @@ Que el campo sea obligatorio u opcional lo decide cada formulario; la regla solo
 | --- | --- |
 | `src/domain/user/FullNameRule.constants.ts` | `FULL_NAME_RULE` (`MAX_LENGTH`, `MIN_LENGTH`) |
 | `src/domain/user/PhoneRule.constants.ts` | `PHONE_RULE` (`MAX_DIGITS`, `MAX_LENGTH`, `MIN_DIGITS`, `PATTERN.ALLOWED_CHARACTERS`, `PATTERN.DIGIT`) |
-| `src/domain/user/isValidPhone.ts` | Función pura: caracteres permitidos, conteo de dígitos y largo. La pueden usar formularios que no usan los esquemas de abajo |
+| `src/domain/user/isValidPhone.ts` | Función pura: caracteres permitidos, `+` solo al inicio, conteo de dígitos y largo. La pueden usar formularios que no usan los esquemas de abajo |
 | `src/modules/auth/models/FullNameField.schema.ts` | `fullNameFieldSchema`: `required`, `tooShort`, `tooLong` |
-| `src/modules/auth/models/PhoneField.schema.ts` | `phoneFieldSchema`: `required`, `tooLong`, `validation:phoneInvalid`. `optionalPhoneFieldSchema`: lo mismo, pero vacío o solo espacios se guarda como `""` |
+| `src/modules/auth/models/PhoneField.schema.ts` | `phoneFieldSchema`: `required`, `tooLong`, `validation:phoneInvalid`. `optionalPhoneFieldSchema`: lo mismo, pero vacío, solo espacios o sin valor (`undefined`) se guarda como `""` |
 | `functions/src/shared/constants/` | Copias de `FULL_NAME_RULE` y `PHONE_RULE` para el servidor (`// Mirror of … — keep in sync.`) |
 | `.agents/skills/forms-validation-standards/SKILL.md` | §6 nueva: la regla y cómo usarla |
 
@@ -59,8 +59,8 @@ El mensaje del formato es `validation:phoneInvalid`, que ya existe en los dos id
 
 | Archivo | Casos |
 | --- | --- |
-| `src/domain/tests/isValidPhone.test.ts` | Acepta `(506) 8888-8888`, `+1 555 123 4567`, 7 y 15 dígitos; rechaza `-------`, `(((((((`, 6 y 16 dígitos, letras, más de 20 caracteres |
-| `src/modules/auth/tests/personFieldSchemas.test.ts` | Mensaje de cada caso: vacío → `required`, nombre corto → `tooShort`, largo → `tooLong`, formato → `phoneInvalid`; recorta los espacios; el teléfono opcional acepta vacío y solo espacios |
+| `src/domain/tests/isValidPhone.test.ts` | Acepta `(506) 8888-8888`, `+1 555 123 4567`, 7 y 15 dígitos; rechaza `-------`, `(((((((`, 6 y 16 dígitos, letras, `+` después del primer carácter, más de 20 caracteres |
+| `src/modules/auth/tests/personFieldSchemas.test.ts` | Mensaje de cada caso: vacío → `required`, nombre corto → `tooShort`, largo → `tooLong`, formato → `phoneInvalid`; recorta los espacios; el teléfono opcional acepta vacío, solo espacios y `undefined`, y con más de 20 dígitos da `tooLong` |
 
 ### 4. Adopción (cada uno en su propio PR)
 
@@ -78,5 +78,6 @@ Este PR no cambia ningún formulario existente: solo agrega la regla.
 
 | Id | Pregunta | Supuesto |
 | --- | --- | --- |
-| P-1 | ¿Todo el equipo usa esta regla del teléfono? | Sí; se confirma en la reunión del 2026-10-17 |
-| P-2 | ¿El `+` solo puede ir al inicio? | No por ahora: se copia la regla del PR #10 tal cual para que el perfil y el registro coincidan. Cerrarlo más es un cambio aparte |
+| P-1 | ¿Todo el equipo usa esta regla del teléfono? | Sí; se propuso por mensaje el 2026-10-17 (la reunión se canceló) y se confirma en el PR #43 |
+| P-2 | ¿El `+` solo puede ir al inicio? | **Resuelto (revisión del PR #43):** sí, como en E.164 y en el perfil del negocio. El perfil del cliente (PR #10) coincide al adoptar `phoneFieldSchema` (§4) |
+| P-3 | ¿El nombre completo valida algo más que el largo? | No: acepta `12`, `!!` o varios espacios seguidos para no rechazar nombres reales; solo se recortan los espacios del inicio y del final |

@@ -45,6 +45,11 @@ describe("phoneFieldSchema", () => {
     ["a phone without digits", "-------", VALIDATION_MESSAGE_KEY.PHONE_INVALID],
     ["a phone with 6 digits", "123-456", VALIDATION_MESSAGE_KEY.PHONE_INVALID],
     ["a phone with letters", "8888-ABCD", VALIDATION_MESSAGE_KEY.PHONE_INVALID],
+    [
+      "a phone with a + after the first character",
+      "506+8888+8888",
+      VALIDATION_MESSAGE_KEY.PHONE_INVALID,
+    ],
   ])(
     "KAN-123: rejects %s (AC-KAN-123-04, AC-KAN-123-12, AC-KAN-123-13)",
     (_case, phone, messageKey) => {
@@ -56,6 +61,7 @@ describe("phoneFieldSchema", () => {
 describe("optionalPhoneFieldSchema", () => {
   it.each([
     ["an empty phone", "", ""],
+    ["a missing phone", undefined, ""],
     ["a phone with only spaces", "   ", ""],
     ["a valid phone", " (506) 8888-8888 ", "(506) 8888-8888"],
   ])("KAN-123: accepts %s (AS-3)", (_case, phone, storedPhone) => {
@@ -67,6 +73,11 @@ describe("optionalPhoneFieldSchema", () => {
     [
       "a phone longer than 20 characters",
       "+506 (88) 88 - 88 - 88",
+      VALIDATION_MESSAGE_KEY.TOO_LONG,
+    ],
+    [
+      "a phone with more than 20 digits",
+      "1".repeat(25),
       VALIDATION_MESSAGE_KEY.TOO_LONG,
     ],
   ])("KAN-123: rejects %s (AS-3)", (_case, phone, messageKey) => {

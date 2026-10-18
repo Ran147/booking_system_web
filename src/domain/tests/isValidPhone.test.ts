@@ -17,6 +17,8 @@ describe("isValidPhone", () => {
     ["6 digits", "123456"],
     ["16 digits", "1234567890123456"],
     ["letters", "8888-ABCD"],
+    ["a + after the first character", "12+34+567+89"],
+    ["a + at the end", "1234567+++"],
     ["more than 20 characters", "+506 (88) 88 - 88 - 88"],
     ["an empty value", ""],
   ])("KAN-123: rejects %s (AS-3)", (_case, phone) => {

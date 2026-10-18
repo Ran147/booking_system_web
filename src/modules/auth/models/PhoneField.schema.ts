@@ -12,8 +12,10 @@ export const phoneFieldSchema = z
   .refine(isValidPhone, VALIDATION_MESSAGE_KEY.PHONE_INVALID);
 
 // The same field when the form does not require it. The value is trimmed
-// first, so a field with only spaces counts as empty, not as a missing phone.
+// first, so a field with only spaces counts as empty, not as a missing phone;
+// a missing value is stored as empty too.
 export const optionalPhoneFieldSchema = z
   .string()
   .trim()
+  .default(STRING.EMPTY)
   .pipe(z.union([z.literal(STRING.EMPTY), phoneFieldSchema]));

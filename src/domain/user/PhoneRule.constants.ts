@@ -7,8 +7,9 @@ export const PHONE_RULE = Object.freeze({
   MAX_LENGTH: 20,
   MIN_DIGITS: 7,
   PATTERN: Object.freeze({
-    // Digits, spaces, "+", "-" and parentheses.
-    ALLOWED_CHARACTERS: /^[0-9+() -]+$/,
+    // Digits, spaces, "-" and parentheses, with an optional "+" only at the
+    // start (E.164).
+    ALLOWED_CHARACTERS: /^\+?[0-9() -]+$/,
     // Global: count with String.match, never call .test() on it (a global
     // regex keeps lastIndex between calls and answers differently).
     DIGIT: /\d/g,
