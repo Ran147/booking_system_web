@@ -1,4 +1,71 @@
 {
+  "auth": {
+    "idle": {
+      "signOutAction": "Sign out",
+      "signedOut": "We signed you out because of inactivity. Sign in again to continue.",
+      "stayConnectedAction": "Stay signed in",
+      "warningMessage": "Your session will end in {{count}} seconds because of inactivity.",
+      "warningTitle": "Are you still there?"
+    },
+    "password": {
+      "hide": "Hide password",
+      "ruleMet": "Met:",
+      "ruleMissing": "Missing:",
+      "rules": {
+        "digit": "Includes a number",
+        "lowercase": "Includes a lowercase letter",
+        "minimumLength": "Has at least {{count}} characters",
+        "symbol": "Includes a symbol",
+        "uppercase": "Includes an uppercase letter"
+      },
+      "show": "Show password",
+      "strength": {
+        "medium": "medium",
+        "strong": "strong",
+        "weak": "weak"
+      },
+      "strengthEmpty": "Type a password to see its strength.",
+      "strengthLabel": "Password strength: {{level}}"
+    },
+    "passwordRecovery": {
+      "backToSignInAction": "Back to sign in",
+      "cooldownLabel": "You can ask again in {{count}} s",
+      "emailLabel": "Email",
+      "submitAction": "Send link",
+      "submittingLabel": "Sending…",
+      "subtitle": "We will email you a link to create a new password.",
+      "title": "Recover password"
+    },
+    "passwordReset": {
+      "confirmationLabel": "Confirm the new password",
+      "linkInvalid": "The link has expired, was already used or is not valid.",
+      "newPasswordLabel": "New password",
+      "requestNewLinkAction": "Ask for a new link",
+      "requestSent": "If the email is registered, we sent you a link to change your password. Check your inbox.",
+      "retryAction": "Try again",
+      "submitAction": "Save password",
+      "submittingLabel": "Saving…",
+      "subtitle": "Choose a new password for your account.",
+      "success": "Your password was changed. You can now sign in.",
+      "title": "Create a new password",
+      "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
+      "weakPassword": "That password does not meet the security policy. Choose a longer or harder-to-guess one."
+    },
+    "signIn": {
+      "accountDisabled": "Your account is disabled. If you think this is a mistake, contact whoever gave you access.",
+      "emailLabel": "Email",
+      "forgotPassword": "Forgot your password?",
+      "invalidCredentials": "The email or password is incorrect.",
+      "passwordLabel": "Password",
+      "recaptchaLabel": "Security check",
+      "recoverPasswordAction": "Recover password",
+      "submitAction": "Sign in",
+      "submittingLabel": "Signing in…",
+      "subtitle": "Sign in with your email and password.",
+      "title": "Sign in",
+      "tooManyAttempts": "Too many attempts. Wait a few minutes or recover your password."
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelled",
     "completed": "Completed",
@@ -23,10 +90,6 @@
     "previousAction": "Previous",
     "summary_one": "Page {{pageNumber}} · {{count}} result",
     "summary_other": "Page {{pageNumber}} · {{count}} results"
-  },
-  "signInPlaceholder": {
-    "description": "Sign-in is not available yet.",
-    "title": "Sign in"
   },
   "status": {
     "loading": "Loading…"

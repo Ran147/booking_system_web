@@ -3,8 +3,8 @@ import { render, type RenderResult } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { I18nextProvider } from "react-i18next";
 import { MemoryRouter } from "react-router";
-import type { Session } from "@/features/auth";
-import { AuthContext } from "@/features/auth/context/AuthContext";
+import type { Session } from "@/modules/auth";
+import { AuthContext } from "@/modules/auth/context/AuthContext";
 import { testI18n } from "./testI18n";
 
 export interface RenderWithProvidersOptions {

@@ -11,13 +11,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       coverage: {
-        include: [
-          "src/modules/**",
-          "src/domain/**",
-          "src/portals/**",
-          "src/features/**",
-          "src/shared/domain/**",
-        ],
+        include: ["src/modules/**", "src/domain/**"],
         provider: "v8",
         thresholds: { lines: 70 },
       },
@@ -29,7 +23,7 @@ export default mergeConfig(
       include: isFirestoreEmulatorRunning
         ? ["tests/rules/**/*.test.ts"]
         : ["src/**/*.test.{ts,tsx}"],
-      setupFiles: ["./src/shared/test-utils/setupTests.ts"],
+      setupFiles: ["./src/test-utils/setupTests.ts"],
     },
   }),
 );
