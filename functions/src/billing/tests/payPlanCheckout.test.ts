@@ -59,7 +59,7 @@ describe("payPlanCheckout", () => {
     await seedCheckoutPlan();
   });
 
-  it("AC-KAN-22-02: stores one PlanCheckout with the plan, the email, the amount, the payment date and the terms acceptance", async () => {
+  it("KAN-22: stores one PlanCheckout with the plan, the email, the amount, the payment date and the terms acceptance (AC-KAN-22-02)", async () => {
     const checkoutResponse = await callPayPlanCheckout(
       buildCallableRequest(buildCheckoutPayload()),
     );
@@ -81,7 +81,7 @@ describe("payPlanCheckout", () => {
     );
   });
 
-  it("AC-KAN-22-02: leaves the sign-up link for the KAN-24 email (spec D1)", async () => {
+  it("KAN-22: leaves the sign-up link for the KAN-24 email (AC-KAN-22-02, spec D1)", async () => {
     await callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload()));
 
     expect(await readCheckout()).toMatchObject({
@@ -90,7 +90,7 @@ describe("payPlanCheckout", () => {
     });
   });
 
-  it("AC-KAN-22-03: creates no account, business or payment", async () => {
+  it("KAN-22: creates no account, business or payment (AC-KAN-22-03)", async () => {
     await callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload()));
 
     for (const collectionName of [
@@ -105,7 +105,7 @@ describe("payPlanCheckout", () => {
     }
   });
 
-  it("AS-9: never stores the card data", async () => {
+  it("KAN-22: never stores the card data (AS-9)", async () => {
     await callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload()));
 
     const storedCheckout = JSON.stringify(await readCheckout());
@@ -114,7 +114,7 @@ describe("payPlanCheckout", () => {
     expect(storedCheckout).not.toContain("12/40");
   });
 
-  it("AC-KAN-22-04: declines the test card, stores nothing and lets the visitor try again", async () => {
+  it("KAN-22: declines the test card, stores nothing and lets the visitor try again (AC-KAN-22-04)", async () => {
     const httpsError = await captureHttpsError(
       callPayPlanCheckout(
         buildCallableRequest(
@@ -139,7 +139,7 @@ describe("payPlanCheckout", () => {
     ).resolves.toEqual({ email: "owner@example.com" });
   });
 
-  it("AC-KAN-22-06: verifies the reCAPTCHA token and charges nothing when it is rejected", async () => {
+  it("KAN-22: verifies the reCAPTCHA token and charges nothing when it is rejected (AC-KAN-22-06)", async () => {
     vi.mocked(assertRecaptcha).mockRejectedValueOnce(
       new HttpsError("permission-denied", "The reCAPTCHA token was rejected"),
     );
@@ -153,7 +153,7 @@ describe("payPlanCheckout", () => {
     expect(await countCheckouts()).toBe(0);
   });
 
-  it("AC-KAN-22-07: rejects an inactive plan with PLAN_UNAVAILABLE and charges nothing", async () => {
+  it("KAN-22: rejects an inactive plan with PLAN_UNAVAILABLE and charges nothing (AC-KAN-22-07)", async () => {
     await seedCheckoutPlan({ status: PLAN_STATUS.INACTIVE });
 
     const httpsError = await captureHttpsError(
@@ -167,7 +167,7 @@ describe("payPlanCheckout", () => {
     expect(await countCheckouts()).toBe(0);
   });
 
-  it("AC-KAN-22-07: rejects a deleted plan with PLAN_UNAVAILABLE", async () => {
+  it("KAN-22: rejects a deleted plan with PLAN_UNAVAILABLE (AC-KAN-22-07)", async () => {
     const httpsError = await captureHttpsError(
       callPayPlanCheckout(
         buildCallableRequest(buildCheckoutPayload({ planId: "deleted-plan" })),
@@ -180,7 +180,7 @@ describe("payPlanCheckout", () => {
     );
   });
 
-  it("AC-KAN-22-08: rejects a changed price with PRICE_CHANGED, sends the new price and charges nothing", async () => {
+  it("KAN-22: rejects a changed price with PRICE_CHANGED, sends the new price and charges nothing (AC-KAN-22-08)", async () => {
     await seedCheckoutPlan({ priceInCents: 59_900 });
 
     const httpsError = await captureHttpsError(
@@ -195,7 +195,7 @@ describe("payPlanCheckout", () => {
     expect(await countCheckouts()).toBe(0);
   });
 
-  it("AC-KAN-22-09: answers a retry of a paid attempt without charging it twice", async () => {
+  it("KAN-22: answers a retry of a paid attempt without charging it twice (AC-KAN-22-09)", async () => {
     await callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload()));
     const firstCheckout = await readCheckout();
 
@@ -209,7 +209,7 @@ describe("payPlanCheckout", () => {
     );
   });
 
-  it("AC-KAN-22-09: answers a retry after the plan was deactivated with the paid checkout", async () => {
+  it("KAN-22: answers a retry after the plan was deactivated with the paid checkout (AC-KAN-22-09)", async () => {
     await callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload()));
     await seedCheckoutPlan({ status: PLAN_STATUS.INACTIVE });
 
@@ -219,7 +219,7 @@ describe("payPlanCheckout", () => {
     expect(await countCheckouts()).toBe(1);
   });
 
-  it("AC-KAN-22-10: stores one PlanCheckout when the same attempt arrives twice at once", async () => {
+  it("KAN-22: stores one PlanCheckout when the same attempt arrives twice at once (AC-KAN-22-10)", async () => {
     const checkoutResults = await Promise.all([
       callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload())),
       callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload())),
@@ -232,7 +232,7 @@ describe("payPlanCheckout", () => {
     expect(await countCheckouts()).toBe(1);
   });
 
-  it("AC-KAN-22-11: stores the email trimmed and in lower case", async () => {
+  it("KAN-22: stores the email trimmed and in lower case (AC-KAN-22-11)", async () => {
     const checkoutResponse = await callPayPlanCheckout(
       buildCallableRequest(
         buildCheckoutPayload({ email: "  Owner@Example.COM " }),
@@ -243,7 +243,7 @@ describe("payPlanCheckout", () => {
     expect((await readCheckout())?.email).toBe("owner@example.com");
   });
 
-  it("AS-9: accepts a card number typed without spaces", async () => {
+  it("KAN-22: accepts a card number typed without spaces (AS-9)", async () => {
     await expect(
       callPayPlanCheckout(
         buildCallableRequest(
@@ -274,7 +274,7 @@ describe("payPlanCheckout", () => {
     ["a negative expected price (AC-KAN-22-08)", { expectedPriceInCents: -1 }],
     ["an unknown language", { language: "fr" }],
   ])(
-    "rejects %s as invalid-argument and charges nothing",
+    "KAN-22: rejects %s as invalid-argument and charges nothing",
     async (_caseName, payloadOverrides) => {
       const httpsError = await captureHttpsError(
         callPayPlanCheckout(
