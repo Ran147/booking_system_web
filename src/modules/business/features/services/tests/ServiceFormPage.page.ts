@@ -21,6 +21,7 @@ export interface ServiceFormPageObject {
   readonly getPriceInput: () => HTMLInputElement;
   readonly getReadOnlyAlert: () => Nullable<HTMLElement>;
   readonly getSubmitButton: () => HTMLButtonElement;
+  readonly getTitleHeading: () => HTMLElement;
   readonly queryErrorText: (text: string | RegExp) => Nullable<HTMLElement>;
   readonly uploadImage: (file: File) => Promise<void>;
 }
@@ -150,6 +151,8 @@ export const createServiceFormPage = (): ServiceFormPageObject => {
       screen.getByRole("button", {
         name: /guardar servicio/i,
       }) as HTMLButtonElement,
+    getTitleHeading: (): HTMLElement =>
+      screen.getByRole("heading", { level: 1 }),
     queryErrorText: (text: string | RegExp): Nullable<HTMLElement> =>
       screen.queryByText(text),
     uploadImage: async (file: File): Promise<void> => {

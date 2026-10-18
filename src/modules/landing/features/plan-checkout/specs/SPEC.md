@@ -53,7 +53,7 @@ A business owner who is comparing plans opens one plan, sees everything it inclu
 - [x] **AC-KAN-21-11** · edge · Given a signed-in user of any role, when they activate the contract action, then no checkout opens and `landing:planCheckout.detail.signedInNotice` explains that a new business is contracted signed out, with a sign-out action. See AS-8. [KAN-21]
 
 ### KAN-22 — Pay the plan through the simulated gateway to complete the contract
-- [ ] **AC-KAN-22-01** · happy · Given a visitor on the checkout of an `active` plan, when they see the page, then it shows the plan name, its price formatted from `priceInCents` with its billing period, an email field, the simulated payment fields (AS-9), the terms acceptance (KAN-23) and a reCAPTCHA. [KAN-22]
+- [ ] **AC-KAN-22-01** · happy · Given a visitor on the checkout of an `active` plan, when they see the page, then it shows the plan name, its price formatted from `priceInCents` with its billing period, an email field with the hint `landing:planCheckout.payment.emailHint` (AS-13), the simulated payment fields (AS-9), the terms acceptance (KAN-23) and a reCAPTCHA. [KAN-22]
 - [ ] **AC-KAN-22-02** · happy · Given valid fields, accepted terms and a solved reCAPTCHA, when the visitor pays and the simulated gateway returns success, then a `PlanCheckout` is stored with the plan, the email, the amount charged, the payment date and the terms acceptance, the confirmation page shows `landing:planCheckout.payment.success` with the email the link was sent to, and the email of KAN-24 is sent. [KAN-22, KAN-24]
 - [ ] **AC-KAN-22-03** · happy · Given a successful payment, when the confirmation page is shown, then no account and no business exist yet: they are created from the link in the email (KAN-25), and the page says the business will be reviewed before it becomes active (`landing:planCheckout.payment.reviewNotice`, Q2). [KAN-22, KAN-25]
 - [ ] **AC-KAN-22-04** · error · Given the simulated gateway returns a failure, when the visitor pays, then no `PlanCheckout` is stored, nothing is charged, no email is sent, the entered values except the payment fields are kept and `landing:planCheckout.payment.declinedError` is shown with the option to try again. [KAN-22]
@@ -97,6 +97,7 @@ None. Q7 was decided on 2026-09-28: the MVP includes plan checkout from the land
 | AS-10 | The terms version is the last-updated date shown on the KAN-9 terms page. | AC-KAN-23-02 |
 | AS-11 | The acceptance checkbox can be checked only after the terms were opened once. | AC-KAN-23-04 |
 | AS-12 | A checkout whose email already has an account is settled by the platform team by hand (refund or new email); no automatic refund in the MVP. | AC-KAN-24-06 |
+| AS-13 | Below the checkout email a fixed hint, the same for every visitor, asks for an email that has no platform account yet, because it becomes the new business account's email. It prevents most AS-12 cases without revealing which emails are registered (decided 2026-10-17). | AC-KAN-22-01 |
 
 ## Backlog issues
 - The Jira epic is named "Gestión de la contratación de los planes"; the epic map calls it "Contratación de planes". Same epic.

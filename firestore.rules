@@ -136,6 +136,13 @@ service cloud.firestore {
           || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
         allow write: if false;
       }
+
+      // Subscription can be read only by the owner/subscriber (AS-10, KAN-40).
+      // Collaborators do not have access. Writes happen only via Cloud Functions.
+      match /subscription/{subscriptionId} {
+        allow read: if ownsBusiness(businessId);
+        allow write: if false;
+      }
     }
 
     // Public plan catalog and plan detail (KAN-7, KAN-21): anyone reads an

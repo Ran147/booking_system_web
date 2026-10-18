@@ -5,6 +5,7 @@ import type { Nullable } from "@/shared/types";
 import { LANDING_NAVBAR_CONSTANTS } from "../constants/landingNavbar.constants";
 
 export interface LandingNavbarPageObject {
+  clickLogoLink: () => Promise<void>;
   clickMobileMenuToggle: () => Promise<void>;
   clickNavigationLink: (label: string) => Promise<void>;
   clickPortalActionButton: () => Promise<void>;
@@ -12,12 +13,14 @@ export interface LandingNavbarPageObject {
   getAllNavigationLinks: () => HTMLElement[];
   getBrandName: () => HTMLElement;
   getLogo: () => HTMLElement;
+  getLogoLink: () => HTMLElement;
   getMobileMenu: () => Nullable<HTMLElement>;
   getMobileMenuToggleButton: () => HTMLElement;
   getNavbar: () => HTMLElement;
   getNavigationLink: (label: string) => HTMLElement;
   getPortalActionButton: () => HTMLElement;
   getSignInButton: () => HTMLElement;
+  queryLogoImage: () => Nullable<HTMLElement>;
   queryMobileMenu: () => Nullable<HTMLElement>;
   queryPortalActionButton: () => Nullable<HTMLElement>;
   querySignInButton: () => Nullable<HTMLElement>;
@@ -35,6 +38,16 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
 
   const getLogo = (): HTMLElement =>
     within(getNavbar()).getByRole("img", {
+      name: testI18n.t("landing:home.navbar.logoAlt"),
+    });
+
+  const getLogoLink = (): HTMLElement =>
+    within(getNavbar()).getByRole("link", {
+      name: `${LANDING_NAVBAR_CONSTANTS.BRAND_NAME} - ${testI18n.t("landing:home.navbar.logoAlt")}`,
+    });
+
+  const queryLogoImage = (): Nullable<HTMLElement> =>
+    within(getNavbar()).queryByRole("img", {
       name: testI18n.t("landing:home.navbar.logoAlt"),
     });
 
@@ -96,6 +109,10 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
     await user.click(getPortalActionButton());
   };
 
+  const clickLogoLink = async (): Promise<void> => {
+    await user.click(getLogoLink());
+  };
+
   const clickMobileMenuToggle = async (): Promise<void> => {
     await user.click(getMobileMenuToggleButton());
   };
@@ -105,6 +122,7 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
   };
 
   return {
+    clickLogoLink,
     clickMobileMenuToggle,
     clickNavigationLink,
     clickPortalActionButton,
@@ -112,12 +130,14 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
     getAllNavigationLinks,
     getBrandName,
     getLogo,
+    getLogoLink,
     getMobileMenu,
     getMobileMenuToggleButton,
     getNavbar,
     getNavigationLink,
     getPortalActionButton,
     getSignInButton,
+    queryLogoImage,
     queryMobileMenu,
     queryPortalActionButton,
     querySignInButton,
