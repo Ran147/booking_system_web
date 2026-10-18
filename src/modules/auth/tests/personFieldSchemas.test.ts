@@ -1,9 +1,15 @@
 import { VALIDATION_MESSAGE_KEY } from "@/constants";
 import { fullNameFieldSchema } from "../models/FullNameField.schema";
-import { phoneFieldSchema } from "../models/PhoneField.schema";
+import {
+  optionalPhoneFieldSchema,
+  phoneFieldSchema,
+} from "../models/PhoneField.schema";
 
 const readFirstMessage = (
-  schema: typeof fullNameFieldSchema | typeof phoneFieldSchema,
+  schema:
+    | typeof fullNameFieldSchema
+    | typeof optionalPhoneFieldSchema
+    | typeof phoneFieldSchema,
   value: string,
 ): string => schema.safeParse(value).error?.issues[0]?.message ?? "";
 
@@ -45,4 +51,25 @@ describe("phoneFieldSchema", () => {
       expect(readFirstMessage(phoneFieldSchema, phone)).toBe(messageKey);
     },
   );
+});
+
+describe("optionalPhoneFieldSchema", () => {
+  it.each([
+    ["an empty phone", "", ""],
+    ["a phone with only spaces", "   ", ""],
+    ["a valid phone", " (506) 8888-8888 ", "(506) 8888-8888"],
+  ])("KAN-123: accepts %s (AS-3)", (_case, phone, storedPhone) => {
+    expect(optionalPhoneFieldSchema.parse(phone)).toBe(storedPhone);
+  });
+
+  it.each([
+    ["a phone without digits", "-------", VALIDATION_MESSAGE_KEY.PHONE_INVALID],
+    [
+      "a phone longer than 20 characters",
+      "+506 (88) 88 - 88 - 88",
+      VALIDATION_MESSAGE_KEY.TOO_LONG,
+    ],
+  ])("KAN-123: rejects %s (AS-3)", (_case, phone, messageKey) => {
+    expect(readFirstMessage(optionalPhoneFieldSchema, phone)).toBe(messageKey);
+  });
 });

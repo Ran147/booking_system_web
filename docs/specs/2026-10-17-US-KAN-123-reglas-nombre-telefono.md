@@ -47,11 +47,11 @@ Que el campo sea obligatorio u opcional lo decide cada formulario; la regla solo
 | `src/domain/user/PhoneRule.constants.ts` | `PHONE_RULE` (`MAX_DIGITS`, `MAX_LENGTH`, `MIN_DIGITS`, `PATTERN.ALLOWED_CHARACTERS`, `PATTERN.DIGIT`) |
 | `src/domain/user/isValidPhone.ts` | Función pura: caracteres permitidos, conteo de dígitos y largo. La pueden usar formularios que no usan los esquemas de abajo |
 | `src/modules/auth/models/FullNameField.schema.ts` | `fullNameFieldSchema`: `required`, `tooShort`, `tooLong` |
-| `src/modules/auth/models/PhoneField.schema.ts` | `phoneFieldSchema`: `required`, `tooLong`, `validation:phoneInvalid` |
+| `src/modules/auth/models/PhoneField.schema.ts` | `phoneFieldSchema`: `required`, `tooLong`, `validation:phoneInvalid`. `optionalPhoneFieldSchema`: lo mismo, pero vacío o solo espacios se guarda como `""` |
 | `functions/src/shared/constants/` | Copias de `FULL_NAME_RULE` y `PHONE_RULE` para el servidor (`// Mirror of … — keep in sync.`) |
 | `.agents/skills/forms-validation-standards/SKILL.md` | §6 nueva: la regla y cómo usarla |
 
-Los esquemas viven junto a `passwordFieldSchema` y `emailFieldSchema` en `@/modules/auth`, que es donde el proyecto ya pone los campos que comparten varios formularios. Un formulario con teléfono opcional usa `z.union([z.literal(STRING.EMPTY), phoneFieldSchema])`.
+Los esquemas viven junto a `passwordFieldSchema` y `emailFieldSchema` en `@/modules/auth`, que es donde el proyecto ya pone los campos que comparten varios formularios. Un formulario con teléfono opcional usa `optionalPhoneFieldSchema`, que recorta antes de decidir si está vacío: armarlo a mano con `z.union([z.literal(STRING.EMPTY), phoneFieldSchema])` rechaza un campo con solo espacios como `required`.
 
 El mensaje del formato es `validation:phoneInvalid`, que ya existe en los dos idiomas y es el que pide la SPEC del registro del cliente.
 
@@ -60,7 +60,7 @@ El mensaje del formato es `validation:phoneInvalid`, que ya existe en los dos id
 | Archivo | Casos |
 | --- | --- |
 | `src/domain/tests/isValidPhone.test.ts` | Acepta `(506) 8888-8888`, `+1 555 123 4567`, 7 y 15 dígitos; rechaza `-------`, `(((((((`, 6 y 16 dígitos, letras, más de 20 caracteres |
-| `src/modules/auth/tests/personFieldSchemas.test.ts` | Mensaje de cada caso: vacío → `required`, nombre corto → `tooShort`, largo → `tooLong`, formato → `phoneInvalid`; recorta los espacios |
+| `src/modules/auth/tests/personFieldSchemas.test.ts` | Mensaje de cada caso: vacío → `required`, nombre corto → `tooShort`, largo → `tooLong`, formato → `phoneInvalid`; recorta los espacios; el teléfono opcional acepta vacío y solo espacios |
 
 ### 4. Adopción (cada uno en su propio PR)
 
