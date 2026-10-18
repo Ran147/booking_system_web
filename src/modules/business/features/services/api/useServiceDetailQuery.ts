@@ -10,12 +10,14 @@ import type { ServiceDetail } from "../models";
 export interface UseServiceDetailQueryOptions {
   readonly businessId: string;
   readonly enabled?: boolean;
+  readonly initialData?: ServiceDetail;
   readonly serviceId: Nullable<string>;
 }
 
 export const useServiceDetailQuery = ({
   businessId,
   enabled = true,
+  initialData,
   serviceId,
 }: UseServiceDetailQueryOptions): UseQueryResult<
   ServiceDetail,
@@ -23,6 +25,7 @@ export const useServiceDetailQuery = ({
 > =>
   useQuery<ServiceDetail, MutationError>({
     enabled: Boolean(businessId && serviceId && enabled),
+    initialData,
     queryFn: async () => {
       if (!serviceId) {
         throw new FirebaseError(

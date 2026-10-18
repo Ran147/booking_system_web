@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { I18N_NAMESPACE } from "@/shared/constants";
+import { generatePath, useNavigate } from "react-router";
+import { I18N_NAMESPACE, ROUTE_PATH } from "@/shared/constants";
 import { formatPrice } from "@/shared/utils/format";
 import { resolveViewState } from "@/shared/utils/resolveViewState";
 import { useActivePlansQuery } from "../api/useActivePlansQuery";
@@ -14,6 +15,7 @@ import type {
 
 export const usePlanCatalogViewModel = (): UsePlanCatalogViewModelReturn => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.LANDING);
+  const navigate = useNavigate();
   const plansQueryResult = useActivePlansQuery();
 
   const rawPlans = plansQueryResult.data ?? [];
@@ -51,8 +53,9 @@ export const usePlanCatalogViewModel = (): UsePlanCatalogViewModelReturn => {
 
   const viewState = resolveViewState(plansQueryResult, formattedPlans.length);
 
-  const handleSelectPlan = (_planId: string): void => {
-    // Intencionalmente vacio mientras se resuelve Q7 (checkout en MVP)
+  // Q7 decided 2026-09-28: each plan opens its detail page (KAN-21).
+  const handleSelectPlan = (planId: string): void => {
+    void navigate(generatePath(ROUTE_PATH.LANDING.PLAN_DETAIL, { planId }));
   };
 
   const retry = (): void => {

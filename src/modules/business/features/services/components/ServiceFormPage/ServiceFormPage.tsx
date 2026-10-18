@@ -1,4 +1,11 @@
-import { AlertCircle, AlertTriangle, ArrowLeft, RotateCw } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  RotateCw,
+  Tag,
+  Users,
+} from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
@@ -145,6 +152,33 @@ export const ServiceFormPage = ({
         </h1>
         <p className="text-sm text-muted-foreground">{pageSubtitle}</p>
       </div>
+
+      {viewModel.isEditMode && effectiveServiceId && (
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button
+            leftIcon={Tag}
+            onClick={() =>
+              navigate(`/business/services/${effectiveServiceId}/discounts`)
+            }
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            {t("services.discounts.title")}
+          </Button>
+          <Button
+            leftIcon={Users}
+            onClick={() =>
+              navigate(`/business/services/${effectiveServiceId}/collaborators`)
+            }
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            {t("services.collaborators.title")}
+          </Button>
+        </div>
+      )}
 
       {viewModel.isReadOnly && (
         <div
