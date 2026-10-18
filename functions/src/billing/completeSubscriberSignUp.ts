@@ -8,6 +8,8 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import {
   PAYMENT_RESULT,
   SIGN_UP_CLAIMS_ATTEMPTS,
+  SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS,
+  SIGN_UP_CLAIMS_RETRY_DELAY_MULTIPLIER,
   SIGN_UP_ERROR,
   SIGN_UP_ERROR_REASON,
 } from "./constants/SubscriberSignUp.constants.js";
@@ -27,6 +29,7 @@ import { auth, firestore } from "../shared/firebaseAdmin.js";
 import { hasErrorCode } from "../shared/hasErrorCode.js";
 import { isReservedBusinessSlug } from "../shared/isReservedBusinessSlug.js";
 import { readPayload } from "../shared/readPayload.js";
+import { wait } from "../shared/wait.js";
 
 interface SignUpAccount {
   readonly email: string;
@@ -181,8 +184,9 @@ const undoSignUp = async (
   await deleteAccount(signUpAccount.userId);
 };
 
-// Sets the subscriber claims, trying again a few times: a transient Auth
-// failure must not leave an account that cannot open its portal.
+// Sets the subscriber claims, trying again a few times with a growing pause:
+// a transient Auth failure must not leave an account that cannot open its
+// portal.
 const setSubscriberClaims = async (
   userId: string,
   businessId: string,
@@ -204,6 +208,10 @@ const setSubscriberClaims = async (
       if (attempt >= SIGN_UP_CLAIMS_ATTEMPTS) {
         throw error;
       }
+      await wait(
+        SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS *
+          SIGN_UP_CLAIMS_RETRY_DELAY_MULTIPLIER ** (attempt - 1),
+      );
     }
   }
 };
@@ -260,17 +268,18 @@ export const completeSubscriberSignUp = onCall<
     });
 
   // Without claims the account cannot open its portal, so if they cannot be
-  // set the whole sign-up is undone and the visitor can try again.
+  // set the whole sign-up is undone and the visitor can try again: unavailable
+  // makes the client show the network message (AC-KAN-25-10).
   try {
     await setSubscriberClaims(userId, signUpDocuments.businessId);
-  } catch (error) {
+  } catch {
     await undoSignUp(
       planCheckoutReference,
       signUpPayload,
       signUpAccount,
       signUpDocuments,
     );
-    throw error;
+    throw new HttpsError("unavailable", SIGN_UP_ERROR.CLAIMS_NOT_SET);
   }
 
   return { email: planCheckout.email };

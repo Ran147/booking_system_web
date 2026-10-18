@@ -27,9 +27,12 @@ import {
   functionsTestEnvironment,
   readErrorReason,
 } from "../../shared/tests/emulatorTestHelpers.js";
+import { wait } from "../../shared/wait.js";
 import { completeSubscriberSignUp } from "../completeSubscriberSignUp.js";
 import {
   SIGN_UP_CLAIMS_ATTEMPTS,
+  SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS,
+  SIGN_UP_CLAIMS_RETRY_DELAY_MULTIPLIER,
   SIGN_UP_ERROR_REASON,
 } from "../constants/SubscriberSignUp.constants.js";
 
@@ -39,6 +42,10 @@ vi.mock("../../auth/assertRecaptcha.js", () => ({
   RECAPTCHA_SECRETS: [],
   assertRecaptcha: vi.fn(),
 }));
+
+// The pauses between claims attempts are checked by their length, without
+// making the tests wait.
+vi.mock("../../shared/wait.js", () => ({ wait: vi.fn() }));
 
 const PROMISE_SETTLED_STATUS = {
   FULFILLED: "fulfilled",
@@ -67,6 +74,7 @@ describe("completeSubscriberSignUp", () => {
   beforeEach(async () => {
     await clearEmulators();
     vi.mocked(assertRecaptcha).mockReset().mockResolvedValue();
+    vi.mocked(wait).mockReset().mockResolvedValue();
     await seedPlan();
     planCheckoutId = await seedCheckout({ signUpToken: "valid-token" });
   });
@@ -255,6 +263,9 @@ describe("completeSubscriberSignUp", () => {
     expect(signUpResponse).toEqual({ email: TEST_CHECKOUT_EMAIL });
     const userRecord = await auth.getUserByEmail(TEST_CHECKOUT_EMAIL);
     expect(userRecord.customClaims).toMatchObject({ role: "subscriber" });
+    expect(wait).toHaveBeenCalledExactlyOnceWith(
+      SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS,
+    );
   });
 
   it("KAN-25: undoes the whole sign-up and keeps the link valid when the claims cannot be set (AC-KAN-25-22)", async () => {
@@ -262,13 +273,23 @@ describe("completeSubscriberSignUp", () => {
       new Error("Auth is down"),
     );
 
-    await expect(
+    const httpsError = await captureHttpsError(
       callCompleteSubscriberSignUp(buildCallableRequest(buildSignUpPayload())),
-    ).rejects.toThrow("Auth is down");
+    );
 
+    // unavailable: the client shows the network message, which invites the
+    // visitor to try again with the same link.
+    expect(httpsError.code).toBe("unavailable");
     expect(auth.setCustomUserClaims).toHaveBeenCalledTimes(
       SIGN_UP_CLAIMS_ATTEMPTS,
     );
+    expect(vi.mocked(wait).mock.calls).toEqual([
+      [SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS],
+      [
+        SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS *
+          SIGN_UP_CLAIMS_RETRY_DELAY_MULTIPLIER,
+      ],
+    ]);
     expect(await countAuthUsers()).toBe(0);
     expect(await countDocuments(FIRESTORE_COLLECTION.BUSINESSES)).toBe(0);
     expect(await countDocuments(FIRESTORE_COLLECTION.USERS)).toBe(0);

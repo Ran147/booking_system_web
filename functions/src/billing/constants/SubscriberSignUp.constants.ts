@@ -62,6 +62,11 @@ export const SIGN_UP_ERROR = Object.freeze({
 // sign-up (SPEC "Order and rollback").
 export const SIGN_UP_CLAIMS_ATTEMPTS = 3;
 
+// Pause before the second attempt; it is multiplied before each next one
+// (200 ms, then 400 ms), so a brief Auth outage has time to pass.
+export const SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS = 200;
+export const SIGN_UP_CLAIMS_RETRY_DELAY_MULTIPLIER = 2;
+
 // Sign-up link of the KAN-24 email (plan-checkout SPEC "Data", AS-6). Only
 // the hash of the token is stored on the PlanCheckout.
 export const SIGN_UP_LINK = Object.freeze({
