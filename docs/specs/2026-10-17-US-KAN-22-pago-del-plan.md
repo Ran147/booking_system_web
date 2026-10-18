@@ -48,8 +48,8 @@ Cualquier fallo de formato → `invalid-argument`.
 1. Leer y normalizar el payload (§3.1).
 2. `await assertRecaptcha(recaptchaToken)` → `permission-denied` / `unavailable` (AC-KAN-22-06).
 3. Comprobar en una transacción:
-   - si ya existe `planCheckouts/{attemptId}` → devolver la misma respuesta, sin cobrar de nuevo (AC-KAN-22-09);
-   - si el plan no existe o no está `active` → `failed-precondition`, reason `planUnavailable` (AC-KAN-22-07);
+   - si ya existe `planCheckouts/{attemptId}` con el mismo `planId` y `email` → devolver la misma respuesta, sin cobrar de nuevo (AC-KAN-22-09); con otro `planId` u otro `email` → `failed-precondition`, reason `attemptReused`, sin cobrar (§3.4);
+   - si el plan no existe, no está `active` o su documento no tiene la forma esperada (`payablePlanDocumentSchema`) → `failed-precondition`, reason `planUnavailable` (AC-KAN-22-07);
    - si `priceInCents` ≠ `expectedPriceInCents` → `failed-precondition`, reason `priceChanged`, con `currentPriceInCents` en `details` (AC-KAN-22-08).
 4. Pasarela simulada (§3.3). Si rechaza → `failed-precondition`, reason `paymentDeclined`, y no se guarda nada (AC-KAN-22-04).
 5. Si aprueba → crear `planCheckouts/{attemptId}` en la misma transacción (§3.5).
@@ -67,6 +67,8 @@ Cualquier fallo de formato → `invalid-argument`.
 - El cliente genera un `attemptId` (UUID) al enviar y lo **reutiliza** si reintenta por error de red o doble clic. Solo genera uno nuevo después de un rechazo o si cambia los datos.
 - El `PlanCheckout` se guarda con `attemptId` como id del documento. Si un reintento llega después de un pago aprobado, la transacción ve que el documento ya existe y responde lo mismo sin cobrar (un `PlanCheckout` por intento, AC-KAN-22-09).
 - Si llegan dos llamadas a la vez con el mismo `attemptId`, la transacción deja pasar solo una (test de concurrencia).
+- Un `attemptId` ya pagado que llega con otro `planId` u otro `email` no es un reintento: se responde `attemptReused` y no se cobra, para que nadie vea "pagado" un plan que no pagó (revisión del PR #39). La pantalla (PR 2) genera un `attemptId` nuevo cada vez que se abre el checkout o cambian el plan o el email, y lo conserva solo para reintentar el mismo envío.
+- Con una pasarela real, el cobro sale de la transacción (`runTransaction` puede repetir el callback) y el `attemptId` se manda como clave de idempotencia de la pasarela.
 
 ### 3.5 Documento `planCheckouts/{attemptId}`
 
@@ -85,7 +87,7 @@ Por eso `PlanCheckoutDocument` pasa a tener `signUpTokenHash` y `signUpLinkExpir
 
 ### 3.6 Errores (`constants/PlanCheckout.constants.ts`)
 
-`PLAN_CHECKOUT_ERROR` (mensajes para desarrolladores) y `PLAN_CHECKOUT_ERROR_REASON` (`paymentDeclined`, `planUnavailable`, `priceChanged`), que el cliente replica en el PR 2. Ningún error revela si el email ya tiene cuenta (AS-5 de sign-up, AS-12).
+`PLAN_CHECKOUT_ERROR` (mensajes para desarrolladores) y `PLAN_CHECKOUT_ERROR_REASON` (`attemptReused`, `paymentDeclined`, `planUnavailable`, `priceChanged`), que el cliente replica en el PR 2. Ningún error revela si el email ya tiene cuenta (AS-5 de sign-up, AS-12).
 
 ### 3.7 Registro (`cloud-functions-standards` §8)
 
@@ -106,7 +108,7 @@ Por eso `PlanCheckoutDocument` pasa a tener `signUpTokenHash` y `signUpLinkExpir
 
 | Archivo | Cubre |
 | --- | --- |
-| `functions/src/billing/tests/payPlanCheckout.test.ts` | Pago aprobado y documento guardado, email normalizado, rechazo sin documento, plan inactivo o inexistente, precio cambiado, reCAPTCHA rechazado, payload inválido, términos no aceptados, reintento con el mismo `attemptId` sin cobro doble, dos llamadas a la vez, tarjeta no guardada |
+| `functions/src/billing/tests/payPlanCheckout.test.ts` | Pago aprobado y documento guardado, email normalizado, rechazo sin documento, plan inactivo o inexistente, precio cambiado, reCAPTCHA rechazado, payload inválido, términos no aceptados, plan mal formado, reintento con el mismo `attemptId` sin cobro doble, el mismo `attemptId` con otro plan u otro email (`attemptReused`), dos llamadas a la vez, tarjeta no guardada |
 | `tests/rules/planCheckouts.rules.test.ts` | KAN-22: un visitante no puede crear un `PlanCheckout` |
 | `src/modules/landing/features/plan-checkout/tests/PlanCheckoutPage.test.tsx` (PR 2) | ACs de pantalla con Page Object |
 

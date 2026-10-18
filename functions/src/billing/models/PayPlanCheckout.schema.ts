@@ -44,6 +44,15 @@ const cardNumberSchema = z
   )
   .pipe(z.string().regex(PLAN_CHECKOUT_PATTERN.CARD_NUMBER));
 
+// The fields of plans/{planId} that the payment reads. A plan that does not
+// match is treated as unavailable, never as a changed price.
+export const payablePlanDocumentSchema = z.object({
+  priceInCents: z.number().int().nonnegative(),
+  status: z.string(),
+});
+
+export type PayablePlanDocument = z.infer<typeof payablePlanDocumentSchema>;
+
 export const payPlanCheckoutPayloadSchema = z.object({
   attemptId: z.uuid(),
   cardCvc: z.string().trim().regex(PLAN_CHECKOUT_PATTERN.CARD_CVC),

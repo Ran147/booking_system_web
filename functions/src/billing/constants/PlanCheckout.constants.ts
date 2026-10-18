@@ -5,6 +5,7 @@
 // Developer-facing messages sent with the HttpsError; the client maps the code
 // and the reason to a translated key and never shows these.
 export const PLAN_CHECKOUT_ERROR = Object.freeze({
+  ATTEMPT_REUSED: "The attemptId was already paid with another plan or email",
   INVALID_PAYLOAD:
     "The checkout payload is missing fields or breaks the field rules",
   PAYMENT_DECLINED: "The simulated gateway declined the card",
@@ -14,6 +15,7 @@ export const PLAN_CHECKOUT_ERROR = Object.freeze({
 
 // HttpsError details.reason of payPlanCheckout (spec §3.6).
 export const PLAN_CHECKOUT_ERROR_REASON = Object.freeze({
+  ATTEMPT_REUSED: "attemptReused",
   PAYMENT_DECLINED: "paymentDeclined",
   PLAN_UNAVAILABLE: "planUnavailable",
   PRICE_CHANGED: "priceChanged",

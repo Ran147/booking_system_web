@@ -11,15 +11,17 @@ import type {
   PayPlanCheckoutPayload,
   PayPlanCheckoutResponse,
 } from "./models/PayPlanCheckout.mutation.js";
-import { payPlanCheckoutPayloadSchema } from "./models/PayPlanCheckout.schema.js";
-import type { PlanDocument } from "./models/Plan.document.js";
+import {
+  type PayablePlanDocument,
+  payablePlanDocumentSchema,
+  payPlanCheckoutPayloadSchema,
+} from "./models/PayPlanCheckout.schema.js";
 import type { PlanCheckoutDocument } from "./models/PlanCheckout.document.js";
 import { assertRecaptcha, RECAPTCHA_SECRETS } from "../auth/assertRecaptcha.js";
 import { FIRESTORE_COLLECTION } from "../shared/constants/FirestoreCollection.constants.js";
 import { PLAN_STATUS } from "../shared/constants/PlanStatus.constants.js";
 import { firestore } from "../shared/firebaseAdmin.js";
 import { readPayload } from "../shared/readPayload.js";
-import type { NullableUndefined } from "../shared/types/Nullable.js";
 
 // The simulated gateway (SPEC AS-9, Q5): one test card is declined, every
 // other valid card is approved. It returns only a reference; the card data
@@ -45,21 +47,22 @@ const chargeSimulatedCard = (cardNumber: string): string => {
 const readPayablePlan = async (
   transaction: Transaction,
   checkoutPayload: PayPlanCheckoutPayload,
-): Promise<PlanDocument> => {
+): Promise<PayablePlanDocument> => {
   const planSnapshot = await transaction.get(
     firestore
       .collection(FIRESTORE_COLLECTION.PLANS)
       .doc(checkoutPayload.planId),
   );
-  const plan = planSnapshot.data() as NullableUndefined<PlanDocument>;
+  const planParsed = payablePlanDocumentSchema.safeParse(planSnapshot.data());
 
-  if (!plan || plan.status !== PLAN_STATUS.ACTIVE) {
+  if (!planParsed.success || planParsed.data.status !== PLAN_STATUS.ACTIVE) {
     throw new HttpsError(
       "failed-precondition",
       PLAN_CHECKOUT_ERROR.PLAN_UNAVAILABLE,
       { reason: PLAN_CHECKOUT_ERROR_REASON.PLAN_UNAVAILABLE },
     );
   }
+  const plan = planParsed.data;
   if (plan.priceInCents !== checkoutPayload.expectedPriceInCents) {
     throw new HttpsError(
       "failed-precondition",
@@ -75,7 +78,9 @@ const readPayablePlan = async (
 
 // One PlanCheckout per attempt, stored under the attemptId (spec D3): a retry
 // of an attempt that was already paid answers the stored checkout and charges
-// nothing (AC-KAN-22-09). The simulated gateway has no side effects, so it can
+// nothing (AC-KAN-22-09); the same attemptId with another plan or email is not
+// a retry and is rejected, so the visitor is never told a plan they did not
+// pay for is paid. The simulated gateway has no side effects, so it can
 // run inside the transaction; a real gateway would take the attemptId as its
 // idempotency key.
 const storePaidCheckout = async (
@@ -87,7 +92,18 @@ const storePaidCheckout = async (
     .doc(checkoutPayload.attemptId);
   const checkoutSnapshot = await transaction.get(checkoutReference);
   if (checkoutSnapshot.exists) {
-    return (checkoutSnapshot.data() as PlanCheckoutDocument).email;
+    const paidCheckout = checkoutSnapshot.data() as PlanCheckoutDocument;
+    if (
+      paidCheckout.planId !== checkoutPayload.planId ||
+      paidCheckout.email !== checkoutPayload.email
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        PLAN_CHECKOUT_ERROR.ATTEMPT_REUSED,
+        { reason: PLAN_CHECKOUT_ERROR_REASON.ATTEMPT_REUSED },
+      );
+    }
+    return paidCheckout.email;
   }
 
   const plan = await readPayablePlan(transaction, checkoutPayload);

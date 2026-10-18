@@ -180,6 +180,23 @@ describe("payPlanCheckout", () => {
     );
   });
 
+  it("KAN-22: rejects a malformed plan with PLAN_UNAVAILABLE, not PRICE_CHANGED (AC-KAN-22-07)", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.PLANS)
+      .doc(CHECKOUT_TEST_PLAN.ID)
+      .set({ name: "Pro", status: PLAN_STATUS.ACTIVE });
+
+    const httpsError = await captureHttpsError(
+      callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload())),
+    );
+
+    expect(httpsError.code).toBe("failed-precondition");
+    expect(readErrorReason(httpsError)).toBe(
+      PLAN_CHECKOUT_ERROR_REASON.PLAN_UNAVAILABLE,
+    );
+    expect(await countCheckouts()).toBe(0);
+  });
+
   it("KAN-22: rejects a changed price with PRICE_CHANGED, sends the new price and charges nothing (AC-KAN-22-08)", async () => {
     await seedCheckoutPlan({ priceInCents: 59_900 });
 
@@ -215,6 +232,42 @@ describe("payPlanCheckout", () => {
 
     await expect(
       callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload())),
+    ).resolves.toEqual({ email: "owner@example.com" });
+    expect(await countCheckouts()).toBe(1);
+  });
+
+  it.each([
+    ["another email", { email: "someone-else@example.com" }],
+    ["another plan", { planId: "test-plan-basic" }],
+  ])(
+    "KAN-22: rejects a paid attempt sent again with %s with ATTEMPT_REUSED (AC-KAN-22-09)",
+    async (_case, payloadChange) => {
+      await callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload()));
+
+      const httpsError = await captureHttpsError(
+        callPayPlanCheckout(
+          buildCallableRequest(buildCheckoutPayload(payloadChange)),
+        ),
+      );
+
+      expect(httpsError.code).toBe("failed-precondition");
+      expect(readErrorReason(httpsError)).toBe(
+        PLAN_CHECKOUT_ERROR_REASON.ATTEMPT_REUSED,
+      );
+      expect(await countCheckouts()).toBe(1);
+      expect((await readCheckout())?.email).toBe("owner@example.com");
+    },
+  );
+
+  it("KAN-22: answers a retry whose email differs only in case and spaces with the paid checkout (AC-KAN-22-09, AC-KAN-22-11)", async () => {
+    await callPayPlanCheckout(buildCallableRequest(buildCheckoutPayload()));
+
+    await expect(
+      callPayPlanCheckout(
+        buildCallableRequest(
+          buildCheckoutPayload({ email: "  Owner@Example.com " }),
+        ),
+      ),
     ).resolves.toEqual({ email: "owner@example.com" });
     expect(await countCheckouts()).toBe(1);
   });
