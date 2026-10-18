@@ -38,6 +38,11 @@
     },
     "title": "Business public profile"
   },
+  "collaborators": {
+    "edit": {
+      "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned."
+    }
+  },
   "errors": {
     "readOnly": "Your business is inactive or suspended. Changes cannot be made."
   },
@@ -174,6 +179,24 @@
     "title": "Business dashboard"
   },
   "services": {
+    "collaborators": {
+      "collaboratorListDescription": "Check the collaborators authorized to provide this service.",
+      "collaboratorListTitle": "Available collaborators",
+      "emptyCollaborators": "There are no active or invited collaborators registered.",
+      "noCollaboratorNotice": "With no collaborators selected, the service is handled as a single business resource.",
+      "readOnlyNotice": "Your business is inactive or suspended. Collaborator assignment is disabled.",
+      "saveAction": "Save changes",
+      "saveSuccess": "Collaborator assignments updated successfully.",
+      "saving": "Saving…",
+      "selection": {
+        "automatic": "The system assigns an available one automatically",
+        "customerChoice": "The customer can choose which one",
+        "description": "Decide whether the customer chooses or the system assigns automatically.",
+        "title": "Assignment mode"
+      },
+      "subtitle": "Select which collaborators provide this service and how they are assigned.",
+      "title": "Assign collaborators"
+    },
     "delete": {
       "action": "Delete",
       "cancelAction": "Cancel",
@@ -183,6 +206,35 @@
       "hasBookingsError": "You cannot delete a service with pending or confirmed bookings.",
       "mustBeInactiveError": "You can only delete deactivated services.",
       "success": "Service deleted."
+    },
+    "discounts": {
+      "action": "Discounts",
+      "activeBadge": "Active",
+      "addDiscountAction": "Add discount",
+      "adding": "Saving…",
+      "emptyDescription": "Add a discount to incentivize your customers.",
+      "emptyTitle": "No promotions configured",
+      "endDateLabel": "End date",
+      "expiredBadge": "Expired",
+      "invalidDateRangeError": "The end date must be on or after the start date.",
+      "overlapError": "The date range overlaps with an existing discount.",
+      "readOnlyNotice": "Your business is inactive or suspended. Promotion management is disabled.",
+      "removeAction": "Remove",
+      "removeConfirmDescription": "Are you sure you want to remove this discount?",
+      "removeConfirmTitle": "Remove discount",
+      "removeSuccess": "Discount removed successfully.",
+      "saveSuccess": "Discount saved successfully.",
+      "startDateLabel": "Start date",
+      "subtitle": "Configure time-limited percentage or fixed-amount discounts.",
+      "title": "Discounts and promotions",
+      "typeFixedAmount": "Fixed amount",
+      "typeLabel": "Discount type",
+      "typePercentage": "Percentage (%)",
+      "upcomingBadge": "Upcoming",
+      "valueHelpFixed": "Enter discount amount in business currency (must be lower than price).",
+      "valueHelpPercentage": "Enter an integer percentage between 1 and 100.",
+      "valueLabel": "Value",
+      "valuePlaceholder": "0"
     },
     "form": {
       "addFeatureAction": "Add feature",
@@ -228,8 +280,10 @@
     "list": {
       "actions": "Actions",
       "clearFiltersAction": "Clear filters",
+      "collaboratorsAction": "Collaborators",
       "createServiceAction": "Create service",
       "description": "Manage your business's service catalog.",
+      "discountsAction": "Discounts",
       "duration": "Duration",
       "durationMinutes": "{{minutes}} min",
       "editAction": "Edit",
@@ -252,6 +306,9 @@
       "statusInactive": "Inactive",
       "title": "Services",
       "totalCount": "{{count}} services total"
+    },
+    "snapshot": {
+      "serviceUnavailableError": "The selected service is not available or has been deleted."
     },
     "status": {
       "activateAction": "Activate",

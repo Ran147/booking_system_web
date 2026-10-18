@@ -4,10 +4,13 @@ import {
   Pencil,
   Power,
   PowerOff,
+  Tag,
   Trash2,
+  Users,
 } from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import {
   Button,
   BUTTON_SIZE,
@@ -30,10 +33,13 @@ export const ServiceListTable = ({
   isReadOnly,
   onActivateService,
   onEditService,
+  onNavigateToCollaborators,
+  onNavigateToDiscounts,
   onOpenDeactivateModal,
   onOpenDeleteModal,
   services,
 }: ServiceListTableProps): ReactElement => {
+  const navigate = useNavigate();
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
 
   return (
@@ -111,6 +117,38 @@ export const ServiceListTable = ({
                       variant={BUTTON_VARIANT.GHOST}
                     >
                       {t("services.list.editAction")}
+                    </Button>
+                    <Button
+                      ariaLabel={t("services.list.discountsAction")}
+                      leftIcon={Tag}
+                      onClick={() =>
+                        onNavigateToDiscounts
+                          ? onNavigateToDiscounts(serviceItem.id)
+                          : navigate(
+                              `/business/services/${serviceItem.id}/discounts`,
+                            )
+                      }
+                      size={BUTTON_SIZE.SM}
+                      type="button"
+                      variant={BUTTON_VARIANT.GHOST}
+                    >
+                      {t("services.list.discountsAction")}
+                    </Button>
+                    <Button
+                      ariaLabel={t("services.list.collaboratorsAction")}
+                      leftIcon={Users}
+                      onClick={() =>
+                        onNavigateToCollaborators
+                          ? onNavigateToCollaborators(serviceItem.id)
+                          : navigate(
+                              `/business/services/${serviceItem.id}/collaborators`,
+                            )
+                      }
+                      size={BUTTON_SIZE.SM}
+                      type="button"
+                      variant={BUTTON_VARIANT.GHOST}
+                    >
+                      {t("services.list.collaboratorsAction")}
                     </Button>
                     {isServiceActive ? (
                       <Button
