@@ -105,6 +105,9 @@ export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
     isMobileMenuOpen,
     isSignedIn,
     logoAlt: t("home.navbar.logoAlt"),
+    // In current MVP phase, default branding renders the semantic stylized mark
+    // (Calendar icon with dynamic tokens). logoUrl prepares the infrastructure
+    // for custom uploaded logos without breaking the MVVM contract.
     logoUrl: undefined,
     navLinks,
     portalActionLabel,

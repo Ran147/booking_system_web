@@ -2,6 +2,7 @@ import { Calendar } from "lucide-react";
 import type { ReactElement } from "react";
 import { Link } from "react-router";
 import { Image } from "@/components/common";
+import { LANDING_NAVBAR_CONSTANTS } from "@/modules/landing/layout/constants/landingNavbar.constants";
 import { ROUTE_PATH } from "@/shared/constants";
 import type { LandingNavbarBrandingProps } from "./types";
 
@@ -12,20 +13,19 @@ export const LandingNavbarBranding = ({
   logoUrl,
   onImageError,
 }: LandingNavbarBrandingProps): ReactElement => {
-  const shouldRenderImage = Boolean(logoUrl) && !hasImageError;
-
   return (
     <Link
       aria-label={`${brandName} - ${logoAlt}`}
       className="flex items-center gap-2.5 transition-opacity hover:opacity-85"
+      id={LANDING_NAVBAR_CONSTANTS.LOGO_CONTAINER_ID}
       to={ROUTE_PATH.LANDING.HOME}
     >
-      {shouldRenderImage ? (
+      {logoUrl && !hasImageError ? (
         <Image
           alt={logoAlt}
           className="h-9 w-9 rounded-lg object-contain shadow-xs"
           onError={onImageError}
-          src={logoUrl ?? ""}
+          src={logoUrl}
         />
       ) : (
         <div

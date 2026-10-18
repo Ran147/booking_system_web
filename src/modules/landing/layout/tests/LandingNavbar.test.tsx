@@ -188,6 +188,11 @@ describe("LandingNavbar (KAN-3, KAN-12)", () => {
       testI18n.t("landing:home.navbar.logoAlt"),
     );
 
+    const homeLink = page.getNavigationLink(
+      testI18n.t("landing:home.navbar.links.home"),
+    );
+    expect(homeLink).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
+
     const logoLink = page.getLogoLink();
     expect(logoLink).toBeInTheDocument();
     expect(logoLink).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
