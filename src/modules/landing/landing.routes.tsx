@@ -18,6 +18,13 @@ export const landingRoutes: RouteObject[] = [
       },
       {
         lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+          const { HelpPage } = await import("./features/help");
+          return { Component: HelpPage };
+        },
+        path: ROUTE_PATH.LANDING.HELP,
+      },
+      {
+        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
           const { PlanDetailPage } = await import("./features/plan-checkout");
           return { Component: PlanDetailPage };
         },
