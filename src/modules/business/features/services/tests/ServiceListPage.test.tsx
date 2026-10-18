@@ -1,8 +1,12 @@
 import { screen, waitFor } from "@testing-library/react";
+import { FirebaseError } from "firebase/app";
 import type { QueryDocumentSnapshot } from "firebase/firestore";
 import type { RouteObject } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "@/components/common";
+import { FIREBASE_ERROR_CODE, FUNCTION_NAME } from "@/constants";
 import { BUSINESS_STATUS, SERVICE_STATUS } from "@/domain";
+import * as callFunctionModule from "@/services/firebase/callFunction";
 import {
   renderRoutesWithProviders,
   renderWithProviders,
@@ -14,6 +18,7 @@ import { createServiceListPage } from "./ServiceListPage.page";
 import * as fetchBusinessInfoModule from "../api/fetchBusinessInfo";
 import * as fetchBusinessStatusModule from "../api/fetchBusinessStatus";
 import * as fetchServicePageModule from "../api/fetchServicePage";
+import * as updateServiceStatusModule from "../api/updateServiceStatus";
 import { ServiceListPage } from "../components/ServiceListPage";
 import type { ServiceListItem } from "../models";
 
@@ -532,5 +537,501 @@ describe("ServiceListPage (KAN-55)", () => {
     for (const editButton of editButtons) {
       expect(editButton).toBeDisabled();
     }
+  });
+
+  describe("Activate a service (KAN-57)", () => {
+    it("AC-KAN-57-01: activates an inactive service and immediately updates status to active", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const updateStatusSpy = vi
+        .spyOn(updateServiceStatusModule, "updateServiceStatus")
+        .mockResolvedValueOnce({
+          serviceId: "service-beard",
+          status: SERVICE_STATUS.ACTIVE,
+        });
+      const toastSuccessSpy = vi.spyOn(toast, "success");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickActivateService("Arreglo de barba");
+
+      await waitFor(() => {
+        expect(updateStatusSpy).toHaveBeenCalledWith({
+          businessId: SUBSCRIBER_SESSION.businessId,
+          serviceId: "service-beard",
+          status: SERVICE_STATUS.ACTIVE,
+        });
+      });
+
+      expect(toastSuccessSpy).toHaveBeenCalledWith(
+        testI18n.t("business:services.status.activateSuccess"),
+      );
+    });
+
+    it("AC-KAN-57-02: shows business:errors.readOnly and does not activate when business is inactive/suspended", async () => {
+      vi.spyOn(
+        fetchBusinessStatusModule,
+        "fetchBusinessStatus",
+      ).mockResolvedValue(BUSINESS_STATUS.INACTIVE);
+      vi.spyOn(fetchBusinessInfoModule, "fetchBusinessInfo").mockResolvedValue({
+        currency: "USD",
+        status: BUSINESS_STATUS.INACTIVE,
+      });
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const updateStatusSpy = vi.spyOn(
+        updateServiceStatusModule,
+        "updateServiceStatus",
+      );
+
+      renderWithProviders(
+        <ServiceListPage businessStatus={BUSINESS_STATUS.INACTIVE} />,
+        {
+          initialPath: "/business/services",
+          session: SUBSCRIBER_SESSION,
+        },
+      );
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      const activateButton = await page.queryActivateButton("Arreglo de barba");
+      expect(activateButton).toBeDisabled();
+      expect(updateStatusSpy).not.toHaveBeenCalled();
+    });
+
+    it("AC-KAN-57-03: rolls back to inactive and shows common:errors.network when activation fails with network error", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      vi.spyOn(
+        updateServiceStatusModule,
+        "updateServiceStatus",
+      ).mockRejectedValueOnce(
+        new FirebaseError(
+          FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED,
+          "network error",
+        ),
+      );
+      const toastErrorSpy = vi.spyOn(toast, "error");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickActivateService("Arreglo de barba");
+
+      await waitFor(() => {
+        expect(toastErrorSpy).toHaveBeenCalledWith(
+          testI18n.t("common:errors.network"),
+        );
+      });
+
+      const row = await page.findRowByName("Arreglo de barba");
+      expect(row).toHaveTextContent(
+        testI18n.t("business:services.list.statusInactive"),
+      );
+    });
+
+    it("AC-KAN-57-04: only offers the activate action on inactive services", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[0]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+      const activateButton = await page.queryActivateButton("Corte de cabello");
+      expect(activateButton).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Deactivate a service (KAN-58)", () => {
+    it("AC-KAN-58-01: deactivates an active service upon confirmation and updates status", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[0]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const updateStatusSpy = vi
+        .spyOn(updateServiceStatusModule, "updateServiceStatus")
+        .mockResolvedValueOnce({
+          serviceId: "service-haircut",
+          status: SERVICE_STATUS.INACTIVE,
+        });
+      const toastSuccessSpy = vi.spyOn(toast, "success");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+      await page.clickDeactivateService("Corte de cabello");
+
+      expect(await page.findDeactivateConfirmModal()).toBeInTheDocument();
+      await page.confirmDeactivation();
+
+      await waitFor(() => {
+        expect(updateStatusSpy).toHaveBeenCalledWith({
+          businessId: SUBSCRIBER_SESSION.businessId,
+          serviceId: "service-haircut",
+          status: SERVICE_STATUS.INACTIVE,
+        });
+      });
+
+      expect(toastSuccessSpy).toHaveBeenCalledWith(
+        testI18n.t("business:services.status.deactivateSuccess"),
+      );
+    });
+
+    it("AC-KAN-58-02: disables deactivate action when business is inactive/suspended", async () => {
+      vi.spyOn(
+        fetchBusinessStatusModule,
+        "fetchBusinessStatus",
+      ).mockResolvedValue(BUSINESS_STATUS.SUSPENDED);
+      vi.spyOn(fetchBusinessInfoModule, "fetchBusinessInfo").mockResolvedValue({
+        currency: "USD",
+        status: BUSINESS_STATUS.SUSPENDED,
+      });
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[0]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const updateStatusSpy = vi.spyOn(
+        updateServiceStatusModule,
+        "updateServiceStatus",
+      );
+
+      renderWithProviders(
+        <ServiceListPage businessStatus={BUSINESS_STATUS.SUSPENDED} />,
+        {
+          initialPath: "/business/services",
+          session: SUBSCRIBER_SESSION,
+        },
+      );
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+      const deactivateButton =
+        await page.queryDeactivateButton("Corte de cabello");
+      expect(deactivateButton).toBeDisabled();
+      expect(updateStatusSpy).not.toHaveBeenCalled();
+    });
+
+    it("AC-KAN-58-03: rolls back to active and shows common:errors.network when deactivation fails with network error", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[0]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      vi.spyOn(
+        updateServiceStatusModule,
+        "updateServiceStatus",
+      ).mockRejectedValueOnce(
+        new FirebaseError(
+          FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED,
+          "network error",
+        ),
+      );
+      const toastErrorSpy = vi.spyOn(toast, "error");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+      await page.clickDeactivateService("Corte de cabello");
+      await page.confirmDeactivation();
+
+      await waitFor(() => {
+        expect(toastErrorSpy).toHaveBeenCalledWith(
+          testI18n.t("common:errors.network"),
+        );
+      });
+
+      const row = await page.findRowByName("Corte de cabello");
+      expect(row).toHaveTextContent(
+        testI18n.t("business:services.list.statusActive"),
+      );
+    });
+
+    it("AC-KAN-58-04: keeps existing confirmed bookings intact when service is deactivated (AS-2)", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[0]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const updateStatusSpy = vi
+        .spyOn(updateServiceStatusModule, "updateServiceStatus")
+        .mockResolvedValueOnce({
+          serviceId: "service-haircut",
+          status: SERVICE_STATUS.INACTIVE,
+        });
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      await page.clickDeactivateService("Corte de cabello");
+      await page.confirmDeactivation();
+
+      await waitFor(() => {
+        expect(updateStatusSpy).toHaveBeenCalledWith({
+          businessId: SUBSCRIBER_SESSION.businessId,
+          serviceId: "service-haircut",
+          status: SERVICE_STATUS.INACTIVE,
+        });
+      });
+    });
+
+    it("AC-KAN-58-05: keeps service active when subscriber cancels the confirmation dialog", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[0]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const updateStatusSpy = vi.spyOn(
+        updateServiceStatusModule,
+        "updateServiceStatus",
+      );
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+      await page.clickDeactivateService("Corte de cabello");
+
+      expect(await page.findDeactivateConfirmModal()).toBeInTheDocument();
+      await page.cancelDeactivation();
+
+      expect(updateStatusSpy).not.toHaveBeenCalled();
+      const row = await page.findRowByName("Corte de cabello");
+      expect(row).toHaveTextContent(
+        testI18n.t("business:services.list.statusActive"),
+      );
+    });
+  });
+
+  describe("Delete a deactivated service (KAN-59)", () => {
+    it("AC-KAN-59-01: deletes an inactive service upon confirmation and shows success toast", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const callFunctionSpy = vi
+        .spyOn(callFunctionModule, "callFunction")
+        .mockResolvedValueOnce({ deletedServiceId: "service-beard" });
+      const toastSuccessSpy = vi.spyOn(toast, "success");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickDeleteService("Arreglo de barba");
+
+      expect(await page.findDeleteConfirmModal()).toBeInTheDocument();
+      await page.confirmDeletion();
+
+      await waitFor(() => {
+        expect(callFunctionSpy).toHaveBeenCalledWith(
+          FUNCTION_NAME.DELETE_SERVICE,
+          {
+            businessId: SUBSCRIBER_SESSION.businessId,
+            serviceId: "service-beard",
+          },
+        );
+      });
+
+      expect(toastSuccessSpy).toHaveBeenCalledWith(
+        testI18n.t("business:services.delete.success"),
+      );
+    });
+
+    it("AC-KAN-59-02: shows business:services.delete.hasBookingsError when service has bookings", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      vi.spyOn(callFunctionModule, "callFunction").mockRejectedValueOnce(
+        new FirebaseError(
+          FIREBASE_ERROR_CODE.FAILED_PRECONDITION,
+          "The service has pending or confirmed bookings",
+        ),
+      );
+      const toastErrorSpy = vi.spyOn(toast, "error");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickDeleteService("Arreglo de barba");
+      await page.confirmDeletion();
+
+      await waitFor(() => {
+        expect(toastErrorSpy).toHaveBeenCalledWith(
+          testI18n.t("business:services.delete.hasBookingsError"),
+        );
+      });
+    });
+
+    it("AC-KAN-59-03: does not offer delete action on active services", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[0]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Corte de cabello")).toBeInTheDocument();
+      const deleteButton = await page.queryDeleteButton("Corte de cabello");
+      expect(deleteButton).not.toBeInTheDocument();
+    });
+
+    it("AC-KAN-59-04: disables delete action when business is inactive/suspended", async () => {
+      vi.spyOn(
+        fetchBusinessStatusModule,
+        "fetchBusinessStatus",
+      ).mockResolvedValue(BUSINESS_STATUS.INACTIVE);
+      vi.spyOn(fetchBusinessInfoModule, "fetchBusinessInfo").mockResolvedValue({
+        currency: "USD",
+        status: BUSINESS_STATUS.INACTIVE,
+      });
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const callFunctionSpy = vi.spyOn(callFunctionModule, "callFunction");
+
+      renderWithProviders(
+        <ServiceListPage businessStatus={BUSINESS_STATUS.INACTIVE} />,
+        {
+          initialPath: "/business/services",
+          session: SUBSCRIBER_SESSION,
+        },
+      );
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      const deleteButton = await page.queryDeleteButton("Arreglo de barba");
+      expect(deleteButton).toBeDisabled();
+      expect(callFunctionSpy).not.toHaveBeenCalled();
+    });
+
+    it("AC-KAN-59-05: keeps service listed and shows common:errors.network when deletion fails due to network error", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      vi.spyOn(callFunctionModule, "callFunction").mockRejectedValueOnce(
+        new FirebaseError(
+          FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED,
+          "network error",
+        ),
+      );
+      const toastErrorSpy = vi.spyOn(toast, "error");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickDeleteService("Arreglo de barba");
+      await page.confirmDeletion();
+
+      await waitFor(() => {
+        expect(toastErrorSpy).toHaveBeenCalledWith(
+          testI18n.t("common:errors.network"),
+        );
+      });
+
+      expect(page.queryRowByName("Arreglo de barba")).toBeInTheDocument();
+    });
+
+    it("cancelling delete dialog keeps service listed and does not call deleteService", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      const callFunctionSpy = vi.spyOn(callFunctionModule, "callFunction");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickDeleteService("Arreglo de barba");
+
+      expect(await page.findDeleteConfirmModal()).toBeInTheDocument();
+      await page.cancelDeletion();
+
+      expect(callFunctionSpy).not.toHaveBeenCalled();
+      expect(page.queryRowByName("Arreglo de barba")).toBeInTheDocument();
+    });
   });
 });

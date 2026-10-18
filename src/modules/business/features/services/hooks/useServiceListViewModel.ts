@@ -1,7 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
+import { toast } from "@/components/common";
 import {
+  FIREBASE_ERROR_CODE,
   FIRESTORE_COLLECTION,
+  I18N_NAMESPACE,
   PAGINATION,
   ROUTE_PATH,
   SEARCH_PARAM,
@@ -12,14 +17,18 @@ import {
 import { BUSINESS_STATUS, SERVICE_STATUS, type ServiceStatus } from "@/domain";
 import { useCursorPagination } from "@/hooks";
 import { useCurrentBusiness } from "@/modules/auth";
+import type { Nullable } from "@/types";
 import {
   fetchBusinessInfo,
+  useDeleteServiceMutation,
   useServiceListQuery,
+  useUpdateServiceStatusMutation,
   type BusinessInfo,
 } from "../api";
 import { DEFAULT_SERVICE_LIST_CURRENCY } from "../constants/ServiceList.constants";
 import type {
   ServiceListFilters,
+  ServiceListItem,
   ServiceListViewModel,
   UseServiceListViewModelOptions,
 } from "../models";
@@ -30,6 +39,15 @@ export const useServiceListViewModel = (
   const navigate = useNavigate();
   const [searchParameters, setSearchParameters] = useSearchParams();
   const { businessId } = useCurrentBusiness();
+  const { t } = useTranslation([
+    I18N_NAMESPACE.BUSINESS,
+    I18N_NAMESPACE.COMMON,
+  ]);
+
+  const [deactivatingService, setDeactivatingService] =
+    useState<Nullable<ServiceListItem>>(null);
+  const [deletingService, setDeletingService] =
+    useState<Nullable<ServiceListItem>>(null);
 
   const rawSearchTerm =
     searchParameters.get(SEARCH_PARAM.SEARCH) ?? STRING.EMPTY;
@@ -73,6 +91,9 @@ export const useServiceListViewModel = (
     pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
   });
 
+  const updateServiceStatusMutation = useUpdateServiceStatusMutation();
+  const deleteServiceMutation = useDeleteServiceMutation();
+
   const handleCreateService = (): void => {
     if (options.onCreateService) {
       options.onCreateService();
@@ -87,6 +108,137 @@ export const useServiceListViewModel = (
     } else {
       navigate(`/business/${ROUTE_PATH.BUSINESS.SERVICES}/${serviceId}/edit`);
     }
+  };
+
+  const handleActivateService = (serviceId: string): void => {
+    if (isReadOnly) {
+      toast.error(t("business:errors.readOnly"));
+      return;
+    }
+
+    updateServiceStatusMutation.mutate(
+      {
+        businessId,
+        serviceId,
+        status: SERVICE_STATUS.ACTIVE,
+      },
+      {
+        onError: (mutationError) => {
+          toast.error(t(`common:${mutationError.messageKey}`));
+        },
+        onSuccess: () => {
+          toast.success(t("business:services.status.activateSuccess"));
+        },
+      },
+    );
+  };
+
+  const handleOpenDeactivateModal = (serviceId: string): void => {
+    if (isReadOnly) {
+      toast.error(t("business:errors.readOnly"));
+      return;
+    }
+
+    const targetService = (serviceListQuery.data?.items ?? []).find(
+      (serviceItem) => serviceItem.id === serviceId,
+    );
+    if (targetService) {
+      setDeactivatingService(targetService);
+    }
+  };
+
+  const handleCloseDeactivateModal = (): void => {
+    setDeactivatingService(null);
+  };
+
+  const handleConfirmDeactivate = (): void => {
+    if (!deactivatingService) {
+      return;
+    }
+
+    if (isReadOnly) {
+      toast.error(t("business:errors.readOnly"));
+      setDeactivatingService(null);
+      return;
+    }
+
+    const targetServiceId = deactivatingService.id;
+    setDeactivatingService(null);
+
+    updateServiceStatusMutation.mutate(
+      {
+        businessId,
+        serviceId: targetServiceId,
+        status: SERVICE_STATUS.INACTIVE,
+      },
+      {
+        onError: (mutationError) => {
+          toast.error(t(`common:${mutationError.messageKey}`));
+        },
+        onSuccess: () => {
+          toast.success(t("business:services.status.deactivateSuccess"));
+        },
+      },
+    );
+  };
+
+  const handleOpenDeleteModal = (serviceId: string): void => {
+    if (isReadOnly) {
+      toast.error(t("business:errors.readOnly"));
+      return;
+    }
+
+    const targetService = (serviceListQuery.data?.items ?? []).find(
+      (serviceItem) => serviceItem.id === serviceId,
+    );
+    if (!targetService) {
+      return;
+    }
+
+    if (targetService.status === SERVICE_STATUS.ACTIVE) {
+      toast.error(t("business:services.delete.mustBeInactiveError"));
+      return;
+    }
+
+    setDeletingService(targetService);
+  };
+
+  const handleCloseDeleteModal = (): void => {
+    setDeletingService(null);
+  };
+
+  const handleConfirmDelete = (): void => {
+    if (!deletingService) {
+      return;
+    }
+
+    if (isReadOnly) {
+      toast.error(t("business:errors.readOnly"));
+      setDeletingService(null);
+      return;
+    }
+
+    const targetServiceId = deletingService.id;
+    setDeletingService(null);
+
+    deleteServiceMutation.mutate(
+      {
+        businessId,
+        serviceId: targetServiceId,
+      },
+      {
+        onError: (mutationError) => {
+          if (mutationError.code === FIREBASE_ERROR_CODE.FAILED_PRECONDITION) {
+            toast.error(t("business:services.delete.hasBookingsError"));
+          } else {
+            toast.error(t(`common:${mutationError.messageKey}`));
+          }
+        },
+        onSuccess: () => {
+          toast.success(t("business:services.delete.success"));
+        },
+      },
+    );
   };
 
   const handleSearchChange = (newSearchTerm: string): void => {
@@ -153,11 +305,20 @@ export const useServiceListViewModel = (
 
   return {
     currency: effectiveCurrency,
+    deactivatingService,
+    deletingService,
     filters,
+    handleActivateService,
     handleClearFilters,
+    handleCloseDeactivateModal,
+    handleCloseDeleteModal,
+    handleConfirmDeactivate,
+    handleConfirmDelete,
     handleCreateService,
     handleEditService,
     handleNextPage,
+    handleOpenDeactivateModal,
+    handleOpenDeleteModal,
     handlePreviousPage,
     handleRetry,
     handleSearchChange,
@@ -165,6 +326,8 @@ export const useServiceListViewModel = (
     hasActiveFilters,
     hasNextPage: Boolean(serviceListQuery.data?.nextCursor),
     hasPreviousPage: pagination.hasPreviousPage,
+    isDeactivating: updateServiceStatusMutation.isPending,
+    isDeleting: deleteServiceMutation.isPending,
     isEmpty,
     isNoResults,
     isReadOnly,
