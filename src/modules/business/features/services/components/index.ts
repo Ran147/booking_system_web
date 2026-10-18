@@ -1,4 +1,12 @@
 export {
+  DeactivateServiceConfirmDialog,
+  type DeactivateServiceConfirmDialogProps,
+} from "./DeactivateServiceConfirmDialog";
+export {
+  DeleteServiceConfirmDialog,
+  type DeleteServiceConfirmDialogProps,
+} from "./DeleteServiceConfirmDialog";
+export {
   ServiceFeatureList,
   type ServiceFeatureListProps,
 } from "./ServiceFeatureList";
