@@ -3,6 +3,7 @@ import { render, type RenderResult } from "@testing-library/react";
 import { I18nextProvider } from "react-i18next";
 import {
   createMemoryRouter,
+  parsePath,
   RouterProvider,
   type RouteObject,
 } from "react-router";
@@ -12,23 +13,30 @@ import { testI18n } from "./testI18n";
 
 export interface RenderRoutesWithProvidersOptions {
   initialPath: string;
+  /** Router state of the first entry, as navigate(path, { state }) sends it. */
+  initialState?: unknown;
   session: Session;
 }
+
+export type RenderRoutesWithProvidersResult = RenderResult & {
+  /** The memory router, to read where it ended up (location, state). */
+  readonly router: ReturnType<typeof createMemoryRouter>;
+};
 
 // Like renderWithProviders, but for a route tree (lazy routes, guards and
 // redirects) instead of a single element.
 export const renderRoutesWithProviders = (
   routes: RouteObject[],
-  { initialPath, session }: RenderRoutesWithProvidersOptions,
-): RenderResult => {
+  { initialPath, initialState, session }: RenderRoutesWithProvidersOptions,
+): RenderRoutesWithProvidersResult => {
   const testQueryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
   const testRouter = createMemoryRouter(routes, {
-    initialEntries: [initialPath],
+    initialEntries: [{ ...parsePath(initialPath), state: initialState }],
   });
 
-  return render(
+  const renderResult = render(
     <QueryClientProvider client={testQueryClient}>
       <I18nextProvider i18n={testI18n}>
         <AuthContext.Provider value={{ session }}>
@@ -37,4 +45,6 @@ export const renderRoutesWithProviders = (
       </I18nextProvider>
     </QueryClientProvider>,
   );
+
+  return { ...renderResult, router: testRouter };
 };

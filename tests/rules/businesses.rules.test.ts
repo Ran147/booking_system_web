@@ -43,6 +43,12 @@ describe("firestore.rules: tenant isolation", () => {
         .doc(BUSINESS_A_CUSTOMER_PATH)
         .set({ status: "active" });
       await adminFirestore
+        .doc("businesses/business-a/subscription/current")
+        .set({ planId: "plan-pro", status: "active" });
+      await adminFirestore
+        .doc("businesses/business-a/collaborators/collaborator-1")
+        .set({ permissions: [], status: "active" });
+      await adminFirestore
         .doc("businesses/business-pending")
         .set({ ownerUserId: "subscriber-pending", status: "pending" });
     });
@@ -110,6 +116,152 @@ describe("firestore.rules: tenant isolation", () => {
         .firestore()
         .doc("businesses/business-pending")
         .update({ status: "active" }),
+    );
+  });
+
+  it("KAN-199: lets the owner update only public profile fields", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriberA.firestore().doc("businesses/business-a").update({
+        contactEmail: "contact@example.com",
+        name: "Updated business",
+        socialLinks: [],
+      }),
+    );
+  });
+
+  it("KAN-199: denies changing protected business fields", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertFails(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ slug: "another-slug" }),
+    );
+  });
+
+  it("KAN-199: denies updating another subscriber's public profile", async () => {
+    const subscriberB = testEnvironment.authenticatedContext(
+      "subscriber-b",
+      subscriberOf("business-b"),
+    );
+
+    await assertFails(
+      subscriberB
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Stolen business" }),
+    );
+  });
+
+  it.each([
+    ["an empty name", { name: "" }],
+    ["an oversized name", { name: "n".repeat(121) }],
+    ["an oversized description", { description: "d".repeat(1_001) }],
+    ["an empty optional field instead of null", { description: "" }],
+    ["an invalid email", { contactEmail: "invalid-email" }],
+    ["an invalid phone", { contactPhone: "123" }],
+    [
+      "a non-HTTPS social URL",
+      {
+        socialLinks: [{ network: "facebook", url: "http://example.com" }],
+      },
+    ],
+    [
+      "an unsupported social network",
+      {
+        socialLinks: [{ network: "other", url: "https://example.com" }],
+      },
+    ],
+    [
+      "more than five social links",
+      {
+        socialLinks: Array.from({ length: 6 }, (_, index) => ({
+          network: "website",
+          url: `https://example.com/${index}`,
+        })),
+      },
+    ],
+    ["an invalid profile field type", { description: 42 }],
+  ])("KAN-199: denies %s", async (_caseName, invalidUpdate) => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertFails(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a")
+        .update(invalidUpdate),
+    );
+  });
+
+  it("KAN-40: lets a subscriber read their own business subscription", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a/subscription/current")
+        .get(),
+    );
+  });
+
+  it("KAN-40: denies a subscriber reading another business subscription", async () => {
+    const subscriberB = testEnvironment.authenticatedContext(
+      "subscriber-b",
+      subscriberOf("business-b"),
+    );
+
+    await assertFails(
+      subscriberB
+        .firestore()
+        .doc("businesses/business-a/subscription/current")
+        .get(),
+    );
+  });
+
+  it("KAN-40: denies a collaborator reading the business subscription (AS-10)", async () => {
+    const collaborator = testEnvironment.authenticatedContext(
+      "collaborator-1",
+      {
+        businessId: "business-a",
+        collaboratorId: "collaborator-1",
+        role: "collaborator",
+      },
+    );
+
+    await assertFails(
+      collaborator
+        .firestore()
+        .doc("businesses/business-a/subscription/current")
+        .get(),
+    );
+  });
+
+  it("KAN-40: denies client writes to the business subscription", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertFails(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a/subscription/current")
+        .update({ status: "cancelled" }),
     );
   });
 

@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/availability/` |
+| Feature folder | `src/modules/customer/features/availability/` |
 | Stories | KAN-140, KAN-141, KAN-142, KAN-143, KAN-144 |
 | Status | Draft |
 | Depends on | Q1 decided 2026-09-28 (each collaborator serves one booking at a time; glossary §3 "Collaborators and availability"); KAN-77 collaborators, KAN-61 service assignment; Q4 decided 2026-09-28 (the flow lives under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory; the flow is private); KAN-64 business hours; KAN-65 / KAN-66 schedule blocks; KAN-70 booking confirmation mode; `service-selection` spec (KAN-134); booking-checkout spec (KAN-145, KAN-148) |

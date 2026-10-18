@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/collaborators/` |
+| Feature folder | `src/modules/business/features/collaborators/` |
 | Stories | KAN-78, KAN-79, KAN-80, KAN-81, KAN-82, KAN-83, KAN-84, KAN-85, KAN-86 |
 | Status | Draft |
-| Depends on | Q1 decided 2026-09-28 (collaborator is a fifth actor, uses the business portal limited by permissions); KAN-180 plans (`limits.maxCollaborators`, KAN-181); KAN-32 subscription (upgrade KAN-44, read-only KAN-49); KAN-30 services (`serviceIds`, KAN-61); KAN-63 schedule (collaborator bookings and absences); KAN-28 auth (`src/features/auth`: password rules, recovery KAN-36, idle logout KAN-38) |
+| Depends on | Q1 decided 2026-09-28 (collaborator is a fifth actor, uses the business portal limited by permissions); KAN-180 plans (`limits.maxCollaborators`, KAN-181); KAN-32 subscription (upgrade KAN-44, read-only KAN-49); KAN-30 services (`serviceIds`, KAN-61); KAN-63 schedule (collaborator bookings and absences); KAN-28 auth (`src/modules/auth`: password rules, recovery KAN-36, idle logout KAN-38) |
 
 ## Intent
 The subscriber manages the people who serve customers in their business (for example the barbers of a barbershop): registers them, invites them by email so they activate their own account, edits, deactivates and reactivates them, and decides what each one may do in the business portal. A collaborator then signs in to the same business portal and sees only what the subscriber enabled for them.
@@ -172,7 +172,7 @@ None. Q1 was decided on 2026-09-28.
 | --- | --- | --- |
 | KAN-78 | AC-KAN-78-01 … AC-KAN-78-12 | `tests/CollaboratorFormScreen.test.tsx`; `functions/src/collaborators/tests/registerCollaborator.test.ts` |
 | KAN-79 | AC-KAN-79-01, AC-KAN-79-03, AC-KAN-79-08, AC-KAN-79-09 | `functions/src/collaborators/tests/acceptCollaboratorInvitation.test.ts` |
-| KAN-79 | AC-KAN-79-02, AC-KAN-79-04 … AC-KAN-79-07 | `src/features/auth/tests/AcceptInvitationPage.test.tsx` |
+| KAN-79 | AC-KAN-79-02, AC-KAN-79-04 … AC-KAN-79-07 | `src/modules/auth/tests/AcceptInvitationPage.test.tsx` |
 | KAN-80 | AC-KAN-80-01 … AC-KAN-80-08 | `tests/CollaboratorFormScreen.test.tsx` |
 | KAN-81 | AC-KAN-81-01, AC-KAN-81-03 … AC-KAN-81-06 | `tests/CollaboratorProfileScreen.test.tsx` |
 | KAN-81 | AC-KAN-81-02 | `tests/rules/collaborators.rules.test.ts` |
@@ -181,4 +181,4 @@ None. Q1 was decided on 2026-09-28.
 | KAN-84 | AC-KAN-84-01 … AC-KAN-84-05 | `tests/CollaboratorProfileScreen.test.tsx` |
 | KAN-85 | AC-KAN-85-01 … AC-KAN-85-06 | `tests/CollaboratorFormScreen.test.tsx`; `functions/src/collaborators/tests/registerCollaborator.test.ts` |
 | KAN-86 | AC-KAN-86-01, AC-KAN-86-06, AC-KAN-86-07 | `tests/CollaboratorPermissionsScreen.test.tsx` |
-| KAN-86 | AC-KAN-86-02 … AC-KAN-86-05, AC-KAN-86-08, AC-KAN-86-09 | `src/portals/business/layout/tests/BusinessLayout.test.tsx`; `tests/rules/collaborators.rules.test.ts` |
+| KAN-86 | AC-KAN-86-02 … AC-KAN-86-05, AC-KAN-86-08, AC-KAN-86-09 | `src/modules/business/layout/tests/BusinessLayout.test.tsx`; `tests/rules/collaborators.rules.test.ts` |

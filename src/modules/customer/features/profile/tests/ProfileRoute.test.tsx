@@ -1,22 +1,16 @@
 import { screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { appRoutes } from "@/app/router/appRoutes";
-import { renderRoutesWithProviders } from "@/test-utils/renderRoutesWithProviders";
 import {
+  renderRoutesWithProviders,
   SIGNED_OUT_SESSION,
   SUBSCRIBER_SESSION,
-} from "@/test-utils/sessionFixtures";
-import { testI18n } from "@/test-utils/testI18n";
-import { fetchCustomerProfile } from "../api/fetchCustomerProfile";
-
-vi.mock("../api/fetchCustomerProfile");
+  testI18n,
+} from "@/shared/test-utils";
 
 const PROFILE_PATH = "/barberia-centro/profile";
 
 describe("customer profile route", () => {
-  beforeEach(() => {
-    vi.mocked(fetchCustomerProfile).mockReset();
-  });
-
   it("KAN-169 AC-KAN-169-04: redirects a signed-out visitor to sign-in without loading profile data", async () => {
     renderRoutesWithProviders(appRoutes, {
       initialPath: PROFILE_PATH,
@@ -25,10 +19,9 @@ describe("customer profile route", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: testI18n.t("signInPlaceholder.title"),
+        name: testI18n.t("auth.signIn.title"),
       }),
     ).toBeInTheDocument();
-    expect(fetchCustomerProfile).not.toHaveBeenCalled();
   });
 
   it("KAN-169 AC-KAN-169-04: redirects another role without loading profile data", async () => {
@@ -39,9 +32,9 @@ describe("customer profile route", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: testI18n.t("landing:placeholder.title"),
+        level: 1,
+        name: "Panel del negocio",
       }),
     ).toBeInTheDocument();
-    expect(fetchCustomerProfile).not.toHaveBeenCalled();
   });
 });

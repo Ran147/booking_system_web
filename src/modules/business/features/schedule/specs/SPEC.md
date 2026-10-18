@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/schedule/` |
+| Feature folder | `src/modules/business/features/schedule/` |
 | Stories | KAN-64, KAN-65, KAN-66, KAN-67, KAN-68, KAN-69, KAN-70, KAN-71, KAN-72, KAN-73, KAN-74, KAN-75, KAN-76 |
 | Status | Draft |
 | Depends on | KAN-28 (subscriber sign-in); KAN-30 (services, snapshot KAN-62); KAN-87 epic (business customers, customers without an account KAN-88, blocked customers KAN-93); KAN-139 epic (availability computation KAN-141, KAN-143, KAN-144); KAN-32 / KAN-49 (read-only); KAN-163 epic (customer emails); KAN-77 collaborators epic (Q1 decided 2026-09-28: `Collaborator`, permissions KAN-86, availability per collaborator) |

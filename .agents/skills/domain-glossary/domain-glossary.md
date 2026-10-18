@@ -62,6 +62,10 @@ Notificación / alerta interna	Notification	users/{userId}/notifications/{notifi
 Recordatorio	Reminder	— (scheduled Cloud Function)	KAN-100, KAN-165
 Reporte	Report	— (computed)	KAN-102
 
+Business public profile (KAN-199)
+
+Business stores `name` and the optional public fields `logoUrl`, `description`, `contactPhone`, `contactEmail` and `socialLinks`. `socialLinks` is a list of `{ network, url }`, where `network` is one of `facebook`, `instagram`, `tiktok`, `website` or `whatsapp`, and `url` is HTTPS. The subscriber may edit these fields for their own active business. `slug`, `status` and `ownerUserId` remain protected.
+
 Naming rules
 
 The tenant key is always businessId. Never tenantId, companyId, shopId or storeId.
