@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/common";
-import { ARIA_ROLE, I18N_NAMESPACE } from "@/constants";
+import { Alert, ALERT_VARIANT, Button } from "@/components/common";
+import { I18N_NAMESPACE } from "@/constants";
 
 export interface SignedInContractNoticeProps {
   readonly isSigningOut: boolean;
@@ -16,14 +16,11 @@ export const SignedInContractNotice = ({
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
 
   return (
-    <div
-      className="flex flex-col gap-3 rounded-lg border border-border bg-muted/40 p-4 text-sm text-foreground"
-      role={ARIA_ROLE.ALERT}
-    >
+    <Alert className="flex flex-col gap-3" variant={ALERT_VARIANT.WARNING}>
       <p>{t("planCheckout.detail.signedInNotice")}</p>
       <Button isLoading={isSigningOut} onClick={onSignOut} variant="outline">
         {t("planCheckout.detail.signOutAction")}
       </Button>
-    </div>
+    </Alert>
   );
 };

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { AppLink } from "@/components/common";
-import { ARIA_ROLE, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { Alert, AppLink } from "@/components/common";
+import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import type { ContractError } from "../models/PlanDetailViewModel.interface";
 
 export interface ContractErrorAlertProps {
@@ -15,16 +15,13 @@ export const ContractErrorAlert = ({
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
 
   return (
-    <div
-      className="flex flex-col gap-2 rounded-lg border border-destructive p-4 text-sm text-destructive"
-      role={ARIA_ROLE.ALERT}
-    >
+    <Alert className="flex flex-col gap-2">
       <p>{contractError.message}</p>
       {contractError.showCatalogLink ? (
         <AppLink to={ROUTE_PATH.LANDING.HOME}>
           {t("planCheckout.detail.catalogAction")}
         </AppLink>
       ) : null}
-    </div>
+    </Alert>
   );
 };

@@ -41,7 +41,7 @@ export interface ContractError {
 }
 
 /**
- * Resultado del ViewModel de la pagina de detalle del plan.
+ * What the plan detail page ViewModel returns.
  */
 export interface PlanDetailPageViewModel {
   readonly contractError: Nullable<ContractError>;
