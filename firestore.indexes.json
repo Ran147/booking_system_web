@@ -1,6 +1,24 @@
 {
   "indexes": [
     {
+      "collectionGroup": "bookings",
+      "fields": [
+        { "fieldPath": "customerUserId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "startsAt", "order": "ASCENDING" }
+      ],
+      "queryScope": "COLLECTION_GROUP"
+    },
+    {
+      "collectionGroup": "bookings",
+      "fields": [
+        { "fieldPath": "customerUserId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "startsAt", "order": "DESCENDING" }
+      ],
+      "queryScope": "COLLECTION_GROUP"
+    },
+    {
       "collectionGroup": "services",
       "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
