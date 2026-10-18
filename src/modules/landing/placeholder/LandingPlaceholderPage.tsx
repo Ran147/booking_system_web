@@ -6,16 +6,14 @@ import { HeroSection } from "../features/home/components/HeroSection";
 import { PlatformIntroSection } from "../features/home/components/PlatformIntroSection";
 
 const PlanCatalogSection = lazy(async () => {
-  const { PlanCatalogSection: Component } = await import(
-    "../features/home/components/PlanCatalogSection"
-  );
+  const { PlanCatalogSection: Component } =
+    await import("../features/home/components/PlanCatalogSection");
   return { default: Component };
 });
 
 const TestimonialsSection = lazy(async () => {
-  const { TestimonialsSection: Component } = await import(
-    "../features/home/components/TestimonialsSection"
-  );
+  const { TestimonialsSection: Component } =
+    await import("../features/home/components/TestimonialsSection");
   return { default: Component };
 });
 

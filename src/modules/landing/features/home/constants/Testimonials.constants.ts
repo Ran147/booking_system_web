@@ -26,6 +26,7 @@ export const TESTIMONIALS_CONSTANTS = Object.freeze({
       RATING: 5,
     }),
   ]),
+  RATING_LABEL_KEY: "home.testimonials.ratingLabel",
   STAR_SYMBOL: "★",
   SUBTITLE_KEY: "home.testimonials.subtitle",
   TITLE_KEY: "home.testimonials.title",

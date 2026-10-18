@@ -5,7 +5,6 @@ import { testI18n } from "@/shared/test-utils/testI18n";
 import { createTestimonialsSectionPage } from "./TestimonialsSection.page";
 import { TestimonialsSection } from "../components/TestimonialsSection";
 import { TESTIMONIALS_CONSTANTS } from "../constants/Testimonials.constants";
-import * as useTestimonialsViewModelModule from "../hooks/useTestimonialsViewModel";
 
 const TEST_PROVIDER_OPTIONS = {
   initialPath: ROUTE_PATH.LANDING.HOME,
@@ -31,63 +30,56 @@ describe("TestimonialsSection (KAN-6)", () => {
     expect(ratings).toHaveLength(3);
     expect(ratings[0]).toHaveAttribute(
       "aria-label",
-      "Calificación: 5 de 5 estrellas",
+      testI18n.t(`landing:${TESTIMONIALS_CONSTANTS.RATING_LABEL_KEY}`, {
+        maxRating: TESTIMONIALS_CONSTANTS.DEFAULT_MAX_RATING,
+        rating: 5,
+      }),
     );
   });
 
   it("AC-KAN-6-02: skips testimonials with empty or missing quote", () => {
-    const originalHook =
-      useTestimonialsViewModelModule.useTestimonialsViewModel;
-    vi.spyOn(
-      useTestimonialsViewModelModule,
-      "useTestimonialsViewModel",
-    ).mockImplementation(() => {
-      const real = originalHook();
-      return {
-        ...real,
-        testimonials: real.testimonials.slice(0, 1),
-      };
+    const firstItem = TESTIMONIALS_CONSTANTS.ITEMS[0];
+    const existsSpy = vi.spyOn(testI18n, "exists").mockImplementation((key) => {
+      if (firstItem && key === firstItem.QUOTE_KEY) {
+        return false;
+      }
+      return true;
     });
 
     renderWithProviders(<TestimonialsSection />, TEST_PROVIDER_OPTIONS);
     const page = createTestimonialsSectionPage();
 
-    expect(page.getTestimonialCards()).toHaveLength(1);
+    expect(page.getTestimonialCards()).toHaveLength(2);
 
-    vi.restoreAllMocks();
+    existsSpy.mockRestore();
   });
 
   it("AC-KAN-6-03: renders nothing when there are no available testimonials", () => {
-    const originalHook =
-      useTestimonialsViewModelModule.useTestimonialsViewModel;
-    vi.spyOn(
-      useTestimonialsViewModelModule,
-      "useTestimonialsViewModel",
-    ).mockImplementation(() => {
-      const real = originalHook();
-      return {
-        ...real,
-        hasTestimonials: false,
-        testimonials: [],
-      };
-    });
+    const existsSpy = vi.spyOn(testI18n, "exists").mockReturnValue(false);
 
     renderWithProviders(<TestimonialsSection />, TEST_PROVIDER_OPTIONS);
     const page = createTestimonialsSectionPage();
 
     expect(page.getSection()).not.toBeInTheDocument();
 
-    vi.restoreAllMocks();
+    existsSpy.mockRestore();
   });
 
-  it("AC-KAN-6-04: provides accessible landmark labeling and responsive container styling", () => {
+  it("AC-KAN-6-04: provides accessible landmark labeling and static grid navigation without auto-rotation (AS-9)", () => {
     renderWithProviders(<TestimonialsSection />, TEST_PROVIDER_OPTIONS);
     const page = createTestimonialsSectionPage();
 
     const section = page.getSection();
+    expect(section).toBeInTheDocument();
     expect(section).toHaveAttribute(
       "aria-labelledby",
       TESTIMONIALS_CONSTANTS.HEADING_ID,
     );
+
+    const cards = page.getTestimonialCards();
+    expect(cards).toHaveLength(3);
+    cards.forEach((card) => {
+      expect(card).toHaveAttribute("role", "article");
+    });
   });
 });

@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/common";
+import { I18N_NAMESPACE } from "@/shared/constants";
 import { cn } from "@/shared/utils/cn";
 import type { TestimonialCardProps } from "./TestimonialCard.types";
 import { TESTIMONIALS_CONSTANTS } from "../constants/Testimonials.constants";
@@ -10,17 +12,26 @@ export const TestimonialCard = ({
   className,
   testimonial,
 }: TestimonialCardProps): ReactElement => {
+  const { t } = useTranslation(I18N_NAMESPACE.LANDING);
+
+  const ratingAriaLabel = t(TESTIMONIALS_CONSTANTS.RATING_LABEL_KEY, {
+    maxRating: TESTIMONIALS_CONSTANTS.DEFAULT_MAX_RATING,
+    rating: testimonial.rating,
+  });
+
   return (
     <Card
+      aria-label={testimonial.authorName}
       className={cn(
         "flex h-full flex-col justify-between border-border bg-card transition-shadow hover:shadow-xs",
         className,
       )}
+      role="article"
     >
       <CardContent className="flex h-full flex-col justify-between p-6">
         <div>
           <div
-            aria-label={`Calificación: ${testimonial.rating} de 5 estrellas`}
+            aria-label={ratingAriaLabel}
             className="mb-4 flex items-center space-x-1 text-primary"
             role="img"
           >

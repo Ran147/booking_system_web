@@ -1,8 +1,7 @@
 import { type MouseEvent, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { I18N_NAMESPACE } from "@/shared/constants";
+import { I18N_NAMESPACE, ROUTE_PATH } from "@/shared/constants";
 import type { Nullable, NullableUndefined } from "@/shared/types";
-import { ROUTE_PATH } from "@/shared/constants";
 import {
   DEFAULT_LANDING_FOOTER_CONFIG,
   FOOTER_NAVIGATION_ITEMS,

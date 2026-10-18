@@ -27,10 +27,7 @@ Los testimonios son estáticos y multilenguaje (AS-4), presentados mediante tarj
   - Una cuadrícula responsiva con tarjetas de testimonios (`TestimonialCard`), donde cada una incluye la cita textual (`quote`), el nombre del autor (`authorName`), el nombre del negocio o especialidad (`businessName`) y la calificación visual de satisfacción (`rating`).
 * **AC-KAN-6-02 [Resiliencia / Error - Testimonio sin Contenido Válido]:** Dado que un testimonio específico no contiene cita (`quote`) o está vacío en el idioma activo, el ViewModel filtra dicho elemento y la sección omite esa tarjeta, evitando mostrar contenido roto o incompleto.
 * **AC-KAN-6-03 [Edge - Lista Vacía de Testimonios]:** Dado que no existen testimonios disponibles o todos resultan inválidos, la sección completa no se renderiza en la página principal, preservando la limpieza del diseño.
-* **AC-KAN-6-04 [Accesibilidad WCAG AA y Responsive]:**
-  - La sección utiliza semántica accesible con `<section aria-labelledby="testimonials-heading">`.
-  - En pantallas móviles estrechas (360 px), las tarjetas se apilan verticalmente sin provocar desbordamiento horizontal.
-  - La apariencia visual respeta los tokens semánticos de Tailwind v4 (`bg-card`, `border-border`, `text-card-foreground`, `text-muted-foreground`), garantizando legibilidad y contraste WCAG AA en tema claro y oscuro (RNF-05).
+* **AC-KAN-6-04 [Navegación Accesible y Control sin Auto-rotación]:** Dado que los testimonios superan el espacio disponible en el viewport, cuando se renderiza la sección, el visitante puede explorarlos mediante teclado y puntero de forma natural (cuadrícula responsiva accesible), sin desplazamientos automáticos ni rotaciones que se muevan sin acción del usuario (AS-9). Incluye semántica accesible con `<section aria-labelledby="testimonials-heading">` y tokens de contraste WCAG AA en tema claro y oscuro (RNF-05).
 
 ---
 
@@ -86,6 +83,7 @@ export const TESTIMONIALS_CONSTANTS = Object.freeze({
   CONTAINER_SECTION_ID: "testimonials-section",
   DEFAULT_MAX_RATING: 5,
   HEADING_ID: "testimonials-heading",
+  RATING_LABEL_KEY: "home.testimonials.ratingLabel",
   SUBTITLE_KEY: "home.testimonials.subtitle",
   TITLE_KEY: "home.testimonials.title",
 } as const);
@@ -100,5 +98,5 @@ export const TESTIMONIALS_CONSTANTS = Object.freeze({
 | **AC-KAN-6-01** | Happy Path | `TestimonialsSection.test.tsx` | Valida renderizado de cabecera (badge, título, subtítulo) y tarjetas de testimonios con autor, negocio y cita. |
 | **AC-KAN-6-02** | Error/Resiliencia | `TestimonialsSection.test.tsx` | Verifica que elementos con cita vacía sean descartados automáticamente. |
 | **AC-KAN-6-03** | Edge | `TestimonialsSection.test.tsx` | Verifica que si no hay testimonios válidos, la sección no se renderiza en el DOM. |
-| **AC-KAN-6-04** | Accesibilidad/Edge | `TestimonialsSection.test.tsx` | Comprueba atributos `aria-labelledby`, semántica de encabezados y tokens de contraste. |
+| **AC-KAN-6-04** | Accesibilidad/Edge | `TestimonialsSection.test.tsx` | Comprueba navegación estática sin auto-rotación, atributos `aria-labelledby` y contraste de tema. |
 | **Unit VM** | Unitario | `useTestimonialsViewModel.test.tsx` | Valida filtrado de testimonios y mapeo de textos i18n. |
