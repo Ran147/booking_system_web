@@ -111,7 +111,8 @@ service cloud.firestore {
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
           || isCollaboratorOf(businessId);
-        allow create, update: if ownsBusiness(businessId) && businessIsWritable(businessId);
+        allow create, update: if (ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_services'))
+          && businessIsWritable(businessId);
         allow delete: if false; // via the deleteService function (KAN-59)
       }
 

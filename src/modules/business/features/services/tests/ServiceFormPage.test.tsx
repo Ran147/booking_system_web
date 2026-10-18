@@ -571,6 +571,42 @@ describe("ServiceFormPage (KAN-56)", { timeout: 10_000 }, () => {
     });
   });
 
+  it("AC-KAN-62-02: editing service name, price or duration updates the service document without mutating existing booking snapshots", async () => {
+    const updateSpy = vi
+      .spyOn(updateServiceModule, "updateService")
+      .mockResolvedValueOnce({ serviceId: "service-test-456" });
+
+    renderWithProviders(
+      <ServiceFormPage
+        initialService={MOCK_EXISTING_SERVICE}
+        serviceId="service-test-456"
+      />,
+      {
+        initialPath: "/business/services/service-test-456/edit",
+        session: SUBSCRIBER_SESSION,
+      },
+    );
+
+    const page = createServiceFormPage();
+
+    await page.changeName("Nuevo Corte");
+    await page.changePrice(99);
+    await page.changeDuration(90);
+    await page.clickSubmit();
+
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalledWith({
+        businessId: "business-test",
+        formValues: expect.objectContaining({
+          durationMinutes: 90,
+          name: "Nuevo Corte",
+          price: 99,
+        }),
+        serviceId: "service-test-456",
+      });
+    });
+  });
+
   it("renders not-found error state with retry and back actions when service detail fails to load", async () => {
     vi.spyOn(fetchServiceDetailModule, "fetchServiceDetail").mockRejectedValue(
       new FirebaseError(
