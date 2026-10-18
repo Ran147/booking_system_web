@@ -93,5 +93,11 @@
   },
   "status": {
     "loading": "Cargando…"
+  },
+  "subscriptionStatus": {
+    "active": "Activa",
+    "cancelled": "Cancelada",
+    "expired": "Vencida",
+    "past_due": "Pago pendiente"
   }
 }

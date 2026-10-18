@@ -3,12 +3,16 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
+  BUTTON_SIZE,
+  BUTTON_VARIANT,
   CursorPagination,
   PageTemplate,
   Spinner,
 } from "@/components/common";
 import { I18N_NAMESPACE, VIEW_STATE } from "@/constants";
 import { useServiceListViewModel } from "@/modules/business/features/services";
+import { DeactivateServiceConfirmDialog } from "../DeactivateServiceConfirmDialog";
+import { DeleteServiceConfirmDialog } from "../DeleteServiceConfirmDialog";
 import { ServiceListEmptyState } from "../ServiceListEmptyState";
 import { ServiceListNoResults } from "../ServiceListNoResults";
 import { ServiceListTable } from "../ServiceListTable";
@@ -19,6 +23,7 @@ export const ServiceListPage = ({
   businessStatus,
   currency,
   onCreateService,
+  onEditService,
 }: ServiceListPageProps): ReactElement => {
   const { t } = useTranslation([
     I18N_NAMESPACE.BUSINESS,
@@ -28,6 +33,7 @@ export const ServiceListPage = ({
     businessStatus,
     currency,
     onCreateService,
+    onEditService,
   });
 
   return (
@@ -40,9 +46,9 @@ export const ServiceListPage = ({
           disabled={viewModel.isReadOnly}
           leftIcon={Plus}
           onClick={viewModel.handleCreateService}
-          size="md"
+          size={BUTTON_SIZE.MD}
           type="button"
-          variant="default"
+          variant={BUTTON_VARIANT.DEFAULT}
         >
           {t("services.list.createServiceAction", {
             ns: I18N_NAMESPACE.BUSINESS,
@@ -104,9 +110,9 @@ export const ServiceListPage = ({
             })}
             leftIcon={RotateCw}
             onClick={viewModel.handleRetry}
-            size="sm"
+            size={BUTTON_SIZE.SM}
             type="button"
-            variant="outline"
+            variant={BUTTON_VARIANT.OUTLINE}
           >
             {t("services.list.retryAction", {
               ns: I18N_NAMESPACE.BUSINESS,
@@ -132,7 +138,12 @@ export const ServiceListPage = ({
           <div className="space-y-4">
             <ServiceListTable
               currency={viewModel.currency}
+              isActivating={viewModel.isActivating}
               isReadOnly={viewModel.isReadOnly}
+              onActivateService={viewModel.handleActivateService}
+              onEditService={viewModel.handleEditService}
+              onOpenDeactivateModal={viewModel.handleOpenDeactivateModal}
+              onOpenDeleteModal={viewModel.handleOpenDeleteModal}
               services={viewModel.services}
             />
             <CursorPagination
@@ -145,6 +156,22 @@ export const ServiceListPage = ({
             />
           </div>
         )}
+
+      <DeactivateServiceConfirmDialog
+        isOpen={Boolean(viewModel.deactivatingService)}
+        isPending={viewModel.isDeactivating}
+        onCancel={viewModel.handleCloseDeactivateModal}
+        onConfirm={viewModel.handleConfirmDeactivate}
+        serviceName={viewModel.deactivatingService?.name ?? ""}
+      />
+
+      <DeleteServiceConfirmDialog
+        isOpen={Boolean(viewModel.deletingService)}
+        isPending={viewModel.isDeleting}
+        onCancel={viewModel.handleCloseDeleteModal}
+        onConfirm={viewModel.handleConfirmDelete}
+        serviceName={viewModel.deletingService?.name ?? ""}
+      />
     </PageTemplate>
   );
 };

@@ -116,16 +116,27 @@
     "welcome": "Bienvenido a tu panel"
   },
   "layout": {
+    "expiryWarning": {
+      "ariaLabel": "Aviso de vencimiento de suscripción",
+      "dismiss": "Descartar aviso",
+      "endsToday": "Tu suscripción finaliza hoy.",
+      "message": "Tu suscripción finaliza en {{count}} días ({{date}}).",
+      "pastDue": "Tu suscripción tiene un pago pendiente. Finaliza en {{count}} días ({{date}}).",
+      "pastDueNoCountdown": "Tu suscripción tiene un pago pendiente.",
+      "payLink": "Pagar suscripción"
+    },
     "sidebar": {
       "ariaLabel": "Navegación del portal del negocio",
       "brandFallback": "BN",
       "closeMenu": "Cerrar menú",
+      "collaborator": "Colaborador: {{name}}",
       "collaborators": "Equipo",
       "collaboratorsDescription": "Colaboradores y asignación de permisos",
       "customers": "Clientes",
       "customersDescription": "Directorio y gestión de clientes",
       "dashboard": "Inicio",
       "dashboardDescription": "Resumen y estadísticas de tu negocio",
+      "logoAlt": "Logo de {{name}}",
       "openMenu": "Abrir menú de navegación",
       "reports": "Reportes",
       "reportsDescription": "Ocupación y métricas operativas",
@@ -139,6 +150,23 @@
       "subscription": "Suscripción",
       "subscriptionDescription": "Plan contratado y facturación"
     },
+    "signOut": {
+      "cancelAction": "Permanecer aquí",
+      "confirmAction": "Cerrar sesión",
+      "confirmTitle": "Cambios sin guardar",
+      "unsavedChangesConfirm": "¿Deseas cerrar sesión? Tienes cambios sin guardar que se perderán."
+    },
+    "subscriptionBanner": {
+      "ariaLabel": "Estado de la suscripción",
+      "endsOn": "Finaliza el {{date}}",
+      "loadError": "No se pudo cargar la suscripción",
+      "payLink": "Pagar ahora",
+      "readOnlyNotice": "Modo de solo lectura",
+      "renewsOn": "Se renueva el {{date}}",
+      "retry": "Reintentar",
+      "suspendedNotice": "Negocio suspendido por administración",
+      "viewPlan": "Administrar suscripción"
+    },
     "title": "Portal del negocio"
   },
   "placeholder": {
@@ -146,6 +174,16 @@
     "title": "Panel del negocio"
   },
   "services": {
+    "delete": {
+      "action": "Eliminar",
+      "cancelAction": "Cancelar",
+      "confirmAction": "Eliminar",
+      "confirmDescription": "¿Estás seguro de que deseas eliminar permanentemente este servicio? Esta acción no se puede deshacer.",
+      "confirmTitle": "Eliminar servicio",
+      "hasBookingsError": "No puedes eliminar un servicio con reservas pendientes o confirmadas.",
+      "mustBeInactiveError": "Solo puedes eliminar servicios desactivados.",
+      "success": "Servicio eliminado."
+    },
     "form": {
       "addFeatureAction": "Agregar característica",
       "backToServicesAction": "Volver a servicios",
@@ -158,6 +196,9 @@
       "durationHelp": "Entre 5 y 480 minutos, en pasos de 5 minutos.",
       "durationLabel": "Duración (minutos)",
       "durationPlaceholder": "60",
+      "editSubtitle": "Modifica los datos del servicio seleccionado en el catálogo.",
+      "editSuccess": "Servicio actualizado.",
+      "editTitle": "Editar servicio",
       "featureItemLabel": "Característica {{index}}",
       "featurePlaceholder": "Ej. Incluye lavado y peinado",
       "featuresDescription": "Agrega hasta 10 características o beneficios del servicio.",
@@ -211,6 +252,16 @@
       "statusInactive": "Inactivo",
       "title": "Servicios",
       "totalCount": "{{count}} servicios en total"
+    },
+    "status": {
+      "activateAction": "Activar",
+      "activateSuccess": "Servicio activado.",
+      "deactivateAction": "Desactivar",
+      "deactivateCancelAction": "Cancelar",
+      "deactivateConfirmAction": "Desactivar",
+      "deactivateConfirmDescription": "¿Estás seguro de que deseas desactivar este servicio? Dejará de aparecer en el catálogo público para nuevas reservas.",
+      "deactivateConfirmTitle": "Desactivar servicio",
+      "deactivateSuccess": "Servicio desactivado."
     }
   }
 }

@@ -69,34 +69,34 @@ The business always comes from the session, never from the URL. A subscriber nev
 - [x] **AC-KAN-55-08** · edge · Given a subscriber whose business is `inactive` or `suspended`, when they open the list, then they can still view and search their services, and the create, edit and status actions are disabled. [KAN-55, KAN-49]
 
 ### KAN-56 — Edit a service
-- [ ] **AC-KAN-56-01** · happy · Given a subscriber and one of their services, when they change any of its fields and save, then the service shows the new values in the list and in its detail. [KAN-56]
-- [ ] **AC-KAN-56-02** · error · Given an edit that clears a required field or puts a value out of range, when the subscriber saves, then the service is not changed and `validation:required` or `validation:outOfRange` is shown next to the field. [KAN-56]
-- [ ] **AC-KAN-56-03** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to edit a service, then nothing changes and `business:errors.readOnly` is shown. [KAN-56, KAN-49]
-- [ ] **AC-KAN-56-04** · error · Given the service was deleted in the meantime (for example in another tab), when the subscriber saves, then nothing is written and `common:errors.notFound` is shown. [KAN-56]
-- [ ] **AC-KAN-56-05** · error · Given the save request fails because of the network, when the subscriber saves, then the service keeps its previous values, the form keeps the edited values and `common:errors.network` is shown. [KAN-56]
-- [ ] **AC-KAN-56-06** · edge · Given a service with existing bookings, when its price or duration is edited, then those bookings keep their original values (KAN-62) and only bookings created afterwards use the new values. [KAN-56, KAN-62]
+- [x] **AC-KAN-56-01** · happy · Given a subscriber and one of their services, when they change any of its fields and save, then the service shows the new values in the list and in its detail. [KAN-56]
+- [x] **AC-KAN-56-02** · error · Given an edit that clears a required field or puts a value out of range, when the subscriber saves, then the service is not changed and `validation:required` or `validation:outOfRange` is shown next to the field. [KAN-56]
+- [x] **AC-KAN-56-03** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to edit a service, then nothing changes and `business:errors.readOnly` is shown. [KAN-56, KAN-49]
+- [x] **AC-KAN-56-04** · error · Given the service was deleted in the meantime (for example in another tab), when the subscriber saves, then nothing is written and `common:errors.notFound` is shown. [KAN-56]
+- [x] **AC-KAN-56-05** · error · Given the save request fails because of the network, when the subscriber saves, then the service keeps its previous values, the form keeps the edited values and `common:errors.network` is shown. [KAN-56]
+- [x] **AC-KAN-56-06** · edge · Given a service with existing bookings, when its price or duration is edited, then those bookings keep their original values (KAN-62) and only bookings created afterwards use the new values. [KAN-56, KAN-62]
 
 ### KAN-57 — Activate a service
-- [ ] **AC-KAN-57-01** · happy · Given a subscriber and an `inactive` service of their business, when they activate it, then its status becomes `active`, the badge updates immediately and the service appears in the public catalog (KAN-113). [KAN-57]
-- [ ] **AC-KAN-57-02** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to activate a service, then nothing changes and `business:errors.readOnly` is shown. [KAN-57, KAN-49]
-- [ ] **AC-KAN-57-03** · error · Given the request fails because of the network, when the subscriber activates a service, then the badge returns to `inactive` and `common:errors.network` is shown. [KAN-57]
-- [ ] **AC-KAN-57-04** · edge · Given a newly created service, when it is saved, then it is already `active` without a separate activation step (AS-1); the activate action is only offered on `inactive` services. [KAN-57]
+- [x] **AC-KAN-57-01** · happy · Given a subscriber and an `inactive` service of their business, when they activate it, then its status becomes `active`, the badge updates immediately and the service appears in the public catalog (KAN-113). [KAN-57]
+- [x] **AC-KAN-57-02** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to activate a service, then nothing changes and `business:errors.readOnly` is shown. [KAN-57, KAN-49]
+- [x] **AC-KAN-57-03** · error · Given the request fails because of the network, when the subscriber activates a service, then the badge returns to `inactive` and `common:errors.network` is shown. [KAN-57]
+- [x] **AC-KAN-57-04** · edge · Given a newly created service, when it is saved, then it is already `active` without a separate activation step (AS-1); the activate action is only offered on `inactive` services. [KAN-57]
 
 ### KAN-58 — Deactivate a service
-- [ ] **AC-KAN-58-01** · happy · Given a subscriber and an `active` service of their business, when they deactivate it and confirm, then its status becomes `inactive`, it disappears from the public catalog (KAN-113) and it stays visible in their own list with its status badge. [KAN-58]
-- [ ] **AC-KAN-58-02** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to deactivate a service, then nothing changes and `business:errors.readOnly` is shown. [KAN-58, KAN-49]
-- [ ] **AC-KAN-58-03** · error · Given the request fails because of the network, when the subscriber confirms, then the service keeps its previous status and `common:errors.network` is shown. [KAN-58]
-- [ ] **AC-KAN-58-04** · edge · Given an `active` service with `confirmed` future bookings, when it is deactivated, then those bookings are kept. See AS-2. [KAN-58]
-- [ ] **AC-KAN-58-05** · edge · Given the confirmation dialog, when the subscriber cancels it, then the service stays `active`. [KAN-58]
+- [x] **AC-KAN-58-01** · happy · Given a subscriber and an `active` service of their business, when they deactivate it and confirm, then its status becomes `inactive`, it disappears from the public catalog (KAN-113) and it stays visible in their own list with its status badge. [KAN-58]
+- [x] **AC-KAN-58-02** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to deactivate a service, then nothing changes and `business:errors.readOnly` is shown. [KAN-58, KAN-49]
+- [x] **AC-KAN-58-03** · error · Given the request fails because of the network, when the subscriber confirms, then the service keeps its previous status and `common:errors.network` is shown. [KAN-58]
+- [x] **AC-KAN-58-04** · edge · Given an `active` service with `confirmed` future bookings, when it is deactivated, then those bookings are kept. See AS-2. [KAN-58]
+- [x] **AC-KAN-58-05** · edge · Given the confirmation dialog, when the subscriber cancels it, then the service stays `active`. [KAN-58]
 
 ### KAN-59 — Delete a deactivated service
-- [ ] **AC-KAN-59-01** · happy · Given a subscriber and an `inactive` service with no `pending` or `confirmed` bookings, when they delete it and confirm, then the service no longer appears in their list and the total count decreases by one. [KAN-59]
-- [ ] **AC-KAN-59-02** · error · Given an `inactive` service with at least one `pending` or `confirmed` booking, when the subscriber tries to delete it, then the service is not deleted and `business:services.delete.hasBookingsError` is shown. [KAN-59]
-- [ ] **AC-KAN-59-03** · error · Given an `active` service, when the subscriber looks for the delete action, then it is not offered; a delete request for an `active` service is rejected and `business:services.delete.mustBeInactiveError` is shown. [KAN-59]
-- [ ] **AC-KAN-59-04** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to delete a service, then nothing is deleted and `business:errors.readOnly` is shown. [KAN-59, KAN-49]
-- [ ] **AC-KAN-59-05** · error · Given the request fails because of the network, when the subscriber confirms the deletion, then the service is still listed and `common:errors.network` is shown. [KAN-59]
-- [ ] **AC-KAN-59-06** · edge · Given an `inactive` service whose only bookings are `completed`, `cancelled` or `no_show`, when it is deleted, then the deletion succeeds and those past bookings still show the service name, price and duration from their snapshot (KAN-62). [KAN-59, KAN-62]
-- [ ] **AC-KAN-59-07** · edge · Given a customer creates a `pending` booking for the service at the same moment the subscriber deletes it, when both requests arrive, then either the booking is rejected or the deletion is rejected with `business:services.delete.hasBookingsError`; never both succeed. [KAN-59]
+- [x] **AC-KAN-59-01** · happy · Given a subscriber and an `inactive` service with no `pending` or `confirmed` bookings, when they delete it and confirm, then the service no longer appears in their list and the total count decreases by one. [KAN-59]
+- [x] **AC-KAN-59-02** · error · Given an `inactive` service with at least one `pending` or `confirmed` booking, when the subscriber tries to delete it, then the service is not deleted and `business:services.delete.hasBookingsError` is shown. [KAN-59]
+- [x] **AC-KAN-59-03** · error · Given an `active` service, when the subscriber looks for the delete action, then it is not offered; a delete request for an `active` service is rejected and `business:services.delete.mustBeInactiveError` is shown. [KAN-59]
+- [x] **AC-KAN-59-04** · error · Given a subscriber whose business is `inactive` or `suspended`, when they try to delete a service, then nothing is deleted and `business:errors.readOnly` is shown. [KAN-59, KAN-49]
+- [x] **AC-KAN-59-05** · error · Given the request fails because of the network, when the subscriber confirms the deletion, then the service is still listed and `common:errors.network` is shown. [KAN-59]
+- [x] **AC-KAN-59-06** · edge · Given an `inactive` service whose only bookings are `completed`, `cancelled` or `no_show`, when it is deleted, then the deletion succeeds and those past bookings still show the service name, price and duration from their snapshot (KAN-62). [KAN-59, KAN-62]
+- [x] **AC-KAN-59-07** · edge · Given a customer creates a `pending` booking for the service at the same moment the subscriber deletes it, when both requests arrive, then either the booking is rejected or the deletion is rejected with `business:services.delete.hasBookingsError`; never both succeed. [KAN-59]
 
 ### KAN-60 — Discounts and promotions on a service
 - [ ] **AC-KAN-60-01** · happy · Given a subscriber and one of their services, when they add a percentage discount with a start and end date and save, then the discount is stored on the service and shown in the service detail with its value and validity dates in the business `timeZone`. [KAN-60]
@@ -190,7 +190,7 @@ None.
 | KAN-57 | AC-KAN-57-01 … AC-KAN-57-04 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
 | KAN-58 | AC-KAN-58-01 … AC-KAN-58-05 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
 | KAN-59 | AC-KAN-59-01 … AC-KAN-59-05 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
-| KAN-59 | AC-KAN-59-02, AC-KAN-59-06, AC-KAN-59-07 | `functions/src/services/tests/deleteService.test.ts` |
+| KAN-59 | AC-KAN-59-02, AC-KAN-59-04, AC-KAN-59-06, AC-KAN-59-07 | `functions/src/services/tests/deleteService.test.ts` |
 | KAN-60 | AC-KAN-60-01, AC-KAN-60-02, AC-KAN-60-04 … AC-KAN-60-10 | `src/modules/business/features/services/tests/ServiceDiscountsPage.test.tsx` |
 | KAN-60 | AC-KAN-60-03 | `functions/src/bookings/tests/createBooking.test.ts` |
 | KAN-61 | AC-KAN-61-01 … AC-KAN-61-07 | `src/modules/business/features/services/tests/ServiceCollaboratorsPage.test.tsx` |

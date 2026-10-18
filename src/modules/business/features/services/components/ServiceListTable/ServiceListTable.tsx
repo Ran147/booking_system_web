@@ -1,8 +1,17 @@
-import { CheckCircle2, Clock, Pencil } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Pencil,
+  Power,
+  PowerOff,
+  Trash2,
+} from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
+  BUTTON_SIZE,
+  BUTTON_VARIANT,
   StatusBadge,
   Table,
   TableBody,
@@ -18,7 +27,12 @@ import type { ServiceListTableProps } from "./types/ServiceListTable.types";
 
 export const ServiceListTable = ({
   currency,
-  isReadOnly: _isReadOnly,
+  isActivating,
+  isReadOnly,
+  onActivateService,
+  onEditService,
+  onOpenDeactivateModal,
+  onOpenDeleteModal,
   services,
 }: ServiceListTableProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
@@ -87,16 +101,57 @@ export const ServiceListTable = ({
                   </StatusBadge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    ariaLabel={t("services.list.editAction")}
-                    disabled
-                    leftIcon={Pencil}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    {t("services.list.editAction")}
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      ariaLabel={t("services.list.editAction")}
+                      disabled={isReadOnly}
+                      leftIcon={Pencil}
+                      onClick={() => onEditService?.(serviceItem.id)}
+                      size={BUTTON_SIZE.SM}
+                      type="button"
+                      variant={BUTTON_VARIANT.GHOST}
+                    >
+                      {t("services.list.editAction")}
+                    </Button>
+                    {isServiceActive ? (
+                      <Button
+                        ariaLabel={t("services.status.deactivateAction")}
+                        disabled={isReadOnly}
+                        leftIcon={PowerOff}
+                        onClick={() => onOpenDeactivateModal?.(serviceItem.id)}
+                        size={BUTTON_SIZE.SM}
+                        type="button"
+                        variant={BUTTON_VARIANT.GHOST}
+                      >
+                        {t("services.status.deactivateAction")}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          ariaLabel={t("services.status.activateAction")}
+                          disabled={isReadOnly || isActivating}
+                          leftIcon={Power}
+                          onClick={() => onActivateService?.(serviceItem.id)}
+                          size={BUTTON_SIZE.SM}
+                          type="button"
+                          variant={BUTTON_VARIANT.GHOST}
+                        >
+                          {t("services.status.activateAction")}
+                        </Button>
+                        <Button
+                          ariaLabel={t("services.delete.action")}
+                          disabled={isReadOnly}
+                          leftIcon={Trash2}
+                          onClick={() => onOpenDeleteModal?.(serviceItem.id)}
+                          size={BUTTON_SIZE.SM}
+                          type="button"
+                          variant={BUTTON_VARIANT.GHOST}
+                        >
+                          {t("services.delete.action")}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             );
