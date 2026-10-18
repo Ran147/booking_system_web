@@ -9,63 +9,134 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { FIRESTORE_COLLECTION, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { BUSINESS_STATUS, USER_ROLE, type BusinessStatus } from "@/domain";
 import {
-  BUSINESS_STATUS,
-  USER_ROLE,
-  type BusinessStatus,
-  type UserRole,
-} from "@/domain";
-import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
-import { AuthContext } from "@/modules/auth/context/AuthContext";
-import { fetchBusinessStatus } from "@/modules/business/features/home";
+  SESSION_STATUS,
+  useCurrentBusiness,
+  useSession,
+  useSignOut,
+} from "@/modules/auth";
 import type { Nullable } from "@/types";
+import {
+  businessLayoutQueryKeys,
+  fetchBusinessProfile,
+  fetchCollaboratorProfile,
+  fetchCurrentSubscription,
+  fetchPlanName,
+  fetchPlatformSettings,
+  type BusinessProfileData,
+  type CollaboratorProfileData,
+  type CurrentSubscriptionData,
+  type PlatformSettingsData,
+} from "../api";
 import type { BusinessSidebarItem, BusinessSidebarViewModel } from "../models";
+import { calculateExpiryWarning } from "../utils";
 import type { UseBusinessSidebarViewModelOptions } from "./useBusinessSidebarViewModel.types";
 
 export const useBusinessSidebarViewModel = (
   options: UseBusinessSidebarViewModelOptions = {},
 ): BusinessSidebarViewModel => {
-  const { t } = useTranslation([
+  const { i18n, t } = useTranslation([
     I18N_NAMESPACE.BUSINESS,
     I18N_NAMESPACE.COMMON,
   ]);
   const navigate = useNavigate();
-  const authContext = useContext(AuthContext);
+  const signOut = useSignOut();
+  const session = useSession();
+  const { businessId } = useCurrentBusiness();
 
   const [activePlaceholderItem, setActivePlaceholderItem] =
     useState<Nullable<BusinessSidebarItem>>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isExpiryWarningDismissed, setIsExpiryWarningDismissed] =
+    useState<boolean>(false);
+  const [isSignOutConfirmOpen, setIsSignOutConfirmOpen] =
+    useState<boolean>(false);
 
-  const session = authContext?.session;
-  const isSessionSignedIn = session?.status === SESSION_STATUS.SIGNED_IN;
+  const isCollaborator =
+    session.status === SESSION_STATUS.SIGNED_IN &&
+    session.role === USER_ROLE.COLLABORATOR;
+  const isSubscriber =
+    session.status === SESSION_STATUS.SIGNED_IN &&
+    session.role === USER_ROLE.SUBSCRIBER;
 
-  const businessId =
-    isSessionSignedIn && session.businessId
-      ? session.businessId
-      : "business-test";
+  const collaboratorId =
+    isCollaborator && session.collaboratorId ? session.collaboratorId : null;
 
-  const businessName = options.businessName ?? t("business:placeholder.title");
-
-  const role: UserRole =
-    isSessionSignedIn && session.role ? session.role : USER_ROLE.SUBSCRIBER;
-
-  const isSubscriber = role === USER_ROLE.SUBSCRIBER;
-  const isCollaborator = role === USER_ROLE.COLLABORATOR;
-
-  const businessStatusQuery = useQuery<BusinessStatus>({
-    enabled: options.initialBusinessStatus === undefined,
-    queryFn: () => fetchBusinessStatus(businessId),
-    queryKey: [FIRESTORE_COLLECTION.BUSINESSES, businessId, "status"],
+  const businessProfileQuery = useQuery<BusinessProfileData>({
+    enabled: Boolean(businessId),
+    queryFn: () => fetchBusinessProfile(businessId),
+    queryKey: businessLayoutQueryKeys.profile(businessId),
   });
+
+  const businessName =
+    options.businessName ??
+    (businessProfileQuery.data?.name || t("business:placeholder.title"));
+
+  const logoUrl =
+    options.logoUrl !== undefined
+      ? options.logoUrl
+      : (businessProfileQuery.data?.logoUrl ?? null);
+
+  const timeZone = businessProfileQuery.data?.timeZone || "UTC";
 
   const businessStatus: BusinessStatus =
     options.initialBusinessStatus ??
-    businessStatusQuery.data ??
+    businessProfileQuery.data?.status ??
     BUSINESS_STATUS.ACTIVE;
+
+  const collaboratorProfileQuery = useQuery<CollaboratorProfileData>({
+    enabled: Boolean(isCollaborator && businessId && collaboratorId),
+    queryFn: () => fetchCollaboratorProfile(businessId, collaboratorId ?? ""),
+    queryKey: businessLayoutQueryKeys.collaboratorProfile(
+      businessId,
+      collaboratorId ?? "",
+    ),
+  });
+
+  const collaboratorName =
+    options.collaboratorName ??
+    (collaboratorProfileQuery.data?.fullName || null);
+
+  const subscriptionQuery = useQuery<Nullable<CurrentSubscriptionData>>({
+    enabled: Boolean(isSubscriber && businessId),
+    queryFn: () => fetchCurrentSubscription(businessId),
+    queryKey: businessLayoutQueryKeys.subscription(businessId),
+  });
+
+  const planId = subscriptionQuery.data?.planId ?? "";
+
+  const planQuery = useQuery<string>({
+    enabled: Boolean(isSubscriber && planId),
+    queryFn: () => fetchPlanName(planId),
+    queryKey: businessLayoutQueryKeys.planName(planId),
+  });
+
+  const platformSettingsQuery = useQuery<PlatformSettingsData>({
+    enabled: Boolean(isSubscriber),
+    queryFn: fetchPlatformSettings,
+    queryKey: businessLayoutQueryKeys.platformSettings(),
+  });
+
+  const expiryWarning = calculateExpiryWarning({
+    cancelAtPeriodEnd: subscriptionQuery.data?.cancelAtPeriodEnd,
+    currentPeriodEndsAt: subscriptionQuery.data?.currentPeriodEndsAt,
+    gracePeriodDays: platformSettingsQuery.data?.gracePeriodDays ?? null,
+    isCollaborator,
+    isDismissed: isExpiryWarningDismissed,
+    isPlatformSettingsError: platformSettingsQuery.isError,
+    isSubscriptionError: subscriptionQuery.isError,
+    language: i18n.language,
+    referenceDate: options.referenceDate,
+    status: subscriptionQuery.data?.status,
+    t: (key: string, translationOptions?: Record<string, unknown>): string =>
+      String(t(key as never, translationOptions as never)),
+    timeZone,
+  });
 
   const handleActionClick = (item: BusinessSidebarItem): void => {
     if (item.isAvailable && item.href) {
@@ -84,12 +155,50 @@ export const useBusinessSidebarViewModel = (
     setActivePlaceholderItem(null);
   };
 
-  const handleSignOut = (): void => {
+  const executeSignOut = (): void => {
     if (options.onSignOut) {
-      options.onSignOut();
+      try {
+        options.onSignOut();
+      } catch {
+        // Proceed even if custom handler throws
+      }
       return;
     }
-    navigate(ROUTE_PATH.AUTH.SIGN_IN);
+    void signOut();
+  };
+
+  const handleSignOut = (): void => {
+    if (options.hasUnsavedChanges) {
+      setIsSignOutConfirmOpen(true);
+      return;
+    }
+    executeSignOut();
+  };
+
+  const handleConfirmSignOut = (): void => {
+    setIsSignOutConfirmOpen(false);
+    executeSignOut();
+  };
+
+  const handleCancelSignOut = (): void => {
+    setIsSignOutConfirmOpen(false);
+  };
+
+  const handleDismissExpiryWarning = (): void => {
+    setIsExpiryWarningDismissed(true);
+  };
+
+  const handleNavigateToSubscription = (): void => {
+    const targetPath = `/business/${ROUTE_PATH.BUSINESS.SUBSCRIPTION}`;
+    if (options.onNavigate) {
+      options.onNavigate(targetPath);
+    } else {
+      navigate(targetPath);
+    }
+  };
+
+  const handleRetrySubscription = (): void => {
+    subscriptionQuery.refetch();
   };
 
   const toggleDrawer = (): void => {
@@ -170,16 +279,34 @@ export const useBusinessSidebarViewModel = (
 
   return {
     activePlaceholderItem,
+    businessError: businessProfileQuery.isError,
     businessName,
     businessStatus,
     closeDrawer,
     closePlaceholderModal,
+    collaboratorName,
+    expiryWarning,
+    gracePeriodDays: platformSettingsQuery.data?.gracePeriodDays ?? null,
     handleActionClick,
+    handleCancelSignOut,
+    handleConfirmSignOut,
+    handleDismissExpiryWarning,
+    handleNavigateToSubscription,
+    handleRetrySubscription,
     handleSignOut,
     isCollaborator,
     isDrawerOpen,
+    isExpiryWarningDismissed,
+    isPlatformSettingsError: platformSettingsQuery.isError,
+    isSignOutConfirmOpen,
     isSubscriber,
+    isSubscriptionError: subscriptionQuery.isError,
+    isSubscriptionLoading: subscriptionQuery.isLoading,
+    logoUrl,
     navItems: allNavItems,
+    planName: planQuery.data || null,
+    subscription: subscriptionQuery.data ?? null,
+    timeZone,
     toggleDrawer,
   };
 };

@@ -116,16 +116,27 @@
     "welcome": "Welcome to your dashboard"
   },
   "layout": {
+    "expiryWarning": {
+      "ariaLabel": "Subscription expiry notice",
+      "dismiss": "Dismiss warning",
+      "endsToday": "Your subscription ends today.",
+      "message": "Your subscription ends in {{count}} days ({{date}}).",
+      "pastDue": "Your subscription has a pending payment. Ends in {{count}} days ({{date}}).",
+      "pastDueNoCountdown": "Your subscription has a pending payment.",
+      "payLink": "Pay subscription"
+    },
     "sidebar": {
       "ariaLabel": "Business portal navigation",
       "brandFallback": "BP",
       "closeMenu": "Close menu",
+      "collaborator": "Collaborator: {{name}}",
       "collaborators": "Team",
       "collaboratorsDescription": "Collaborators and permission assignment",
       "customers": "Customers",
       "customersDescription": "Directory and customer management",
       "dashboard": "Dashboard",
       "dashboardDescription": "Business summary and statistics",
+      "logoAlt": "Logo of {{name}}",
       "openMenu": "Open navigation menu",
       "reports": "Reports",
       "reportsDescription": "Occupancy and operational metrics",
@@ -138,6 +149,23 @@
       "signOut": "Sign out",
       "subscription": "Subscription",
       "subscriptionDescription": "Subscribed plan and billing"
+    },
+    "signOut": {
+      "cancelAction": "Stay here",
+      "confirmAction": "Sign out",
+      "confirmTitle": "Unsaved changes",
+      "unsavedChangesConfirm": "Do you want to sign out? You have unsaved changes that will be lost."
+    },
+    "subscriptionBanner": {
+      "ariaLabel": "Subscription status",
+      "endsOn": "Ends on {{date}}",
+      "loadError": "Could not load subscription",
+      "payLink": "Pay now",
+      "readOnlyNotice": "Read-only mode",
+      "renewsOn": "Renews on {{date}}",
+      "retry": "Retry",
+      "suspendedNotice": "Business suspended by administration",
+      "viewPlan": "Manage subscription"
     },
     "title": "Business portal"
   },
