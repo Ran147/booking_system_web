@@ -39,7 +39,7 @@
     "intro": {
       "badge": "Why choose Booking System?",
       "features": {
-        "notifications": "Automated reminders via WhatsApp and email to minimize no-shows.",
+        "notifications": "Automated reminders and timely notifications to minimize no-shows.",
         "payments": "Integrated payment options and transparent subscription management.",
         "scheduling": "Real-time agenda availability with 24/7 self-service scheduling for clients."
       },

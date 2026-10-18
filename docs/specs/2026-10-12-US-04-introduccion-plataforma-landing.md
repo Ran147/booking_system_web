@@ -25,7 +25,7 @@ La interfaz presenta un extracto o resumen inicial conciso (`summary`) para mant
 * **AC-KAN-4-01 [Happy Path - Visualización de Resumen]:** Dado que el visitante accede a la página principal, cuando se renderiza la sección introductoria, entonces se visualiza una insignia descriptiva (`badge`), el título principal (`title`), el resumen de la propuesta (`summary`) y el control interactivo rotulado como "Leer más" (`readMore`).
 * **AC-KAN-4-02 [Happy Path - Expansión Interactiva]:** Dado que el resumen está visible, cuando el visitante activa "Leer más", entonces el contenido ampliado de la propuesta (`fullText`) se despliega de manera visible y accesible en la misma sección, y el botón de acción cambia su texto a "Leer menos" (`readLess`).
 * **AC-KAN-4-03 [Happy Path - Colapso de Contenido]:** Dado que el contenido ampliado se encuentra visible, cuando el visitante activa "Leer menos", entonces el texto ampliado se oculta, la acción vuelve al estado "Leer más" y el foco accesible permanece en el botón de alternancia.
-* **AC-KAN-4-04 [Error / Resiliencia - Ausencia de Contenido Ampliado]:** Dado que el contenido ampliado no está configurado o se encuentra vacío en las traducciones del idioma activo, cuando se renderiza la sección, entonces se muestra únicamente el resumen y el botón de alternancia no se renderiza, evitando un estado vacío o una interacción inoperante.
+* **AC-KAN-4-04 [Accesibilidad - Región Viva Persistente]:** El contenedor del texto ampliado permanece montado en el DOM con atributos accesibles (`aria-live="polite"` y `aria-atomic="true"`), actualizando su contenido dinámicamente entre colapso y expansión para garantizar anuncios confiables en lectores de pantalla.
 * **AC-KAN-4-05 [Accesibilidad WCAG AA y Responsive]:**
   - El botón interactivo incluye `aria-expanded` acorde al estado actual y `aria-controls` apuntando al identificador del contenedor del texto ampliado.
   - La sección se adapta a dispositivos móviles estrechos (360 px) sin desbordamiento horizontal.
@@ -62,7 +62,6 @@ export interface PlatformIntroViewModel {
   readonly badge: string;
   readonly fullText: string;
   readonly handleToggle: () => void;
-  readonly hasFullText: boolean;
   readonly isExpanded: boolean;
   readonly summary: string;
   readonly title: string;
@@ -78,6 +77,7 @@ export const PLATFORM_INTRO_CONSTANTS = Object.freeze({
   CONTAINER_SECTION_ID: "platform-intro-section",
   FULL_TEXT_CONTAINER_ID: "platform-intro-full-text",
   FULL_TEXT_KEY: "home.intro.fullText",
+  HEADING_ID: "platform-intro-heading",
   READ_LESS_KEY: "home.intro.readLess",
   READ_MORE_KEY: "home.intro.readMore",
   SUMMARY_KEY: "home.intro.summary",
@@ -103,6 +103,6 @@ src/modules/landing/features/home/components/PlatformIntroSection/
 | **AC-KAN-4-01** | Happy Path | `PlatformIntroSection.test.tsx` | Verifica renderizado de badge, título, resumen y botón "Leer más". |
 | **AC-KAN-4-02** | Happy Path | `PlatformIntroSection.test.tsx` | Simula clic en "Leer más" y verifica aparición de `fullText` y cambio a "Leer menos". |
 | **AC-KAN-4-03** | Happy Path | `PlatformIntroSection.test.tsx` | Simula alternancia a "Leer menos" y verifica colapso del texto adicional. |
-| **AC-KAN-4-04** | Error/Edge | `PlatformIntroSection.test.tsx` | Verifica que si `fullText` está vacío, no se renderice el botón de alternancia. |
+| **AC-KAN-4-04** | Accesibilidad/Edge | `PlatformIntroSection.test.tsx` | Verifica permanencia del contenedor `aria-live="polite"` en el DOM y actualización de su contenido. |
 | **AC-KAN-4-05** | Accesibilidad/Edge | `PlatformIntroSection.test.tsx` | Verifica atributos `aria-expanded`, `aria-controls` y clases semánticas de contraste. |
 | **Unit VM** | Unitario | `usePlatformIntroViewModel.test.tsx` | Valida estados iniciales y función `handleToggle`. |

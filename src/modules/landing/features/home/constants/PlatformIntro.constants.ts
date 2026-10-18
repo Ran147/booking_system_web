@@ -6,6 +6,7 @@ export const PLATFORM_INTRO_CONSTANTS = Object.freeze({
   FEATURES_SCHEDULING_KEY: "home.intro.features.scheduling",
   FULL_TEXT_CONTAINER_ID: "platform-intro-full-text",
   FULL_TEXT_KEY: "home.intro.fullText",
+  HEADING_ID: "platform-intro-heading",
   READ_LESS_KEY: "home.intro.readLess",
   READ_MORE_KEY: "home.intro.readMore",
   SUMMARY_KEY: "home.intro.summary",

@@ -1,12 +1,11 @@
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ROUTE_PATH } from "@/shared/constants";
 import { renderWithProviders, SIGNED_OUT_SESSION } from "@/shared/test-utils";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { createPlatformIntroSectionPage } from "./PlatformIntroSection.page";
 import { PlatformIntroSection } from "../components/PlatformIntroSection";
 import { PLATFORM_INTRO_CONSTANTS } from "../constants/PlatformIntro.constants";
-import * as usePlatformIntroViewModelModule from "../hooks/usePlatformIntroViewModel";
 
 const TEST_PROVIDER_OPTIONS = {
   initialPath: ROUTE_PATH.LANDING.HOME,
@@ -35,7 +34,9 @@ describe("PlatformIntroSection (KAN-4)", () => {
       "aria-controls",
       PLATFORM_INTRO_CONSTANTS.FULL_TEXT_CONTAINER_ID,
     );
-    expect(page.getFullTextContainer()).not.toBeInTheDocument();
+    expect(page.getFullTextContainer()).toBeInTheDocument();
+    expect(page.getFullTextContainer()).toBeEmptyDOMElement();
+    expect(page.getFullTextParagraph()).not.toBeInTheDocument();
   });
 
   it("AC-KAN-4-02: expands full introduction text and toggles button label to read less upon activation", async () => {
@@ -53,6 +54,7 @@ describe("PlatformIntroSection (KAN-4)", () => {
     expect(fullTextContainer).toHaveTextContent(
       testI18n.t(`landing:${PLATFORM_INTRO_CONSTANTS.FULL_TEXT_KEY}`),
     );
+    expect(page.getFullTextParagraph()).toBeInTheDocument();
     expect(page.getToggleButton()).toHaveTextContent(
       testI18n.t(`landing:${PLATFORM_INTRO_CONSTANTS.READ_LESS_KEY}`),
     );
@@ -66,39 +68,39 @@ describe("PlatformIntroSection (KAN-4)", () => {
 
     const toggleButton = page.getToggleButton();
     await user.click(toggleButton as HTMLElement);
-    expect(page.getFullTextContainer()).toBeInTheDocument();
+    expect(page.getFullTextContainer()).not.toBeEmptyDOMElement();
+    expect(page.getFullTextParagraph()).toBeInTheDocument();
 
     await user.click(page.getToggleButton() as HTMLElement);
-    expect(page.getFullTextContainer()).not.toBeInTheDocument();
+    expect(page.getFullTextContainer()).toBeEmptyDOMElement();
+    expect(page.getFullTextParagraph()).not.toBeInTheDocument();
     expect(page.getToggleButton()).toHaveTextContent(
       testI18n.t(`landing:${PLATFORM_INTRO_CONSTANTS.READ_MORE_KEY}`),
     );
     expect(page.getToggleButton()).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("AC-KAN-4-04: does not render toggle button when full text is missing or unavailable", () => {
-    const originalHook =
-      usePlatformIntroViewModelModule.usePlatformIntroViewModel;
-    vi.spyOn(
-      usePlatformIntroViewModelModule,
-      "usePlatformIntroViewModel",
-    ).mockImplementation(() => {
-      const real = originalHook();
-      return {
-        ...real,
-        fullText: "",
-        hasFullText: false,
-      };
-    });
-
+  it("AC-KAN-4-04: ensures the aria-live polite region remains mounted in the DOM across toggle states", async () => {
+    const user = userEvent.setup();
     renderWithProviders(<PlatformIntroSection />, TEST_PROVIDER_OPTIONS);
     const page = createPlatformIntroSectionPage();
 
-    expect(page.getSummary()).toBeInTheDocument();
-    expect(page.getToggleButton()).not.toBeInTheDocument();
-    expect(page.getFullTextContainer()).not.toBeInTheDocument();
+    const liveRegion = page.getFullTextContainer();
+    expect(liveRegion).toBeInTheDocument();
+    expect(liveRegion).toHaveAttribute("aria-live", "polite");
+    expect(liveRegion).toHaveAttribute("aria-atomic", "true");
+    expect(liveRegion).toBeEmptyDOMElement();
 
-    vi.restoreAllMocks();
+    const toggleButton = page.getToggleButton();
+    await user.click(toggleButton as HTMLElement);
+
+    expect(liveRegion).not.toBeEmptyDOMElement();
+    expect(page.getFullTextParagraph()).toBeInTheDocument();
+
+    await user.click(toggleButton as HTMLElement);
+
+    expect(liveRegion).toBeEmptyDOMElement();
+    expect(page.getFullTextParagraph()).not.toBeInTheDocument();
   });
 
   it("AC-KAN-4-05: adheres to accessible landmark labels and renders key features", () => {
@@ -108,7 +110,7 @@ describe("PlatformIntroSection (KAN-4)", () => {
     const section = page.getSection();
     expect(section).toHaveAttribute(
       "aria-labelledby",
-      "platform-intro-heading",
+      PLATFORM_INTRO_CONSTANTS.HEADING_ID,
     );
     expect(page.getFeatures().length).toBeGreaterThanOrEqual(1);
   });

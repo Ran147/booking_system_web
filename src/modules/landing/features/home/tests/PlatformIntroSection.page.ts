@@ -6,6 +6,7 @@ export interface PlatformIntroSectionPage {
   readonly getBadge: () => Nullable<HTMLElement>;
   readonly getFeatures: () => HTMLElement[];
   readonly getFullTextContainer: () => Nullable<HTMLElement>;
+  readonly getFullTextParagraph: () => Nullable<HTMLElement>;
   readonly getHeading: () => Nullable<HTMLElement>;
   readonly getSection: () => Nullable<HTMLElement>;
   readonly getSummary: () => Nullable<HTMLElement>;
@@ -23,6 +24,10 @@ export const createPlatformIntroSectionPage = (): PlatformIntroSectionPage => ({
     ),
   getFullTextContainer: (): Nullable<HTMLElement> =>
     document.getElementById(PLATFORM_INTRO_CONSTANTS.FULL_TEXT_CONTAINER_ID),
+  getFullTextParagraph: (): Nullable<HTMLElement> =>
+    screen.queryByText(
+      /Nuestra solución fue diseñada|Our platform is tailored/i,
+    ),
   getHeading: (): Nullable<HTMLElement> =>
     screen.queryByRole("heading", { level: 2 }),
   getSection: (): Nullable<HTMLElement> =>

@@ -19,7 +19,7 @@ export const PlatformIntroSection = ({
 
   return (
     <section
-      aria-labelledby="platform-intro-heading"
+      aria-labelledby={PLATFORM_INTRO_CONSTANTS.HEADING_ID}
       className={cn("mx-auto max-w-5xl px-4 py-12 md:py-16", className)}
       id={PLATFORM_INTRO_CONSTANTS.CONTAINER_SECTION_ID}
     >
@@ -29,7 +29,7 @@ export const PlatformIntroSection = ({
         </Badge>
         <h2
           className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl"
-          id="platform-intro-heading"
+          id={PLATFORM_INTRO_CONSTANTS.HEADING_ID}
         >
           {viewModel.title}
         </h2>
@@ -37,30 +37,32 @@ export const PlatformIntroSection = ({
           {viewModel.summary}
         </p>
 
-        {viewModel.isExpanded && (
-          <div
-            aria-live="polite"
-            className="mt-4 max-w-3xl animate-in fade-in duration-300"
-            id={PLATFORM_INTRO_CONSTANTS.FULL_TEXT_CONTAINER_ID}
-          >
-            <p className="rounded-xl border border-border bg-card p-6 text-left text-sm text-card-foreground shadow-xs sm:text-base">
+        <div
+          aria-atomic="true"
+          aria-live="polite"
+          className={cn(
+            "w-full max-w-3xl transition-all duration-300",
+            viewModel.isExpanded && "mt-4",
+          )}
+          id={PLATFORM_INTRO_CONSTANTS.FULL_TEXT_CONTAINER_ID}
+        >
+          {viewModel.isExpanded ? (
+            <p className="rounded-xl border border-border bg-card p-6 text-left text-sm text-card-foreground shadow-xs sm:text-base animate-in fade-in duration-300">
               {viewModel.fullText}
             </p>
-          </div>
-        )}
+          ) : null}
+        </div>
 
-        {viewModel.hasFullText && (
-          <div className="mt-6">
-            <Button
-              aria-controls={PLATFORM_INTRO_CONSTANTS.FULL_TEXT_CONTAINER_ID}
-              aria-expanded={viewModel.isExpanded}
-              onClick={viewModel.handleToggle}
-              variant={BUTTON_VARIANT.OUTLINE}
-            >
-              {viewModel.toggleButtonLabel}
-            </Button>
-          </div>
-        )}
+        <div className="mt-6">
+          <Button
+            aria-controls={PLATFORM_INTRO_CONSTANTS.FULL_TEXT_CONTAINER_ID}
+            aria-expanded={viewModel.isExpanded}
+            onClick={viewModel.handleToggle}
+            variant={BUTTON_VARIANT.OUTLINE}
+          >
+            {viewModel.toggleButtonLabel}
+          </Button>
+        </div>
       </div>
 
       <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

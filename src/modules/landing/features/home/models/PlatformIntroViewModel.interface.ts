@@ -18,8 +18,6 @@ export interface PlatformIntroViewModel {
   readonly fullText: string;
   /** Accion de alternancia para expandir o colapsar el texto */
   readonly handleToggle: () => void;
-  /** Indica si existe texto extendido valido para mostrar la accion de expansion */
-  readonly hasFullText: boolean;
   /** Estado de visibilidad del texto extendido */
   readonly isExpanded: boolean;
   /** Resumen inicial conciso de la propuesta */

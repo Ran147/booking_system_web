@@ -13,9 +13,6 @@ export const usePlatformIntroViewModel = (): PlatformIntroViewModel => {
   const summary = t(PLATFORM_INTRO_CONSTANTS.SUMMARY_KEY);
   const fullText = t(PLATFORM_INTRO_CONSTANTS.FULL_TEXT_KEY);
 
-  const hasFullText =
-    Boolean(fullText) && fullText !== PLATFORM_INTRO_CONSTANTS.FULL_TEXT_KEY;
-
   const handleToggle = useCallback((): void => {
     setIsExpanded((previousState) => !previousState);
   }, []);
@@ -44,7 +41,6 @@ export const usePlatformIntroViewModel = (): PlatformIntroViewModel => {
     features,
     fullText,
     handleToggle,
-    hasFullText,
     isExpanded,
     summary,
     title,

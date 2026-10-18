@@ -21,7 +21,6 @@ describe("usePlatformIntroViewModel", () => {
     });
 
     expect(result.current.isExpanded).toBe(false);
-    expect(result.current.hasFullText).toBe(true);
     expect(result.current.badge).toBeTruthy();
     expect(result.current.title).toBeTruthy();
     expect(result.current.summary).toBeTruthy();
