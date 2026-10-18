@@ -8,6 +8,8 @@ export { SESSION_STATUS } from "./constants/SessionStatus.constants";
 export { useCurrentBusiness } from "./hooks/useCurrentBusiness";
 export { useSession } from "./hooks/useSession";
 export { useSignOut } from "./hooks/useSignOut";
+export { fullNameFieldSchema } from "./models/FullNameField.schema";
 export { passwordFieldSchema } from "./models/PasswordField.schema";
+export { phoneFieldSchema } from "./models/PhoneField.schema";
 export type { Session } from "./models/Session.types";
 export type { SignInLocationState } from "./models/SignInLocationState.interface";
