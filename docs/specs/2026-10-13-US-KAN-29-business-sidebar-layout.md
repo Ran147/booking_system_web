@@ -72,4 +72,3 @@ Para habilitar la reutilización en cualquier portal (Admin, Business, Customer)
   - `signOutLabel`?: string — Texto accesible para el botón de cierre de sesión.
   - `ariaLabel`: string — Etiqueta ARIA para el landmark `<nav>`.
   - `className`?: string — Clases adicionales de diseño.
-

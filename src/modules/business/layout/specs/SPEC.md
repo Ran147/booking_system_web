@@ -125,4 +125,3 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 | KAN-40 | AC-KAN-40-01 … AC-KAN-40-08 | `tests/SubscriptionBanner.test.tsx` |
 | KAN-41 | AC-KAN-41-01, AC-KAN-41-03 … AC-KAN-41-08 (AC-KAN-41-02 replaced) | `tests/ExpiryWarningBanner.test.tsx` |
 | KAN-42 | AC-KAN-42-01 … AC-KAN-42-08 | `tests/BusinessSidebar.test.tsx`, `tests/useBusinessSidebarViewModel.test.tsx` |
-
