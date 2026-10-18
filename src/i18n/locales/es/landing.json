@@ -1,4 +1,27 @@
 {
+  "contact": {
+    "form": {
+      "dismissAction": "Cerrar",
+      "dismissAlert": "Cerrar alerta",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@correo.com",
+      "messageLabel": "Mensaje o consulta",
+      "messagePlaceholder": "Escribe tu consulta detallada aquí...",
+      "nameLabel": "Nombre completo",
+      "namePlaceholder": "Tu nombre y apellido",
+      "recaptchaLabel": "Verificación de seguridad",
+      "serverError": "Ocurrió un error al enviar el mensaje. Inténtalo nuevamente.",
+      "submitButton": "Enviar mensaje",
+      "subjectLabel": "Asunto",
+      "subjectPlaceholder": "¿En qué podemos ayudarte?",
+      "success": "¡Mensaje enviado con éxito! Nos comunicaremos contigo lo más pronto posible.",
+      "title": "Formulario de contacto"
+    },
+    "page": {
+      "description": "¿Tienes alguna pregunta sobre Booking System o deseas una demostración personalizada? Escríbenos y nuestro equipo te responderá.",
+      "title": "Contáctanos"
+    }
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
