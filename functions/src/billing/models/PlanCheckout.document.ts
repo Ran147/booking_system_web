@@ -5,10 +5,15 @@ import type { NullableRef } from "../../shared/types/Nullable.js";
 export interface PlanCheckoutDocument {
   readonly amountInCents: number;
   readonly email: string;
+  readonly language?: string;
   readonly paidAt: Timestamp;
   readonly paymentReference?: string;
   readonly planId: string;
   readonly signUpCompletedAt: NullableRef<Timestamp>;
-  readonly signUpLinkExpiresAt: Timestamp;
-  readonly signUpTokenHash: string;
+  /** null until the KAN-24 email creates the sign-up link (KAN-22 spec D1). */
+  readonly signUpLinkExpiresAt: NullableRef<Timestamp>;
+  /** null until the KAN-24 email creates the sign-up link (KAN-22 spec D1). */
+  readonly signUpTokenHash: NullableRef<string>;
+  readonly termsAcceptedAt?: Timestamp;
+  readonly termsVersion?: string;
 }

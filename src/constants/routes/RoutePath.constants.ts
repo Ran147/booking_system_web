@@ -30,11 +30,15 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
+    BOOKING_DETAIL: "my-bookings/:bookingId",
+    MY_BOOKINGS: "my-bookings",
     ROOT: "/:businessSlug",
   },
   LANDING: {
     CONTACT: "/contact",
     HOME: "/",
+    PLAN_CHECKOUT: "/plans/:planId/checkout",
+    PLAN_DETAIL: "/plans/:planId",
     PLANS: "/plans",
     SIGN_UP: "/sign-up",
     TERMS: "/terms",
