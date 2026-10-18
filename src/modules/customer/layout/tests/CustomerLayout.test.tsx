@@ -73,6 +73,7 @@ describe("CustomerLayout", () => {
     expect(screen.getByRole("status")).toHaveAccessibleName(
       testI18n.t("status.loading"),
     );
+    expect(screen.queryByText("Contenido Customer")).not.toBeInTheDocument();
     expect(createCustomerFooterPage().getTermsLink()).toBeInTheDocument();
   });
 
@@ -87,6 +88,7 @@ describe("CustomerLayout", () => {
       testI18n.t("errors.unknown"),
     );
     expect(screen.queryByText(BUSINESS_PROFILE.name)).not.toBeInTheDocument();
+    expect(screen.queryByText("Contenido Customer")).not.toBeInTheDocument();
     expect(createCustomerFooterPage().getTermsLink()).toBeInTheDocument();
   });
 
@@ -98,6 +100,7 @@ describe("CustomerLayout", () => {
     expect(
       await screen.findByText(testI18n.t("customer:layout.businessNotFound")),
     ).toBeInTheDocument();
+    expect(screen.queryByText("Contenido Customer")).not.toBeInTheDocument();
     expect(createCustomerFooterPage().getTermsLink()).toBeInTheDocument();
   });
 });

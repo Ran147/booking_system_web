@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import type { BadgeVariant } from "@/components/common/badge/models/badge.model";
+import type { Nullable } from "@/types";
 
 /**
  * @typedef {Object} PortalSidebarItem
@@ -30,6 +31,9 @@ export interface PortalSidebarItem {
  * @property {string} brandName - Name of the brand or current portal workspace.
  * @property {string} [brandInitials] - Custom initials for brand avatar (derived from brandName if omitted).
  * @property {ReactNode} [badge] - Role badge or status badge displayed next to brand name.
+ * @property {ReactNode} [banner] - Optional banner widget placed above the footer (e.g. subscription banner).
+ * @property {Nullable<string>} [collaboratorName] - Optional full name of signed-in collaborator.
+ * @property {Nullable<string>} [logoUrl] - Optional URL for the brand logo image.
  * @property {readonly PortalSidebarItem[]} navItems - List of navigation items.
  * @property {string} [activePath] - Currently active URL route for visual selection highlight.
  * @property {(item: PortalSidebarItem) => void} onItemClick - Callback when any navigation item is clicked.
@@ -42,9 +46,12 @@ export interface PortalSidebarProps {
   readonly activePath?: string;
   readonly ariaLabel: string;
   readonly badge?: ReactNode;
+  readonly banner?: ReactNode;
   readonly brandInitials?: string;
   readonly brandName: string;
   readonly className?: string;
+  readonly collaboratorName?: Nullable<string>;
+  readonly logoUrl?: Nullable<string>;
   readonly navItems: readonly PortalSidebarItem[];
   readonly onItemClick: (item: PortalSidebarItem) => void;
   readonly onSignOut?: () => void;

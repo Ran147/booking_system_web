@@ -136,12 +136,54 @@ service cloud.firestore {
           || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
         allow write: if false;
       }
+
+      // Subscription can be read only by the owner/subscriber (AS-10, KAN-40).
+      // Collaborators do not have access. Writes happen only via Cloud Functions.
+      match /subscription/{subscriptionId} {
+        allow read: if ownsBusiness(businessId);
+        allow write: if false;
+      }
+    }
+
+    // A deactivated plan keeps its subscribers (AC-KAN-176-06): the subscriber
+    // can still read the plan of their own subscription (sidebar, KAN-40).
+    // "current" is the subscription document id the sidebar reads
+    // (BUSINESS_LAYOUT_CONSTANTS.CURRENT_DOCUMENT_ID) and the seed writes.
+    function isSubscribedToPlan(planId) {
+      return hasRole('subscriber')
+        && request.auth.token.businessId is string
+        && get(/databases/$(database)/documents/businesses/$(request.auth.token.businessId)/subscription/current).data.planId == planId;
+    }
+
+    // Public plan catalog and plan detail (KAN-7, KAN-21): anyone reads an
+    // active plan; the super admin also reads inactive ones (KAN-184). Plans
+    // are written only by functions, which write the audit entry (KAN-181).
+    match /plans/{planId} {
+      allow read: if resource.data.status == 'active'
+        || isSuperAdmin()
+        || isSubscribedToPlan(planId);
+      allow write: if false;
+    }
+
+    // A customer lists their own bookings across businesses with a collection
+    // group query on customerUserId (KAN-150). Read only; the per-business rule
+    // above keeps covering every other role.
+    match /{path=**}/bookings/{bookingId} {
+      allow read: if hasRole('customer')
+        && resource.data.customerUserId == request.auth.uid;
     }
 
     // Each user reads only their own profile; sign-in needs User.language
     // (AC-KAN-129-02). Writes arrive with the profile stories.
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Global parameters (KAN-182). Any signed-in user reads them (the idle
+    // timeout, KAN-38); only the admin stories write them, so no client write.
+    match /platformSettings/{platformSettingsId} {
+      allow read: if isSignedIn();
+      allow write: if false;
     }
 
     match /auditLog/{auditLogEntryId} {

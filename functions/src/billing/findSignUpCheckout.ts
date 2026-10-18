@@ -48,8 +48,9 @@ export const findSignUpCheckout = async (
   const planCheckout = checkoutSnapshot.data() as PlanCheckoutDocument;
 
   // A used link is invalid even when it has also expired: only an unused,
-  // expired link offers a new one (AC-KAN-25-20).
-  if (planCheckout.signUpCompletedAt) {
+  // expired link offers a new one (AC-KAN-25-20). A checkout whose link was
+  // never created (KAN-22 spec D1) is invalid too.
+  if (planCheckout.signUpCompletedAt || !planCheckout.signUpLinkExpiresAt) {
     throw new HttpsError("failed-precondition", SIGN_UP_ERROR.LINK_INVALID, {
       reason: SIGN_UP_ERROR_REASON.LINK_INVALID,
     });

@@ -12,7 +12,9 @@ export interface CustomerFooterPageObject {
   getSocialLink: (network: string, businessName: string) => HTMLElement;
   getTermsLink: () => HTMLElement;
   queryContactHeading: () => Nullable<HTMLElement>;
+  queryEmailLink: () => Nullable<HTMLElement>;
   queryLogo: () => Nullable<HTMLElement>;
+  queryPhoneLink: () => Nullable<HTMLElement>;
   querySocialHeading: () => Nullable<HTMLElement>;
 }
 
@@ -57,8 +59,20 @@ export const createCustomerFooterPage = (): CustomerFooterPageObject => {
       within(getFooter()).queryByRole("heading", {
         name: testI18n.t("customer:layout.footer.contact.title"),
       }),
+    queryEmailLink: (): Nullable<HTMLElement> =>
+      within(getFooter()).queryByRole("link", {
+        name: testI18n.t("customer:layout.footer.contact.emailLabel", {
+          email: "contacto@negocio.test",
+        }),
+      }),
     queryLogo: (): Nullable<HTMLElement> =>
       within(getFooter()).queryByRole("img"),
+    queryPhoneLink: (): Nullable<HTMLElement> =>
+      within(getFooter()).queryByRole("link", {
+        name: testI18n.t("customer:layout.footer.contact.phoneLabel", {
+          phone: "+506 2222-3333",
+        }),
+      }),
     querySocialHeading: (): Nullable<HTMLElement> =>
       within(getFooter()).queryByRole("heading", {
         name: testI18n.t("customer:layout.footer.social.title"),

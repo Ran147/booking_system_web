@@ -116,16 +116,27 @@
     "welcome": "Welcome to your dashboard"
   },
   "layout": {
+    "expiryWarning": {
+      "ariaLabel": "Subscription expiry notice",
+      "dismiss": "Dismiss warning",
+      "endsToday": "Your subscription ends today.",
+      "message": "Your subscription ends in {{count}} days ({{date}}).",
+      "pastDue": "Your subscription has a pending payment. Ends in {{count}} days ({{date}}).",
+      "pastDueNoCountdown": "Your subscription has a pending payment.",
+      "payLink": "Pay subscription"
+    },
     "sidebar": {
       "ariaLabel": "Business portal navigation",
       "brandFallback": "BP",
       "closeMenu": "Close menu",
+      "collaborator": "Collaborator: {{name}}",
       "collaborators": "Team",
       "collaboratorsDescription": "Collaborators and permission assignment",
       "customers": "Customers",
       "customersDescription": "Directory and customer management",
       "dashboard": "Dashboard",
       "dashboardDescription": "Business summary and statistics",
+      "logoAlt": "Logo of {{name}}",
       "openMenu": "Open navigation menu",
       "reports": "Reports",
       "reportsDescription": "Occupancy and operational metrics",
@@ -139,6 +150,23 @@
       "subscription": "Subscription",
       "subscriptionDescription": "Subscribed plan and billing"
     },
+    "signOut": {
+      "cancelAction": "Stay here",
+      "confirmAction": "Sign out",
+      "confirmTitle": "Unsaved changes",
+      "unsavedChangesConfirm": "Do you want to sign out? You have unsaved changes that will be lost."
+    },
+    "subscriptionBanner": {
+      "ariaLabel": "Subscription status",
+      "endsOn": "Ends on {{date}}",
+      "loadError": "Could not load subscription",
+      "payLink": "Pay now",
+      "readOnlyNotice": "Read-only mode",
+      "renewsOn": "Renews on {{date}}",
+      "retry": "Retry",
+      "suspendedNotice": "Business suspended by administration",
+      "viewPlan": "Manage subscription"
+    },
     "title": "Business portal"
   },
   "placeholder": {
@@ -146,6 +174,16 @@
     "title": "Business dashboard"
   },
   "services": {
+    "delete": {
+      "action": "Delete",
+      "cancelAction": "Cancel",
+      "confirmAction": "Delete",
+      "confirmDescription": "Are you sure you want to permanently delete this service? This action cannot be undone.",
+      "confirmTitle": "Delete service",
+      "hasBookingsError": "You cannot delete a service with pending or confirmed bookings.",
+      "mustBeInactiveError": "You can only delete deactivated services.",
+      "success": "Service deleted."
+    },
     "form": {
       "addFeatureAction": "Add feature",
       "backToServicesAction": "Back to services",
@@ -158,6 +196,9 @@
       "durationHelp": "Between 5 and 480 minutes, in 5-minute increments.",
       "durationLabel": "Duration (minutes)",
       "durationPlaceholder": "60",
+      "editSubtitle": "Update the details and pricing for this service in your catalog.",
+      "editSuccess": "Service updated.",
+      "editTitle": "Edit service",
       "featureItemLabel": "Feature {{index}}",
       "featurePlaceholder": "e.g. Includes wash and styling",
       "featuresDescription": "Add up to 10 features or benefits of the service.",
@@ -186,16 +227,41 @@
     },
     "list": {
       "actions": "Actions",
+      "clearFiltersAction": "Clear filters",
       "createServiceAction": "Create service",
       "description": "Manage your business's service catalog.",
       "duration": "Duration",
+      "durationMinutes": "{{minutes}} min",
+      "editAction": "Edit",
       "emptyDescription": "There are no services registered at this time. Click 'Create service' to add the first one.",
       "emptyTitle": "No services registered",
+      "filterStatusActive": "Active",
+      "filterStatusAll": "All statuses",
+      "filterStatusInactive": "Inactive",
+      "filterStatusLabel": "Filter by status",
       "name": "Service",
+      "noResults": "No services match the selected filters.",
+      "noResultsDescription": "Try adjusting your search or clearing the filters to see all services.",
       "price": "Price",
-      "readOnlyNotice": "Your business is inactive or suspended. Service creation is disabled.",
+      "readOnlyNotice": "Your business is inactive or suspended. Service creation and editing is disabled.",
+      "retryAction": "Retry",
+      "searchLabel": "Search services",
+      "searchPlaceholder": "Search by name…",
       "status": "Status",
-      "title": "Services"
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "title": "Services",
+      "totalCount": "{{count}} services total"
+    },
+    "status": {
+      "activateAction": "Activate",
+      "activateSuccess": "Service activated.",
+      "deactivateAction": "Deactivate",
+      "deactivateCancelAction": "Cancel",
+      "deactivateConfirmAction": "Deactivate",
+      "deactivateConfirmDescription": "Are you sure you want to deactivate this service? It will no longer appear in the public catalog for new bookings.",
+      "deactivateConfirmTitle": "Deactivate service",
+      "deactivateSuccess": "Service deactivated."
     }
   }
 }

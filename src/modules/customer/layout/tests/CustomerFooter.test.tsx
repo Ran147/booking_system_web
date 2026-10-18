@@ -5,8 +5,10 @@ import {
   SOCIAL_NETWORK,
   type BusinessPublicProfile,
 } from "@/domain";
+import { landingRoutes } from "@/modules/landing/landing.routes";
 import {
   renderWithProviders,
+  renderRoutesWithProviders,
   SIGNED_OUT_SESSION,
   testI18n,
 } from "@/test-utils";
@@ -68,6 +70,22 @@ describe("CustomerFooter", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("KAN-118: shows only the configured phone", () => {
+    renderFooter({ ...COMPLETE_BUSINESS, contactEmail: null });
+    const page = createCustomerFooterPage();
+
+    expect(page.getPhoneLink()).toBeInTheDocument();
+    expect(page.queryEmailLink()).not.toBeInTheDocument();
+  });
+
+  it("KAN-118: shows only the configured email", () => {
+    renderFooter({ ...COMPLETE_BUSINESS, contactPhone: null });
+    const page = createCustomerFooterPage();
+
+    expect(page.getEmailLink()).toBeInTheDocument();
+    expect(page.queryPhoneLink()).not.toBeInTheDocument();
+  });
+
   it("KAN-118 KAN-120: hides optional sections when they have no data", () => {
     renderFooter({
       ...COMPLETE_BUSINESS,
@@ -114,6 +132,20 @@ describe("CustomerFooter", () => {
     expect(termsLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
+  it("KAN-119: resolves the public terms route without authentication", async () => {
+    renderRoutesWithProviders(landingRoutes, {
+      initialPath: ROUTE_PATH.LANDING.TERMS,
+      session: SIGNED_OUT_SESSION,
+    });
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: testI18n.t("landing:terms.title"),
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("KAN-118: renders no invented business data when the profile is absent", () => {
     renderFooter();
     const page = createCustomerFooterPage();
@@ -134,5 +166,13 @@ describe("CustomerFooter", () => {
     expect(
       screen.getByText(testI18n.t("customer:layout.title")),
     ).toBeInTheDocument();
+  });
+
+  it("KAN-117: keeps its responsive grid composition", () => {
+    renderFooter(COMPLETE_BUSINESS);
+
+    expect(
+      createCustomerFooterPage().getFooter().firstElementChild,
+    ).toHaveClass("grid-cols-1", "md:grid-cols-2", "lg:grid-cols-4");
   });
 });

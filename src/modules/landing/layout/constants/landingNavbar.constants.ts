@@ -21,6 +21,7 @@ export const DEFAULT_NAVBAR_LINKS = Object.freeze([
 export const LANDING_NAVBAR_CONSTANTS = Object.freeze({
   BRAND_NAME: "Booking System",
   ESCAPE_KEY: "Escape",
+  LOGO_CONTAINER_ID: "landing-navbar-branding-logo",
   MOBILE_MENU_ID: "landing-navbar-mobile-menu",
   NAVBAR_LANDMARK_LABEL_KEY: "home.navbar.landmarkLabel",
 });

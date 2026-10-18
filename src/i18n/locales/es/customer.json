@@ -27,6 +27,57 @@
     },
     "title": "Portal del cliente"
   },
+  "myBookings": {
+    "description": "Consulta tus próximas citas y el historial de tus reservas.",
+    "detail": {
+      "back": "Volver a mis reservas",
+      "business": "Negocio",
+      "businessResource": "Atendido por el negocio",
+      "cancellation": {
+        "cancelledBy": {
+          "business": "Cancelada por el negocio",
+          "customer": "Cancelada por ti"
+        },
+        "label": "Cancelación",
+        "notPenalized": "Sin penalización",
+        "penalized": "Con penalización"
+      },
+      "collaborator": "Atendido por",
+      "duration": "Duración",
+      "durationValue_one": "{{count}} minuto",
+      "durationValue_other": "{{count}} minutos",
+      "endsAt": "Fin",
+      "price": "Precio",
+      "service": "Servicio",
+      "startsAt": "Inicio",
+      "status": "Estado",
+      "title": "Detalle de la reserva"
+    },
+    "history": {
+      "empty": "Todavía no tienes reservas pasadas."
+    },
+    "list": {
+      "columns": {
+        "actions": "Acciones",
+        "business": "Negocio",
+        "date": "Fecha y hora",
+        "service": "Servicio",
+        "status": "Estado"
+      },
+      "detailAction": "Ver detalle",
+      "label": "Mis reservas"
+    },
+    "retryAction": "Reintentar",
+    "tabs": {
+      "history": "Historial",
+      "label": "Tipo de reservas",
+      "upcoming": "Próximas"
+    },
+    "title": "Mis reservas",
+    "upcoming": {
+      "empty": "No tienes reservas próximas."
+    }
+  },
   "placeholder": {
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
