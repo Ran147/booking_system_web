@@ -15,12 +15,15 @@ export {
   serviceFormSchema,
   type CreateServicePayload,
   type CreateServiceResponse,
+  type ServiceDetail,
   type ServiceFormValues,
   type ServiceFormViewModel,
   type ServiceListFilters,
   type ServiceListItem,
   type ServiceListQueryParams,
   type ServiceListViewModel,
+  type UpdateServicePayload,
+  type UpdateServiceResponse,
   type UseServiceListViewModelOptions,
 } from "./models";
 export {

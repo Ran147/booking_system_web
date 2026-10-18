@@ -21,6 +21,7 @@ export const ROUTE_PATH = {
     REPORTS: "reports",
     ROOT: "/business",
     SCHEDULE: "schedule",
+    SERVICE_EDIT: "services/:serviceId/edit",
     SERVICE_NEW: "services/new",
     SERVICES: "services",
     SETTINGS: "settings",
