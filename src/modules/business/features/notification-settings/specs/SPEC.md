@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/notification-settings/` |
+| Feature folder | `src/modules/business/features/notification-settings/` |
 | Stories | KAN-100, KAN-101 |
 | Status | Draft |
 | Depends on | KAN-163 customer notifications (KAN-165 reminder emails, sent by `functions/src/notifications`); KAN-168 customer profile (reminder opt-in, not yet defined); KAN-63 schedule and KAN-155 customer cancellation (events for alerts); KAN-32 subscription (KAN-49 read-only, period end); KAN-29 business layout (where alerts are shown) |

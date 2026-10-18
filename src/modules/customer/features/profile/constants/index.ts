@@ -1,6 +1,1 @@
-export {
-  PROFILE_FIELD_LIMIT,
-  PROFILE_PHONE_DIGIT_PATTERN,
-  PROFILE_PHONE_INVALID_MESSAGE_KEY,
-  PROFILE_PHONE_PATTERN,
-} from "./ProfileForm.constants";
+export { PROFILE_PHONE_INVALID_MESSAGE_KEY } from "./ProfileForm.constants";

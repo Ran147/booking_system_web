@@ -19,7 +19,7 @@ describe("customer profile route (KAN-170)", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: testI18n.t("signInPlaceholder.title"),
+        name: testI18n.t("auth.signIn.title"),
       }),
     ).toBeInTheDocument();
   });
@@ -32,7 +32,8 @@ describe("customer profile route (KAN-170)", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: testI18n.t("landing:placeholder.title"),
+        level: 1,
+        name: "Panel del negocio",
       }),
     ).toBeInTheDocument();
   });

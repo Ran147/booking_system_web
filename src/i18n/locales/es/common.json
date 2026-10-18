@@ -1,4 +1,71 @@
 {
+  "auth": {
+    "idle": {
+      "signOutAction": "Cerrar sesión",
+      "signedOut": "Cerramos tu sesión por inactividad. Inicia sesión de nuevo para continuar.",
+      "stayConnectedAction": "Seguir conectado",
+      "warningMessage": "Tu sesión se cerrará en {{count}} segundos por inactividad.",
+      "warningTitle": "¿Sigues ahí?"
+    },
+    "password": {
+      "hide": "Ocultar contraseña",
+      "ruleMet": "Cumplido:",
+      "ruleMissing": "Pendiente:",
+      "rules": {
+        "digit": "Incluye un número",
+        "lowercase": "Incluye una letra minúscula",
+        "minimumLength": "Tiene al menos {{count}} caracteres",
+        "symbol": "Incluye un símbolo",
+        "uppercase": "Incluye una letra mayúscula"
+      },
+      "show": "Mostrar contraseña",
+      "strength": {
+        "medium": "media",
+        "strong": "fuerte",
+        "weak": "débil"
+      },
+      "strengthEmpty": "Escribe una contraseña para ver su seguridad.",
+      "strengthLabel": "Seguridad de la contraseña: {{level}}"
+    },
+    "passwordRecovery": {
+      "backToSignInAction": "Volver a iniciar sesión",
+      "cooldownLabel": "Puedes volver a pedirlo en {{count}} s",
+      "emailLabel": "Correo electrónico",
+      "submitAction": "Enviar enlace",
+      "submittingLabel": "Enviando…",
+      "subtitle": "Te enviaremos un enlace para crear una contraseña nueva.",
+      "title": "Recuperar contraseña"
+    },
+    "passwordReset": {
+      "confirmationLabel": "Confirma la contraseña nueva",
+      "linkInvalid": "El enlace venció, ya se usó o no es válido.",
+      "newPasswordLabel": "Contraseña nueva",
+      "requestNewLinkAction": "Pedir un enlace nuevo",
+      "requestSent": "Si el correo está registrado, te enviamos un enlace para cambiar tu contraseña. Revisa tu bandeja de entrada.",
+      "retryAction": "Reintentar",
+      "submitAction": "Guardar contraseña",
+      "submittingLabel": "Guardando…",
+      "subtitle": "Elige una contraseña nueva para tu cuenta.",
+      "success": "Tu contraseña se cambió. Ya puedes iniciar sesión.",
+      "title": "Crear contraseña nueva",
+      "tooManyRequests": "Hiciste demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
+      "weakPassword": "Esa contraseña no cumple la política de seguridad. Elige una más larga o más difícil de adivinar."
+    },
+    "signIn": {
+      "accountDisabled": "Tu cuenta está desactivada. Si crees que es un error, contacta a quien te dio acceso.",
+      "emailLabel": "Correo electrónico",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "invalidCredentials": "El correo o la contraseña no son correctos.",
+      "passwordLabel": "Contraseña",
+      "recaptchaLabel": "Verificación de seguridad",
+      "recoverPasswordAction": "Recuperar contraseña",
+      "submitAction": "Iniciar sesión",
+      "submittingLabel": "Iniciando sesión…",
+      "subtitle": "Ingresa con tu correo y tu contraseña.",
+      "title": "Iniciar sesión",
+      "tooManyAttempts": "Hiciste demasiados intentos. Espera unos minutos o recupera tu contraseña."
+    }
+  },
   "bookingStatus": {
     "cancelled": "Cancelada",
     "completed": "Completada",
@@ -24,11 +91,13 @@
     "summary_one": "Página {{pageNumber}} · {{count}} resultado",
     "summary_other": "Página {{pageNumber}} · {{count}} resultados"
   },
-  "signInPlaceholder": {
-    "description": "El inicio de sesión todavía no está disponible.",
-    "title": "Iniciar sesión"
-  },
   "status": {
     "loading": "Cargando…"
+  },
+  "subscriptionStatus": {
+    "active": "Activa",
+    "cancelled": "Cancelada",
+    "expired": "Vencida",
+    "past_due": "Pago pendiente"
   }
 }

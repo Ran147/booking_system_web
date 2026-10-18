@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | landing |
-| Feature folder | `src/portals/landing/layout/` |
+| Feature folder | `src/modules/landing/layout/` |
 | Stories | KAN-8, KAN-10, KAN-11, KAN-13 |
 | Status | Ready |
-| Depends on | KAN-12 company logo (`src/portals/landing/features/home/`); KAN-9 terms and conditions; KAN-14 platform contact |
+| Depends on | KAN-12 company logo (`src/modules/landing/features/home/`); KAN-9 terms and conditions; KAN-14 platform contact |
 
 ## Intent
 Provide a consistent, accessible, and responsive footer across every page of the public landing portal. Visitors and users can easily locate essential platform information, reach direct contact channels (phone and email), follow official social media channels, navigate to legal terms, and verify copyright details from any landing route.
@@ -31,10 +31,10 @@ No actor writes or updates data through the footer UI; it is a read-only layout 
 - Responsive layout adapting cleanly from 360 px mobile viewports to desktop.
 
 ## Out of scope
-- The terms and conditions page content and route itself (specified under KAN-9 in `src/portals/landing/features/home/specs/SPEC.md`).
+- The terms and conditions page content and route itself (specified under KAN-9 in `src/modules/landing/features/home/specs/SPEC.md`).
 - The contact form and reCAPTCHA verification (specified under KAN-5 in `home` and KAN-14 in `contact`).
 - The navbar header and portal routing (specified under KAN-3 and KAN-12).
-- The customer portal footer (specified under KAN-117 in `src/portals/customer/layout/specs/SPEC.md`).
+- The customer portal footer (specified under KAN-117 in `src/modules/customer/layout/specs/SPEC.md`).
 - Dynamic CMS or database administration of footer contents (landing content is static configuration and i18n-driven in the MVP; AS-2).
 
 ## Data

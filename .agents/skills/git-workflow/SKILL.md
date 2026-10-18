@@ -79,3 +79,16 @@ npm run test:run       # Suite completa de Vitest
 - [ ] La PR incluye la plantilla de PR completa (`.github/pull_request_template.md`).
 - [ ] Todos los comandos de verificacion pasan al 100%.
 - [ ] No contiene secretos ni archivos generados en cache (`graphify-out/`, `.env*`).
+- [ ] El tamaño del PR cumple la guia de la seccion 5 (aviso a partir de ~2000 lineas) o la descripcion explica por que.
+
+---
+
+## 5. Tamano del Pull Request (guia, no bloqueo)
+
+Un PR muy grande no se puede revisar bien: los errores se cuelan entre miles de lineas. Por eso hay un **aviso**, no una prohibicion.
+
+- **Umbral:** unas **2000 lineas** cambiadas (suma de agregadas y borradas).
+- **No cuentan:** lockfiles (`package-lock.json`), archivos generados y capturas o recursos binarios. En el PR #5 casi 7000 de 11700 lineas eran un lockfile.
+- **Si se pasa:** la descripcion del PR lo dice y explica por que no se dividio. Si se puede partir sin romper nada (por ejemplo: componentes compartidos, infraestructura de pruebas y la historia en PRs separados), es preferible partirlo.
+- **Quien revisa:** lo anota como observacion (`revisor-agente`), nunca bloquea el PR por esto solo.
+- **Como medirlo:** `git diff --shortstat origin/develop...HEAD -- . ':!package-lock.json' ':!functions/package-lock.json'`.
