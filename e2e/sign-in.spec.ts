@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { seedEmulators } from "./seedEmulators";
 import { SEED_USER } from "../scripts/constants/SeedEmulator.constants";
 import business from "../src/i18n/locales/es/business.json" with { type: "json" };
 import common from "../src/i18n/locales/es/common.json" with { type: "json" };
@@ -7,8 +6,6 @@ import common from "../src/i18n/locales/es/common.json" with { type: "json" };
 // US-33: real sign-in against the emulators with Google's test reCAPTCHA,
 // which always passes after ticking the box.
 test.describe.configure({ mode: "serial" });
-
-test.beforeAll(seedEmulators);
 
 test("AC-KAN-33-03: a subscriber signs in from a protected page and returns to it", async ({
   page,

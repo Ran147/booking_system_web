@@ -2,6 +2,7 @@
   "emailInvalid": "Enter a valid email.",
   "fileInvalid": "Select a PNG, JPEG or WebP image up to 2 MB.",
   "outOfRange": "The value is out of the allowed range.",
+  "passwordMismatch": "The passwords do not match.",
   "passwordTooWeak": "The password does not meet the requirements.",
   "phoneInvalid": "Enter a valid phone number.",
   "recaptchaRequired": "Confirm you are not a robot.",

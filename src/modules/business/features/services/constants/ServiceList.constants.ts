@@ -1,1 +1,2 @@
+export const DEFAULT_SERVICE_LIST_CURRENCY = "USD";
 export const SERVICE_TABLE_COLUMN_COUNT = 5;

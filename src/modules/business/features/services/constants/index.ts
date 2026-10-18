@@ -1,3 +1,4 @@
+export { SERVICE_FIELD } from "./ServiceField.constants";
 export {
   KEYBOARD_KEY,
   SERVICE_FEATURE_LIMIT,
@@ -5,4 +6,7 @@ export {
   SERVICE_IMAGE_LIMIT,
 } from "./ServiceForm.constants";
 export { DEFAULT_SERVICE_FORM_VALUES } from "./ServiceFormDefaults.constants";
-export { SERVICE_TABLE_COLUMN_COUNT } from "./ServiceList.constants";
+export {
+  DEFAULT_SERVICE_LIST_CURRENCY,
+  SERVICE_TABLE_COLUMN_COUNT,
+} from "./ServiceList.constants";

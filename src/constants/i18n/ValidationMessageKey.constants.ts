@@ -2,6 +2,7 @@ export const VALIDATION_MESSAGE_KEY = {
   EMAIL_INVALID: "emailInvalid",
   FILE_INVALID: "fileInvalid",
   OUT_OF_RANGE: "outOfRange",
+  PASSWORD_MISMATCH: "passwordMismatch",
   PASSWORD_TOO_WEAK: "passwordTooWeak",
   PHONE_INVALID: "phoneInvalid",
   RECAPTCHA_REQUIRED: "recaptchaRequired",

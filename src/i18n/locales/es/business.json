@@ -116,16 +116,27 @@
     "welcome": "Bienvenido a tu panel"
   },
   "layout": {
+    "expiryWarning": {
+      "ariaLabel": "Aviso de vencimiento de suscripción",
+      "dismiss": "Descartar aviso",
+      "endsToday": "Tu suscripción finaliza hoy.",
+      "message": "Tu suscripción finaliza en {{count}} días ({{date}}).",
+      "pastDue": "Tu suscripción tiene un pago pendiente. Finaliza en {{count}} días ({{date}}).",
+      "pastDueNoCountdown": "Tu suscripción tiene un pago pendiente.",
+      "payLink": "Pagar suscripción"
+    },
     "sidebar": {
       "ariaLabel": "Navegación del portal del negocio",
       "brandFallback": "BN",
       "closeMenu": "Cerrar menú",
+      "collaborator": "Colaborador: {{name}}",
       "collaborators": "Equipo",
       "collaboratorsDescription": "Colaboradores y asignación de permisos",
       "customers": "Clientes",
       "customersDescription": "Directorio y gestión de clientes",
       "dashboard": "Inicio",
       "dashboardDescription": "Resumen y estadísticas de tu negocio",
+      "logoAlt": "Logo de {{name}}",
       "openMenu": "Abrir menú de navegación",
       "reports": "Reportes",
       "reportsDescription": "Ocupación y métricas operativas",
@@ -138,6 +149,23 @@
       "signOut": "Cerrar sesión",
       "subscription": "Suscripción",
       "subscriptionDescription": "Plan contratado y facturación"
+    },
+    "signOut": {
+      "cancelAction": "Permanecer aquí",
+      "confirmAction": "Cerrar sesión",
+      "confirmTitle": "Cambios sin guardar",
+      "unsavedChangesConfirm": "¿Deseas cerrar sesión? Tienes cambios sin guardar que se perderán."
+    },
+    "subscriptionBanner": {
+      "ariaLabel": "Estado de la suscripción",
+      "endsOn": "Finaliza el {{date}}",
+      "loadError": "No se pudo cargar la suscripción",
+      "payLink": "Pagar ahora",
+      "readOnlyNotice": "Modo de solo lectura",
+      "renewsOn": "Se renueva el {{date}}",
+      "retry": "Reintentar",
+      "suspendedNotice": "Negocio suspendido por administración",
+      "viewPlan": "Administrar suscripción"
     },
     "title": "Portal del negocio"
   },
@@ -158,6 +186,9 @@
       "durationHelp": "Entre 5 y 480 minutos, en pasos de 5 minutos.",
       "durationLabel": "Duración (minutos)",
       "durationPlaceholder": "60",
+      "editSubtitle": "Modifica los datos del servicio seleccionado en el catálogo.",
+      "editSuccess": "Servicio actualizado.",
+      "editTitle": "Editar servicio",
       "featureItemLabel": "Característica {{index}}",
       "featurePlaceholder": "Ej. Incluye lavado y peinado",
       "featuresDescription": "Agrega hasta 10 características o beneficios del servicio.",
@@ -186,16 +217,31 @@
     },
     "list": {
       "actions": "Acciones",
+      "clearFiltersAction": "Limpiar filtros",
       "createServiceAction": "Crear servicio",
       "description": "Administra el catálogo de servicios de tu negocio.",
       "duration": "Duración",
+      "durationMinutes": "{{minutes}} min",
+      "editAction": "Editar",
       "emptyDescription": "No hay servicios registrados en este momento. Haz clic en 'Crear servicio' para agregar el primero.",
       "emptyTitle": "No hay servicios registrados",
+      "filterStatusActive": "Activos",
+      "filterStatusAll": "Todos los estados",
+      "filterStatusInactive": "Inactivos",
+      "filterStatusLabel": "Filtrar por estado",
       "name": "Servicio",
+      "noResults": "No se encontraron servicios con los filtros aplicados.",
+      "noResultsDescription": "Intenta ajustar la búsqueda o limpiar los filtros para ver todos los servicios.",
       "price": "Precio",
-      "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La creación de servicios está deshabilitada.",
+      "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La creación y edición de servicios está deshabilitada.",
+      "retryAction": "Reintentar",
+      "searchLabel": "Buscar servicios",
+      "searchPlaceholder": "Buscar por nombre…",
       "status": "Estado",
-      "title": "Servicios"
+      "statusActive": "Activo",
+      "statusInactive": "Inactivo",
+      "title": "Servicios",
+      "totalCount": "{{count}} servicios en total"
     }
   }
 }

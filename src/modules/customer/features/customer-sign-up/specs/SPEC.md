@@ -49,7 +49,7 @@ A person who wants to book and manage bookings creates a customer account with t
 - [ ] **AC-KAN-123-10** · edge · Given the visitor double-clicks submit, when the request is in progress, then submit is disabled and only one account is created. [KAN-123]
 - [ ] **AC-KAN-123-11** · happy · Given a valid sign-up, when the account is created, then the `User` stores `fullName` and `phone` as entered (trimmed), and the email and password belong to the Firebase Auth account; no other personal data is asked. [KAN-123]
 - [ ] **AC-KAN-123-12** · error · Given the phone field is empty, when the visitor submits, then nothing is created and `validation:required` is shown on the phone field (the phone is required, Q6). [KAN-123]
-- [ ] **AC-KAN-123-13** · error · Given a phone with characters other than digits, spaces, `+`, `-` and parentheses, or with fewer digits than AS-3 allows, when the visitor leaves the field or submits, then `validation:phoneInvalid` is shown and nothing is created. See AS-3. [KAN-123]
+- [ ] **AC-KAN-123-13** · error · Given a phone with characters other than digits, spaces, `+`, `-` and parentheses, a `+` after the first character, or with fewer digits than AS-3 allows, when the visitor leaves the field or submits, then `validation:phoneInvalid` is shown and nothing is created. See AS-3. [KAN-123]
 
 ### KAN-124 — Password strength feedback during sign-up
 - [ ] **AC-KAN-124-01** · happy · Given the visitor is typing a password, when each character changes, then a strength meter shows which password rules are met and which are not (minimum length, lowercase, uppercase, digit, symbol) and an overall strength level. [KAN-124]
@@ -89,7 +89,7 @@ A person who wants to book and manage bookings creates a customer account with t
 | --- | --- | --- |
 | AS-1 | ~~"Personal data" means full name (required) and phone (optional).~~ Replaced by the Q6 decision (2026-09-28): full name and phone are both required; no other fields are collected. | AC-KAN-123-01, AC-KAN-123-11, AC-KAN-123-12 |
 | AS-2 | Sign-up creates only the platform-wide `User`. The business-scoped `Customer` record is created when the customer books with a business (KAN-145). | Data |
-| AS-3 | Full name: 2 to 80 characters; phone: up to 20 characters with 7 to 15 digits (digits, spaces, `+`, `-` and parentheses allowed). | AC-KAN-123-04, AC-KAN-123-13 |
+| AS-3 | Full name: 2 to 80 characters; phone: up to 20 characters with 7 to 15 digits (digits, spaces, `-` and parentheses allowed, and `+` only at the start). | AC-KAN-123-04, AC-KAN-123-13 |
 | AS-4 | To follow "never reveal whether an email exists" (`auth-and-roles` §5), an already registered email gets the same result screen as a successful sign-up (verification sent, redirect to sign-in); no email is sent to the existing account. | AC-KAN-123-06 |
 | AS-5 | Emails are normalized (trimmed, lowercase) before the account is created. | AC-KAN-123-09 |
 | AS-6 | Resending the verification email is limited by Firebase Auth's own rate limit; no custom limit is added. | AC-KAN-126-05 |

@@ -25,6 +25,7 @@ import {
   SEED_PAYMENT_RESULT,
   SEED_PENDING_BUSINESS,
   SEED_PLAN,
+  SEED_PLATFORM_SETTINGS,
   SEED_SERVICE,
   SEED_SUBSCRIPTION_PERIOD,
   SEED_TABLE_CELL,
@@ -46,6 +47,7 @@ import {
   USER_ROLE,
   type UserRole,
 } from "../src/domain/user/UserRole.constants";
+import { normalizeSearchTerm } from "../src/utils/normalizeSearchTerm";
 
 interface SeedUser {
   EMAIL: string;
@@ -139,6 +141,7 @@ const buildServiceDocument = (
   durationMinutes: seedService.DURATION_MINUTES,
   name: seedService.NAME,
   priceInCents: seedService.PRICE_IN_CENTS,
+  searchName: normalizeSearchTerm(seedService.NAME),
   status: SERVICE_STATUS.ACTIVE,
 });
 
@@ -292,6 +295,13 @@ const seedPendingBusiness = async (firestore: Firestore): Promise<void> => {
     });
 };
 
+const seedPlatformSettings = async (firestore: Firestore): Promise<void> => {
+  await firestore
+    .collection(FIRESTORE_COLLECTION.PLATFORM_SETTINGS)
+    .doc(SEED_DOCUMENT_ID.PLATFORM_SETTINGS)
+    .set({ idleTimeoutMinutes: SEED_PLATFORM_SETTINGS.IDLE_TIMEOUT_MINUTES });
+};
+
 const printCredentials = (): void => {
   console.log("\nEmulator seed done. Test credentials (emulator only):");
   const activeBusinessLabel = `${SEED_BUSINESS.NAME} (active)`;
@@ -380,6 +390,7 @@ const seedEmulator = async (): Promise<void> => {
   await writeUserProfile(firestore, SEED_USER.CUSTOMER);
 
   await seedPlans(firestore);
+  await seedPlatformSettings(firestore);
   await seedBusiness(firestore);
   await seedPendingBusiness(firestore);
   await seedCustomerBookings(firestore);

@@ -1,4 +1,4 @@
-import { STRING } from "@/shared/constants";
+import { STRING } from "../constants";
 
 const DIACRITIC_PATTERN = /\p{Diacritic}/gu;
 

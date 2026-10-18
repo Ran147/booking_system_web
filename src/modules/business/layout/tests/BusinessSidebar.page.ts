@@ -4,16 +4,22 @@ import { testI18n } from "@/shared/test-utils/testI18n";
 import type { Nullable } from "@/types";
 
 export interface BusinessSidebarPageObject {
+  readonly clickCancelSignOut: () => Promise<void>;
   readonly clickClosePlaceholderModal: () => Promise<void>;
+  readonly clickConfirmSignOut: () => Promise<void>;
   readonly clickCreateServiceItem: () => Promise<void>;
   readonly clickScheduleItem: () => Promise<void>;
   readonly clickSignOutButton: () => Promise<void>;
   readonly findBrandName: (name: string) => Promise<HTMLElement>;
+  readonly findBusinessLogo: (name: string) => Promise<HTMLElement>;
+  readonly findCollaboratorName: (name: string) => Promise<HTMLElement>;
   readonly findCreateServiceItem: () => Promise<HTMLElement>;
   readonly findDashboardItem: () => Promise<HTMLElement>;
+  readonly findNetworkErrorAnnouncement: () => Promise<HTMLElement>;
   readonly findPlaceholderModalHeading: () => Promise<HTMLElement>;
   readonly findRoleBadge: (roleLabel: string) => Promise<HTMLElement>;
   readonly findSidebarNav: () => Promise<HTMLElement>;
+  readonly findSignOutConfirmDialog: () => Promise<HTMLElement>;
   readonly queryCollaboratorsItem: () => Nullable<HTMLElement>;
   readonly queryPlaceholderModalHeading: () => Nullable<HTMLElement>;
   readonly querySettingsItem: () => Nullable<HTMLElement>;
@@ -32,6 +38,18 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     const nav = await findSidebarNav();
     const sidebar = nav.closest("aside") ?? document.body;
     return within(sidebar).findByText(name);
+  };
+
+  const findCollaboratorName = async (name: string): Promise<HTMLElement> => {
+    const nav = await findSidebarNav();
+    const sidebar = nav.closest("aside") ?? document.body;
+    return within(sidebar).findByText(name);
+  };
+
+  const findBusinessLogo = async (name: string): Promise<HTMLElement> => {
+    const nav = await findSidebarNav();
+    const sidebar = nav.closest("aside") ?? document.body;
+    return within(sidebar).findByRole("img", { name });
   };
 
   const findRoleBadge = async (roleLabel: string): Promise<HTMLElement> => {
@@ -88,6 +106,28 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     await user.click(signOutButton);
   };
 
+  const findSignOutConfirmDialog = (): Promise<HTMLElement> =>
+    screen.findByText(
+      testI18n.t("business:layout.signOut.unsavedChangesConfirm"),
+    );
+
+  const clickConfirmSignOut = async (): Promise<void> => {
+    const confirmButton = await screen.findByRole("button", {
+      name: testI18n.t("business:layout.signOut.confirmAction"),
+    });
+    await user.click(confirmButton);
+  };
+
+  const clickCancelSignOut = async (): Promise<void> => {
+    const cancelButton = await screen.findByRole("button", {
+      name: testI18n.t("business:layout.signOut.cancelAction"),
+    });
+    await user.click(cancelButton);
+  };
+
+  const findNetworkErrorAnnouncement = (): Promise<HTMLElement> =>
+    screen.findByText(testI18n.t("common:errors.network"));
+
   const queryCollaboratorsItem = (): Nullable<HTMLElement> =>
     screen.queryByRole("button", {
       name: new RegExp(
@@ -107,16 +147,22 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     });
 
   return {
+    clickCancelSignOut,
     clickClosePlaceholderModal,
+    clickConfirmSignOut,
     clickCreateServiceItem,
     clickScheduleItem,
     clickSignOutButton,
     findBrandName,
+    findBusinessLogo,
+    findCollaboratorName,
     findCreateServiceItem,
     findDashboardItem,
+    findNetworkErrorAnnouncement,
     findPlaceholderModalHeading,
     findRoleBadge,
     findSidebarNav,
+    findSignOutConfirmDialog,
     queryCollaboratorsItem,
     queryPlaceholderModalHeading,
     querySettingsItem,
