@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/booking-changes/` |
+| Feature folder | `src/modules/customer/features/booking-changes/` |
 | Stories | KAN-156, KAN-157, KAN-158, KAN-159, KAN-160, KAN-161, KAN-162 |
 | Status | Draft |
 | Depends on | KAN-150 my bookings (entry point), KAN-139 availability (`getAvailability`, KAN-141, KAN-143, KAN-144), KAN-63 business `BookingPolicy` settings, KAN-163 reschedule / cancel emails (`functions/src/notifications` spec), KAN-128 customer sign-in; Q1 decided 2026-09-28 (a reschedule keeps the booking's collaborator; availability per collaborator, KAN-142) |

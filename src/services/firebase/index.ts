@@ -7,3 +7,4 @@ export {
   storage,
 } from "./firebaseApp";
 export { mapFirebaseError } from "./mapFirebaseError";
+export { recaptchaSiteKey } from "./recaptchaSiteKey";
