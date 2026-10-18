@@ -145,11 +145,21 @@ service cloud.firestore {
       }
     }
 
+    // A deactivated plan keeps its subscribers (AC-KAN-176-06): the subscriber
+    // can still read the plan of their own subscription (sidebar, KAN-40).
+    function isSubscribedToPlan(planId) {
+      return hasRole('subscriber')
+        && request.auth.token.businessId is string
+        && get(/databases/$(database)/documents/businesses/$(request.auth.token.businessId)/subscription/current).data.planId == planId;
+    }
+
     // Public plan catalog and plan detail (KAN-7, KAN-21): anyone reads an
     // active plan; the super admin also reads inactive ones (KAN-184). Plans
     // are written only by functions, which write the audit entry (KAN-181).
     match /plans/{planId} {
-      allow read: if resource.data.status == 'active' || isSuperAdmin();
+      allow read: if resource.data.status == 'active'
+        || isSuperAdmin()
+        || isSubscribedToPlan(planId);
       allow write: if false;
     }
 

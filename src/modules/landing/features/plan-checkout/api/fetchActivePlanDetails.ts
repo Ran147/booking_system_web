@@ -1,8 +1,9 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { FIRESTORE_COLLECTION } from "@/constants";
+import { FIRESTORE_COLLECTION, FIRESTORE_OPERATOR } from "@/constants";
 import { PLAN_STATUS } from "@/domain";
 import { firestore, mapFirebaseError } from "@/services/firebase";
 import type { MutationError } from "@/types";
+import { PLAN_FIELD } from "../constants/PlanField.constants";
 import type { PlanDetail } from "../models/PlanDetail.interface";
 import { planDocumentSchema } from "../models/PlanDocument.schema";
 
@@ -14,7 +15,7 @@ export const fetchActivePlanDetails = async (): Promise<PlanDetail[]> => {
     const activePlansSnapshot = await getDocs(
       query(
         collection(firestore, FIRESTORE_COLLECTION.PLANS),
-        where("status", "==", PLAN_STATUS.ACTIVE),
+        where(PLAN_FIELD.STATUS, FIRESTORE_OPERATOR.EQUAL, PLAN_STATUS.ACTIVE),
       ),
     );
 
