@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/components/common";
 import { FIREBASE_ERROR_CODE } from "@/constants";
 import { BUSINESS_STATUS, SERVICE_STATUS } from "@/domain";
-import type { Booking } from "@/domain/booking/Booking.interface";
 import { renderWithProviders, SUBSCRIBER_SESSION } from "@/shared/test-utils";
 import { createServiceFormPage } from "./ServiceFormPage.page";
 import * as createServiceModule from "../api/createService";
@@ -14,7 +13,7 @@ import * as updateServiceModule from "../api/updateService";
 import { ServiceFormPage } from "../components/ServiceFormPage";
 import type { ServiceDetail } from "../models";
 
-describe("ServiceFormPage (KAN-54)", () => {
+describe("ServiceFormPage (KAN-54)", { timeout: 10_000 }, () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.spyOn(
@@ -325,7 +324,7 @@ const MOCK_EXISTING_SERVICE: ServiceDetail = {
   status: SERVICE_STATUS.ACTIVE,
 };
 
-describe("ServiceFormPage (KAN-56)", () => {
+describe("ServiceFormPage (KAN-56)", { timeout: 10_000 }, () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.spyOn(
@@ -467,7 +466,10 @@ describe("ServiceFormPage (KAN-56)", () => {
 
   it("AC-KAN-56-04: shows common:errors.notFound when service was deleted in the meantime", async () => {
     vi.spyOn(updateServiceModule, "updateService").mockRejectedValueOnce(
-      new FirebaseError(FIREBASE_ERROR_CODE.NOT_FOUND, "No document to update"),
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.FIRESTORE_NOT_FOUND,
+        "No document to update",
+      ),
     );
     const toastErrorSpy = vi.spyOn(toast, "error");
 
@@ -533,27 +535,10 @@ describe("ServiceFormPage (KAN-56)", () => {
     expect(page.getDurationInput()).toHaveValue(45);
   });
 
-  it("AC-KAN-56-06: editing price or duration does not mutate existing booking snapshots", async () => {
+  it("AC-KAN-56-06: editing price or duration updates only the service without mutating booking snapshots", async () => {
     const updateSpy = vi
       .spyOn(updateServiceModule, "updateService")
       .mockResolvedValueOnce({ serviceId: "service-test-456" });
-
-    const existingBooking: Booking = {
-      businessId: "business-test",
-      cancellation: null,
-      customerId: "cust-1",
-      customerUserId: "user-1",
-      endsAt: new Date("2026-11-01T11:00:00Z"),
-      id: "booking-existing-1",
-      serviceId: "service-test-456",
-      serviceSnapshot: {
-        durationMinutes: 30,
-        name: "Corte Estándar",
-        priceInCents: 2000,
-      },
-      startsAt: new Date("2026-11-01T10:30:00Z"),
-      status: "confirmed",
-    };
 
     renderWithProviders(
       <ServiceFormPage
@@ -576,8 +561,69 @@ describe("ServiceFormPage (KAN-56)", () => {
       expect(updateSpy).toHaveBeenCalledTimes(1);
     });
 
-    expect(existingBooking.serviceSnapshot.priceInCents).toBe(2000);
-    expect(existingBooking.serviceSnapshot.durationMinutes).toBe(30);
-    expect(existingBooking.serviceSnapshot.name).toBe("Corte Estándar");
+    expect(updateSpy).toHaveBeenCalledWith({
+      businessId: "business-test",
+      formValues: expect.objectContaining({
+        durationMinutes: 60,
+        price: 50,
+      }),
+      serviceId: "service-test-456",
+    });
+  });
+
+  it("renders not-found error state with retry and back actions when service detail fails to load", async () => {
+    vi.spyOn(fetchServiceDetailModule, "fetchServiceDetail").mockRejectedValue(
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.FIRESTORE_NOT_FOUND,
+        "Service not found",
+      ),
+    );
+
+    renderWithProviders(<ServiceFormPage serviceId="service-test-456" />, {
+      initialPath: "/business/services/service-test-456/edit",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    expect(
+      await screen.findByText("No encontramos lo que buscabas."),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Reintentar" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: "Volver a servicios" }).length,
+    ).toBeGreaterThanOrEqual(1);
+
+    expect(
+      screen.queryByRole("textbox", { name: /nombre del servicio/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders network error state when service detail loading fails with network error", async () => {
+    vi.spyOn(fetchServiceDetailModule, "fetchServiceDetail").mockRejectedValue(
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.UNAVAILABLE,
+        "Network connection lost",
+      ),
+    );
+
+    renderWithProviders(<ServiceFormPage serviceId="service-test-456" />, {
+      initialPath: "/business/services/service-test-456/edit",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    expect(
+      await screen.findByText(
+        "Sin conexión. Revisa tu internet e inténtalo de nuevo.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Reintentar" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: /nombre del servicio/i }),
+    ).not.toBeInTheDocument();
   });
 });

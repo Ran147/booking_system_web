@@ -5,6 +5,7 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/components/common";
 import {
+  ERROR_MESSAGE_KEY,
   FIRESTORE_COLLECTION,
   I18N_NAMESPACE,
   MONEY,
@@ -200,7 +201,8 @@ export const useServiceFormViewModel = (
       .map((feature) => feature.trim())
       .filter((feature) => feature.length > 0);
 
-    if (isEditMode && options.serviceId) {
+    const currentServiceId = options.serviceId;
+    if (isEditMode && currentServiceId) {
       updateServiceMutation.mutate(
         {
           businessId,
@@ -208,7 +210,7 @@ export const useServiceFormViewModel = (
             ...formValues,
             features: sanitizedFeatures,
           },
-          serviceId: options.serviceId,
+          serviceId: currentServiceId,
         },
         {
           onError: (mutationError) => {
@@ -216,7 +218,7 @@ export const useServiceFormViewModel = (
           },
           onSuccess: () => {
             toast.success(t("business:services.form.editSuccess"));
-            options.onSuccess?.(options.serviceId!);
+            options.onSuccess?.(currentServiceId);
           },
         },
       );
@@ -245,6 +247,17 @@ export const useServiceFormViewModel = (
     );
   };
 
+  const isLoadError =
+    isEditMode && !options.initialService && serviceDetailQuery.isError;
+
+  const loadErrorMessageKey = isLoadError
+    ? (serviceDetailQuery.error?.messageKey ?? ERROR_MESSAGE_KEY.NETWORK)
+    : null;
+
+  const handleRetryLoad = (): void => {
+    void serviceDetailQuery.refetch();
+  };
+
   return {
     canAddFeature: currentFeatures.length < SERVICE_FEATURE_LIMIT.MAX_ITEMS,
     form,
@@ -255,14 +268,17 @@ export const useServiceFormViewModel = (
     handleMoveFeatureUp,
     handleRemoveFeature,
     handleRemoveImage,
+    handleRetryLoad,
     handleSubmit: form.handleSubmit(submitServiceForm),
     imageError,
     isEditMode,
+    isLoadError,
     isLoading:
       isEditMode && !options.initialService && serviceDetailQuery.isPending,
     isReadOnly,
     isSubmitting:
       createServiceMutation.isPending || updateServiceMutation.isPending,
+    loadErrorMessageKey,
     selectedImagePreview,
   };
 };

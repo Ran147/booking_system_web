@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import type { Nullable } from "@/types";
@@ -8,6 +8,7 @@ export interface ServiceListPageObject {
   readonly changeStatusFilter: (statusValue: string) => Promise<void>;
   readonly clickClearFilters: () => Promise<void>;
   readonly clickCreateService: () => Promise<void>;
+  readonly clickEditService: (serviceName?: string) => Promise<void>;
   readonly clickNextPage: () => Promise<void>;
   readonly clickPreviousPage: () => Promise<void>;
   readonly clickRetry: () => Promise<void>;
@@ -52,6 +53,26 @@ export const createServiceListPage = (): ServiceListPageObject => {
   const clickCreateService = async (): Promise<void> => {
     const button = await findCreateServiceButton();
     await user.click(button);
+  };
+
+  const clickEditService = async (serviceName?: string): Promise<void> => {
+    if (serviceName) {
+      const row = await findRowByName(serviceName);
+      const editButton = within(row).getByRole("button", {
+        name: testI18n.t("business:services.list.editAction"),
+      });
+      await user.click(editButton);
+      return;
+    }
+
+    const editButtons = await screen.findAllByRole("button", {
+      name: testI18n.t("business:services.list.editAction"),
+    });
+    const firstButton = editButtons[0];
+    if (!firstButton) {
+      throw new Error("Edit service button not found");
+    }
+    await user.click(firstButton);
   };
 
   const findTable = (): Promise<HTMLElement> => screen.findByRole("table");
@@ -153,6 +174,7 @@ export const createServiceListPage = (): ServiceListPageObject => {
     changeStatusFilter,
     clickClearFilters,
     clickCreateService,
+    clickEditService,
     clickNextPage,
     clickPreviousPage,
     clickRetry,

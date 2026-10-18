@@ -20,7 +20,10 @@ export const fetchServiceDetail = async (
   const documentSnapshot = await getDoc(documentReference);
 
   if (!documentSnapshot.exists()) {
-    throw new FirebaseError(FIREBASE_ERROR_CODE.NOT_FOUND, "Service not found");
+    throw new FirebaseError(
+      FIREBASE_ERROR_CODE.FIRESTORE_NOT_FOUND,
+      "Service not found",
+    );
   }
 
   return mapServiceDetail(documentSnapshot);

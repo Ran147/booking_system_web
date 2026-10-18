@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft } from "lucide-react";
+import { AlertCircle, AlertTriangle, ArrowLeft, RotateCw } from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
@@ -10,7 +10,7 @@ import {
   CardTitle,
   Spinner,
 } from "@/components/common";
-import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { ERROR_MESSAGE_KEY, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import { useServiceFormViewModel } from "@/modules/business/features/services";
 import { ServiceForm } from "../ServiceForm";
 import type { ServiceFormPageProps } from "./types";
@@ -22,7 +22,10 @@ export const ServiceFormPage = ({
   onSuccess,
   serviceId,
 }: ServiceFormPageProps): ReactElement => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+  const { t } = useTranslation([
+    I18N_NAMESPACE.BUSINESS,
+    I18N_NAMESPACE.COMMON,
+  ]);
   const navigate = useNavigate();
   const routeParameters = useParams<{ serviceId?: string }>();
 
@@ -64,6 +67,59 @@ export const ServiceFormPage = ({
     return (
       <div className="container mx-auto flex h-64 max-w-3xl items-center justify-center px-4 py-8">
         <Spinner />
+      </div>
+    );
+  }
+
+  if (viewModel.isLoadError) {
+    return (
+      <div className="container mx-auto max-w-3xl px-4 py-8 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button
+            ariaLabel={t("services.form.backToServicesAction")}
+            leftIcon={ArrowLeft}
+            onClick={handleDefaultCancel}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            {t("services.form.backToServicesAction")}
+          </Button>
+        </div>
+
+        <div
+          aria-live="assertive"
+          className="flex flex-col items-center justify-center gap-4 rounded-xl border border-destructive/30 bg-destructive/10 p-10 text-center text-destructive"
+          role="alert"
+        >
+          <AlertCircle className="h-8 w-8" />
+          <p className="text-sm font-medium">
+            {t(viewModel.loadErrorMessageKey ?? ERROR_MESSAGE_KEY.NETWORK, {
+              ns: I18N_NAMESPACE.COMMON,
+            })}
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              ariaLabel={t("services.list.retryAction")}
+              leftIcon={RotateCw}
+              onClick={viewModel.handleRetryLoad}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              {t("services.list.retryAction")}
+            </Button>
+            <Button
+              ariaLabel={t("services.form.backToServicesAction")}
+              onClick={handleDefaultCancel}
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              {t("services.form.backToServicesAction")}
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

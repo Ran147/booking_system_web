@@ -1,4 +1,6 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { FirebaseError } from "firebase/app";
+import { FIREBASE_ERROR_CODE, STRING } from "@/constants";
 import { mapFirebaseError } from "@/services/firebase";
 import type { MutationError, Nullable } from "@/types";
 import { fetchServiceDetail } from "./fetchServiceDetail";
@@ -22,11 +24,17 @@ export const useServiceDetailQuery = ({
   useQuery<ServiceDetail, MutationError>({
     enabled: Boolean(businessId && serviceId && enabled),
     queryFn: async () => {
+      if (!serviceId) {
+        throw new FirebaseError(
+          FIREBASE_ERROR_CODE.FIRESTORE_NOT_FOUND,
+          "Service not found",
+        );
+      }
       try {
-        return await fetchServiceDetail(businessId, serviceId!);
+        return await fetchServiceDetail(businessId, serviceId);
       } catch (error) {
         throw mapFirebaseError(error);
       }
     },
-    queryKey: serviceQueryKeys.detail(businessId, serviceId ?? ""),
+    queryKey: serviceQueryKeys.detail(businessId, serviceId ?? STRING.EMPTY),
   });

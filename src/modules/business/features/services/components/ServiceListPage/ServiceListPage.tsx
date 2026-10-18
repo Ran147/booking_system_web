@@ -19,6 +19,7 @@ export const ServiceListPage = ({
   businessStatus,
   currency,
   onCreateService,
+  onEditService,
 }: ServiceListPageProps): ReactElement => {
   const { t } = useTranslation([
     I18N_NAMESPACE.BUSINESS,
@@ -28,6 +29,7 @@ export const ServiceListPage = ({
     businessStatus,
     currency,
     onCreateService,
+    onEditService,
   });
 
   return (

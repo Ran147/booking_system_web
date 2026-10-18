@@ -1,6 +1,5 @@
-import { FirebaseError } from "firebase/app";
-import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
-import { FIREBASE_ERROR_CODE, FIRESTORE_COLLECTION, MONEY } from "@/constants";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { FIRESTORE_COLLECTION, MONEY } from "@/constants";
 import { firestore } from "@/services/firebase";
 import { normalizeSearchTerm } from "@/utils/normalizeSearchTerm";
 import type {
@@ -19,11 +18,6 @@ export const updateService = async (
     FIRESTORE_COLLECTION.SERVICES,
     serviceId,
   );
-
-  const documentSnapshot = await getDoc(serviceDocumentReference);
-  if (!documentSnapshot.exists()) {
-    throw new FirebaseError(FIREBASE_ERROR_CODE.NOT_FOUND, "Service not found");
-  }
 
   const sanitizedFeatures = (formValues.features ?? [])
     .map((feature) => feature.trim())
