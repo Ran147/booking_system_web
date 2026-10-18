@@ -5,5 +5,6 @@ export { requestPasswordReset } from "./auth/requestPasswordReset.js";
 export { verifyRecaptcha } from "./auth/verifyRecaptcha.js";
 export { checkBusinessSlug } from "./billing/checkBusinessSlug.js";
 export { completeSubscriberSignUp } from "./billing/completeSubscriberSignUp.js";
-export { deleteService } from "./services/deleteService.js";
+export { payPlanCheckout } from "./billing/payPlanCheckout.js";
 export { validateSignUpLink } from "./billing/validateSignUpLink.js";
+export { deleteService } from "./services/deleteService.js";
