@@ -3,10 +3,10 @@
 | Field | Value |
 | --- | --- |
 | Portal | admin |
-| Feature folder | `src/portals/admin/features/support-tickets/` |
+| Feature folder | `src/modules/admin/features/support-tickets/` |
 | Stories | KAN-190, KAN-191, KAN-192 |
 | Status | Draft |
-| Depends on | PROP-3 subscriber support tickets (proposed, not in Jira yet; `src/portals/business/features/support` spec) creates the tickets; KAN-174 businesses spec (business profile link); email sending in `functions/` |
+| Depends on | PROP-3 subscriber support tickets (proposed, not in Jira yet; `src/modules/business/features/support` spec) creates the tickets; KAN-174 businesses spec (business profile link); email sending in `functions/` |
 
 ## Intent
 Business owners raise support tickets and the super admin handles them from the admin portal: sees them all with their status, answers by email and marks them resolved when done. The owner gets the answer in their inbox and the platform keeps a record of each ticket's state.

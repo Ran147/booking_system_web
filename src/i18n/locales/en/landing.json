@@ -30,6 +30,40 @@
     }
   },
   "home": {
+    "hero": {
+      "badge": "Appointment & booking management for professionals",
+      "ctaAction": "Explore plans",
+      "tagline": "Simplify your business schedule, automate reminders, and allow your clients to book online 24/7 effortlessly.",
+      "title": "Boost your business with smart and effortless bookings"
+    },
+    "intro": {
+      "badge": "Why choose Booking System?",
+      "features": {
+        "notifications": "Automated reminders and timely notifications to minimize no-shows.",
+        "payments": "Integrated payment options and transparent subscription management.",
+        "scheduling": "Real-time agenda availability with 24/7 self-service scheduling for clients."
+      },
+      "fullText": "Our platform is tailored to empower barbershops, beauty salons, medical consultancies, and independent professionals. With centralized scheduling, automatic reminders, multi-collaborator support, and comprehensive reports, you regain control over your time while delivering an effortless booking experience for your clients.",
+      "readLess": "Read less",
+      "readMore": "Read more",
+      "summary": "Booking System is the all-in-one booking platform designed to streamline appointments, eliminate scheduling conflicts, and grow your service business effortlessly.",
+      "title": "Smart scheduling built for modern service businesses"
+    },
+    "navbar": {
+      "goToPortal": "Go to my dashboard",
+      "landmarkLabel": "Main navigation",
+      "links": {
+        "contact": "Contact",
+        "home": "Home",
+        "plans": "Plans"
+      },
+      "linksNavLabel": "Main links",
+      "logoAlt": "Booking System logo",
+      "menuClose": "Close navigation menu",
+      "menuOpen": "Open navigation menu",
+      "mobileNavLabel": "Mobile navigation",
+      "signIn": "Sign in"
+    },
     "plans": {
       "billingPeriod": {
         "annual": "/year",
@@ -43,6 +77,29 @@
       "seeDetails": "Get started",
       "subtitle": "Choose the ideal plan to manage your business bookings and appointments.",
       "title": "Plans & Pricing"
+    },
+    "testimonials": {
+      "badge": "Customer stories",
+      "items": {
+        "item1": {
+          "authorName": "Carlos Mendoza",
+          "businessName": "Vintage Barbershop",
+          "quote": "Booking System transformed our daily routine. No-shows dropped by 80% with automated reminders, and our clients love booking at midnight without waiting for replies."
+        },
+        "item2": {
+          "authorName": "Valeria Castro",
+          "businessName": "Glow Beauty & Spa",
+          "quote": "Managing four stylists used to be chaotic. Now every collaborator has their calendar synced, and our clients can choose their favorite specialist effortlessly."
+        },
+        "item3": {
+          "authorName": "Dr. Fernando Ruiz",
+          "businessName": "Ruiz Physiotherapy Center",
+          "quote": "The platform is clean, reliable, and extremely easy for our patients to navigate. It saved us countless administrative hours every single week."
+        }
+      },
+      "ratingLabel": "Rating: {{rating}} out of {{maxRating}} stars",
+      "subtitle": "Discover how service professionals and business owners manage appointments effortlessly.",
+      "title": "Trusted by hundreds of growing businesses"
     }
   },
   "layout": {
@@ -51,5 +108,107 @@
   "placeholder": {
     "description": "Book services from your favorite businesses. This page is under construction.",
     "title": "Welcome to Booking System"
+  },
+  "planCheckout": {
+    "detail": {
+      "backToPlans": "← Back to plans",
+      "billingPeriod": {
+        "annual": "/year",
+        "monthly": "/month"
+      },
+      "catalogAction": "See the available plans",
+      "contract": "Contract this plan",
+      "featuresTitle": "What it includes",
+      "limits": {
+        "maxBookings_one": "Up to {{count}} booking per month",
+        "maxBookings_other": "Up to {{count}} bookings per month",
+        "maxCollaborators_one": "Up to {{count}} collaborator",
+        "maxCollaborators_other": "Up to {{count}} collaborators"
+      },
+      "limitsTitle": "Plan limits",
+      "otherPlans": "Other plans",
+      "retryAction": "Try again",
+      "signOutAction": "Sign out",
+      "signedInNotice": "A new business is contracted signed out: each account has only one business. Sign out to continue."
+    },
+    "payment": {
+      "planUnavailableError": "This plan is no longer available. Choose another plan."
+    }
+  },
+  "subscriberSignUp": {
+    "description": "Fill in your details and your business details to start taking bookings.",
+    "form": {
+      "accountTitle": "Sign-in details",
+      "businessNameLabel": "Business name",
+      "businessSlugHint": "Your business address will be {{businessAddress}}",
+      "businessSlugHintWithStatus": "Your business address will be {{businessAddress}}. {{slugStatus}}",
+      "businessSlugLabel": "Business address",
+      "businessTitle": "Your business",
+      "cannotCreateAccount": "We could not create the account with this email. If you already have one, sign in or recover your password.",
+      "emailHint": "The email you paid the plan with.",
+      "emailLabel": "Email",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "passwordConfirmationLabel": "Confirm password",
+      "passwordLabel": "Password",
+      "passwordMismatch": "The passwords do not match.",
+      "passwordRecoveryAction": "Recover password",
+      "personalDataTitle": "Personal details",
+      "phoneHint": "Optional.",
+      "phoneInvalidError": "Use only digits, spaces, + and -.",
+      "phoneLabel": "Phone",
+      "recaptchaLabel": "Security check",
+      "signInAction": "Sign in",
+      "slugAvailable": "It is available.",
+      "slugChecking": "Checking availability…",
+      "slugInvalidError": "Use 3 to 40 lowercase letters, digits and single hyphens, not starting or ending with a hyphen.",
+      "slugReservedError": "This address is reserved. Choose another one.",
+      "slugTakenError": "Another business already uses this address. Choose another one.",
+      "submitAction": "Create account"
+    },
+    "link": {
+      "contactAction": "Contact us",
+      "expired": "This sign-up link has expired. Write to us and we will send you a new one.",
+      "invalid": "This sign-up link is not valid or was already used.",
+      "missing": "Sign-up starts by choosing a plan. Choose yours and we will send you the link to create your account.",
+      "plansAction": "See the plans",
+      "retryAction": "Try again"
+    },
+    "plan": {
+      "billingPeriod": {
+        "annual": "/year",
+        "monthly": "/month"
+      },
+      "title": "Your plan"
+    },
+    "success": "Your account is ready. Sign in with your email and password.",
+    "title": "Create your account"
+  },
+  "terms": {
+    "backToHome": "Back to home",
+    "clauses": {
+      "acceptance": {
+        "body": "By accessing and using Booking System, you agree to comply with and be bound by these terms and conditions. If you do not agree with any part of these terms, you should discontinue using the platform immediately.",
+        "title": "1. Acceptance of Terms"
+      },
+      "cancellations": {
+        "body": "Cancellation and rescheduling policies for appointments are defined individually by each subscribed business. Booking System facilitates automated notifications but is not liable for business-specific cancellation penalties.",
+        "title": "4. Cancellations and Rescheduling"
+      },
+      "liability": {
+        "body": "Booking System strives to provide continuous 24/7 service availability. However, we do not guarantee uninterrupted access and are not liable for business losses arising from temporary downtime, third-party internet outages, or force majeure.",
+        "title": "5. Limitation of Liability"
+      },
+      "services": {
+        "body": "Booking System provides cloud software for appointments, client scheduling, and subscription administration. We act as an intermediary technical provider and do not guarantee the direct quality of services delivered by independent businesses.",
+        "title": "2. Platform Services & Responsibilities"
+      },
+      "subscriptions": {
+        "body": "Subscribers may select monthly or annual plans. Payments are processed securely and billed at the start of each period. Subscribers may upgrade, downgrade, or cancel their subscription plan at any time through their business portal.",
+        "title": "3. Subscriptions, Fees & Billing"
+      }
+    },
+    "lastUpdated": "Last updated: October 12, 2026",
+    "title": "Terms and Conditions of Service"
   }
 }

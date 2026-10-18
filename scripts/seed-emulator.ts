@@ -25,25 +25,30 @@ import {
   SEED_PAYMENT_RESULT,
   SEED_PENDING_BUSINESS,
   SEED_PLAN,
+  SEED_PLATFORM_SETTINGS,
   SEED_SERVICE,
   SEED_SUBSCRIPTION_PERIOD,
   SEED_TABLE_CELL,
   SEED_USER,
   SEED_WEEKDAY,
 } from "./constants/SeedEmulator.constants";
-import { FIRESTORE_COLLECTION } from "../src/shared/constants/firestore/FirestoreCollection.constants";
-import { THEME_MODE } from "../src/shared/constants/theme/ThemeMode.constants";
-import { BUSINESS_STATUS } from "../src/shared/domain/business/BusinessStatus.constants";
-import { isReservedBusinessSlug } from "../src/shared/domain/business/isReservedBusinessSlug";
-import { COLLABORATOR_PERMISSION } from "../src/shared/domain/collaborator/CollaboratorPermission.constants";
-import { COLLABORATOR_STATUS } from "../src/shared/domain/collaborator/CollaboratorStatus.constants";
-import { PLAN_STATUS } from "../src/shared/domain/plan/PlanStatus.constants";
-import { SERVICE_STATUS } from "../src/shared/domain/service/ServiceStatus.constants";
-import { SUBSCRIPTION_STATUS } from "../src/shared/domain/subscription/SubscriptionStatus.constants";
+import { seedCustomerBookings } from "./seedCustomerBookings";
+import { seedSignUpCheckouts } from "./seedSignUpCheckout";
+import { FIRESTORE_COLLECTION } from "../src/constants/firestore/FirestoreCollection.constants";
+import { DEFAULT_LANGUAGE } from "../src/constants/i18n/Language.constants";
+import { THEME_MODE } from "../src/constants/theme/ThemeMode.constants";
+import { BUSINESS_STATUS } from "../src/domain/business/BusinessStatus.constants";
+import { isReservedBusinessSlug } from "../src/domain/business/isReservedBusinessSlug";
+import { COLLABORATOR_PERMISSION } from "../src/domain/collaborator/CollaboratorPermission.constants";
+import { COLLABORATOR_STATUS } from "../src/domain/collaborator/CollaboratorStatus.constants";
+import { PLAN_STATUS } from "../src/domain/plan/PlanStatus.constants";
+import { SERVICE_STATUS } from "../src/domain/service/ServiceStatus.constants";
+import { SUBSCRIPTION_STATUS } from "../src/domain/subscription/SubscriptionStatus.constants";
 import {
   USER_ROLE,
   type UserRole,
-} from "../src/shared/domain/user/UserRole.constants";
+} from "../src/domain/user/UserRole.constants";
+import { normalizeSearchTerm } from "../src/utils/normalizeSearchTerm";
 
 interface SeedUser {
   EMAIL: string;
@@ -115,6 +120,8 @@ const writeUserProfile = async (
   await firestore.collection(FIRESTORE_COLLECTION.USERS).doc(seedUser.UID).set({
     email: seedUser.EMAIL,
     fullName: seedUser.FULL_NAME,
+    // Sign-in switches the interface to User.language (AC-KAN-129-02).
+    language: DEFAULT_LANGUAGE,
     phone: seedUser.PHONE,
     theme: THEME_MODE.SYSTEM,
   });
@@ -136,6 +143,7 @@ const buildServiceDocument = (
   durationMinutes: seedService.DURATION_MINUTES,
   name: seedService.NAME,
   priceInCents: seedService.PRICE_IN_CENTS,
+  searchName: normalizeSearchTerm(seedService.NAME),
   status: SERVICE_STATUS.ACTIVE,
 });
 
@@ -289,6 +297,13 @@ const seedPendingBusiness = async (firestore: Firestore): Promise<void> => {
     });
 };
 
+const seedPlatformSettings = async (firestore: Firestore): Promise<void> => {
+  await firestore
+    .collection(FIRESTORE_COLLECTION.PLATFORM_SETTINGS)
+    .doc(SEED_DOCUMENT_ID.PLATFORM_SETTINGS)
+    .set({ idleTimeoutMinutes: SEED_PLATFORM_SETTINGS.IDLE_TIMEOUT_MINUTES });
+};
+
 const printCredentials = (): void => {
   console.log("\nEmulator seed done. Test credentials (emulator only):");
   const activeBusinessLabel = `${SEED_BUSINESS.NAME} (active)`;
@@ -377,10 +392,13 @@ const seedEmulator = async (): Promise<void> => {
   await writeUserProfile(firestore, SEED_USER.CUSTOMER);
 
   await seedPlans(firestore);
+  await seedPlatformSettings(firestore);
   await seedBusiness(firestore);
   await seedPendingBusiness(firestore);
+  await seedCustomerBookings(firestore);
 
   printCredentials();
+  await seedSignUpCheckouts(firestore);
 };
 
 await seedEmulator();

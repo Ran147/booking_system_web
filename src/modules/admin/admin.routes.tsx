@@ -1,5 +1,5 @@
 import type { RouteObject } from "react-router";
-import { RequireRole } from "@/features/auth";
+import { RequireRole } from "@/modules/auth";
 import { ROUTE_PATH } from "@/shared/constants";
 import { USER_ROLE } from "@/shared/domain";
 import { AdminLayout } from "./layout/AdminLayout";

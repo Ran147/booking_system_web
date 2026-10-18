@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/settings/` |
+| Feature folder | `src/modules/business/features/settings/` |
 | Stories | KAN-51, KAN-52, KAN-53 |
 | Status | Draft |
 | Depends on | KAN-28 (subscriber sign-in and session); Q1 decided 2026-09-28 (a collaborator has the same personal settings); password rules from KAN-25 / KAN-37 (`forms-validation-standards` §5); `i18n-standards` (languages); `theming-standards` §4 (theme modes) |
