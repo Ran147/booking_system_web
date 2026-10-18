@@ -7,9 +7,13 @@ import type { BusinessSidebarProps } from "./BusinessSidebar.types";
 
 export const BusinessSidebar = ({
   activePath,
+  banner,
   businessName,
   className = "",
+  collaboratorName,
+  isCollaborator,
   isSubscriber,
+  logoUrl,
   navItems,
   onActionClick,
   onSignOut,
@@ -22,11 +26,18 @@ export const BusinessSidebar = ({
       ariaLabel={t("layout.sidebar.ariaLabel")}
       badge={
         <Badge className="mt-1" variant={BADGE_VARIANT.OUTLINE}>
-          {isSubscriber ? t("home.roleBadge") : t("home.roleCollaboratorBadge")}
+          {isSubscriber
+            ? t("home.roleBadge")
+            : isCollaborator
+              ? t("home.roleCollaboratorBadge")
+              : ""}
         </Badge>
       }
+      banner={banner}
       brandName={businessName}
       className={className}
+      collaboratorName={collaboratorName}
+      logoUrl={logoUrl}
       navItems={navItems}
       onItemClick={onActionClick}
       onSignOut={onSignOut}

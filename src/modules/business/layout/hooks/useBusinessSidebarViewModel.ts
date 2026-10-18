@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   Calendar,
@@ -21,8 +21,18 @@ import {
 } from "@/domain";
 import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
 import { AuthContext } from "@/modules/auth/context/AuthContext";
-import { fetchBusinessStatus } from "@/modules/business/features/home";
 import type { Nullable } from "@/types";
+import {
+  fetchBusinessProfile,
+  fetchCollaboratorProfile,
+  fetchCurrentSubscription,
+  fetchPlanName,
+  fetchPlatformSettings,
+  type BusinessProfileData,
+  type CollaboratorProfileData,
+  type CurrentSubscriptionData,
+  type PlatformSettingsData,
+} from "../api";
 import type { BusinessSidebarItem, BusinessSidebarViewModel } from "../models";
 import type { UseBusinessSidebarViewModelOptions } from "./useBusinessSidebarViewModel.types";
 
@@ -34,11 +44,16 @@ export const useBusinessSidebarViewModel = (
     I18N_NAMESPACE.COMMON,
   ]);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const authContext = useContext(AuthContext);
 
   const [activePlaceholderItem, setActivePlaceholderItem] =
     useState<Nullable<BusinessSidebarItem>>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isExpiryWarningDismissed, setIsExpiryWarningDismissed] =
+    useState<boolean>(false);
+  const [isSignOutConfirmOpen, setIsSignOutConfirmOpen] =
+    useState<boolean>(false);
 
   const session = authContext?.session;
   const isSessionSignedIn = session?.status === SESSION_STATUS.SIGNED_IN;
@@ -48,7 +63,8 @@ export const useBusinessSidebarViewModel = (
       ? session.businessId
       : "business-test";
 
-  const businessName = options.businessName ?? t("business:placeholder.title");
+  const collaboratorId =
+    isSessionSignedIn && session.collaboratorId ? session.collaboratorId : null;
 
   const role: UserRole =
     isSessionSignedIn && session.role ? session.role : USER_ROLE.SUBSCRIBER;
@@ -56,16 +72,67 @@ export const useBusinessSidebarViewModel = (
   const isSubscriber = role === USER_ROLE.SUBSCRIBER;
   const isCollaborator = role === USER_ROLE.COLLABORATOR;
 
-  const businessStatusQuery = useQuery<BusinessStatus>({
-    enabled: options.initialBusinessStatus === undefined,
-    queryFn: () => fetchBusinessStatus(businessId),
-    queryKey: [FIRESTORE_COLLECTION.BUSINESSES, businessId, "status"],
+  const businessProfileQuery = useQuery<BusinessProfileData>({
+    enabled: Boolean(businessId),
+    queryFn: () => fetchBusinessProfile(businessId),
+    queryKey: [FIRESTORE_COLLECTION.BUSINESSES, businessId, "profile"],
   });
+
+  const businessName =
+    options.businessName ??
+    (businessProfileQuery.data?.name || t("business:placeholder.title"));
+
+  const logoUrl =
+    options.logoUrl !== undefined
+      ? options.logoUrl
+      : (businessProfileQuery.data?.logoUrl ?? null);
+
+  const timeZone = businessProfileQuery.data?.timeZone || "UTC";
 
   const businessStatus: BusinessStatus =
     options.initialBusinessStatus ??
-    businessStatusQuery.data ??
+    businessProfileQuery.data?.status ??
     BUSINESS_STATUS.ACTIVE;
+
+  const collaboratorProfileQuery = useQuery<CollaboratorProfileData>({
+    enabled: Boolean(isCollaborator && businessId && collaboratorId),
+    queryFn: () => fetchCollaboratorProfile(businessId, collaboratorId ?? ""),
+    queryKey: [
+      FIRESTORE_COLLECTION.BUSINESSES,
+      businessId,
+      FIRESTORE_COLLECTION.COLLABORATORS,
+      collaboratorId,
+    ],
+  });
+
+  const collaboratorName =
+    options.collaboratorName ??
+    (collaboratorProfileQuery.data?.fullName || null);
+
+  const subscriptionQuery = useQuery<Nullable<CurrentSubscriptionData>>({
+    enabled: Boolean(isSubscriber && businessId),
+    queryFn: () => fetchCurrentSubscription(businessId),
+    queryKey: [
+      FIRESTORE_COLLECTION.BUSINESSES,
+      businessId,
+      FIRESTORE_COLLECTION.SUBSCRIPTION,
+      "current",
+    ],
+  });
+
+  const planId = subscriptionQuery.data?.planId ?? "";
+
+  const planQuery = useQuery<string>({
+    enabled: Boolean(isSubscriber && planId),
+    queryFn: () => fetchPlanName(planId),
+    queryKey: [FIRESTORE_COLLECTION.PLANS, planId],
+  });
+
+  const platformSettingsQuery = useQuery<PlatformSettingsData>({
+    enabled: Boolean(isSubscriber),
+    queryFn: fetchPlatformSettings,
+    queryKey: [FIRESTORE_COLLECTION.PLATFORM_SETTINGS, "current"],
+  });
 
   const handleActionClick = (item: BusinessSidebarItem): void => {
     if (item.isAvailable && item.href) {
@@ -84,12 +151,52 @@ export const useBusinessSidebarViewModel = (
     setActivePlaceholderItem(null);
   };
 
+  const executeSignOut = (): void => {
+    try {
+      queryClient.clear();
+      if (options.onSignOut) {
+        options.onSignOut();
+        return;
+      }
+      navigate(ROUTE_PATH.AUTH.SIGN_IN);
+    } catch {
+      queryClient.clear();
+      navigate(ROUTE_PATH.AUTH.SIGN_IN);
+    }
+  };
+
   const handleSignOut = (): void => {
-    if (options.onSignOut) {
-      options.onSignOut();
+    if (options.hasUnsavedChanges) {
+      setIsSignOutConfirmOpen(true);
       return;
     }
-    navigate(ROUTE_PATH.AUTH.SIGN_IN);
+    executeSignOut();
+  };
+
+  const handleConfirmSignOut = (): void => {
+    setIsSignOutConfirmOpen(false);
+    executeSignOut();
+  };
+
+  const handleCancelSignOut = (): void => {
+    setIsSignOutConfirmOpen(false);
+  };
+
+  const handleDismissExpiryWarning = (): void => {
+    setIsExpiryWarningDismissed(true);
+  };
+
+  const handleNavigateToSubscription = (): void => {
+    const targetPath = `/business/${ROUTE_PATH.BUSINESS.SUBSCRIPTION}`;
+    if (options.onNavigate) {
+      options.onNavigate(targetPath);
+    } else {
+      navigate(targetPath);
+    }
+  };
+
+  const handleRetrySubscription = (): void => {
+    subscriptionQuery.refetch();
   };
 
   const toggleDrawer = (): void => {
@@ -170,16 +277,33 @@ export const useBusinessSidebarViewModel = (
 
   return {
     activePlaceholderItem,
+    businessError: businessProfileQuery.isError,
     businessName,
     businessStatus,
     closeDrawer,
     closePlaceholderModal,
+    collaboratorName,
+    gracePeriodDays: platformSettingsQuery.data?.gracePeriodDays ?? null,
     handleActionClick,
+    handleCancelSignOut,
+    handleConfirmSignOut,
+    handleDismissExpiryWarning,
+    handleNavigateToSubscription,
+    handleRetrySubscription,
     handleSignOut,
     isCollaborator,
     isDrawerOpen,
+    isExpiryWarningDismissed,
+    isPlatformSettingsError: platformSettingsQuery.isError,
+    isSignOutConfirmOpen,
     isSubscriber,
+    isSubscriptionError: subscriptionQuery.isError,
+    isSubscriptionLoading: subscriptionQuery.isLoading,
+    logoUrl,
     navItems: allNavItems,
+    planName: planQuery.data || null,
+    subscription: subscriptionQuery.data ?? null,
+    timeZone,
     toggleDrawer,
   };
 };

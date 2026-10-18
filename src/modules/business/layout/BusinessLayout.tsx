@@ -11,11 +11,19 @@ import {
 } from "@/components/common";
 import { PlaceholderDialog } from "@/components/common/portal-home-template/components";
 import { I18N_NAMESPACE } from "@/constants";
-import { BusinessSidebar } from "./components";
+import {
+  BusinessSidebar,
+  ExpiryWarningBanner,
+  SignOutConfirmDialog,
+  SubscriptionBanner,
+} from "./components";
 import { useBusinessSidebarViewModel } from "./hooks";
 
 export const BusinessLayout = (): ReactElement => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+  const { t } = useTranslation([
+    I18N_NAMESPACE.BUSINESS,
+    I18N_NAMESPACE.COMMON,
+  ]);
   const location = useLocation();
   const viewModel = useBusinessSidebarViewModel();
 
@@ -30,15 +38,57 @@ export const BusinessLayout = (): ReactElement => {
       }
     : null;
 
+  const sidebarBanners = (
+    <div className="flex flex-col gap-2">
+      <ExpiryWarningBanner
+        cancelAtPeriodEnd={viewModel.subscription?.cancelAtPeriodEnd}
+        currentPeriodEndsAt={viewModel.subscription?.currentPeriodEndsAt}
+        gracePeriodDays={viewModel.gracePeriodDays}
+        isCollaborator={viewModel.isCollaborator}
+        isDismissed={viewModel.isExpiryWarningDismissed}
+        isPlatformSettingsError={viewModel.isPlatformSettingsError}
+        isSubscriptionError={viewModel.isSubscriptionError}
+        onDismiss={viewModel.handleDismissExpiryWarning}
+        onNavigateToSubscription={viewModel.handleNavigateToSubscription}
+        onPay={viewModel.handleNavigateToSubscription}
+        status={viewModel.subscription?.status}
+        timeZone={viewModel.timeZone}
+      />
+      <SubscriptionBanner
+        businessStatus={viewModel.businessStatus}
+        cancelAtPeriodEnd={viewModel.subscription?.cancelAtPeriodEnd}
+        currentPeriodEndsAt={viewModel.subscription?.currentPeriodEndsAt}
+        isCollaborator={viewModel.isCollaborator}
+        isError={viewModel.isSubscriptionError}
+        isLoading={viewModel.isSubscriptionLoading}
+        onPay={viewModel.handleNavigateToSubscription}
+        onRetry={viewModel.handleRetrySubscription}
+        planName={viewModel.planName}
+        status={viewModel.subscription?.status}
+        timeZone={viewModel.timeZone}
+      />
+    </div>
+  );
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
+      {/* Network error live region announcement */}
+      {viewModel.businessError && (
+        <div aria-live="assertive" className="sr-only" role="alert">
+          {t("common:errors.network")}
+        </div>
+      )}
+
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex">
         <BusinessSidebar
           activePath={location.pathname}
+          banner={sidebarBanners}
           businessName={viewModel.businessName}
+          collaboratorName={viewModel.collaboratorName}
           isCollaborator={viewModel.isCollaborator}
           isSubscriber={viewModel.isSubscriber}
+          logoUrl={viewModel.logoUrl}
           navItems={viewModel.navItems}
           onActionClick={viewModel.handleActionClick}
           onSignOut={viewModel.handleSignOut}
@@ -53,9 +103,12 @@ export const BusinessLayout = (): ReactElement => {
       >
         <BusinessSidebar
           activePath={location.pathname}
+          banner={sidebarBanners}
           businessName={viewModel.businessName}
+          collaboratorName={viewModel.collaboratorName}
           isCollaborator={viewModel.isCollaborator}
           isSubscriber={viewModel.isSubscriber}
+          logoUrl={viewModel.logoUrl}
           navItems={viewModel.navItems}
           onActionClick={viewModel.handleActionClick}
           onSignOut={viewModel.handleSignOut}
@@ -67,7 +120,7 @@ export const BusinessLayout = (): ReactElement => {
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
           <p className="text-base font-semibold">{viewModel.businessName}</p>
           <Button
-            aria-label={t("layout.sidebar.openMenu")}
+            aria-label={t("business:layout.sidebar.openMenu")}
             onClick={viewModel.toggleDrawer}
             size={BUTTON_SIZE.SM}
             type="button"
@@ -86,6 +139,12 @@ export const BusinessLayout = (): ReactElement => {
       <PlaceholderDialog
         item={placeholderQuickAccessItem}
         onClose={viewModel.closePlaceholderModal}
+      />
+
+      <SignOutConfirmDialog
+        isOpen={viewModel.isSignOutConfirmOpen}
+        onCancel={viewModel.handleCancelSignOut}
+        onConfirm={viewModel.handleConfirmSignOut}
       />
     </div>
   );

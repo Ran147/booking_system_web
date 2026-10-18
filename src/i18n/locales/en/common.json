@@ -93,5 +93,11 @@
   },
   "status": {
     "loading": "Loading…"
+  },
+  "subscriptionStatus": {
+    "active": "Active",
+    "cancelled": "Cancelled",
+    "expired": "Expired",
+    "past_due": "Past due"
   }
 }
