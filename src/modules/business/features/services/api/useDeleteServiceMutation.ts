@@ -4,24 +4,25 @@ import {
   type UseMutationResult,
 } from "@tanstack/react-query";
 import { FUNCTION_NAME } from "@/constants";
-import { callFunction, mapFirebaseError } from "@/services/firebase";
-import type { MutationError } from "@/types";
+import { callFunction } from "@/services/firebase";
+import { mapDeleteServiceError } from "./mapDeleteServiceError";
 import { serviceQueryKeys } from "./serviceQueryKeys";
 import type {
   DeleteServicePayload,
   DeleteServiceResponse,
 } from "../models/DeleteService.mutation";
+import type { DeleteServiceError } from "../models/DeleteServiceError.interface";
 
 export const useDeleteServiceMutation = (): UseMutationResult<
   DeleteServiceResponse,
-  MutationError,
+  DeleteServiceError,
   DeleteServicePayload
 > => {
   const queryClient = useQueryClient();
 
   return useMutation<
     DeleteServiceResponse,
-    MutationError,
+    DeleteServiceError,
     DeleteServicePayload
   >({
     mutationFn: async (payload) => {
@@ -31,7 +32,7 @@ export const useDeleteServiceMutation = (): UseMutationResult<
           payload,
         );
       } catch (error) {
-        throw mapFirebaseError(error);
+        throw mapDeleteServiceError(error);
       }
     },
     onSuccess: async (_response, payload) => {

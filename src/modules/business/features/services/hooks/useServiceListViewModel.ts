@@ -25,6 +25,7 @@ import {
   useUpdateServiceStatusMutation,
   type BusinessInfo,
 } from "../api";
+import { DELETE_SERVICE_ERROR_REASON } from "../constants/DeleteServiceError.constants";
 import { DEFAULT_SERVICE_LIST_CURRENCY } from "../constants/ServiceList.constants";
 import type {
   ServiceListFilters,
@@ -111,8 +112,10 @@ export const useServiceListViewModel = (
   };
 
   const handleActivateService = (serviceId: string): void => {
-    if (isReadOnly) {
-      toast.error(t("business:errors.readOnly"));
+    if (isReadOnly || updateServiceStatusMutation.isPending) {
+      if (isReadOnly) {
+        toast.error(t("business:errors.readOnly"));
+      }
       return;
     }
 
@@ -229,7 +232,19 @@ export const useServiceListViewModel = (
       {
         onError: (mutationError) => {
           if (mutationError.code === FIREBASE_ERROR_CODE.FAILED_PRECONDITION) {
-            toast.error(t("business:services.delete.hasBookingsError"));
+            if (
+              mutationError.reason ===
+              DELETE_SERVICE_ERROR_REASON.MUST_BE_INACTIVE
+            ) {
+              toast.error(t("business:services.delete.mustBeInactiveError"));
+            } else if (
+              mutationError.reason ===
+              DELETE_SERVICE_ERROR_REASON.BUSINESS_NOT_ACTIVE
+            ) {
+              toast.error(t("business:errors.readOnly"));
+            } else {
+              toast.error(t("business:services.delete.hasBookingsError"));
+            }
           } else {
             toast.error(t(`common:${mutationError.messageKey}`));
           }
@@ -303,6 +318,14 @@ export const useServiceListViewModel = (
   const isNoResults =
     totalCount === 0 && hasActiveFilters && viewState === VIEW_STATE.READY;
 
+  const isActivating =
+    updateServiceStatusMutation.isPending &&
+    updateServiceStatusMutation.variables?.status === SERVICE_STATUS.ACTIVE;
+
+  const isDeactivating =
+    updateServiceStatusMutation.isPending &&
+    updateServiceStatusMutation.variables?.status === SERVICE_STATUS.INACTIVE;
+
   return {
     currency: effectiveCurrency,
     deactivatingService,
@@ -326,7 +349,8 @@ export const useServiceListViewModel = (
     hasActiveFilters,
     hasNextPage: Boolean(serviceListQuery.data?.nextCursor),
     hasPreviousPage: pagination.hasPreviousPage,
-    isDeactivating: updateServiceStatusMutation.isPending,
+    isActivating,
+    isDeactivating,
     isDeleting: deleteServiceMutation.isPending,
     isEmpty,
     isNoResults,

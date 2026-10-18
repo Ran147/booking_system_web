@@ -7,9 +7,14 @@ import type {
   DeleteServicePayload,
   DeleteServiceResponse,
 } from "./models/DeleteService.mutation.js";
-import { deleteServicePayloadSchema } from "./models/DeleteService.schema.js";
+import {
+  businessStatusDocumentSchema,
+  deleteServicePayloadSchema,
+  serviceStatusDocumentSchema,
+} from "./models/DeleteService.schema.js";
 import { assertSubscriberOf } from "../shared/assertSubscriberOf.js";
 import { BOOKING_STATUS } from "../shared/constants/BookingStatus.constants.js";
+import { BUSINESS_STATUS } from "../shared/constants/BusinessStatus.constants.js";
 import { FIRESTORE_COLLECTION } from "../shared/constants/FirestoreCollection.constants.js";
 import { SERVICE_STATUS } from "../shared/constants/ServiceStatus.constants.js";
 import { firestore } from "../shared/firebaseAdmin.js";
@@ -40,13 +45,34 @@ export const deleteService = onCall<
     .limit(1);
 
   return firestore.runTransaction(async (transaction) => {
+    const businessSnapshot = await transaction.get(businessReference);
+    const businessParsed = businessStatusDocumentSchema.safeParse(
+      businessSnapshot.data(),
+    );
+    if (
+      !businessSnapshot.exists ||
+      !businessParsed.success ||
+      businessParsed.data.status !== BUSINESS_STATUS.ACTIVE
+    ) {
+      throw new HttpsError(
+        "failed-precondition",
+        DELETE_SERVICE_ERROR.BUSINESS_NOT_ACTIVE,
+        { reason: DELETE_SERVICE_ERROR_REASON.BUSINESS_NOT_ACTIVE },
+      );
+    }
+
     const serviceSnapshot = await transaction.get(serviceReference);
     if (!serviceSnapshot.exists) {
       throw new HttpsError("not-found", DELETE_SERVICE_ERROR.NOT_FOUND);
     }
 
-    const serviceData = serviceSnapshot.data();
-    if (serviceData?.status !== SERVICE_STATUS.INACTIVE) {
+    const serviceParsed = serviceStatusDocumentSchema.safeParse(
+      serviceSnapshot.data(),
+    );
+    if (
+      !serviceParsed.success ||
+      serviceParsed.data.status !== SERVICE_STATUS.INACTIVE
+    ) {
       throw new HttpsError(
         "failed-precondition",
         DELETE_SERVICE_ERROR.MUST_BE_INACTIVE,

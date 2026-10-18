@@ -1,5 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { BOOKING_STATUS } from "../../shared/constants/BookingStatus.constants.js";
+import { BUSINESS_STATUS } from "../../shared/constants/BusinessStatus.constants.js";
 import { FIRESTORE_COLLECTION } from "../../shared/constants/FirestoreCollection.constants.js";
 import { SERVICE_STATUS } from "../../shared/constants/ServiceStatus.constants.js";
 import { USER_ROLE } from "../../shared/constants/UserRole.constants.js";
@@ -22,6 +23,11 @@ const TEST_BUSINESS_ID = "business-123";
 const OTHER_BUSINESS_ID = "business-999";
 const TEST_SERVICE_ID = "service-456";
 const TEST_SUBSCRIBER_UID = "user-subscriber-123";
+
+const PROMISE_SETTLED_STATUS = Object.freeze({
+  FULFILLED: "fulfilled",
+  REJECTED: "rejected",
+} as const);
 
 const SUBSCRIBER_AUTH = {
   token: {
@@ -329,5 +335,142 @@ describe("deleteService", () => {
     );
 
     expect(error.code).toBe("invalid-argument");
+  });
+
+  it("KAN-59: rejects deletion when business is inactive (AC-KAN-59-04)", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .update({ status: BUSINESS_STATUS.INACTIVE });
+
+    await seedService(SERVICE_STATUS.INACTIVE);
+
+    const error = await captureHttpsError(
+      callDeleteService(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            serviceId: TEST_SERVICE_ID,
+          },
+          SUBSCRIBER_AUTH,
+        ),
+      ),
+    );
+
+    expect(error.code).toBe("failed-precondition");
+    expect(readErrorReason(error)).toBe(
+      DELETE_SERVICE_ERROR_REASON.BUSINESS_NOT_ACTIVE,
+    );
+
+    const serviceDoc = await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.SERVICES)
+      .doc(TEST_SERVICE_ID)
+      .get();
+    expect(serviceDoc.exists).toBe(true);
+  });
+
+  it("KAN-59: rejects deletion when business is suspended (AC-KAN-59-04)", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .update({ status: BUSINESS_STATUS.SUSPENDED });
+
+    await seedService(SERVICE_STATUS.INACTIVE);
+
+    const error = await captureHttpsError(
+      callDeleteService(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            serviceId: TEST_SERVICE_ID,
+          },
+          SUBSCRIBER_AUTH,
+        ),
+      ),
+    );
+
+    expect(error.code).toBe("failed-precondition");
+    expect(readErrorReason(error)).toBe(
+      DELETE_SERVICE_ERROR_REASON.BUSINESS_NOT_ACTIVE,
+    );
+  });
+
+  it("KAN-59: handles concurrent delete requests safely (AC-KAN-59-07)", async () => {
+    await seedService(SERVICE_STATUS.INACTIVE);
+
+    const deleteResults = await Promise.allSettled([
+      callDeleteService(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            serviceId: TEST_SERVICE_ID,
+          },
+          SUBSCRIBER_AUTH,
+        ),
+      ),
+      callDeleteService(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            serviceId: TEST_SERVICE_ID,
+          },
+          SUBSCRIBER_AUTH,
+        ),
+      ),
+    ]);
+
+    const fulfilledResults = deleteResults.filter(
+      (result) => result.status === PROMISE_SETTLED_STATUS.FULFILLED,
+    );
+    const rejectedResults = deleteResults.filter(
+      (result) => result.status === PROMISE_SETTLED_STATUS.REJECTED,
+    );
+
+    expect(fulfilledResults).toHaveLength(1);
+    expect(rejectedResults).toHaveLength(1);
+
+    const serviceDoc = await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.SERVICES)
+      .doc(TEST_SERVICE_ID)
+      .get();
+    expect(serviceDoc.exists).toBe(false);
+  });
+
+  it("KAN-59: ensures deletion is safely coordinated with concurrent bookings (AC-KAN-59-07)", async () => {
+    await seedService(SERVICE_STATUS.INACTIVE);
+
+    const operations = await Promise.allSettled([
+      seedBooking("booking-concurrent", BOOKING_STATUS.PENDING),
+      callDeleteService(
+        buildAuthenticatedCallableRequest(
+          {
+            businessId: TEST_BUSINESS_ID,
+            serviceId: TEST_SERVICE_ID,
+          },
+          SUBSCRIBER_AUTH,
+        ),
+      ),
+    ]);
+
+    const serviceDoc = await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.SERVICES)
+      .doc(TEST_SERVICE_ID)
+      .get();
+
+    const deleteOperation = operations[1];
+    if (deleteOperation?.status === PROMISE_SETTLED_STATUS.REJECTED) {
+      expect(readErrorReason(deleteOperation.reason)).toBe(
+        DELETE_SERVICE_ERROR_REASON.HAS_ACTIVE_BOOKINGS,
+      );
+      expect(serviceDoc.exists).toBe(true);
+    } else {
+      expect(serviceDoc.exists).toBe(false);
+    }
   });
 });

@@ -1,3 +1,7 @@
+export {
+  DELETE_SERVICE_ERROR_REASON,
+  type DeleteServiceErrorReason,
+} from "./DeleteServiceError.constants";
 export { SERVICE_FIELD } from "./ServiceField.constants";
 export {
   KEYBOARD_KEY,

@@ -138,6 +138,7 @@ export const ServiceListPage = ({
           <div className="space-y-4">
             <ServiceListTable
               currency={viewModel.currency}
+              isActivating={viewModel.isActivating}
               isReadOnly={viewModel.isReadOnly}
               onActivateService={viewModel.handleActivateService}
               onEditService={viewModel.handleEditService}

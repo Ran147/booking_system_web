@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import { FirebaseError } from "firebase/app";
 import type { QueryDocumentSnapshot } from "firebase/firestore";
+import { FunctionsError } from "firebase/functions";
 import type { RouteObject } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/components/common";
@@ -20,6 +21,7 @@ import * as fetchBusinessStatusModule from "../api/fetchBusinessStatus";
 import * as fetchServicePageModule from "../api/fetchServicePage";
 import * as updateServiceStatusModule from "../api/updateServiceStatus";
 import { ServiceListPage } from "../components/ServiceListPage";
+import { DELETE_SERVICE_ERROR_REASON } from "../constants/DeleteServiceError.constants";
 import type { ServiceListItem } from "../models";
 
 const MOCK_SERVICES: readonly ServiceListItem[] = [
@@ -669,6 +671,57 @@ describe("ServiceListPage (KAN-55)", () => {
       const activateButton = await page.queryActivateButton("Corte de cabello");
       expect(activateButton).not.toBeInTheDocument();
     });
+
+    it("disables the activate button and prevents multiple mutations while activation is pending", async () => {
+      let resolveUpdate: (value: {
+        serviceId: string;
+        status: typeof SERVICE_STATUS.ACTIVE;
+      }) => void = () => {};
+      const updatePromise = new Promise<{
+        serviceId: string;
+        status: typeof SERVICE_STATUS.ACTIVE;
+      }>((resolve) => {
+        resolveUpdate = resolve;
+      });
+
+      const secondInactiveService: ServiceListItem = {
+        description: "Servicio secundario",
+        durationMinutes: 20,
+        id: "service-other",
+        name: "Otro servicio",
+        priceInCents: 10000,
+        status: SERVICE_STATUS.INACTIVE,
+      };
+
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!, secondInactiveService],
+        nextCursor: null,
+        totalCount: 2,
+      });
+      const updateStatusSpy = vi
+        .spyOn(updateServiceStatusModule, "updateServiceStatus")
+        .mockReturnValueOnce(updatePromise);
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickActivateService("Arreglo de barba");
+
+      const otherActivateButton =
+        await page.queryActivateButton("Otro servicio");
+      expect(otherActivateButton).toBeDisabled();
+      expect(updateStatusSpy).toHaveBeenCalledTimes(1);
+
+      resolveUpdate({
+        serviceId: "service-beard",
+        status: SERVICE_STATUS.ACTIVE,
+      });
+    });
   });
 
   describe("Deactivate a service (KAN-58)", () => {
@@ -920,6 +973,72 @@ describe("ServiceListPage (KAN-55)", () => {
       await waitFor(() => {
         expect(toastErrorSpy).toHaveBeenCalledWith(
           testI18n.t("business:services.delete.hasBookingsError"),
+        );
+      });
+    });
+
+    it("AC-KAN-59-03: shows mustBeInactiveError when service was activated in another tab during deletion", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      vi.spyOn(callFunctionModule, "callFunction").mockRejectedValueOnce(
+        new FunctionsError(
+          "failed-precondition",
+          "Only inactive services can be deleted",
+          { reason: DELETE_SERVICE_ERROR_REASON.MUST_BE_INACTIVE },
+        ),
+      );
+      const toastErrorSpy = vi.spyOn(toast, "error");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickDeleteService("Arreglo de barba");
+      await page.confirmDeletion();
+
+      await waitFor(() => {
+        expect(toastErrorSpy).toHaveBeenCalledWith(
+          testI18n.t("business:services.delete.mustBeInactiveError"),
+        );
+      });
+    });
+
+    it("AC-KAN-59-04: shows business:errors.readOnly when business was deactivated during deletion", async () => {
+      vi.spyOn(fetchServicePageModule, "fetchServicePage").mockResolvedValue({
+        items: [MOCK_SERVICES[1]!],
+        nextCursor: null,
+        totalCount: 1,
+      });
+      vi.spyOn(callFunctionModule, "callFunction").mockRejectedValueOnce(
+        new FunctionsError(
+          "failed-precondition",
+          "The business is not active",
+          { reason: DELETE_SERVICE_ERROR_REASON.BUSINESS_NOT_ACTIVE },
+        ),
+      );
+      const toastErrorSpy = vi.spyOn(toast, "error");
+
+      renderWithProviders(<ServiceListPage />, {
+        initialPath: "/business/services",
+        session: SUBSCRIBER_SESSION,
+      });
+
+      const page = createServiceListPage();
+
+      expect(await page.findRowByName("Arreglo de barba")).toBeInTheDocument();
+      await page.clickDeleteService("Arreglo de barba");
+      await page.confirmDeletion();
+
+      await waitFor(() => {
+        expect(toastErrorSpy).toHaveBeenCalledWith(
+          testI18n.t("business:errors.readOnly"),
         );
       });
     });

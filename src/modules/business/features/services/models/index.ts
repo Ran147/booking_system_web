@@ -2,6 +2,7 @@ export type {
   CreateServicePayload,
   CreateServiceResponse,
 } from "./CreateService.mutation";
+export type { DeleteServiceError } from "./DeleteServiceError.interface";
 export type {
   DeleteServicePayload,
   DeleteServiceResponse,
