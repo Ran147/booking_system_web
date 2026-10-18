@@ -25,8 +25,8 @@ export const useTestimonialsViewModel = (): TestimonialsViewModel => {
       const quote = t(item.QUOTE_KEY);
       return Boolean(
         typeof quote === "string" &&
-          quote.trim() !== "" &&
-          quote !== item.QUOTE_KEY,
+        quote.trim() !== "" &&
+        quote !== item.QUOTE_KEY,
       );
     }).map((item): TestimonialItem => ({
       authorName: t(item.AUTHOR_NAME_KEY),

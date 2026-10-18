@@ -50,8 +50,8 @@ describe("useTestimonialsViewModel", () => {
     expect(result.current.hasTestimonials).toBe(true);
     expect(result.current.testimonials).toHaveLength(2);
     expect(
-      result.current.testimonials.some(
-        (item) => Boolean(secondItem && item.id === secondItem.ID),
+      result.current.testimonials.some((item) =>
+        Boolean(secondItem && item.id === secondItem.ID),
       ),
     ).toBe(false);
 

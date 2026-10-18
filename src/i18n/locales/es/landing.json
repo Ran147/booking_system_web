@@ -157,5 +157,32 @@
     },
     "success": "Tu cuenta está lista. Inicia sesión con tu correo y tu contraseña.",
     "title": "Crea tu cuenta"
+  },
+  "terms": {
+    "backToHome": "Volver al inicio",
+    "clauses": {
+      "acceptance": {
+        "body": "Al acceder y utilizar Booking System, aceptas cumplir y estar sujeto a estos términos y condiciones. Si no estás de acuerdo con alguna cláusula, debes suspender el uso de la plataforma de inmediato.",
+        "title": "1. Aceptación de los Términos"
+      },
+      "cancellations": {
+        "body": "Las políticas de cancelación y reprogramación de citas son definidas individualmente por cada negocio suscrito. Booking System facilita notificaciones automatizadas pero no se responsabiliza por penalizaciones particulares del negocio.",
+        "title": "4. Cancelaciones y Reprogramaciones"
+      },
+      "liability": {
+        "body": "Booking System procura mantener la disponibilidad continua del servicio 24/7. No obstante, no garantiza acceso ininterrumpido ni se responsabiliza por pérdidas comerciales derivadas de cortes de conectividad externos o fuerza mayor.",
+        "title": "5. Limitación de Responsabilidad"
+      },
+      "services": {
+        "body": "Booking System provee software en la nube para gestión de citas, agendamiento de clientes y administración de suscripciones. Actuamos como proveedor técnico intermediario y no garantizamos la calidad de los servicios finales ofrecidos por cada negocio.",
+        "title": "2. Servicios de la Plataforma y Alcance"
+      },
+      "subscriptions": {
+        "body": "Los suscriptores pueden elegir planes mensuales o anuales. Los pagos se procesan de forma segura y se facturan al inicio de cada período. Los suscriptores pueden actualizar, cambiar o cancelar su plan en cualquier momento desde su panel.",
+        "title": "3. Suscripciones, Tarifas y Facturación"
+      }
+    },
+    "lastUpdated": "Última actualización: 12 de octubre de 2026",
+    "title": "Términos y Condiciones del Servicio"
   }
 }
