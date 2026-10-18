@@ -1,5 +1,22 @@
 {
   "contact": {
+    "channels": {
+      "cardDescription": "Comunícate directamente con nuestro equipo a través de cualquiera de los siguientes medios oficiales.",
+      "cardTitle": "Canales de atención directa",
+      "emailAriaLabel": "Enviar correo electrónico a {{email}}",
+      "emailLabel": "Correo electrónico",
+      "fallbackNotice": "En este momento todos nuestros canales de atención se gestionan a través del formulario.",
+      "phoneAriaLabel": "Llamar al teléfono {{phone}}",
+      "phoneLabel": "Teléfono",
+      "sectionAriaLabel": "Medios de contacto directo",
+      "social": {
+        "facebook": "Facebook de Booking System (abre en una nueva pestaña)",
+        "instagram": "Instagram de Booking System (abre en una nueva pestaña)",
+        "linkedin": "LinkedIn de Booking System (abre en una nueva pestaña)",
+        "x": "X de Booking System (abre en una nueva pestaña)"
+      },
+      "socialTitle": "Redes sociales oficiales"
+    },
     "form": {
       "dismissAction": "Cerrar",
       "dismissAlert": "Cerrar alerta",

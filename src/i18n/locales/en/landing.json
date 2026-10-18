@@ -1,5 +1,22 @@
 {
   "contact": {
+    "channels": {
+      "cardDescription": "Get in touch directly with our team through any of our official channels.",
+      "cardTitle": "Direct contact channels",
+      "emailAriaLabel": "Send email to {{email}}",
+      "emailLabel": "Email",
+      "fallbackNotice": "Direct contact channels are currently handled through our contact form.",
+      "phoneAriaLabel": "Call phone number {{phone}}",
+      "phoneLabel": "Phone",
+      "sectionAriaLabel": "Direct contact channels",
+      "social": {
+        "facebook": "Booking System on Facebook (opens in a new tab)",
+        "instagram": "Booking System on Instagram (opens in a new tab)",
+        "linkedin": "Booking System on LinkedIn (opens in a new tab)",
+        "x": "Booking System on X (opens in a new tab)"
+      },
+      "socialTitle": "Official social networks"
+    },
     "form": {
       "dismissAction": "Dismiss",
       "dismissAlert": "Dismiss alert",
