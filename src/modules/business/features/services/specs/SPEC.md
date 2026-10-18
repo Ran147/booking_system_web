@@ -190,7 +190,7 @@ None.
 | KAN-57 | AC-KAN-57-01 … AC-KAN-57-04 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
 | KAN-58 | AC-KAN-58-01 … AC-KAN-58-05 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
 | KAN-59 | AC-KAN-59-01 … AC-KAN-59-05 | `src/modules/business/features/services/tests/ServiceListPage.test.tsx` |
-| KAN-59 | AC-KAN-59-02, AC-KAN-59-06, AC-KAN-59-07 | `functions/src/services/tests/deleteService.test.ts` |
+| KAN-59 | AC-KAN-59-02, AC-KAN-59-04, AC-KAN-59-06, AC-KAN-59-07 | `functions/src/services/tests/deleteService.test.ts` |
 | KAN-60 | AC-KAN-60-01, AC-KAN-60-02, AC-KAN-60-04 … AC-KAN-60-10 | `src/modules/business/features/services/tests/ServiceDiscountsPage.test.tsx` |
 | KAN-60 | AC-KAN-60-03 | `functions/src/bookings/tests/createBooking.test.ts` |
 | KAN-61 | AC-KAN-61-01 … AC-KAN-61-07 | `src/modules/business/features/services/tests/ServiceCollaboratorsPage.test.tsx` |

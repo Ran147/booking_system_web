@@ -30,6 +30,7 @@ import type { ServiceListTableProps } from "./types/ServiceListTable.types";
 
 export const ServiceListTable = ({
   currency,
+  isActivating,
   isReadOnly,
   onActivateService,
   onEditService,
@@ -166,7 +167,7 @@ export const ServiceListTable = ({
                       <>
                         <Button
                           ariaLabel={t("services.status.activateAction")}
-                          disabled={isReadOnly}
+                          disabled={isReadOnly || isActivating}
                           leftIcon={Power}
                           onClick={() => onActivateService?.(serviceItem.id)}
                           size={BUTTON_SIZE.SM}

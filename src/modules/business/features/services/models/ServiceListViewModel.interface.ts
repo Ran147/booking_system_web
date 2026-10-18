@@ -34,6 +34,7 @@ export interface ServiceListViewModel {
   readonly hasActiveFilters: boolean;
   readonly hasNextPage: boolean;
   readonly hasPreviousPage: boolean;
+  readonly isActivating: boolean;
   readonly isDeactivating: boolean;
   readonly isDeleting: boolean;
   readonly isEmpty: boolean;

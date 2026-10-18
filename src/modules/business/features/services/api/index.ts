@@ -4,6 +4,7 @@ export { fetchBusinessStatus } from "./fetchBusinessStatus";
 export { fetchServiceCollaboratorsData } from "./fetchServiceCollaboratorsData";
 export { fetchServiceDetail } from "./fetchServiceDetail";
 export { fetchServicePage } from "./fetchServicePage";
+export { mapDeleteServiceError } from "./mapDeleteServiceError";
 export { mapServiceDetail, mapServiceListItem } from "./ServiceDocument.schema";
 export { serviceQueryKeys } from "./serviceQueryKeys";
 export { updateService } from "./updateService";
