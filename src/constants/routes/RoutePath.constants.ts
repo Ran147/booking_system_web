@@ -28,6 +28,8 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
+    BOOKING_DETAIL: "my-bookings/:bookingId",
+    MY_BOOKINGS: "my-bookings",
     ROOT: "/:businessSlug",
   },
   LANDING: {
