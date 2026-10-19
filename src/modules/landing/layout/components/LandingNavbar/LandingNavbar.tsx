@@ -48,6 +48,8 @@ export const LandingNavbar = ({
           openMenuLabel={t("home.navbar.menuOpen")}
           portalActionLabel={viewModel.portalActionLabel}
           portalActionPath={viewModel.portalActionPath}
+          signUpActionLabel={viewModel.signUpActionLabel}
+          signUpActionPath={viewModel.signUpActionPath}
         />
       </div>
 
@@ -59,6 +61,8 @@ export const LandingNavbar = ({
         onNavigate={viewModel.handleNavigate}
         portalActionLabel={viewModel.portalActionLabel}
         portalActionPath={viewModel.portalActionPath}
+        signUpActionLabel={viewModel.signUpActionLabel}
+        signUpActionPath={viewModel.signUpActionPath}
       />
     </header>
   );

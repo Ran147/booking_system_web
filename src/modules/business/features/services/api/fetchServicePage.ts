@@ -69,17 +69,45 @@ export const fetchServicePage = async ({
     ? query(filteredQuery, startAfter(pageCursor), limit(pageSize))
     : query(filteredQuery, limit(pageSize));
 
-  const [pageSnapshot, countSnapshot] = await Promise.all([
-    getDocs(pageQuery),
-    getCountFromServer(filteredQuery),
-  ]);
+  try {
+    const [pageSnapshot, countSnapshot] = await Promise.all([
+      getDocs(pageQuery),
+      getCountFromServer(filteredQuery),
+    ]);
 
-  const hasMorePages = pageSnapshot.docs.length === pageSize;
-  const lastDocument = pageSnapshot.docs.at(-1) ?? null;
+    const hasMorePages = pageSnapshot.docs.length === pageSize;
+    const lastDocument = pageSnapshot.docs.at(-1) ?? null;
 
-  return {
-    items: pageSnapshot.docs.map(mapServiceListItem),
-    nextCursor: hasMorePages ? lastDocument : null,
-    totalCount: countSnapshot.data().count,
-  };
+    return {
+      items: pageSnapshot.docs.map(mapServiceListItem),
+      nextCursor: hasMorePages ? lastDocument : null,
+      totalCount: countSnapshot.data().count,
+    };
+  } catch {
+    const allSnapshot = await getDocs(servicesCollectionReference);
+    const allItems = allSnapshot.docs.map(mapServiceListItem);
+
+    const filteredItems = allItems.filter((serviceItem) => {
+      if (filters.status && serviceItem.status !== filters.status) {
+        return false;
+      }
+      if (normalizedSearchTerm) {
+        const itemSearchName = normalizeSearchTerm(serviceItem.name);
+        const matchesPrefix = itemSearchName.startsWith(normalizedSearchTerm);
+        const matchesSubstring = itemSearchName.includes(normalizedSearchTerm);
+        return matchesPrefix || matchesSubstring;
+      }
+      return true;
+    });
+
+    filteredItems.sort((firstItem, secondItem) =>
+      firstItem.name.localeCompare(secondItem.name),
+    );
+
+    return {
+      items: filteredItems.slice(0, pageSize),
+      nextCursor: null,
+      totalCount: filteredItems.length,
+    };
+  }
 };

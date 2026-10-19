@@ -16,6 +16,8 @@ functions/lib/
 
 # Firebase
 .firebase/
+*-firebase-adminsdk-*.json
+serviceAccount*.json
 firebase-debug.log*
 firestore-debug.log*
 database-debug.log*

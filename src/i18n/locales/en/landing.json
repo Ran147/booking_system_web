@@ -1,4 +1,77 @@
 {
+  "contact": {
+    "about": {
+      "company": {
+        "description": "Born from the real needs of service businesses that lost valuable time coordinating appointments manually. We built Booking System to transform that complexity into a seamless, reliable, and modern experience.",
+        "plansAction": "Explore subscription plans",
+        "title": "Our story and commitment"
+      },
+      "mission": {
+        "description": "Empower professionals and service businesses with intuitive technology that automates scheduling and strengthens client relationships.",
+        "title": "Mission"
+      },
+      "vision": {
+        "description": "To be the leading platform in digital transformation and smart scheduling for service businesses across the region.",
+        "title": "Vision"
+      }
+    },
+    "backToHome": "Back to home",
+    "channels": {
+      "email": {
+        "description": "Write to us for business inquiries or technical support.",
+        "label": "soporte@bookingsystem.com",
+        "title": "Email"
+      },
+      "hours": {
+        "description": "Monday to Friday from 8:00 AM to 6:00 PM (UTC-6)",
+        "label": "Business hours",
+        "title": "Availability"
+      },
+      "phone": {
+        "description": "Call us directly for immediate assistance.",
+        "label": "+506 2222-0000",
+        "title": "Phone line"
+      },
+      "social": {
+        "description": "Follow us on our official social channels for updates.",
+        "title": "Social networks"
+      },
+      "title": "Direct contact channels"
+    },
+    "faq": {
+      "items": {
+        "item1": {
+          "answer": "Choose your ideal plan from our catalog, complete the simulated payment, and configure your hours and services in minutes.",
+          "question": "How do I get started with Booking System?"
+        },
+        "item2": {
+          "answer": "No. Your clients can book directly from any web browser on their mobile phone or computer via your custom link.",
+          "question": "Do my clients need to install an app?"
+        },
+        "item3": {
+          "answer": "Yes, our advanced plans allow inviting staff members, assigning specific schedules, and selecting services for each.",
+          "question": "Can I register my staff members?"
+        },
+        "item4": {
+          "answer": "We accept Visa, Mastercard credit/debit cards, and bank transfers depending on your region via our payment gateway.",
+          "question": "What payment methods are accepted for subscriptions?"
+        },
+        "item5": {
+          "answer": "There are no long-term contracts. You can upgrade, change, or cancel your plan at any time from your business dashboard.",
+          "question": "Can I cancel or switch my subscription?"
+        }
+      },
+      "subtitle": "Clear answers to the most common questions about the platform.",
+      "title": "Frequently asked questions"
+    },
+    "help": {
+      "action": "View plans",
+      "description": "Need a tailored solution or have custom requirements? Our team is here to support you every step of the way.",
+      "title": "Have additional questions?"
+    },
+    "subtitle": "Learn who we are, find answers, and reach out to our support team.",
+    "title": "Contact and customer support"
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
@@ -62,7 +135,8 @@
       "menuClose": "Close navigation menu",
       "menuOpen": "Open navigation menu",
       "mobileNavLabel": "Mobile navigation",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "signUp": "Sign up"
     },
     "plans": {
       "billingPeriod": {
@@ -110,6 +184,40 @@
     "title": "Welcome to Booking System"
   },
   "planCheckout": {
+    "checkout": {
+      "backToDetail": "Back to plan details",
+      "cardCvcHint": "3 or 4 security digits",
+      "cardCvcLabel": "CVC / CVV",
+      "cardExpiryHint": "MM/YY",
+      "cardExpiryLabel": "Expiration date",
+      "cardNumberHint": "Use 4000 0000 0000 0001 to approve, or ending in 2 to decline",
+      "cardNumberLabel": "Card number",
+      "cardholderNameHint": "As shown on card",
+      "cardholderNameLabel": "Cardholder name",
+      "contactEmailLabel": "Contact email:",
+      "declinedError": "Payment was declined by the simulated gateway. Check your details or use another card.",
+      "emailHint": "Use the email address you want to use for your business account.",
+      "emailLabel": "Contact email address",
+      "paidAmountLabel": "Amount paid:",
+      "payAction": "Pay and continue to sign up",
+      "paying": "Processing simulated payment…",
+      "planSummaryTitle": "Plan summary",
+      "recaptchaLabel": "Security verification",
+      "selectedPlanLabel": "Selected plan:",
+      "simulationNotice": "Test environment: this payment is simulated for demonstration and evaluation.",
+      "statusApproved": "Approved (Simulation)",
+      "stepTitle": "Subscription checkout",
+      "subscriptionBadge": "Subscription",
+      "subtitle": "You are one step away from managing your business with Booking System.",
+      "successAction": "Complete business sign up",
+      "successDescription": "We confirmed your payment for plan {{planName}}. Now finish setting up your business to activate your portal.",
+      "successTitle": "Payment processed successfully!",
+      "termsAcceptance": "I have read and accept the",
+      "termsLink": "Terms and conditions of service",
+      "termsRequired": "You must accept the terms and conditions to continue",
+      "title": "Complete plan checkout",
+      "transactionStatusLabel": "Transaction status:"
+    },
     "detail": {
       "backToPlans": "← Back to plans",
       "billingPeriod": {
@@ -145,6 +253,7 @@
       "businessSlugLabel": "Business address",
       "businessTitle": "Your business",
       "cannotCreateAccount": "We could not create the account with this email. If you already have one, sign in or recover your password.",
+      "changeEmail": "Change",
       "emailHint": "The email you paid the plan with.",
       "emailLabel": "Email",
       "firstNameLabel": "First name",

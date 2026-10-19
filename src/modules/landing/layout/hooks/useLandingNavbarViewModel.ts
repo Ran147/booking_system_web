@@ -17,7 +17,11 @@ const resolvePortalPath = (role: UserRole): string => {
   if (role === USER_ROLE.SUPER_ADMIN) {
     return ROUTE_PATH.ADMIN.ROOT;
   }
-  if (role === USER_ROLE.SUBSCRIBER || role === USER_ROLE.COLLABORATOR) {
+  if (
+    role === USER_ROLE.BUSINESS_OWNER ||
+    role === USER_ROLE.SUBSCRIBER ||
+    role === USER_ROLE.COLLABORATOR
+  ) {
     return ROUTE_PATH.BUSINESS.ROOT;
   }
   return ROUTE_PATH.LANDING.HOME;
@@ -112,6 +116,8 @@ export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
     navLinks,
     portalActionLabel,
     portalActionPath,
+    signUpActionLabel: t("home.navbar.signUp"),
+    signUpActionPath: ROUTE_PATH.LANDING.SIGN_UP,
     toggleMobileMenu,
   };
 };

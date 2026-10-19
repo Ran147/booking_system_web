@@ -14,4 +14,6 @@ export interface LandingNavbarActionsProps {
   readonly openMenuLabel: string;
   readonly portalActionLabel: string;
   readonly portalActionPath: string;
+  readonly signUpActionLabel?: string;
+  readonly signUpActionPath?: string;
 }

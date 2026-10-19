@@ -1,4 +1,77 @@
 {
+  "contact": {
+    "about": {
+      "company": {
+        "description": "Nacimos de la necesidad real de negocios de servicios que perdían tiempo valioso coordinando citas manualmente. Creamos Booking System para transformar esa complejidad en una experiencia ágil, confiable y moderna.",
+        "plansAction": "Explorar planes de suscripción",
+        "title": "Nuestra historia y compromiso"
+      },
+      "mission": {
+        "description": "Empoderar a profesionales y negocios de servicios con tecnología intuitiva que automatice sus citas y fortalezca la relación con sus clientes.",
+        "title": "Misión"
+      },
+      "vision": {
+        "description": "Ser la plataforma líder en digitalización y agendamiento inteligente para negocios de servicios en toda la región.",
+        "title": "Visión"
+      }
+    },
+    "backToHome": "Volver al inicio",
+    "channels": {
+      "email": {
+        "description": "Escríbenos para consultas comerciales o soporte técnico.",
+        "label": "soporte@bookingsystem.com",
+        "title": "Correo electrónico"
+      },
+      "hours": {
+        "description": "Lunes a Viernes de 8:00 a 18:00 (UTC-6)",
+        "label": "Horario de atención",
+        "title": "Disponibilidad"
+      },
+      "phone": {
+        "description": "Llámanos directamente para asistencia inmediata.",
+        "label": "+506 2222-0000",
+        "title": "Línea telefónica"
+      },
+      "social": {
+        "description": "Síguenos en nuestras redes oficiales para novedades.",
+        "title": "Redes sociales"
+      },
+      "title": "Canales directos de contacto"
+    },
+    "faq": {
+      "items": {
+        "item1": {
+          "answer": "Elige el plan ideal para tu negocio en nuestro catálogo, completa el pago simulado y configura tus horarios y servicios en minutos.",
+          "question": "¿Cómo comienzo a usar Booking System?"
+        },
+        "item2": {
+          "answer": "No. Tus clientes pueden reservar directamente desde cualquier navegador web en su teléfono o computadora mediante tu enlace personalizado.",
+          "question": "¿Mis clientes necesitan instalar alguna aplicación?"
+        },
+        "item3": {
+          "answer": "Sí, nuestros planes avanzados permiten invitar colaboradores, asignarles horarios específicos y definir qué servicios realiza cada uno.",
+          "question": "¿Puedo registrar a mi equipo de trabajo?"
+        },
+        "item4": {
+          "answer": "Aceptamos tarjetas de crédito y débito Visa, Mastercard y transferencias según tu país mediante nuestra pasarela de pagos.",
+          "question": "¿Qué métodos de pago aceptan para las suscripciones?"
+        },
+        "item5": {
+          "answer": "No hay contratos forzosos. Puedes actualizar, cambiar o cancelar tu plan en cualquier momento desde tu panel de negocio.",
+          "question": "¿Puedo cancelar o cambiar mi suscripción?"
+        }
+      },
+      "subtitle": "Respuestas claras a las dudas más comunes sobre la plataforma.",
+      "title": "Preguntas frecuentes"
+    },
+    "help": {
+      "action": "Ir a los planes",
+      "description": "¿Necesitas una solución personalizada o tienes requerimientos especiales? Nuestro equipo te acompaña en cada paso.",
+      "title": "¿Tienes preguntas adicionales?"
+    },
+    "subtitle": "Conoce quiénes somos, resuelve tus dudas y comunícate con nuestro equipo de atención.",
+    "title": "Contacto y atención al cliente"
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
@@ -62,7 +135,8 @@
       "menuClose": "Cerrar menú de navegación",
       "menuOpen": "Abrir menú de navegación",
       "mobileNavLabel": "Navegación móvil",
-      "signIn": "Iniciar sesión"
+      "signIn": "Iniciar sesión",
+      "signUp": "Registrarse"
     },
     "plans": {
       "billingPeriod": {
@@ -110,6 +184,40 @@
     "title": "Bienvenido a Booking System"
   },
   "planCheckout": {
+    "checkout": {
+      "backToDetail": "Volver al detalle del plan",
+      "cardCvcHint": "3 o 4 dígitos de seguridad",
+      "cardCvcLabel": "CVC / CVV",
+      "cardExpiryHint": "MM/AA",
+      "cardExpiryLabel": "Fecha de expiración",
+      "cardNumberHint": "Usa 4000 0000 0000 0001 para aprobar, o terminada en 2 para rechazar",
+      "cardNumberLabel": "Número de tarjeta",
+      "cardholderNameHint": "Como aparece en la tarjeta",
+      "cardholderNameLabel": "Nombre del titular",
+      "contactEmailLabel": "Correo de contacto:",
+      "declinedError": "El pago fue rechazado por la pasarela simulada. Revisa los datos o usa otra tarjeta.",
+      "emailHint": "Usa el correo con el que deseas crear la cuenta y administrar tu negocio.",
+      "emailLabel": "Correo electrónico de contacto",
+      "paidAmountLabel": "Monto pagado:",
+      "payAction": "Pagar y continuar al registro",
+      "paying": "Procesando pago simulado…",
+      "planSummaryTitle": "Resumen del plan",
+      "recaptchaLabel": "Verificación de seguridad",
+      "selectedPlanLabel": "Plan seleccionado:",
+      "simulationNotice": "Entorno de prueba: este pago es simulado para demostración y evaluación.",
+      "statusApproved": "Aprobado (Simulación)",
+      "stepTitle": "Contratación de suscripción",
+      "subscriptionBadge": "Suscripción",
+      "subtitle": "Estás a un paso de comenzar a gestionar tu negocio con Booking System.",
+      "successAction": "Completar registro de tu negocio",
+      "successDescription": "Hemos confirmado tu pago para el plan {{planName}}. Ahora completa los datos de tu negocio para activar tu panel.",
+      "successTitle": "¡Pago procesado con éxito!",
+      "termsAcceptance": "He leído y acepto los",
+      "termsLink": "Términos y condiciones del servicio",
+      "termsRequired": "Debes aceptar los términos y condiciones para continuar",
+      "title": "Finalizar contratación del plan",
+      "transactionStatusLabel": "Estado de transacción:"
+    },
     "detail": {
       "backToPlans": "← Volver a los planes",
       "billingPeriod": {
@@ -145,6 +253,7 @@
       "businessSlugLabel": "Dirección del negocio",
       "businessTitle": "Tu negocio",
       "cannotCreateAccount": "No pudimos crear la cuenta con este correo. Si ya tienes una, inicia sesión o recupera tu contraseña.",
+      "changeEmail": "Cambiar",
       "emailHint": "Es el correo con el que pagaste el plan.",
       "emailLabel": "Correo electrónico",
       "firstNameLabel": "Nombre",

@@ -13,10 +13,12 @@ export const LandingNavbarActions = ({
   openMenuLabel,
   portalActionLabel,
   portalActionPath,
+  signUpActionLabel,
+  signUpActionPath,
 }: LandingNavbarActionsProps): ReactElement => {
   return (
     <div className="flex items-center gap-2">
-      <div className="hidden sm:block">
+      <div className="hidden items-center gap-2 sm:flex">
         <Button
           ariaLabel={portalActionLabel}
           leftIcon={isSignedIn ? LayoutDashboard : LogIn}
@@ -26,6 +28,17 @@ export const LandingNavbarActions = ({
         >
           {portalActionLabel}
         </Button>
+
+        {!isSignedIn && signUpActionLabel && signUpActionPath && (
+          <Button
+            ariaLabel={signUpActionLabel}
+            onClick={(): void => onNavigate(signUpActionPath)}
+            size={BUTTON_SIZE.DEFAULT}
+            variant={BUTTON_VARIANT.DEFAULT}
+          >
+            {signUpActionLabel}
+          </Button>
+        )}
       </div>
 
       <div className="md:hidden">

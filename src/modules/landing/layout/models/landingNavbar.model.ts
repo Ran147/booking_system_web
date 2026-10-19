@@ -22,5 +22,7 @@ export interface LandingNavbarViewModel {
   readonly navLinks: readonly NavbarNavLink[];
   readonly portalActionLabel: string;
   readonly portalActionPath: string;
+  readonly signUpActionLabel: string;
+  readonly signUpActionPath: string;
   readonly toggleMobileMenu: () => void;
 }

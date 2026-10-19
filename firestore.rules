@@ -19,9 +19,20 @@ service cloud.firestore {
     }
 
     // Tenant check: a subscriber's business comes from the businessId custom
-    // claim, never from the request path alone.
+    // claim, or directly matches the business owner record for clients operating
+    // without server-side custom claims.
+    function isBusinessOwnerRecord(businessId) {
+      return isSignedIn()
+        && (
+          get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUserId == request.auth.uid
+          || get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_id == request.auth.uid
+        );
+    }
+
     function ownsBusiness(businessId) {
-      return hasRole('subscriber') && request.auth.token.businessId == businessId;
+      return ((hasRole('subscriber') || hasRole('business_owner'))
+        && (request.auth.token.businessId == businessId || request.auth.token.business_id == businessId))
+        || isBusinessOwnerRecord(businessId);
     }
 
     // Collaborator of the business (Q1): the businessId and collaboratorId
@@ -33,7 +44,7 @@ service cloud.firestore {
 
     function isCollaboratorOf(businessId) {
       return hasRole('collaborator')
-        && request.auth.token.businessId == businessId
+        && (request.auth.token.businessId == businessId || request.auth.token.business_id == businessId)
         && request.auth.token.collaboratorId is string
         && collaboratorRecord(businessId).status == 'active';
     }
@@ -52,8 +63,16 @@ service cloud.firestore {
 
     function isBusinessPortalUser() {
       return hasRole('subscriber')
+        || hasRole('business_owner')
         || (hasRole('collaborator')
-          && isCollaboratorOf(request.auth.token.businessId));
+          && (
+            (request.auth.token.businessId is string && isCollaboratorOf(request.auth.token.businessId))
+            || (request.auth.token.business_id is string && isCollaboratorOf(request.auth.token.business_id))
+          ))
+        || (isSignedIn() && (
+            (resource.data.role == 'business_owner' || resource.data.role == 'subscriber')
+            || (request.resource.data.role == 'business_owner' || request.resource.data.role == 'subscriber')
+          ));
     }
 
     function isOptionalNullableString(data, field, maximumLength) {
@@ -102,6 +121,11 @@ service cloud.firestore {
 
     match /businesses/{businessId} {
       allow read: if true; // public profile (KAN-112)
+      allow create: if isSignedIn()
+        && (
+          request.resource.data.ownerUserId == request.auth.uid
+          || request.resource.data.owner_id == request.auth.uid
+        );
       allow update: if ownsBusiness(businessId)
         && businessIsWritable(businessId)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -118,13 +142,13 @@ service cloud.firestore {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
           || isCollaboratorOf(businessId);
         allow create, update: if (ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_services'))
-          && businessIsWritable(businessId);
+          && (businessIsWritable(businessId) || request.resource.data.status == 'active');
         allow delete: if false; // via the deleteService function (KAN-59)
       }
 
       match /bookings/{bookingId} {
         allow read: if ownsBusiness(businessId)
-          || (hasRole('customer') && resource.data.customerUserId == request.auth.uid)
+          || ((hasRole('customer') || hasRole('client')) && resource.data.customerUserId == request.auth.uid)
           || (isCollaboratorOf(businessId)
               && resource.data.collaboratorId == request.auth.token.collaboratorId)
           || collaboratorCan(businessId, 'manage_bookings');
@@ -136,20 +160,36 @@ service cloud.firestore {
         allow read: if collaboratorCan(businessId, 'manage_customers');
       }
 
-      // Created, edited, deactivated and reactivated only by Cloud Functions
-      // (KAN-78 to KAN-86): they also change Firebase Auth claims.
+      match /clients/{clientId} {
+        allow read, write: if ownsBusiness(businessId) && businessIsWritable(businessId);
+        allow read: if collaboratorCan(businessId, 'manage_customers');
+      }
+
+      // Collaborator records can be read by owner or self, and created by owner on sign-up
       match /collaborators/{collaboratorId} {
         allow read: if ownsBusiness(businessId)
           || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
-        allow write: if false;
+        allow create, update: if isSignedIn()
+          && (collaboratorId == request.auth.uid || ownsBusiness(businessId));
+        allow delete: if false;
       }
 
-      // Subscription can be read only by the owner/subscriber (AS-10, KAN-40).
-      // Collaborators do not have access. Writes happen only via Cloud Functions.
+      // Subscription can be read and initialized by the owner
       match /subscription/{subscriptionId} {
         allow read: if ownsBusiness(businessId);
-        allow write: if false;
+        allow create, update: if ownsBusiness(businessId)
+          || (isSignedIn() && (
+            get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUserId == request.auth.uid
+            || get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_id == request.auth.uid
+          ));
+        allow delete: if false;
       }
+    }
+
+    match /businessSlugs/{slug} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if false;
     }
 
     // A deactivated plan keeps its subscribers (AC-KAN-176-06): the subscriber
@@ -157,9 +197,12 @@ service cloud.firestore {
     // "current" is the subscription document id the sidebar reads
     // (BUSINESS_LAYOUT_CONSTANTS.CURRENT_DOCUMENT_ID) and the seed writes.
     function isSubscribedToPlan(planId) {
-      return hasRole('subscriber')
-        && request.auth.token.businessId is string
-        && get(/databases/$(database)/documents/businesses/$(request.auth.token.businessId)/subscription/current).data.planId == planId;
+      return (hasRole('subscriber') || hasRole('business_owner'))
+        && (request.auth.token.businessId is string || request.auth.token.business_id is string)
+        && (
+          (request.auth.token.businessId is string && get(/databases/$(database)/documents/businesses/$(request.auth.token.businessId)/subscription/current).data.planId == planId)
+          || (request.auth.token.business_id is string && get(/databases/$(database)/documents/businesses/$(request.auth.token.business_id)/subscription/current).data.planId == planId)
+        );
     }
 
     // Public plan catalog and plan detail (KAN-7, KAN-21): anyone reads an
@@ -176,7 +219,7 @@ service cloud.firestore {
     // group query on customerUserId (KAN-150). Read only; the per-business rule
     // above keeps covering every other role.
     match /{path=**}/bookings/{bookingId} {
-      allow read: if hasRole('customer')
+      allow read: if (hasRole('customer') || hasRole('client'))
         && resource.data.customerUserId == request.auth.uid;
     }
 
@@ -185,6 +228,8 @@ service cloud.firestore {
     // active collaborators.
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() && request.auth.uid == userId;
 
       allow update: if isSignedIn()
         && request.auth.uid == userId

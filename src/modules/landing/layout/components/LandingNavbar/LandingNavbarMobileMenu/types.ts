@@ -15,4 +15,6 @@ export interface LandingNavbarMobileMenuProps {
   readonly onNavigate: (path: string) => void;
   readonly portalActionLabel: string;
   readonly portalActionPath: string;
+  readonly signUpActionLabel?: string;
+  readonly signUpActionPath?: string;
 }
