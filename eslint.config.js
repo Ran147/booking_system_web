@@ -48,12 +48,12 @@ const PALETTE_COLOR_PATTERN =
 const sharedRestrictedSyntax = [
   {
     message:
-      "Use Nullable / NullableRef / NullableUndefined from @/shared/types (code-style-standards).",
+      "Use Nullable / NullableRef / NullableUndefined from @/types (code-style-standards).",
     selector: "TSUnionType > TSNullKeyword",
   },
   {
     message:
-      "Use Nullable / NullableRef / NullableUndefined from @/shared/types (code-style-standards).",
+      "Use Nullable / NullableRef / NullableUndefined from @/types (code-style-standards).",
     selector: "TSUnionType > TSUndefinedKeyword",
   },
   {
@@ -111,7 +111,6 @@ export default tseslint.config(
       "coverage/**",
       "functions/lib/**",
       "node_modules/**",
-      "src/shared/components/ui/**", // vendored shadcn/ui (component-standards §3)
       "src/components/common/ui/**", // vendored shadcn/ui (component-standards §3)
     ],
   },
@@ -202,11 +201,11 @@ export default tseslint.config(
               message: "Use the @/ alias (code-style-standards).",
             },
             {
-              group: ["@/shared/components/ui/*", "@/components/common/ui/*"],
+              group: ["@/components/common/ui/*"],
               message: "Import from @/components/common (component-standards).",
             },
             {
-              group: ["@/portals/*/features/*/*", "@/modules/*/features/*/*"],
+              group: ["@/modules/*/features/*/*"],
               message:
                 "Import another feature only through its index.ts (component-architecture).",
             },
@@ -274,17 +273,13 @@ export default tseslint.config(
 
   // code-style-standards: Nullable.ts is the only place allowed to spell | null / | undefined
   {
-    files: ["src/shared/types/Nullable.ts", "src/types/Nullable.ts"],
+    files: ["src/types/Nullable.ts", "functions/src/shared/types/Nullable.ts"],
     rules: { "no-restricted-syntax": "off" },
   },
 
   // i18n-standards + component-architecture + component-standards: feature UI files
   {
-    files: [
-      "src/portals/**/*.tsx",
-      "src/features/**/*.tsx",
-      "src/modules/**/*.tsx",
-    ],
+    files: ["src/modules/**/*.tsx"],
     ignores: ["**/tests/**", "**/*.test.tsx"],
     plugins: { i18next },
     rules: {
@@ -318,7 +313,7 @@ export default tseslint.config(
 
   // i18n-standards: no visible text in shared components either
   {
-    files: ["src/shared/components/**/*.tsx", "src/components/**/*.tsx"],
+    files: ["src/components/**/*.tsx"],
     plugins: { i18next },
     rules: { "i18next/no-literal-string": I18N_LITERAL_RULE },
   },
@@ -340,12 +335,7 @@ export default tseslint.config(
 
   // Tests: vitest globals
   {
-    files: [
-      "**/*.test.{ts,tsx}",
-      "**/tests/**",
-      "src/shared/test-utils/**",
-      "src/test-utils/**",
-    ],
+    files: ["**/*.test.{ts,tsx}", "**/tests/**", "src/test-utils/**"],
     languageOptions: { globals: { ...globals.vitest } },
   },
 
@@ -357,10 +347,22 @@ export default tseslint.config(
     rules: { "no-console": "off" },
   },
 
+  // functions/ is a separate Node package with no @/ alias: relative imports
+  // are the only way to reach functions/src/shared (cloud-functions-standards §1).
+  {
+    files: ["functions/src/**/*.ts"],
+    rules: { "no-restricted-imports": "off" },
+  },
+
   // Tool config files must use export default; typescript-eslint documents
   // its default import (`tseslint.configs`), which import-x warns about
   {
-    files: ["*.config.{js,ts}"],
+    files: [
+      "*.config.{js,ts}",
+      "functions/*.config.{js,ts}",
+      // Playwright reads the setup function from the default export.
+      "e2e/globalSetup.ts",
+    ],
     rules: {
       "import-x/no-default-export": "off",
       "import-x/no-named-as-default-member": "off",

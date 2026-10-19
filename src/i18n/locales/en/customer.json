@@ -2,6 +2,57 @@
   "layout": {
     "title": "Customer portal"
   },
+  "myBookings": {
+    "description": "See your upcoming appointments and the history of your bookings.",
+    "detail": {
+      "back": "Back to my bookings",
+      "business": "Business",
+      "businessResource": "Served by the business",
+      "cancellation": {
+        "cancelledBy": {
+          "business": "Cancelled by the business",
+          "customer": "Cancelled by you"
+        },
+        "label": "Cancellation",
+        "notPenalized": "No penalty",
+        "penalized": "With penalty"
+      },
+      "collaborator": "Served by",
+      "duration": "Duration",
+      "durationValue_one": "{{count}} minute",
+      "durationValue_other": "{{count}} minutes",
+      "endsAt": "End",
+      "price": "Price",
+      "service": "Service",
+      "startsAt": "Start",
+      "status": "Status",
+      "title": "Booking details"
+    },
+    "history": {
+      "empty": "You have no past bookings yet."
+    },
+    "list": {
+      "columns": {
+        "actions": "Actions",
+        "business": "Business",
+        "date": "Date and time",
+        "service": "Service",
+        "status": "Status"
+      },
+      "detailAction": "View details",
+      "label": "My bookings"
+    },
+    "retryAction": "Try again",
+    "tabs": {
+      "history": "History",
+      "label": "Booking type",
+      "upcoming": "Upcoming"
+    },
+    "title": "My bookings",
+    "upcoming": {
+      "empty": "You have no upcoming bookings."
+    }
+  },
   "placeholder": {
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"

@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | shared (used from landing, business, customer and admin) |
-| Feature folder | `src/features/auth/` |
+| Feature folder | `src/modules/auth/` |
 | Stories | KAN-33, KAN-34, KAN-35, KAN-36, KAN-37, KAN-38 (KAN-28); KAN-129, KAN-130, KAN-131, KAN-132, KAN-133 (KAN-128) |
 | Status | Draft |
 | Depends on | KAN-182 platform settings (`PlatformSettings.idleTimeoutMinutes`, admin); KAN-26 subscriber sign-up; KAN-122 customer sign-up; KAN-29 / KAN-110 sign-out; Q7 and Q2 decided 2026-09-28 (a subscriber whose business is `pending` lands on the "under review" screen); Q1 decided 2026-09-28 (collaborators sign in to the business portal); KAN-174 admin businesses (approval PROP-1) |
@@ -152,7 +152,7 @@ None. Q7 and Q2 were decided on 2026-09-28: a subscriber whose business is `pend
 | AS-10 | A deactivated collaborator's Firebase account is disabled, so sign-in reports `common:auth.signIn.accountDisabled` only after a correct password; wrong passwords still get the neutral `common:auth.signIn.invalidCredentials`. | AC-KAN-33-14 |
 
 ## Backlog issues
-- KAN-28 and KAN-128 are both named "Login" and describe the same flow for two roles; covered by one spec in `src/features/auth`. Super admin and collaborator sign-in have no story and use the same flow.
+- KAN-28 and KAN-128 are both named "Login" and describe the same flow for two roles; covered by one spec in `src/modules/auth`. Super admin and collaborator sign-in have no story and use the same flow.
 - KAN-33 to KAN-38 say "usuario"; in the KAN-28 epic this is the subscriber (the epic map says "Login (suscriptor)").
 - KAN-128 has no stories for reCAPTCHA or password strength; the same rules apply to customers (reCAPTCHA on sign-in, `PASSWORD_RULE` on reset), consistent with `auth-and-roles` §5.
 - KAN-38 describes "a security token that signs me out"; the requirement is sign-out after inactivity (`PlatformSettings.idleTimeoutMinutes`), not the lifetime of the Firebase token.
@@ -172,7 +172,7 @@ None. Q7 and Q2 were decided on 2026-09-28: a subscriber whose business is `pend
 | Story | Criteria | Test file |
 | --- | --- | --- |
 | KAN-33 | AC-KAN-33-01 … AC-KAN-33-08, AC-KAN-33-13, AC-KAN-33-14 | `tests/SignInPage.test.tsx` |
-| KAN-33 | AC-KAN-33-09 … AC-KAN-33-12 | `src/portals/business/layout/tests/BusinessStatusGate.test.tsx` |
+| KAN-33 | AC-KAN-33-09 … AC-KAN-33-12 | `src/modules/business/layout/tests/BusinessStatusGate.test.tsx` |
 | KAN-34 | AC-KAN-34-01 … AC-KAN-34-07 | `tests/SignInPage.test.tsx` |
 | KAN-35 | AC-KAN-35-01 … AC-KAN-35-04 | `tests/SignInPage.test.tsx` |
 | KAN-36 | AC-KAN-36-01 … AC-KAN-36-06 | `tests/PasswordRecoveryPage.test.tsx` |

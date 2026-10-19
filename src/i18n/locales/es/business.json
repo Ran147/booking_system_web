@@ -1,15 +1,251 @@
 {
+  "businessProfile": {
+    "contact": {
+      "emailLabel": "Correo de contacto",
+      "phoneLabel": "Teléfono de contacto",
+      "title": "Contacto"
+    },
+    "description": "Mantén actualizada la información que tus clientes verán cuando visiten tu negocio.",
+    "descriptionField": {
+      "label": "Descripción"
+    },
+    "eyebrow": "Presencia pública",
+    "logo": {
+      "helper": "PNG, JPEG o WebP de hasta 2 MB.",
+      "label": "Logo del negocio",
+      "removeAction": "Quitar logo",
+      "undoAction": "Conservar logo"
+    },
+    "name": {
+      "label": "Nombre del negocio"
+    },
+    "readOnly": "Este negocio está en modo de solo lectura y no puede modificarse.",
+    "retryAction": "Reintentar",
+    "saveAction": "Guardar cambios",
+    "saveSuccess": "El perfil público se guardó correctamente.",
+    "slug": {
+      "label": "Enlace público",
+      "readOnlyHint": "El enlace se define al crear el negocio y no puede modificarse."
+    },
+    "socialLinks": {
+      "facebookLabel": "Facebook",
+      "helper": "Agrega únicamente enlaces HTTPS. Deja vacías las redes que no utilices.",
+      "instagramLabel": "Instagram",
+      "tiktokLabel": "TikTok",
+      "title": "Redes sociales",
+      "websiteLabel": "Sitio web",
+      "whatsappLabel": "WhatsApp"
+    },
+    "title": "Perfil público del negocio"
+  },
+  "collaborators": {
+    "edit": {
+      "serviceHasBookingsWarning": "Este colaborador tiene {{count}} reserva(s) futura(s) de este servicio que se mantendrán asignadas."
+    }
+  },
   "errors": {
     "readOnly": "Tu negocio está inactivo o suspendido. No se pueden realizar cambios."
   },
+  "home": {
+    "closeModal": "Entendido",
+    "configs": {
+      "settings": {
+        "action": "Configurar",
+        "description": "Zona horaria, moneda, notificaciones y apariencia.",
+        "title": "Configuración general"
+      },
+      "subscription": {
+        "action": "Ver plan",
+        "description": "Detalles de tu plan contratado, recibos y fechas de renovación.",
+        "title": "Plan y suscripción"
+      }
+    },
+    "configsDescription": "Administra los parámetros generales y la suscripción de tu negocio.",
+    "configsTitle": "Configuraciones y ajustes",
+    "metrics": {
+      "activeServices": {
+        "helper": "En catálogo público",
+        "label": "Servicios configurados",
+        "value": "1"
+      },
+      "businessStatus": {
+        "helper": "Estado del tenant",
+        "label": "Estado del negocio",
+        "value": "Activo"
+      },
+      "todayBookings": {
+        "helper": "Próximas citas",
+        "label": "Citas para hoy",
+        "value": "0"
+      }
+    },
+    "placeholderModalDescription": "Esta herramienta se encuentra actualmente en desarrollo y estará disponible próximamente en tu portal.",
+    "placeholderModalTitle": "Módulo en construcción",
+    "roleBadge": "Suscriptor",
+    "roleCollaboratorBadge": "Colaborador",
+    "status": {
+      "available": "Disponible",
+      "comingSoon": "Próximamente"
+    },
+    "subtitle": "Accede fácilmente a las herramientas de gestión y configuraciones de tu negocio.",
+    "title": "Panel del negocio",
+    "tools": {
+      "collaborators": {
+        "action": "Gestionar equipo",
+        "description": "Invita a tus colaboradores, asigna servicios y gestiona permisos.",
+        "title": "Equipo y colaboradores"
+      },
+      "customers": {
+        "action": "Ver clientes",
+        "description": "Administra tu cartera de clientes, historial de visitas y notas.",
+        "title": "Directorio de clientes"
+      },
+      "reports": {
+        "action": "Ver estadísticas",
+        "description": "Analiza ingresos estimados, ocupación de turnos y métricas.",
+        "title": "Reportes y estadísticas"
+      },
+      "schedule": {
+        "action": "Ver agenda",
+        "description": "Consulta tus citas del día, agenda turnos y administra bloques.",
+        "title": "Agenda y reservas"
+      },
+      "services": {
+        "action": "Crear servicio",
+        "description": "Crea, edita y organiza los servicios que ofreces a tus clientes.",
+        "title": "Gestión de servicios"
+      }
+    },
+    "toolsDescription": "Gestiona tu catálogo de servicios, agenda, clientes y reportes operativos.",
+    "toolsTitle": "Herramientas y accesos rápidos",
+    "welcome": "Bienvenido a tu panel"
+  },
   "layout": {
+    "expiryWarning": {
+      "ariaLabel": "Aviso de vencimiento de suscripción",
+      "dismiss": "Descartar aviso",
+      "endsToday": "Tu suscripción finaliza hoy.",
+      "message": "Tu suscripción finaliza en {{count}} días ({{date}}).",
+      "pastDue": "Tu suscripción tiene un pago pendiente. Finaliza en {{count}} días ({{date}}).",
+      "pastDueNoCountdown": "Tu suscripción tiene un pago pendiente.",
+      "payLink": "Pagar suscripción"
+    },
+    "sidebar": {
+      "ariaLabel": "Navegación del portal del negocio",
+      "brandFallback": "BN",
+      "closeMenu": "Cerrar menú",
+      "collaborator": "Colaborador: {{name}}",
+      "collaborators": "Equipo",
+      "collaboratorsDescription": "Colaboradores y asignación de permisos",
+      "customers": "Clientes",
+      "customersDescription": "Directorio y gestión de clientes",
+      "dashboard": "Inicio",
+      "dashboardDescription": "Resumen y estadísticas de tu negocio",
+      "logoAlt": "Logo de {{name}}",
+      "openMenu": "Abrir menú de navegación",
+      "reports": "Reportes",
+      "reportsDescription": "Ocupación y métricas operativas",
+      "schedule": "Agenda",
+      "scheduleDescription": "Turnos, reservas y bloqueos de horario",
+      "services": "Servicios",
+      "servicesDescription": "Catálogo de servicios y precios",
+      "settings": "Configuración",
+      "settingsDescription": "Ajustes del sistema y perfil",
+      "signOut": "Cerrar sesión",
+      "subscription": "Suscripción",
+      "subscriptionDescription": "Plan contratado y facturación"
+    },
+    "signOut": {
+      "cancelAction": "Permanecer aquí",
+      "confirmAction": "Cerrar sesión",
+      "confirmTitle": "Cambios sin guardar",
+      "unsavedChangesConfirm": "¿Deseas cerrar sesión? Tienes cambios sin guardar que se perderán."
+    },
+    "subscriptionBanner": {
+      "ariaLabel": "Estado de la suscripción",
+      "endsOn": "Finaliza el {{date}}",
+      "loadError": "No se pudo cargar la suscripción",
+      "payLink": "Pagar ahora",
+      "readOnlyNotice": "Modo de solo lectura",
+      "renewsOn": "Se renueva el {{date}}",
+      "retry": "Reintentar",
+      "suspendedNotice": "Negocio suspendido por administración",
+      "viewPlan": "Administrar suscripción"
+    },
     "title": "Portal del negocio"
   },
   "placeholder": {
     "description": "Aquí gestionarás los servicios, la agenda y los clientes de tu negocio.",
     "title": "Panel del negocio"
   },
+  "settings": {
+    "description": "Administra las preferencias personales de tu cuenta.",
+    "language": {
+      "description": "Los textos, fechas, horas y precios utilizarán el idioma seleccionado.",
+      "label": "Idioma de la interfaz",
+      "saveError": "El idioma cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
+      "title": "Idioma"
+    },
+    "title": "Configuración"
+  },
   "services": {
+    "collaborators": {
+      "collaboratorListDescription": "Marca los colaboradores autorizados para brindar este servicio.",
+      "collaboratorListTitle": "Colaboradores disponibles",
+      "emptyCollaborators": "No hay colaboradores activos o invitados registrados.",
+      "noCollaboratorNotice": "Al no tener colaboradores seleccionados, el servicio es atendido como un recurso único del negocio.",
+      "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La asignación de colaboradores está deshabilitada.",
+      "saveAction": "Guardar cambios",
+      "saveSuccess": "Asignación de colaboradores actualizada.",
+      "saving": "Guardando…",
+      "selection": {
+        "automatic": "El sistema asigna uno disponible automáticamente",
+        "customerChoice": "El cliente puede elegir a cuál",
+        "description": "Decide si el cliente escoge o el sistema asigna automáticamente.",
+        "title": "Modo de asignación"
+      },
+      "subtitle": "Selecciona qué colaboradores atienden este servicio y cómo se asignan.",
+      "title": "Asignar colaboradores"
+    },
+    "delete": {
+      "action": "Eliminar",
+      "cancelAction": "Cancelar",
+      "confirmAction": "Eliminar",
+      "confirmDescription": "¿Estás seguro de que deseas eliminar permanentemente este servicio? Esta acción no se puede deshacer.",
+      "confirmTitle": "Eliminar servicio",
+      "hasBookingsError": "No puedes eliminar un servicio con reservas pendientes o confirmadas.",
+      "mustBeInactiveError": "Solo puedes eliminar servicios desactivados.",
+      "success": "Servicio eliminado."
+    },
+    "discounts": {
+      "action": "Descuentos",
+      "activeBadge": "Vigente",
+      "addDiscountAction": "Agregar descuento",
+      "adding": "Guardando…",
+      "emptyDescription": "Agrega un descuento para incentivar a tus clientes.",
+      "emptyTitle": "No hay promociones configuradas",
+      "endDateLabel": "Fecha de fin",
+      "expiredBadge": "Expirado",
+      "invalidDateRangeError": "La fecha de fin debe ser posterior o igual a la fecha de inicio.",
+      "overlapError": "El rango de fechas se superpone con otro descuento existente.",
+      "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La gestión de promociones está deshabilitada.",
+      "removeAction": "Eliminar",
+      "removeConfirmDescription": "¿Estás seguro de que deseas eliminar este descuento?",
+      "removeConfirmTitle": "Eliminar descuento",
+      "removeSuccess": "Descuento eliminado con éxito.",
+      "saveSuccess": "Descuento guardado con éxito.",
+      "startDateLabel": "Fecha de inicio",
+      "subtitle": "Configura descuentos temporales por porcentaje o monto fijo.",
+      "title": "Descuentos y promociones",
+      "typeFixedAmount": "Monto fijo",
+      "typeLabel": "Tipo de descuento",
+      "typePercentage": "Porcentaje (%)",
+      "upcomingBadge": "Próximo",
+      "valueHelpFixed": "Ingresa el monto del descuento en la moneda del negocio (menor al precio).",
+      "valueHelpPercentage": "Ingresa un porcentaje entero entre 1 y 100.",
+      "valueLabel": "Valor",
+      "valuePlaceholder": "0"
+    },
     "form": {
       "addFeatureAction": "Agregar característica",
       "backToServicesAction": "Volver a servicios",
@@ -22,6 +258,9 @@
       "durationHelp": "Entre 5 y 480 minutos, en pasos de 5 minutos.",
       "durationLabel": "Duración (minutos)",
       "durationPlaceholder": "60",
+      "editSubtitle": "Modifica los datos del servicio seleccionado en el catálogo.",
+      "editSuccess": "Servicio actualizado.",
+      "editTitle": "Editar servicio",
       "featureItemLabel": "Característica {{index}}",
       "featurePlaceholder": "Ej. Incluye lavado y peinado",
       "featuresDescription": "Agrega hasta 10 características o beneficios del servicio.",
@@ -47,6 +286,81 @@
       "submitting": "Guardando…",
       "subtitle": "Completa los datos para agregar un nuevo servicio al catálogo de tu negocio.",
       "title": "Nuevo servicio"
+    },
+    "list": {
+      "actions": "Acciones",
+      "clearFiltersAction": "Limpiar filtros",
+      "collaboratorsAction": "Colaboradores",
+      "createServiceAction": "Crear servicio",
+      "description": "Administra el catálogo de servicios de tu negocio.",
+      "discountsAction": "Descuentos",
+      "duration": "Duración",
+      "durationMinutes": "{{minutes}} min",
+      "editAction": "Editar",
+      "emptyDescription": "No hay servicios registrados en este momento. Haz clic en 'Crear servicio' para agregar el primero.",
+      "emptyTitle": "No hay servicios registrados",
+      "filterStatusActive": "Activos",
+      "filterStatusAll": "Todos los estados",
+      "filterStatusInactive": "Inactivos",
+      "filterStatusLabel": "Filtrar por estado",
+      "name": "Servicio",
+      "noResults": "No se encontraron servicios con los filtros aplicados.",
+      "noResultsDescription": "Intenta ajustar la búsqueda o limpiar los filtros para ver todos los servicios.",
+      "price": "Precio",
+      "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La creación y edición de servicios está deshabilitada.",
+      "retryAction": "Reintentar",
+      "searchLabel": "Buscar servicios",
+      "searchPlaceholder": "Buscar por nombre…",
+      "status": "Estado",
+      "statusActive": "Activo",
+      "statusInactive": "Inactivo",
+      "title": "Servicios",
+      "totalCount": "{{count}} servicios en total"
+    },
+    "snapshot": {
+      "serviceUnavailableError": "El servicio seleccionado no está disponible o ha sido eliminado."
+    },
+    "status": {
+      "activateAction": "Activar",
+      "activateSuccess": "Servicio activado.",
+      "deactivateAction": "Desactivar",
+      "deactivateCancelAction": "Cancelar",
+      "deactivateConfirmAction": "Desactivar",
+      "deactivateConfirmDescription": "¿Estás seguro de que deseas desactivar este servicio? Dejará de aparecer en el catálogo público para nuevas reservas.",
+      "deactivateConfirmTitle": "Desactivar servicio",
+      "deactivateSuccess": "Servicio desactivado."
     }
+  },
+  "settings": {
+    "description": "Administra las preferencias personales de tu cuenta.",
+    "language": {
+      "description": "Los textos, fechas, horas y precios utilizarán el idioma seleccionado.",
+      "label": "Idioma de la interfaz",
+      "saveError": "El idioma cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
+      "title": "Idioma"
+    },
+    "password": {
+      "confirmationMismatch": "La confirmación no coincide con la nueva contraseña.",
+      "confirmPasswordLabel": "Confirmar nueva contraseña",
+      "currentPasswordInvalid": "La contraseña actual no es correcta.",
+      "currentPasswordLabel": "Contraseña actual",
+      "description": "Actualiza la contraseña que utilizas para acceder a tu cuenta.",
+      "newPasswordLabel": "Nueva contraseña",
+      "sameAsCurrent": "La nueva contraseña debe ser diferente de la actual.",
+      "sessionExpired": "Tu sesión ya no es válida. Inicia sesión nuevamente antes de cambiar la contraseña.",
+      "strengthLabel": "Seguridad de la contraseña",
+      "submitAction": "Cambiar contraseña",
+      "submitting": "Cambiando…",
+      "successMessage": "Contraseña actualizada correctamente.",
+      "title": "Cambiar contraseña",
+      "tooManyAttempts": "Se realizaron demasiados intentos. Espera un momento antes de volver a intentarlo."
+    },
+    "theme": {
+      "description": "Elige cómo se muestra la interfaz del portal del negocio.",
+      "label": "Tema de la interfaz",
+      "saveError": "El tema cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
+      "title": "Apariencia"
+    },
+    "title": "Configuración"
   }
 }
