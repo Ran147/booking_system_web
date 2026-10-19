@@ -1,0 +1,14 @@
+export const DISCOUNT_TYPE = Object.freeze({
+  FIXED_AMOUNT: "fixed_amount",
+  PERCENTAGE: "percentage",
+});
+
+export const TIME_CONVERSION = Object.freeze({
+  END_OF_DAY_HOUR: 23,
+  END_OF_DAY_MILLISECOND: 999,
+  END_OF_DAY_MINUTE: 59,
+  END_OF_DAY_SECOND: 59,
+  MILLISECONDS_PER_SECOND: 1000,
+  PERCENTAGE_BASE: 100,
+  SECONDS_PER_MINUTE: 60,
+});
