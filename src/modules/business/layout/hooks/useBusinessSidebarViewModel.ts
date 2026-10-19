@@ -259,9 +259,10 @@ export const useBusinessSidebarViewModel = (
           },
           {
             description: t("business:layout.sidebar.settingsDescription"),
+            href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
             icon: Settings,
             id: "settings",
-            isAvailable: false,
+            isAvailable: true,
             isSubscriberOnly: true,
             label: t("business:layout.sidebar.settings"),
           },
