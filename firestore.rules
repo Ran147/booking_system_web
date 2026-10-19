@@ -50,16 +50,75 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
     }
 
+    function isBusinessPortalUser() {
+      return hasRole('subscriber')
+        || (hasRole('collaborator')
+          && isCollaboratorOf(request.auth.token.businessId));
+    }
+
+    function isOptionalNullableString(data, field, maximumLength) {
+      return !(field in data)
+        || data[field] == null
+        || (data[field] is string
+          && data[field].size() > 0
+          && data[field].size() <= maximumLength);
+    }
+
+    function isValidSocialLink(link) {
+      return link is map
+        && link.keys().hasOnly(['network', 'url'])
+        && link.network in ['facebook', 'instagram', 'tiktok', 'website', 'whatsapp']
+        && link.url is string
+        && link.url.matches('^https://[^ ]+$');
+    }
+
+    function areValidSocialLinks(data) {
+      return !('socialLinks' in data)
+        || (data.socialLinks is list
+          && data.socialLinks.size() <= 5
+          && (data.socialLinks.size() < 1 || isValidSocialLink(data.socialLinks[0]))
+          && (data.socialLinks.size() < 2 || isValidSocialLink(data.socialLinks[1]))
+          && (data.socialLinks.size() < 3 || isValidSocialLink(data.socialLinks[2]))
+          && (data.socialLinks.size() < 4 || isValidSocialLink(data.socialLinks[3]))
+          && (data.socialLinks.size() < 5 || isValidSocialLink(data.socialLinks[4])));
+    }
+
+    function hasValidPublicProfile(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 120
+        && isOptionalNullableString(data, 'description', 1000)
+        && isOptionalNullableString(data, 'contactEmail', 320)
+        && (!('contactEmail' in data)
+          || data.contactEmail == null
+          || data.contactEmail.matches('^[^@]+@[^@]+\\.[^@]+$'))
+        && isOptionalNullableString(data, 'contactPhone', 25)
+        && (!('contactPhone' in data)
+          || data.contactPhone == null
+          || data.contactPhone.matches('^\\+?[0-9 ()-]{7,25}$'))
+        && isOptionalNullableString(data, 'logoUrl', 2048)
+        && areValidSocialLinks(data);
+    }
+
     match /businesses/{businessId} {
       allow read: if true; // public profile (KAN-112)
       allow update: if ownsBusiness(businessId)
-        && !request.resource.data.diff(resource.data).affectedKeys()
-             .hasAny(['status', 'ownerUserId']); // status changes only via functions
+        && businessIsWritable(businessId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'contactEmail',
+          'contactPhone',
+          'description',
+          'logoUrl',
+          'name',
+          'socialLinks'
+        ])
+        && hasValidPublicProfile(request.resource.data);
 
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
           || isCollaboratorOf(businessId);
-        allow create, update: if ownsBusiness(businessId) && businessIsWritable(businessId);
+        allow create, update: if (ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_services'))
+          && businessIsWritable(businessId);
         allow delete: if false; // via the deleteService function (KAN-59)
       }
 
@@ -84,6 +143,64 @@ service cloud.firestore {
           || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
         allow write: if false;
       }
+
+      // Subscription can be read only by the owner/subscriber (AS-10, KAN-40).
+      // Collaborators do not have access. Writes happen only via Cloud Functions.
+      match /subscription/{subscriptionId} {
+        allow read: if ownsBusiness(businessId);
+        allow write: if false;
+      }
+    }
+
+    // A deactivated plan keeps its subscribers (AC-KAN-176-06): the subscriber
+    // can still read the plan of their own subscription (sidebar, KAN-40).
+    // "current" is the subscription document id the sidebar reads
+    // (BUSINESS_LAYOUT_CONSTANTS.CURRENT_DOCUMENT_ID) and the seed writes.
+    function isSubscribedToPlan(planId) {
+      return hasRole('subscriber')
+        && request.auth.token.businessId is string
+        && get(/databases/$(database)/documents/businesses/$(request.auth.token.businessId)/subscription/current).data.planId == planId;
+    }
+
+    // Public plan catalog and plan detail (KAN-7, KAN-21): anyone reads an
+    // active plan; the super admin also reads inactive ones (KAN-184). Plans
+    // are written only by functions, which write the audit entry (KAN-181).
+    match /plans/{planId} {
+      allow read: if resource.data.status == 'active'
+        || isSuperAdmin()
+        || isSubscribedToPlan(planId);
+      allow write: if false;
+    }
+
+    // A customer lists their own bookings across businesses with a collection
+    // group query on customerUserId (KAN-150). Read only; the per-business rule
+    // above keeps covering every other role.
+    match /{path=**}/bookings/{bookingId} {
+      allow read: if hasRole('customer')
+        && resource.data.customerUserId == request.auth.uid;
+    }
+
+    // Each user reads only their own profile. Business portal users may update
+    // only their language and theme preferences (KAN-51, KAN-52), including
+    // active collaborators.
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && isBusinessPortalUser()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['language', 'theme'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['language'])
+          || request.resource.data.language in ['es', 'en'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['theme'])
+          || request.resource.data.theme in ['light', 'dark', 'system']);
+    }
+
+    // Global parameters (KAN-182). Any signed-in user reads them (the idle
+    // timeout, KAN-38); only the admin stories write them, so no client write.
+    match /platformSettings/{platformSettingsId} {
+      allow read: if isSignedIn();
+      allow write: if false;
     }
 
     match /auditLog/{auditLogEntryId} {

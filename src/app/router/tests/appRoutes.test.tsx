@@ -52,7 +52,7 @@ describe("app routes", () => {
 
     expect(
       await appRoutesPage.findPageHeading(
-        testI18n.t("signInPlaceholder.title"),
+        testI18n.t("auth.signIn.title"),
       ),
     ).toBeInTheDocument();
   });
@@ -65,9 +65,7 @@ describe("app routes", () => {
     const appRoutesPage = createAppRoutesPage();
 
     expect(
-      await appRoutesPage.findPageHeading(
-        testI18n.t("signInPlaceholder.title"),
-      ),
+      await appRoutesPage.findPageHeading(testI18n.t("auth.signIn.title")),
     ).toBeInTheDocument();
   });
 
@@ -99,7 +97,27 @@ describe("app routes", () => {
     ).toBeInTheDocument();
   });
 
-  it("KAN-86: redirects a collaborator away from the admin portal", async () => {
+  it.each([
+    ["subscriber", SUBSCRIBER_SESSION],
+    ["collaborator", COLLABORATOR_SESSION],
+  ])(
+    "KAN-53: opens business settings for an authenticated %s",
+    async (_roleName, session) => {
+      renderRoutesWithProviders(appRoutes, {
+        initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+        session,
+      });
+      const appRoutesPage = createAppRoutesPage();
+
+      expect(
+        await appRoutesPage.findPageHeading(
+          testI18n.t("business:settings.title"),
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("KAN-86: redirects a collaborator from the admin portal to the business portal", async () => {
     renderRoutesWithProviders(appRoutes, {
       initialPath: ROUTE_PATH.ADMIN.ROOT,
       session: COLLABORATOR_SESSION,
@@ -108,7 +126,7 @@ describe("app routes", () => {
 
     expect(
       await appRoutesPage.findPageHeading(
-        testI18n.t("landing:placeholder.title"),
+        testI18n.t("business:placeholder.title"),
       ),
     ).toBeInTheDocument();
   });
@@ -127,7 +145,7 @@ describe("app routes", () => {
     ).toBeInTheDocument();
   });
 
-  it("redirects a customer away from the admin portal", async () => {
+  it("AC-KAN-129-06: redirects a customer from the admin portal to their portal home (landing until KAN-150)", async () => {
     renderRoutesWithProviders(appRoutes, {
       initialPath: ROUTE_PATH.ADMIN.ROOT,
       session: CUSTOMER_SESSION,

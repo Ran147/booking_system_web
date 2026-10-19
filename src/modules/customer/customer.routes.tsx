@@ -26,10 +26,27 @@ export const customerRoutes: RouteObject[] = [
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ThemePreferencePage } =
-                await import("./features/theme-preference/ThemePreferencePage");
+                await import(
+                  "./features/theme-preference/ThemePreferencePage"
+                );
               return { Component: ThemePreferencePage };
             },
             path: ROUTE_PATH.CUSTOMER.PROFILE_THEME,
+          },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { MyBookingsPage } = await import("./features/my-bookings");
+              return { Component: MyBookingsPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.MY_BOOKINGS,
+          },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { BookingDetailPage } =
+                await import("./features/my-bookings");
+              return { Component: BookingDetailPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.BOOKING_DETAIL,
           },
         ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
