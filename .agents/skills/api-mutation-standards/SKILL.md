@@ -12,6 +12,7 @@ This skill is the **single source of truth** for **writes**: where a write runs 
 | Topic | Owner |
 | --- | --- |
 | Writes, callable functions, error mapping, cache invalidation, audit trail | **this skill** |
+| Code inside `functions/` (validation, `HttpsError`, transactions, claims) | `cloud-functions-standards` |
 | Permissions and tenant checks | `auth-and-roles` — wins on security |
 | Allowed status transitions | `domain-glossary` |
 | Query keys being invalidated | `api-query-standards` |

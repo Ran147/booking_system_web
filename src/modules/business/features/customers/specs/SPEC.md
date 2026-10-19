@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | business |
-| Feature folder | `src/portals/business/features/customers/` |
+| Feature folder | `src/modules/business/features/customers/` |
 | Stories | KAN-88, KAN-89, KAN-90, KAN-91, KAN-92, KAN-93, KAN-94, KAN-95, KAN-97, KAN-98 |
 | Status | Draft |
 | Depends on | KAN-63 schedule (bookings, KAN-69 manual booking, KAN-73/KAN-74 statuses); KAN-145 booking checkout (enforces blocking); KAN-122 customer sign-up (invitation target); KAN-32 subscription (KAN-49 read-only); KAN-28 auth; Q4 decided 2026-09-28 (the invitation link goes to the customer sign-up under the business's `/<businessSlug>`) |

@@ -26,7 +26,7 @@ export const FOOTER_NAVIGATION_ITEMS = Object.freeze([
     LABEL_KEY: "footer.links.home",
   }),
   Object.freeze({
-    HREF: ROUTE_PATH.LANDING.PLANS,
+    HREF: `${ROUTE_PATH.LANDING.HOME}#plans-section`,
     ID: "plans",
     LABEL_KEY: "footer.links.plans",
   }),

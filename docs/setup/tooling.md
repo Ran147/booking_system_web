@@ -23,7 +23,7 @@ npm install react-router @tanstack/react-query firebase \
   clsx tailwind-merge class-variance-authority
 ```
 
-Tailwind CSS v4 and shadcn/ui are added with their own CLIs (`npx shadcn@latest init`); generated components go to `src/shared/components/ui/`.
+Tailwind CSS v4 and shadcn/ui are added with their own CLIs (`npx shadcn@latest init`); generated components go to `src/components/common/ui/`.
 
 ## package.json scripts
 
@@ -60,4 +60,4 @@ The examples in every skill were type-checked, linted and formatted with: TypeSc
 ## Added when the project was scaffolded
 
 - Build: `vite`, `@vitejs/plugin-react`, `tailwindcss`, `@tailwindcss/vite`, `@types/react`, `@types/react-dom`, `@types/node`.
-- shadcn/ui runtime: `radix-ui`, `sonner`, `lucide-react`, `tw-animate-css`. The shadcn registry was not reachable when scaffolding, so `src/shared/components/ui/` holds hand-copied new-york sources for button, card, input, label, form and sonner. Add more with `npx shadcn@latest add <component>`.
+- shadcn/ui runtime: `radix-ui`, `sonner`, `lucide-react`, `tw-animate-css`. The shadcn registry was not reachable when scaffolding, so `src/components/common/ui/` holds hand-copied new-york sources for button, card, input, label, form and sonner. Add more with `npx shadcn@latest add <component>`.
