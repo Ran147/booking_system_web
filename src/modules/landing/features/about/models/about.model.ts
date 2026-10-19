@@ -9,6 +9,15 @@ export interface AboutMilestoneItem {
 }
 
 /**
+ * Elemento descriptivo de la mision o vision de la empresa.
+ */
+export interface AboutMissionVisionItem {
+  description: string;
+  id: "mission" | "vision";
+  title: string;
+}
+
+/**
  * Elemento representativo de una solucion o capacidad clave ofrecida por la plataforma.
  */
 export interface AboutOfferingItem {
@@ -28,10 +37,23 @@ export interface AboutStatItem {
 }
 
 /**
+ * Elemento descriptivo de un valor corporativo o principio rector.
+ */
+export interface AboutValueItem {
+  description: string;
+  icon: "innovation" | "reliability" | "transparency" | "userFocus";
+  id: string;
+  title: string;
+}
+
+/**
  * Retorno del hook useAboutViewModel con los datos enriquecidos y localizados.
  */
 export interface UseAboutViewModelReturn {
   milestones: AboutMilestoneItem[];
+  mission: AboutMissionVisionItem;
   offerings: AboutOfferingItem[];
   stats: AboutStatItem[];
+  values: AboutValueItem[];
+  vision: AboutMissionVisionItem;
 }

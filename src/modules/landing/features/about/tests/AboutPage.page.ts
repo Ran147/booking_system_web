@@ -8,11 +8,18 @@ export interface AboutPageObject {
   getHistoryDescription: () => HTMLElement;
   getHistoryTitle: () => HTMLElement;
   getMilestones: () => HTMLElement[];
+  getMissionDescription: () => HTMLElement;
+  getMissionTitle: () => HTMLElement;
   getOfferings: () => HTMLElement[];
   getOfferingsTitle: () => HTMLElement;
   getPageMain: () => HTMLElement;
   getStats: () => HTMLElement[];
   getStatsTitle: () => HTMLElement;
+  getValues: () => HTMLElement[];
+  getValuesSubtitle: () => HTMLElement;
+  getValuesTitle: () => HTMLElement;
+  getVisionDescription: () => HTMLElement;
+  getVisionTitle: () => HTMLElement;
 }
 
 export const createAboutPage = (): AboutPageObject => {
@@ -32,6 +39,44 @@ export const createAboutPage = (): AboutPageObject => {
 
   const getHeroDescription = (): HTMLElement =>
     screen.getByText(testI18n.t("landing:about.hero.description"));
+
+  const getMissionTitle = (): HTMLElement =>
+    screen.getByRole("heading", {
+      level: 3,
+      name: testI18n.t("landing:about.mission.title"),
+    });
+
+  const getMissionDescription = (): HTMLElement =>
+    screen.getByText(testI18n.t("landing:about.mission.description"));
+
+  const getVisionTitle = (): HTMLElement =>
+    screen.getByRole("heading", {
+      level: 3,
+      name: testI18n.t("landing:about.vision.title"),
+    });
+
+  const getVisionDescription = (): HTMLElement =>
+    screen.getByText(testI18n.t("landing:about.vision.description"));
+
+  const getValuesTitle = (): HTMLElement =>
+    screen.getByRole("heading", {
+      level: 2,
+      name: testI18n.t("landing:about.values.title"),
+    });
+
+  const getValuesSubtitle = (): HTMLElement =>
+    screen.getByText(testI18n.t("landing:about.values.subtitle"));
+
+  const getValues = (): HTMLElement[] => [
+    screen.getByText(testI18n.t("landing:about.values.items.innovation.title")),
+    screen.getByText(
+      testI18n.t("landing:about.values.items.reliability.title"),
+    ),
+    screen.getByText(
+      testI18n.t("landing:about.values.items.transparency.title"),
+    ),
+    screen.getByText(testI18n.t("landing:about.values.items.userFocus.title")),
+  ];
 
   const getHistoryTitle = (): HTMLElement =>
     screen.getByRole("heading", {
@@ -87,10 +132,17 @@ export const createAboutPage = (): AboutPageObject => {
     getHistoryDescription,
     getHistoryTitle,
     getMilestones,
+    getMissionDescription,
+    getMissionTitle,
     getOfferings,
     getOfferingsTitle,
     getPageMain,
     getStats,
     getStatsTitle,
+    getValues,
+    getValuesSubtitle,
+    getValuesTitle,
+    getVisionDescription,
+    getVisionTitle,
   };
 };

@@ -9,9 +9,22 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
   <I18nextProvider i18n={testI18n}>{children}</I18nextProvider>
 );
 
-describe("useAboutViewModel (US-16 / KAN-16)", () => {
-  it("provides localized milestones, offerings, and stats", () => {
+describe("useAboutViewModel (US-15 / KAN-15 & US-16 / KAN-16)", () => {
+  it("provides localized mission, vision, values, milestones, offerings, and stats", () => {
     const { result } = renderHook(() => useAboutViewModel(), { wrapper });
+
+    expect(result.current.mission.title).toBeTruthy();
+    expect(result.current.mission.description).toBeTruthy();
+    expect(result.current.vision.title).toBeTruthy();
+    expect(result.current.vision.description).toBeTruthy();
+
+    expect(result.current.values).toHaveLength(4);
+    result.current.values.forEach((valueItem) => {
+      expect(valueItem.id).toBeTruthy();
+      expect(valueItem.icon).toBeTruthy();
+      expect(valueItem.title).toBeTruthy();
+      expect(valueItem.description).toBeTruthy();
+    });
 
     expect(result.current.milestones).toHaveLength(3);
     result.current.milestones.forEach((milestone) => {
