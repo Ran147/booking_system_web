@@ -51,6 +51,12 @@ describe("firestore.rules: tenant isolation", () => {
       await adminFirestore
         .doc("businesses/business-pending")
         .set({ ownerUserId: "subscriber-pending", status: "pending" });
+      await adminFirestore
+        .doc("businesses/business-inactive")
+        .set({ ownerUserId: "subscriber-inactive", status: "inactive" });
+      await adminFirestore
+        .doc("businesses/business-suspended")
+        .set({ ownerUserId: "subscriber-suspended", status: "suspended" });
     });
   });
 
@@ -269,5 +275,135 @@ describe("firestore.rules: tenant isolation", () => {
     const visitor = testEnvironment.unauthenticatedContext();
 
     await assertFails(visitor.firestore().doc(BUSINESS_A_BOOKING_PATH).get());
+  });
+
+  it("KAN-101: lets the active owner update only the exact alert settings", async () => {
+    const owner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+    await assertSucceeds(
+      owner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({
+          alertSettings: {
+            bookingCancelledByCustomer: true,
+            bookingCreated: false,
+            subscriptionEnding: true,
+          },
+        }),
+    );
+  });
+
+  it.each([
+    ["another subscriber", "subscriber-b", subscriberOf("business-b")],
+    [
+      "collaborator",
+      "collaborator-a",
+      {
+        businessId: "business-a",
+        collaboratorId: "collaborator-a",
+        role: "collaborator",
+      },
+    ],
+    ["customer", "customer-a", { role: "customer" }],
+    ["super admin", "admin-a", { role: "super_admin" }],
+  ])(
+    "KAN-101: denies %s changing alert settings",
+    async (_name, uid, claims) => {
+      const actor = testEnvironment.authenticatedContext(uid, claims);
+      await assertFails(
+        actor
+          .firestore()
+          .doc("businesses/business-a")
+          .update({
+            alertSettings: {
+              bookingCancelledByCustomer: true,
+              bookingCreated: false,
+              subscriptionEnding: true,
+            },
+          }),
+      );
+    },
+  );
+
+  it("KAN-101: denies changes for a non-active business", async () => {
+    const owner = testEnvironment.authenticatedContext(
+      "subscriber-inactive",
+      subscriberOf("business-inactive"),
+    );
+    await assertFails(
+      owner
+        .firestore()
+        .doc("businesses/business-inactive")
+        .update({
+          alertSettings: {
+            bookingCancelledByCustomer: true,
+            bookingCreated: true,
+            subscriptionEnding: true,
+          },
+        }),
+    );
+  });
+
+  it("KAN-101: denies changes for a suspended business", async () => {
+    const owner = testEnvironment.authenticatedContext(
+      "subscriber-suspended",
+      subscriberOf("business-suspended"),
+    );
+    await assertFails(
+      owner
+        .firestore()
+        .doc("businesses/business-suspended")
+        .update({
+          alertSettings: {
+            bookingCancelledByCustomer: true,
+            bookingCreated: true,
+            subscriptionEnding: true,
+          },
+        }),
+    );
+  });
+
+  it.each([
+    {
+      bookingCancelledByCustomer: true,
+      bookingCreated: "yes",
+      subscriptionEnding: true,
+    },
+    {
+      bookingCancelledByCustomer: true,
+      bookingCreated: true,
+      extra: true,
+      subscriptionEnding: true,
+    },
+  ])(
+    "KAN-101: rejects an invalid alert settings map",
+    async (alertSettings) => {
+      const owner = testEnvironment.authenticatedContext(
+        "subscriber-a",
+        subscriberOf("business-a"),
+      );
+      await assertFails(
+        owner
+          .firestore()
+          .doc("businesses/business-a")
+          .update({ alertSettings }),
+      );
+    },
+  );
+
+  it("KAN-101: denies changing another business field", async () => {
+    const owner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+    await assertFails(
+      owner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Changed" }),
+    );
   });
 });
