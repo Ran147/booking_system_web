@@ -20,6 +20,9 @@ describe("PasswordSettingsPage", () => {
         { exact: false, selector: 'input[name="currentPassword"]' },
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(testI18n.t("business:settings.password.description")),
+    ).toHaveLength(1);
   });
 
   it("KAN-53: provides a link back to the settings overview", () => {

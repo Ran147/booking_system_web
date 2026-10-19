@@ -5,11 +5,10 @@ import {
   AppLink,
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   PageTemplate,
-} from "@/components";
+} from "@/components/common";
 import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import { ChangePasswordForm } from "./components";
 
@@ -30,9 +29,6 @@ export const PasswordSettingsPage = (): ReactElement => {
         <Card>
           <CardHeader>
             <CardTitle>{t("settings.password.formTitle")}</CardTitle>
-            <CardDescription>
-              {t("settings.password.description")}
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <ChangePasswordForm />

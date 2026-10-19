@@ -10,7 +10,7 @@ import {
   PageTemplate,
   RadioGroup,
   SelectField,
-} from "@/components";
+} from "@/components/common";
 import { I18N_NAMESPACE, ROUTE_PATH, type Language } from "@/constants";
 import { SettingsNavigationCard } from "./components";
 import { useSettingsPageViewModel } from "./hooks/useSettingsPageViewModel";

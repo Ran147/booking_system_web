@@ -68,6 +68,10 @@ describe("SettingsPage", () => {
     expect(
       createSettingsPage().queryBusinessProfileLink(),
     ).not.toBeInTheDocument();
+    expect(createSettingsPage().getPasswordSettingsLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`,
+    );
   });
 
   it("KAN-51: changes Spanish to English immediately and persists it", async () => {

@@ -105,26 +105,32 @@ describe("app routes", () => {
     },
   );
 
-  it("KAN-53: navigates from settings to the dedicated password view", async () => {
-    const user = userEvent.setup();
-    renderRoutesWithProviders(appRoutes, {
-      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
-      session: SUBSCRIBER_SESSION,
-    });
+  it.each([
+    ["subscriber", SUBSCRIBER_SESSION],
+    ["collaborator", COLLABORATOR_SESSION],
+  ])(
+    "KAN-53: lets an authenticated %s navigate from settings to the password view",
+    async (_roleName, session) => {
+      const user = userEvent.setup();
+      renderRoutesWithProviders(appRoutes, {
+        initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+        session,
+      });
 
-    await user.click(
-      await screen.findByRole("link", {
-        name: testI18n.t("business:settings.navigation.password.action"),
-      }),
-    );
+      await user.click(
+        await screen.findByRole("link", {
+          name: testI18n.t("business:settings.navigation.password.action"),
+        }),
+      );
 
-    expect(
-      await screen.findByRole("heading", {
-        level: 1,
-        name: testI18n.t("business:settings.password.title"),
-      }),
-    ).toBeInTheDocument();
-  });
+      expect(
+        await screen.findByRole("heading", {
+          level: 1,
+          name: testI18n.t("business:settings.password.title"),
+        }),
+      ).toBeInTheDocument();
+    },
+  );
 
   it.each([
     ["subscriber", SUBSCRIBER_SESSION],

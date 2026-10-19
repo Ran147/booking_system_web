@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import type { ReactElement } from "react";
-import { AppLink, Card, CardDescription, CardTitle } from "@/components";
+import { AppLink, Card, CardDescription, CardTitle } from "@/components/common";
 import type { SettingsNavigationCardProps } from "./SettingsNavigationCard.types";
 
 export const SettingsNavigationCard = ({

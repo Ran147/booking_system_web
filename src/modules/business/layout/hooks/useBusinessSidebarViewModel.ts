@@ -257,15 +257,18 @@ export const useBusinessSidebarViewModel = (
             isSubscriberOnly: true,
             label: t("business:layout.sidebar.collaborators"),
           },
-          {
-            description: t("business:layout.sidebar.settingsDescription"),
-            href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
-            icon: Settings,
-            id: "settings",
-            isAvailable: true,
-            isSubscriberOnly: true,
-            label: t("business:layout.sidebar.settings"),
-          },
+        ]
+      : []),
+    {
+      description: t("business:layout.sidebar.settingsDescription"),
+      href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+      icon: Settings,
+      id: "settings",
+      isAvailable: true,
+      label: t("business:layout.sidebar.settings"),
+    },
+    ...(isSubscriber
+      ? [
           {
             description: t("business:layout.sidebar.subscriptionDescription"),
             icon: CreditCard,
