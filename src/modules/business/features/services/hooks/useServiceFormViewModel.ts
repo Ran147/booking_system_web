@@ -1,19 +1,31 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/components/common";
-import { FIRESTORE_COLLECTION, I18N_NAMESPACE } from "@/constants";
+import {
+  ERROR_MESSAGE_KEY,
+  FIRESTORE_COLLECTION,
+  I18N_NAMESPACE,
+  MONEY,
+  STRING,
+} from "@/constants";
 import { BUSINESS_STATUS, type BusinessStatus } from "@/domain";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
-import { fetchBusinessStatus, useCreateServiceMutation } from "../api";
+import {
+  fetchBusinessStatus,
+  useCreateServiceMutation,
+  useServiceDetailQuery,
+  useUpdateServiceMutation,
+} from "../api";
 import {
   SERVICE_FEATURE_LIMIT,
   SERVICE_IMAGE_LIMIT,
 } from "../constants/ServiceForm.constants";
 import { DEFAULT_SERVICE_FORM_VALUES } from "../constants/ServiceFormDefaults.constants";
+import type { ServiceDetail } from "../models";
 import {
   serviceFormSchema,
   type ServiceFormValues,
@@ -22,8 +34,10 @@ import type { ServiceFormViewModel } from "../models/ServiceFormViewModel.interf
 
 export interface UseServiceFormViewModelOptions {
   readonly businessStatus?: BusinessStatus;
+  readonly initialService?: ServiceDetail;
   readonly onCancel?: () => void;
   readonly onSuccess?: (serviceId: string) => void;
+  readonly serviceId?: string;
 }
 
 export const useServiceFormViewModel = (
@@ -35,15 +49,22 @@ export const useServiceFormViewModel = (
   ]);
   const { businessId } = useCurrentBusiness();
   const createServiceMutation = useCreateServiceMutation();
+  const updateServiceMutation = useUpdateServiceMutation();
+
+  const isEditMode = Boolean(options.serviceId);
 
   const [imageError, setImageError] = useState<Nullable<string>>(null);
-  const [selectedImagePreview, setSelectedImagePreview] =
-    useState<Nullable<string>>(null);
 
   const businessStatusQuery = useQuery<BusinessStatus>({
     enabled: options.businessStatus === undefined,
     queryFn: () => fetchBusinessStatus(businessId),
     queryKey: [FIRESTORE_COLLECTION.BUSINESSES, businessId, "status"],
+  });
+
+  const serviceDetailQuery = useServiceDetailQuery({
+    businessId,
+    enabled: isEditMode && !options.initialService,
+    serviceId: options.serviceId ?? null,
   });
 
   const effectiveBusinessStatus =
@@ -53,17 +74,51 @@ export const useServiceFormViewModel = (
 
   const isReadOnly = effectiveBusinessStatus !== BUSINESS_STATUS.ACTIVE;
 
+  const effectiveServiceDetail =
+    options.initialService ?? serviceDetailQuery.data;
+
+  const initialValues: ServiceFormValues = options.initialService
+    ? {
+        description: options.initialService.description ?? STRING.EMPTY,
+        durationMinutes: options.initialService.durationMinutes,
+        features: [...options.initialService.features],
+        imageUrl: options.initialService.imageUrl ?? null,
+        name: options.initialService.name,
+        price: options.initialService.priceInCents / MONEY.CENTS_PER_UNIT,
+      }
+    : DEFAULT_SERVICE_FORM_VALUES;
+
   const form = useForm<ServiceFormValues>({
-    defaultValues: DEFAULT_SERVICE_FORM_VALUES,
+    defaultValues: initialValues,
     mode: "onBlur",
     resolver: zodResolver(serviceFormSchema) as Resolver<ServiceFormValues>,
   });
+
+  useEffect(() => {
+    if (effectiveServiceDetail) {
+      form.reset({
+        description: effectiveServiceDetail.description ?? STRING.EMPTY,
+        durationMinutes: effectiveServiceDetail.durationMinutes,
+        features: [...effectiveServiceDetail.features],
+        imageUrl: effectiveServiceDetail.imageUrl ?? null,
+        name: effectiveServiceDetail.name,
+        price: effectiveServiceDetail.priceInCents / MONEY.CENTS_PER_UNIT,
+      });
+    }
+  }, [effectiveServiceDetail, form]);
 
   const currentFeatures =
     useWatch({
       control: form.control,
       name: "features",
     }) ?? [];
+
+  const currentImageUrl = useWatch({
+    control: form.control,
+    name: "imageUrl",
+  });
+
+  const selectedImagePreview: Nullable<string> = currentImageUrl ?? null;
 
   const handleFileSelect = (file: Nullable<File>): void => {
     if (!file) return;
@@ -80,13 +135,11 @@ export const useServiceFormViewModel = (
 
     setImageError(null);
     const objectUrl = URL.createObjectURL(file);
-    setSelectedImagePreview(objectUrl);
     form.setValue("imageUrl", objectUrl, { shouldDirty: true });
   };
 
   const handleRemoveImage = (): void => {
     setImageError(null);
-    setSelectedImagePreview(null);
     form.setValue("imageUrl", null, { shouldDirty: true });
   };
 
@@ -148,6 +201,30 @@ export const useServiceFormViewModel = (
       .map((feature) => feature.trim())
       .filter((feature) => feature.length > 0);
 
+    const currentServiceId = options.serviceId;
+    if (isEditMode && currentServiceId) {
+      updateServiceMutation.mutate(
+        {
+          businessId,
+          formValues: {
+            ...formValues,
+            features: sanitizedFeatures,
+          },
+          serviceId: currentServiceId,
+        },
+        {
+          onError: (mutationError) => {
+            toast.error(t(`common:${mutationError.messageKey}`));
+          },
+          onSuccess: () => {
+            toast.success(t("business:services.form.editSuccess"));
+            options.onSuccess?.(currentServiceId);
+          },
+        },
+      );
+      return;
+    }
+
     createServiceMutation.mutate(
       {
         businessId,
@@ -163,12 +240,22 @@ export const useServiceFormViewModel = (
         onSuccess: (response) => {
           toast.success(t("business:services.form.createSuccess"));
           form.reset(DEFAULT_SERVICE_FORM_VALUES);
-          setSelectedImagePreview(null);
           setImageError(null);
           options.onSuccess?.(response.serviceId);
         },
       },
     );
+  };
+
+  const isLoadError =
+    isEditMode && !options.initialService && serviceDetailQuery.isError;
+
+  const loadErrorMessageKey = isLoadError
+    ? (serviceDetailQuery.error?.messageKey ?? ERROR_MESSAGE_KEY.NETWORK)
+    : null;
+
+  const handleRetryLoad = (): void => {
+    void serviceDetailQuery.refetch();
   };
 
   return {
@@ -181,10 +268,17 @@ export const useServiceFormViewModel = (
     handleMoveFeatureUp,
     handleRemoveFeature,
     handleRemoveImage,
+    handleRetryLoad,
     handleSubmit: form.handleSubmit(submitServiceForm),
     imageError,
+    isEditMode,
+    isLoadError,
+    isLoading:
+      isEditMode && !options.initialService && serviceDetailQuery.isPending,
     isReadOnly,
-    isSubmitting: createServiceMutation.isPending,
+    isSubmitting:
+      createServiceMutation.isPending || updateServiceMutation.isPending,
+    loadErrorMessageKey,
     selectedImagePreview,
   };
 };

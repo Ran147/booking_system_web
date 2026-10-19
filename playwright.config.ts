@@ -16,6 +16,7 @@ const FUNCTIONS_READY_URL = `http://${FIREBASE_EMULATOR.HOST}:${FIREBASE_EMULATO
 export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   fullyParallel: true,
+  globalSetup: "./e2e/globalSetup.ts",
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   reporter: "list",
   retries: 0,

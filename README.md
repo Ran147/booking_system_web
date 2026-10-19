@@ -9,7 +9,7 @@ SaaS multi-tenant de reservas. Cada negocio (suscriptor) publica sus servicios y
 | `customer` | `/<slug-del-negocio>` (por ejemplo `/barberia-centro/...`, Q4) | Clientes del negocio, rol `customer` |
 | `admin` | `/admin` | Super administrador, rol `super_admin` |
 
-Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/shared/domain`): ningún negocio puede usarlos.
+Cada negocio tiene un `slug` único (minúsculas, apto para URL) y su portal de clientes vive en `/<slug>`. Las rutas fijas (`/business`, `/admin`, `/sign-in`, `/sign-up`, `/contact`, `/password-recovery`) tienen prioridad y son slugs reservados (`RESERVED_BUSINESS_SLUG` en `src/domain`): ningún negocio puede usarlos.
 
 Este repositorio es el **esqueleto base**: configuración, fundamentos compartidos y los cuatro portales como carcasas vacías. Cada carpeta de feature tiene su `specs/SPEC.md` con los criterios de aceptación de la épica; la primera historia implementada es US-07 (catálogo de planes en la landing).
 
@@ -85,6 +85,8 @@ npx firebase emulators:exec --only auth,firestore --project demo-booking-system 
 
 Los datos del emulador se borran al apagarlo; con `npm run emulators` hay que volver a correr el seed cada vez. Usuarios (contraseña de prueba `Emulator-Only-123!`, **solo para el emulador**): `admin@demo.test` (super admin), `suscriptor@demo.test` (suscriptor de «Barbería Centro»), `colaborador@demo.test` (colaborador de «Barbería Centro»), `pendiente@demo.test` (suscriptor de «Estética Luna», pendiente de aprobación) y `cliente@demo.test` (cliente).
 
+Para probar el registro del suscriptor (KAN-25), el seed también crea dos pagos de plan con links conocidos: uno válido para `nuevo-suscriptor@demo.test` (`/sign-up?token=seed-valid-sign-up-token`) y uno vencido (`/sign-up?token=seed-expired-sign-up-token`). También reserva los slugs de los dos negocios en `businessSlugs`. El registro llama a Cloud Functions, así que los emuladores deben incluir `functions` (`npm run emulators`). Si se vuelve a correr el seed, el link válido queda sin usar otra vez, pero el usuario de Auth creado antes sigue existiendo hasta que se apaguen los emuladores.
+
 ### Cloud Functions
 
 `functions/` es un paquete aparte (TypeScript, Node 22):
@@ -95,7 +97,11 @@ npm ci
 npm run build
 ```
 
-`functions/src/index.ts` exporta `verifyRecaptcha` (`auth/`), la callable que valida el token de reCAPTCHA de los formularios públicos. En los emuladores usa la clave secreta de prueba de Google; desplegada lee el secreto `RECAPTCHA_SECRET_KEY`. Las carpetas `audit/`, `billing/`, `bookings/`, `exports/`, `notifications/` y `shared/` están listas para sus specs.
+`functions/src/index.ts` exporta `verifyRecaptcha` (`auth/`), la callable que valida el token de reCAPTCHA de los formularios públicos. También exporta `requestPasswordReset` (`auth/`, US-36): comprueba el reCAPTCHA, busca la cuenta y pide a Firebase Auth el correo de recuperación en el idioma guardado en `User.language`; responde igual exista o no la cuenta. En los emuladores usa la clave secreta de prueba de Google; desplegada lee el secreto `RECAPTCHA_SECRET_KEY`. **Recuperar contraseña con los emuladores:** el emulador de Auth no envía correos, guarda el enlace. Pide la recuperación en `/password-recovery` y léelo en `http://127.0.0.1:9099/emulator/v1/projects/demo-booking-system/oobCodes`; abre `/password-reset?mode=resetPassword&oobCode=<código>` con el `oobCode` que aparece. `npm run test:e2e` hace este recorrido completo (`e2e/password-reset.spec.ts`).
+
+**Recuperar contraseña desplegado:** copia `functions/.env.example` a `functions/.env.<id-del-proyecto>` y escribe la clave web pública de Firebase en `FIREBASE_WEB_API_KEY`. Fuera de los emuladores, si falta o está vacía la callable falla con un error (no responde "enviado" en silencio). En la consola de Firebase, Authentication > Plantillas > "Restablecimiento de contraseña", cambia la URL de acción a `https://<tu-dominio>/password-reset` para que el enlace del correo llegue a esta página.
+
+Las carpetas `audit/`, `billing/`, `bookings/`, `exports/`, `notifications/` y `shared/` están listas para sus specs.
 
 ## Scripts
 
@@ -115,6 +121,7 @@ npm run build
 | `npm run test:e2e` | Tests end-to-end con Playwright (`e2e/`), solo flujos críticos. Compila las functions, levanta los emuladores (Java 21+), carga la semilla y sirve el build. La primera vez: `npm --prefix functions ci` y `npx playwright install chromium` |
 | `npm run emulators` | Firebase Emulator Suite |
 | `npm run seed` | Carga datos de prueba en los emuladores (ver «Datos de prueba») |
+| `npm run test:functions` | Tests de Cloud Functions contra los emuladores de Auth y Firestore |
 
 Antes de abrir un PR: `npm run lint && npm run format:check && npm run typecheck && npm run test:run` (y `npm run test:rules` si cambió `firestore.rules`, `npm run test:e2e` si cambió un flujo crítico). No hay CI por ahora: estos chequeos se corren localmente.
 
@@ -137,14 +144,15 @@ src/app/               # App, providers (Query, i18n, Theme, Auth) y router
 src/modules/<portal>/  # landing, business, customer, admin y auth: rutas, layout y features/
 src/components/common/ # componentes atómicos compartidos (botón, input, modal, spinner…)
 src/constants/         # constantes congeladas con Object.freeze, ordenadas A-Z
-src/context/  src/domain/  src/hooks/  src/services/  src/types/  src/utils/
+src/domain/  src/hooks/  src/services/  src/types/  src/utils/
 src/i18n/              # configuración de i18next y locales/{es,en}
 src/styles/tokens.css  # tokens de diseño (claro / oscuro)
+src/test-utils/        # renderWithProviders, fixtures de sesión y configuración de Vitest
 tests/rules/           # tests de reglas de Firestore (emulador)
 firestore.rules        # la frontera de seguridad multi-tenant
 ```
 
-Las carpetas `src/portals/`, `src/shared/` y `src/features/` son de la estructura anterior y se están migrando a la de arriba: no se agrega código nuevo en ellas. La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
+La carpeta `src/shared/` es de la estructura anterior: solo quedan unos reexports pequeños (`export * from "@/constants"`, etc.) para que los PRs viejos sigan compilando. **No se agrega código nuevo en ella**: el código nuevo importa de `@/constants`, `@/types`, `@/domain`, `@/components/common`, `@/utils`, `@/services/firebase` y `@/test-utils`. Se borrará por completo cuando los PRs abiertos se actualicen (`docs/specs/2026-10-14-refactor-limpiar-duplicados.md`). La carpeta `placeholder/` de cada portal es temporal: se reemplaza por la primera ruta real del portal y se borra.
 
 ## Skills, specs y decisiones
 

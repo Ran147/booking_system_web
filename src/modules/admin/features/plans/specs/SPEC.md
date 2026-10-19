@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | admin |
-| Feature folder | `src/portals/admin/features/plans/` |
+| Feature folder | `src/modules/admin/features/plans/` |
 | Stories | KAN-181, KAN-182, KAN-183, KAN-184, KAN-185 |
 | Status | Draft |
 | Depends on | Q1 decided 2026-09-28 (collaborator limit `limits.maxCollaborators`, used by KAN-85); Q3 decided 2026-09-28 (plan and settings changes are audited, KAN-194); Q5 decided 2026-09-28 (no renewal retries in the MVP; grace days alone decide when `past_due` becomes `expired`); KAN-1 home (plan catalog KAN-7), KAN-20 plan details (KAN-21), KAN-32 subscription spec; `features/auth` spec (idle logout KAN-38) |
@@ -119,7 +119,7 @@ None. Q1 was decided on 2026-09-28: the collaborator limit is `limits.maxCollabo
 | AS-13 | `limits.maxCollaborators` is a whole number from 0 to 500; there is no "unlimited" value for it. | AC-KAN-181-11, AC-KAN-181-12 |
 
 ## Backlog issues
-- KAN-182 (platform settings) sits in the plans epic but is not about plans. Specified here, in `src/portals/admin/features/plans`, as the backlog places it; the team may move it to its own folder (for example `src/portals/admin/features/platform-settings`) in `epic-map.md`.
+- KAN-182 (platform settings) sits in the plans epic but is not about plans. Specified here, in `src/modules/admin/features/plans`, as the backlog places it; the team may move it to its own folder (for example `src/modules/admin/features/platform-settings`) in `epic-map.md`.
 - KAN-182 "límite máximo de reservas por negocio" overlaps with KAN-181 plan limit "reservas máximas". Which one wins when both apply is not stated (for example the lower of the two). Needs a decision before the booking specs enforce limits.
 - KAN-182 grace days decide when `past_due` becomes `expired` (glossary §4.2); since Q5 deferred renewal retries (out of MVP), nothing else changes that date.
 - No story says whether a plan price change applies to existing subscriptions at their next renewal (AS-8).
@@ -140,7 +140,7 @@ None. Q1 was decided on 2026-09-28: the collaborator limit is `limits.maxCollabo
 | --- | --- | --- |
 | KAN-181 | AC-KAN-181-01 … AC-KAN-181-12 | `tests/PlanFormScreen.test.tsx` |
 | KAN-182 | AC-KAN-182-01, AC-KAN-182-02, AC-KAN-182-04, AC-KAN-182-05, AC-KAN-182-07, AC-KAN-182-08 | `tests/PlatformSettingsScreen.test.tsx` |
-| KAN-182 | AC-KAN-182-03 | `tests/IdleTimeout.test.tsx` (in `src/features/auth`) |
+| KAN-182 | AC-KAN-182-03 | `tests/IdleTimeout.test.tsx` (in `src/modules/auth`) |
 | KAN-182 | AC-KAN-182-06 | `functions/src/rules/tests/platformSettings.rules.test.ts` |
 | KAN-183 | AC-KAN-183-01 … AC-KAN-183-07 | `tests/PlanFormScreen.test.tsx` |
 | KAN-184 | AC-KAN-184-01 … AC-KAN-184-05 | `tests/PlanListScreen.test.tsx` |

@@ -28,6 +28,11 @@ export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
   const navigate = useNavigate();
   const session = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasLogoImageError, setHasLogoImageError] = useState(false);
+
+  const handleLogoImageError = (): void => {
+    setHasLogoImageError(true);
+  };
 
   const isSignedIn = session.status === SESSION_STATUS.SIGNED_IN;
 
@@ -94,10 +99,16 @@ export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
   return {
     brandName: LANDING_NAVBAR_CONSTANTS.BRAND_NAME,
     closeMobileMenu,
+    handleLogoImageError,
     handleNavigate,
+    hasLogoImageError,
     isMobileMenuOpen,
     isSignedIn,
     logoAlt: t("home.navbar.logoAlt"),
+    // In current MVP phase, default branding renders the semantic stylized mark
+    // (Calendar icon with dynamic tokens). logoUrl prepares the infrastructure
+    // for custom uploaded logos without breaking the MVVM contract.
+    logoUrl: undefined,
     navLinks,
     portalActionLabel,
     portalActionPath,

@@ -1,11 +1,14 @@
 export const FIREBASE_ERROR_CODE = {
+  EXPIRED_ACTION_CODE: "auth/expired-action-code",
   FAILED_PRECONDITION: "functions/failed-precondition",
+  FIRESTORE_NOT_FOUND: "not-found",
   // The Functions SDK reports a request that never reached the server (no
   // network) as internal: it cannot tell it apart from a backend crash.
   FUNCTIONS_INTERNAL: "functions/internal",
   FUNCTIONS_INVALID_ARGUMENT: "functions/invalid-argument",
   FUNCTIONS_PERMISSION_DENIED: "functions/permission-denied",
   FUNCTIONS_UNAVAILABLE: "functions/unavailable",
+  INVALID_ACTION_CODE: "auth/invalid-action-code",
   INVALID_CREDENTIAL: "auth/invalid-credential",
   INVALID_EMAIL: "auth/invalid-email",
   INVALID_USER_TOKEN: "auth/invalid-user-token",
@@ -20,5 +23,6 @@ export const FIREBASE_ERROR_CODE = {
   USER_MISMATCH: "auth/user-mismatch",
   USER_NOT_FOUND: "auth/user-not-found",
   USER_TOKEN_EXPIRED: "auth/user-token-expired",
+  WEAK_PASSWORD: "auth/weak-password",
   WRONG_PASSWORD: "auth/wrong-password",
 } as const;

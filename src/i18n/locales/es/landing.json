@@ -36,6 +36,19 @@
       "tagline": "Simplifica la agenda de tu negocio, automatiza tus recordatorios y permite que tus clientes reserven en línea 24/7 sin complicaciones.",
       "title": "Impulsa tu negocio con reservas inteligentes y sin esfuerzo"
     },
+    "intro": {
+      "badge": "¿Por qué elegir Booking System?",
+      "features": {
+        "notifications": "Recordatorios automáticos y notificaciones oportunas para reducir ausencias.",
+        "payments": "Opciones de pago integradas y control transparente de planes de suscripción.",
+        "scheduling": "Disponibilidad de agenda en tiempo real y reservas en línea 24/7 para tus clientes."
+      },
+      "fullText": "Nuestra solución fue diseñada pensando en barberías, centros de estética, consultorios médicos y profesionales independientes. Con gestión centralizada de agendas, recordatorios automáticos, soporte para múltiples colaboradores y reportes de rendimiento, recuperas el control de tu tiempo mientras brindas una experiencia impecable a tus clientes.",
+      "readLess": "Leer menos",
+      "readMore": "Leer más",
+      "summary": "Booking System es la plataforma integral de gestión de reservas diseñada para optimizar citas, eliminar conflictos de agenda e impulsar el crecimiento de tu negocio de servicios.",
+      "title": "Gestión de citas inteligente para negocios modernos"
+    },
     "navbar": {
       "goToPortal": "Ir a mi panel",
       "landmarkLabel": "Barra de navegación principal",
@@ -64,6 +77,29 @@
       "seeDetails": "Comenzar",
       "subtitle": "Selecciona el plan ideal para gestionar las reservas y citas de tu negocio.",
       "title": "Planes y Precios"
+    },
+    "testimonials": {
+      "badge": "Historias de clientes",
+      "items": {
+        "item1": {
+          "authorName": "Carlos Mendoza",
+          "businessName": "Barbería Vintage",
+          "quote": "Booking System transformó nuestra rutina diaria. Las ausencias se redujeron un 80% gracias a los recordatorios automáticos, y los clientes adoran reservar en cualquier momento."
+        },
+        "item2": {
+          "authorName": "Valeria Castro",
+          "businessName": "Glow Beauty & Spa",
+          "quote": "Gestionar cuatro estilistas solía ser un caos de agendas. Ahora cada colaboradora tiene su calendario sincronizado y las clientas eligen a su especialista preferida sin esfuerzo."
+        },
+        "item3": {
+          "authorName": "Dr. Fernando Ruiz",
+          "businessName": "Centro de Fisioterapia Ruiz",
+          "quote": "La plataforma es moderna, confiable y muy fácil de usar para nuestros pacientes. Nos ha ahorrado decenas de horas administrativas cada semana."
+        }
+      },
+      "ratingLabel": "Calificación: {{rating}} de {{maxRating}} estrellas",
+      "subtitle": "Descubre cómo profesionales y negocios de servicios optimizan su gestión diaria de citas.",
+      "title": "La confianza de cientos de negocios en crecimiento"
     }
   },
   "layout": {
@@ -72,5 +108,107 @@
   "placeholder": {
     "description": "Reserva servicios de tus negocios favoritos. Esta página está en construcción.",
     "title": "Bienvenido a Booking System"
+  },
+  "planCheckout": {
+    "detail": {
+      "backToPlans": "← Volver a los planes",
+      "billingPeriod": {
+        "annual": "/año",
+        "monthly": "/mes"
+      },
+      "catalogAction": "Ver los planes disponibles",
+      "contract": "Contratar este plan",
+      "featuresTitle": "Qué incluye",
+      "limits": {
+        "maxBookings_one": "Hasta {{count}} reserva al mes",
+        "maxBookings_other": "Hasta {{count}} reservas al mes",
+        "maxCollaborators_one": "Hasta {{count}} colaborador",
+        "maxCollaborators_other": "Hasta {{count}} colaboradores"
+      },
+      "limitsTitle": "Límites del plan",
+      "otherPlans": "Otros planes",
+      "retryAction": "Reintentar",
+      "signOutAction": "Cerrar sesión",
+      "signedInNotice": "Un negocio nuevo se contrata sin sesión iniciada: cada cuenta tiene un solo negocio. Cierra sesión para continuar."
+    },
+    "payment": {
+      "planUnavailableError": "Este plan ya no está disponible. Elige otro plan."
+    }
+  },
+  "subscriberSignUp": {
+    "description": "Completa tus datos y los de tu negocio para empezar a recibir reservas.",
+    "form": {
+      "accountTitle": "Datos de acceso",
+      "businessNameLabel": "Nombre del negocio",
+      "businessSlugHint": "La dirección de tu negocio será {{businessAddress}}",
+      "businessSlugHintWithStatus": "La dirección de tu negocio será {{businessAddress}}. {{slugStatus}}",
+      "businessSlugLabel": "Dirección del negocio",
+      "businessTitle": "Tu negocio",
+      "cannotCreateAccount": "No pudimos crear la cuenta con este correo. Si ya tienes una, inicia sesión o recupera tu contraseña.",
+      "emailHint": "Es el correo con el que pagaste el plan.",
+      "emailLabel": "Correo electrónico",
+      "firstNameLabel": "Nombre",
+      "lastNameLabel": "Apellido",
+      "passwordConfirmationLabel": "Confirma la contraseña",
+      "passwordLabel": "Contraseña",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "passwordRecoveryAction": "Recuperar contraseña",
+      "personalDataTitle": "Datos personales",
+      "phoneHint": "Opcional.",
+      "phoneInvalidError": "Usa solo números, espacios, + y -.",
+      "phoneLabel": "Teléfono",
+      "recaptchaLabel": "Verificación de seguridad",
+      "signInAction": "Iniciar sesión",
+      "slugAvailable": "Está disponible.",
+      "slugChecking": "Comprobando disponibilidad…",
+      "slugInvalidError": "Usa de 3 a 40 letras minúsculas, números y guiones simples, sin guion al inicio ni al final.",
+      "slugReservedError": "Esta dirección está reservada. Elige otra.",
+      "slugTakenError": "Esta dirección ya la usa otro negocio. Elige otra.",
+      "submitAction": "Crear cuenta"
+    },
+    "link": {
+      "contactAction": "Contáctanos",
+      "expired": "Este link de registro venció. Escríbenos y te enviaremos uno nuevo.",
+      "invalid": "Este link de registro no es válido o ya se usó.",
+      "missing": "El registro empieza eligiendo un plan. Elige el tuyo y te enviaremos el link para crear tu cuenta.",
+      "plansAction": "Ver los planes",
+      "retryAction": "Reintentar"
+    },
+    "plan": {
+      "billingPeriod": {
+        "annual": "/año",
+        "monthly": "/mes"
+      },
+      "title": "Plan contratado"
+    },
+    "success": "Tu cuenta está lista. Inicia sesión con tu correo y tu contraseña.",
+    "title": "Crea tu cuenta"
+  },
+  "terms": {
+    "backToHome": "Volver al inicio",
+    "clauses": {
+      "acceptance": {
+        "body": "Al acceder y utilizar Booking System, aceptas cumplir y estar sujeto a estos términos y condiciones. Si no estás de acuerdo con alguna cláusula, debes suspender el uso de la plataforma de inmediato.",
+        "title": "1. Aceptación de los Términos"
+      },
+      "cancellations": {
+        "body": "Las políticas de cancelación y reprogramación de citas son definidas individualmente por cada negocio suscrito. Booking System facilita notificaciones automatizadas pero no se responsabiliza por penalizaciones particulares del negocio.",
+        "title": "4. Cancelaciones y Reprogramaciones"
+      },
+      "liability": {
+        "body": "Booking System procura mantener la disponibilidad continua del servicio 24/7. No obstante, no garantiza acceso ininterrumpido ni se responsabiliza por pérdidas comerciales derivadas de cortes de conectividad externos o fuerza mayor.",
+        "title": "5. Limitación de Responsabilidad"
+      },
+      "services": {
+        "body": "Booking System provee software en la nube para gestión de citas, agendamiento de clientes y administración de suscripciones. Actuamos como proveedor técnico intermediario y no garantizamos la calidad de los servicios finales ofrecidos por cada negocio.",
+        "title": "2. Servicios de la Plataforma y Alcance"
+      },
+      "subscriptions": {
+        "body": "Los suscriptores pueden elegir planes mensuales o anuales. Los pagos se procesan de forma segura y se facturan al inicio de cada período. Los suscriptores pueden actualizar, cambiar o cancelar su plan en cualquier momento desde su panel.",
+        "title": "3. Suscripciones, Tarifas y Facturación"
+      }
+    },
+    "lastUpdated": "Última actualización: 12 de octubre de 2026",
+    "title": "Términos y Condiciones del Servicio"
   }
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BUSINESS_PROFILE, VALIDATION_MESSAGE_KEY } from "@/constants";
+import { optionalPhoneFieldSchema } from "@/modules/auth";
 
 const optionalHttpsUrlSchema = z
   .string()
@@ -17,13 +18,7 @@ export const BusinessProfileFormSchema = z.object({
       (value) => value === "" || z.email().safeParse(value).success,
       VALIDATION_MESSAGE_KEY.EMAIL_INVALID,
     ),
-  contactPhone: z
-    .string()
-    .trim()
-    .refine(
-      (value) => value === "" || BUSINESS_PROFILE.PHONE_PATTERN.test(value),
-      VALIDATION_MESSAGE_KEY.PHONE_INVALID,
-    ),
+  contactPhone: optionalPhoneFieldSchema.nonoptional(),
   description: z
     .string()
     .trim()

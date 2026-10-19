@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Portal | customer |
-| Feature folder | `src/portals/customer/features/booking-checkout/` |
+| Feature folder | `src/modules/customer/features/booking-checkout/` |
 | Stories | KAN-146, KAN-147, KAN-148, KAN-149 |
 | Status | Draft |
 | Depends on | KAN-134 service selection (`service-selection` spec), KAN-139 availability (`availability` spec, incl. the re-check of KAN-144), KAN-70 manual vs automatic confirmation, KAN-93 customer blocking, KAN-128 customer sign-in, KAN-163 confirmation email (`functions/src/notifications` spec); Q4 decided 2026-09-28 (the flow lives under `/:businessSlug`); Q6 decided 2026-09-28 (a customer account is mandatory; no guest booking); Q1 decided 2026-09-28 (collaborator chosen in KAN-137 / KAN-138, stored in `Booking.collaboratorId`) |

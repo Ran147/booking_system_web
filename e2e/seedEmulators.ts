@@ -2,8 +2,8 @@ import { execSync } from "node:child_process";
 import { SEED_ENV_VAR } from "../scripts/constants/SeedEmulator.constants";
 import { FIREBASE_EMULATOR } from "../src/constants/firebase/FirebaseEmulator.constants";
 
-// Loads the seed accounts into the running emulators. Idempotent, but not
-// safe to run twice at the same time: call it from a serial describe.
+// Loads the seed accounts into the running emulators. Idempotent, but not safe
+// to run twice at the same time: it runs once per run, from globalSetup.
 export const seedEmulators = (): void => {
   execSync("npm run seed", {
     env: {

@@ -16,6 +16,7 @@ Su objetivo es garantizar que ningun cambio entre a `develop` o `main` sin cumpl
 Fase 1: Contexto e Inspeccion de la Rama / PR
   │  ├── Identificar rama base (develop) y rama fuente (US-XX)
   │  ├── Leer git diff y git log
+  │  ├── Medir el tamano sin lockfiles y avisar si pasa de ~2000 lineas (git-workflow §5)
   │  └── Identificar la US y KAN asociada
   ▼
 Fase 2: Ejecucion de Comandos de Verificacion
@@ -67,5 +68,8 @@ Fase 4: Emision del Dictamen Canónico
 - [x] `i18n-standards`: Traducciones completas en ES y EN.
 
 ## 4. Hallazgos y Correcciones Requeridas
+Un PR mayor a ~2000 lineas (sin lockfiles ni generados) se anota como **observacion**
+y pide justificacion en la descripcion; no cambia el veredicto a BLOQUEADO por si solo.
+
 [Lista numerada con archivo, linea y codigo antes/despues]
 ```

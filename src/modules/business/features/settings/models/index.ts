@@ -1,3 +1,4 @@
+export type * from "./Settings.model";
 export {
   createAuthenticatedUserRequiredError,
   isChangePasswordError,
