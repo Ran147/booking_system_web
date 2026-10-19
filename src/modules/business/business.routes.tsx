@@ -26,6 +26,7 @@ export const businessRoutes: RouteObject[] = [
                 lazy: async (): Promise<Pick<RouteObject, "Component">> => {
                   const { BusinessProfilePage } =
                     await import("./features/business-profile");
+
                   return { Component: BusinessProfilePage };
                 },
                 path: ROUTE_PATH.BUSINESS.BUSINESS_PROFILE,
@@ -36,6 +37,7 @@ export const businessRoutes: RouteObject[] = [
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ServiceListPage } = await import("./features/services");
+
               return { Component: ServiceListPage };
             },
             path: ROUTE_PATH.BUSINESS.SERVICES,
@@ -43,6 +45,7 @@ export const businessRoutes: RouteObject[] = [
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ServiceFormPage } = await import("./features/services");
+
               return { Component: ServiceFormPage };
             },
             path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
@@ -50,6 +53,7 @@ export const businessRoutes: RouteObject[] = [
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ServiceFormPage } = await import("./features/services");
+
               return { Component: ServiceFormPage };
             },
             path: ROUTE_PATH.BUSINESS.SERVICE_EDIT,
@@ -57,14 +61,30 @@ export const businessRoutes: RouteObject[] = [
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { SettingsPage } = await import("./features/settings");
+
               return { Component: SettingsPage };
             },
             path: ROUTE_PATH.BUSINESS.SETTINGS,
           },
           {
+            children: [
+              {
+                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                  const { ReminderSettingsPage } =
+                    await import("./features/notification-settings");
+
+                  return { Component: ReminderSettingsPage };
+                },
+                path: ROUTE_PATH.BUSINESS.NOTIFICATION_REMINDERS,
+              },
+            ],
+            element: <RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER]} />,
+          },
+          {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ServiceCollaboratorsPage } =
                 await import("./features/services");
+
               return { Component: ServiceCollaboratorsPage };
             },
             path: ROUTE_PATH.BUSINESS.SERVICE_COLLABORATORS,
@@ -73,6 +93,7 @@ export const businessRoutes: RouteObject[] = [
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ServiceDiscountsPage } =
                 await import("./features/services");
+
               return { Component: ServiceDiscountsPage };
             },
             path: ROUTE_PATH.BUSINESS.SERVICE_DISCOUNTS,

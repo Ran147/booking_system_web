@@ -174,6 +174,27 @@
     },
     "title": "Portal del negocio"
   },
+  "notificationSettings": {
+    "reminders": {
+      "description": "Configura cuándo se envían recordatorios por correo a tus clientes.",
+      "emailOnly": "Los recordatorios se envían únicamente por correo electrónico.",
+      "enabledLabel": "Enviar recordatorios de reservas",
+      "leadTimes": {
+        "60": "1 hora antes",
+        "120": "2 horas antes",
+        "720": "12 horas antes",
+        "1440": "24 horas antes",
+        "2880": "48 horas antes"
+      },
+      "leadTimesLabel": "Anticipación de los recordatorios",
+      "maximumError": "Puedes seleccionar como máximo dos anticipaciones.",
+      "save": "Guardar",
+      "saved": "Configuración de recordatorios guardada.",
+      "saving": "Guardando…",
+      "timeZone": "Zona horaria del negocio: {{timeZone}}",
+      "title": "Recordatorios de reservas"
+    }
+  },
   "placeholder": {
     "description": "Aquí gestionarás los servicios, la agenda y los clientes de tu negocio.",
     "title": "Panel del negocio"
