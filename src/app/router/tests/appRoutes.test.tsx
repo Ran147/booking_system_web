@@ -1,3 +1,5 @@
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ROUTE_PATH } from "@/shared/constants";
 import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
@@ -102,6 +104,61 @@ describe("app routes", () => {
       ).toBeInTheDocument();
     },
   );
+
+  it("KAN-53: navigates from settings to the dedicated password view", async () => {
+    const user = userEvent.setup();
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+      session: SUBSCRIBER_SESSION,
+    });
+
+    await user.click(
+      await screen.findByRole("link", {
+        name: testI18n.t("business:settings.navigation.password.action"),
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: testI18n.t("business:settings.password.title"),
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    ["subscriber", SUBSCRIBER_SESSION],
+    ["collaborator", COLLABORATOR_SESSION],
+  ])(
+    "KAN-53: allows an authenticated %s to open password settings directly",
+    async (_roleName, session) => {
+      renderRoutesWithProviders(appRoutes, {
+        initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`,
+        session,
+      });
+
+      expect(
+        await screen.findByLabelText(
+          testI18n.t("business:settings.password.currentPasswordLabel"),
+          { exact: false, selector: 'input[name="currentPassword"]' },
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("KAN-199: keeps direct business-profile access blocked for collaborators", async () => {
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+      session: COLLABORATOR_SESSION,
+    });
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: testI18n.t("business:placeholder.title"),
+      }),
+    ).toBeInTheDocument();
+  });
 
   it("KAN-86: redirects a collaborator from the admin portal to the business portal", async () => {
     renderRoutesWithProviders(appRoutes, {

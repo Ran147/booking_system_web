@@ -1,3 +1,4 @@
+import { Building2, LockKeyhole } from "lucide-react";
 import type { ChangeEvent, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,8 +11,8 @@ import {
   RadioGroup,
   SelectField,
 } from "@/components";
-import { I18N_NAMESPACE, type Language } from "@/constants";
-import { ChangePasswordForm } from "./components";
+import { I18N_NAMESPACE, ROUTE_PATH, type Language } from "@/constants";
+import { SettingsNavigationCard } from "./components";
 import { useSettingsPageViewModel } from "./hooks/useSettingsPageViewModel";
 
 export const SettingsPage = (): ReactElement => {
@@ -21,6 +22,7 @@ export const SettingsPage = (): ReactElement => {
     handleLanguageChange,
     handleThemeChange,
     isLanguageSaving,
+    isSubscriber,
     isThemeSaving,
     languageOptions,
     showLanguageSaveError,
@@ -34,6 +36,8 @@ export const SettingsPage = (): ReactElement => {
   ): void => {
     handleLanguageChange(changeEvent.target.value as Language);
   };
+  const businessProfilePath = `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`;
+  const passwordSettingsPath = `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`;
 
   return (
     <PageTemplate
@@ -86,17 +90,23 @@ export const SettingsPage = (): ReactElement => {
           </CardContent>
         </Card>
 
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle>{t("settings.password.title")}</CardTitle>
-            <CardDescription>
-              {t("settings.password.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChangePasswordForm />
-          </CardContent>
-        </Card>
+        <SettingsNavigationCard
+          description={t("settings.navigation.password.description")}
+          icon={LockKeyhole}
+          linkLabel={t("settings.navigation.password.action")}
+          title={t("settings.navigation.password.title")}
+          to={passwordSettingsPath}
+        />
+
+        {isSubscriber ? (
+          <SettingsNavigationCard
+            description={t("settings.navigation.businessProfile.description")}
+            icon={Building2}
+            linkLabel={t("settings.navigation.businessProfile.action")}
+            title={t("settings.navigation.businessProfile.title")}
+            to={businessProfilePath}
+          />
+        ) : null}
       </div>
     </PageTemplate>
   );

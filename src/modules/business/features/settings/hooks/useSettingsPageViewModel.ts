@@ -8,6 +8,7 @@ import {
   THEME_MODE,
   type Language,
 } from "@/constants";
+import { USER_ROLE } from "@/domain";
 import { useSession } from "@/modules/auth";
 import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
 import { useSaveUserLanguageMutation } from "../api/useSaveUserLanguageMutation";
@@ -59,6 +60,9 @@ export const useSettingsPageViewModel = (): SettingsPageViewModel => {
     handleLanguageChange,
     handleThemeChange,
     isLanguageSaving: languageMutation.isPending,
+    isSubscriber:
+      session.status === SESSION_STATUS.SIGNED_IN &&
+      session.role === USER_ROLE.SUBSCRIBER,
     isThemeSaving: themeMutation.isPending,
     languageOptions: [
       { label: t("language.spanishLabel"), value: LANGUAGE.ES },
