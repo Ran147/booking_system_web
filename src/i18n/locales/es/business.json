@@ -339,6 +339,22 @@
       "saveError": "El idioma cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
       "title": "Idioma"
     },
+    "password": {
+      "confirmationMismatch": "La confirmación no coincide con la nueva contraseña.",
+      "confirmPasswordLabel": "Confirmar nueva contraseña",
+      "currentPasswordInvalid": "La contraseña actual no es correcta.",
+      "currentPasswordLabel": "Contraseña actual",
+      "description": "Actualiza la contraseña que utilizas para acceder a tu cuenta.",
+      "newPasswordLabel": "Nueva contraseña",
+      "sameAsCurrent": "La nueva contraseña debe ser diferente de la actual.",
+      "sessionExpired": "Tu sesión ya no es válida. Inicia sesión nuevamente antes de cambiar la contraseña.",
+      "strengthLabel": "Seguridad de la contraseña",
+      "submitAction": "Cambiar contraseña",
+      "submitting": "Cambiando…",
+      "successMessage": "Contraseña actualizada correctamente.",
+      "title": "Cambiar contraseña",
+      "tooManyAttempts": "Se realizaron demasiados intentos. Espera un momento antes de volver a intentarlo."
+    },
     "theme": {
       "description": "Elige cómo se muestra la interfaz del portal del negocio.",
       "label": "Tema de la interfaz",

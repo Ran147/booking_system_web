@@ -11,6 +11,7 @@ import {
   SelectField,
 } from "@/components";
 import { I18N_NAMESPACE, type Language } from "@/constants";
+import { ChangePasswordForm } from "./components";
 import { useSettingsPageViewModel } from "./hooks/useSettingsPageViewModel";
 
 export const SettingsPage = (): ReactElement => {
@@ -82,6 +83,18 @@ export const SettingsPage = (): ReactElement => {
                 {t("settings.theme.saveError")}
               </p>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>{t("settings.password.title")}</CardTitle>
+            <CardDescription>
+              {t("settings.password.description")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChangePasswordForm />
           </CardContent>
         </Card>
       </div>

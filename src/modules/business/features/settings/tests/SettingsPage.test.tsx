@@ -23,6 +23,21 @@ describe("SettingsPage", () => {
     vi.mocked(saveUserTheme).mockResolvedValue();
   });
 
+  it("renders language, appearance, and password settings together", () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    expect(screen.getByRole("heading", { name: "Idioma" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Apariencia" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Cambiar contraseña" }),
+    ).toBeInTheDocument();
+  });
+
   it("KAN-51: changes Spanish to English immediately and persists it", async () => {
     renderWithProviders(<SettingsPage />, {
       initialPath: "/business/settings",
