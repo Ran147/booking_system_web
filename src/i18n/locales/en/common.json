@@ -99,9 +99,12 @@
     "loading": "Loading…"
   },
   "theme": {
-    "darkLabel": "Dark",
-    "lightLabel": "Light",
-    "systemLabel": "System"
+    "dark": "Oscuro",
+    "darkLabel": "Oscuro",
+    "light": "Claro",
+    "lightLabel": "Claro",
+    "system": "Sistema",
+    "systemLabel": "Sistema"
   },
   "subscriptionStatus": {
     "active": "Active",

@@ -30,9 +30,11 @@ describe("firestore.rules: users", () => {
     await testEnvironment.clearFirestore();
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       const adminFirestore = context.firestore();
-      await adminFirestore
-        .doc(CUSTOMER_PROFILE_PATH)
-        .set({ email: "cliente@demo.test", language: "en" });
+      await adminFirestore.doc(CUSTOMER_PROFILE_PATH).set({
+        email: "cliente@demo.test",
+        language: "en",
+        theme: "system",
+      });
       await adminFirestore
         .doc(OTHER_PROFILE_PATH)
         .set({ email: "otro@demo.test", language: "es" });
@@ -204,6 +206,58 @@ describe("firestore.rules: users", () => {
         .firestore()
         .doc(SUBSCRIBER_PROFILE_PATH)
         .update({ fullName: "Changed" }),
+    );
+  });
+
+    it("KAN-173: lets a customer update their own theme", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertSucceeds(
+      customer
+        .firestore()
+        .doc(CUSTOMER_PROFILE_PATH)
+        .update({ theme: "dark", updatedAt: new Date() }),
+    );
+  });
+
+  it("KAN-173: denies a customer using an unsupported theme", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(
+      customer
+        .firestore()
+        .doc(CUSTOMER_PROFILE_PATH)
+        .update({ theme: "sepia", updatedAt: new Date() }),
+    );
+  });
+
+  it("KAN-173: denies a customer changing protected fields", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(
+      customer
+        .firestore()
+        .doc(CUSTOMER_PROFILE_PATH)
+        .update({ role: "super_admin" }),
+    );
+  });
+
+  it("KAN-173: denies another customer updating the theme", async () => {
+    const otherCustomer = testEnvironment.authenticatedContext("customer-2", {
+      role: "customer",
+    });
+
+    await assertFails(
+      otherCustomer
+        .firestore()
+        .doc(CUSTOMER_PROFILE_PATH)
+        .update({ theme: "light", updatedAt: new Date() }),
     );
   });
 

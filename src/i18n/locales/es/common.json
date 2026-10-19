@@ -99,8 +99,11 @@
     "loading": "Cargando…"
   },
   "theme": {
+    "dark": "Oscuro",
     "darkLabel": "Oscuro",
+    "light": "Claro",
     "lightLabel": "Claro",
+    "system": "Sistema",
     "systemLabel": "Sistema"
   },
   "subscriptionStatus": {
