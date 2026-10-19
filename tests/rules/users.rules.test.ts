@@ -30,9 +30,11 @@ describe("firestore.rules: users", () => {
     await testEnvironment.clearFirestore();
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       const adminFirestore = context.firestore();
-      await adminFirestore
-        .doc(CUSTOMER_PROFILE_PATH)
-        .set({ email: "cliente@demo.test", language: "en" });
+      await adminFirestore.doc(CUSTOMER_PROFILE_PATH).set({
+        bookingRemindersEnabled: true,
+        email: "cliente@demo.test",
+        language: "en",
+      });
       await adminFirestore
         .doc(OTHER_PROFILE_PATH)
         .set({ email: "otro@demo.test", language: "es" });
@@ -204,6 +206,58 @@ describe("firestore.rules: users", () => {
         .firestore()
         .doc(SUBSCRIBER_PROFILE_PATH)
         .update({ fullName: "Changed" }),
+    );
+  });
+
+  it("KAN-203: lets a customer update their own reminder preference", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertSucceeds(
+      customer.firestore().doc(CUSTOMER_PROFILE_PATH).update({
+        bookingRemindersEnabled: false,
+        updatedAt: new Date(),
+      }),
+    );
+  });
+
+  it("KAN-203: denies another customer updating the reminder preference", async () => {
+    const otherCustomer = testEnvironment.authenticatedContext("customer-2", {
+      role: "customer",
+    });
+
+    await assertFails(
+      otherCustomer.firestore().doc(CUSTOMER_PROFILE_PATH).update({
+        bookingRemindersEnabled: false,
+        updatedAt: new Date(),
+      }),
+    );
+  });
+
+  it("KAN-203: denies changes to protected user fields", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(
+      customer
+        .firestore()
+        .doc(CUSTOMER_PROFILE_PATH)
+        .update({ role: "super_admin" }),
+    );
+  });
+
+  it("KAN-203: denies a non-boolean reminder preference", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(
+      customer.firestore().doc(CUSTOMER_PROFILE_PATH).update({
+        bookingRemindersEnabled: "yes",
+        updatedAt: new Date(),
+      }),
     );
   });
 

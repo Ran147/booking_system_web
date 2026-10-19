@@ -24,20 +24,30 @@ export const customerRoutes: RouteObject[] = [
       {
         children: [
           {
-            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-              const { MyBookingsPage } = await import("./features/my-bookings");
-              return { Component: MyBookingsPage };
-            },
-            path: ROUTE_PATH.CUSTOMER.MY_BOOKINGS,
-          },
-          {
-            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-              const { BookingDetailPage } =
-                await import("./features/my-bookings");
-              return { Component: BookingDetailPage };
-            },
-            path: ROUTE_PATH.CUSTOMER.BOOKING_DETAIL,
-          },
+  lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+    const { BookingRemindersPage } =
+      await import(
+        "./features/reservation-reminders/ReservationRemindersPage"
+            );
+          return { Component: BookingRemindersPage };
+        },
+        path: ROUTE_PATH.CUSTOMER.PROFILE_REMINDERS,
+      },
+      {
+        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+          const { MyBookingsPage } = await import("./features/my-bookings");
+          return { Component: MyBookingsPage };
+        },
+        path: ROUTE_PATH.CUSTOMER.MY_BOOKINGS,
+      },
+      {
+        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+          const { BookingDetailPage } =
+            await import("./features/my-bookings");
+          return { Component: BookingDetailPage };
+        },
+        path: ROUTE_PATH.CUSTOMER.BOOKING_DETAIL,
+      },
         ],
         element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
       },
