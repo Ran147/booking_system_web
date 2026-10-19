@@ -1,3 +1,5 @@
+export { Alert, ALERT_VARIANT } from "./alert";
+export type { AlertProps, AlertVariant } from "./alert";
 export { AppLink, type AppLinkProps } from "./app-link/AppLink";
 export {
   APP_LINK_VARIANT,
@@ -59,7 +61,24 @@ export {
   PageTemplate,
   type PageTemplateProps,
 } from "./page-template/PageTemplate";
+export {
+  PortalHomeTemplate,
+  type PortalHomeMetricItem,
+  type PortalHomeTemplateProps,
+  type PortalQuickAccessItem,
+} from "./portal-home-template";
+export { PasswordInput } from "./password-input";
+export type { PasswordInputProps } from "./password-input/models/passwordInput.model";
+export { PasswordStrengthMeter } from "./password-strength-meter";
+export type { PasswordStrengthMeterProps } from "./password-strength-meter/models/passwordStrengthMeter.model";
 export { PortalShell, type PortalShellProps } from "./portal-shell/PortalShell";
+export {
+  RadioGroup,
+  type RadioGroupOption,
+  type RadioGroupProps,
+} from "./radio-group";
+export { RecaptchaField } from "./recaptcha-field";
+export type { RecaptchaFieldProps } from "./recaptcha-field";
 export { SearchInput, type SearchInputProps } from "./search-input/SearchInput";
 export { Spinner } from "./spinner/Spinner";
 export { StatusBadge, type StatusBadgeProps } from "./status-badge/StatusBadge";
@@ -68,6 +87,26 @@ export type {
   SelectFieldOption,
   SelectFieldProps,
 } from "./select-field/models/selectField.model";
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
+export type {
+  TableBodyProps,
+  TableCaptionProps,
+  TableCellProps,
+  TableFooterProps,
+  TableHeadProps,
+  TableHeaderProps,
+  TableProps,
+  TableRowProps,
+} from "./table";
 export { Tabs } from "./tabs";
 export type { TabItem, TabsProps } from "./tabs/models/tabs.model";
 export { TextareaField } from "./textarea-field";

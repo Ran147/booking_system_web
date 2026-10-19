@@ -19,7 +19,7 @@ describe("language preference route (KAN-172)", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: testI18n.t("signInPlaceholder.title"),
+        name: testI18n.t("auth.signIn.title"),
       }),
     ).toBeInTheDocument();
   });
@@ -31,9 +31,10 @@ describe("language preference route (KAN-172)", () => {
     });
 
     expect(
-      await screen.findByRole("heading", {
-        name: testI18n.t("landing:placeholder.title"),
-      }),
-    ).toBeInTheDocument();
+  await screen.findByRole("heading", {
+    level: 1,
+    name: "Panel del negocio",
+  }),
+).toBeInTheDocument();
   });
 });
