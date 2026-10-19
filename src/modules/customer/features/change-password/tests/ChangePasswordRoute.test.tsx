@@ -18,13 +18,9 @@ describe("change password route (KAN-171)", () => {
     });
 
     expect(
-      await screen.findByRole(
-        "heading",
-        {
-          name: testI18n.t("signInPlaceholder.title"),
-        },
-        { timeout: 5000 },
-      ),
+      await screen.findByRole("heading", {
+        name: testI18n.t("auth.signIn.title"),
+      }),
     ).toBeInTheDocument();
   });
 
@@ -35,13 +31,10 @@ describe("change password route (KAN-171)", () => {
     });
 
     expect(
-      await screen.findByRole(
-        "heading",
-        {
-          name: testI18n.t("landing:placeholder.title"),
-        },
-        { timeout: 5000 },
-      ),
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Panel del negocio",
+      }),
     ).toBeInTheDocument();
   });
 });

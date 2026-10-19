@@ -22,6 +22,7 @@ export const SEED_DOCUMENT_ID = {
   PENDING_PLAN_CHECKOUT: "seed-plan-checkout-estetica-luna",
   PLAN_BASIC: "seed-plan-basic",
   PLAN_PRO: "seed-plan-pro",
+  PLATFORM_SETTINGS: "current",
   SERVICE_BEARD: "seed-service-beard-trim",
   SERVICE_COLOR: "seed-service-hair-color",
   SERVICE_HAIRCUT: "seed-service-haircut",
@@ -109,6 +110,13 @@ export const SEED_WEEKDAY = {
 
 export const SEED_BILLING_PERIOD = {
   MONTHLY: "monthly",
+} as const;
+
+// platformSettings/current (US-38, KAN-182). 15 minutes is the same value the
+// app falls back to; to see the inactivity warning quickly, lower it in the
+// Emulator UI (http://127.0.0.1:4000/firestore) and reload the page.
+export const SEED_PLATFORM_SETTINGS = {
+  IDLE_TIMEOUT_MINUTES: 15,
 } as const;
 
 export const SEED_PLAN = {

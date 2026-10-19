@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ENV_FLAG } from "@/constants";
 import { USER_ROLE } from "@/domain";
 import { subscribeToSession } from "../api/subscribeToSession";
 import { SESSION_STATUS } from "../constants/SessionStatus.constants";
@@ -14,20 +15,22 @@ const DEV_MOCK_SUBSCRIBER_SESSION: Session = {
 };
 
 export const useAuthSessionController = (): AuthContextValue => {
-  const isDevEnvironment = Boolean(
-    import.meta.env.DEV && !import.meta.env.VITEST,
+  const shouldUseDevMockSession = Boolean(
+    import.meta.env.DEV &&
+    !import.meta.env.VITEST &&
+    import.meta.env.VITE_USE_EMULATORS !== ENV_FLAG.ENABLED,
   );
 
   const [session, setSession] = useState<Session>(() =>
-    isDevEnvironment
+    shouldUseDevMockSession
       ? DEV_MOCK_SUBSCRIBER_SESSION
       : { status: SESSION_STATUS.LOADING },
   );
 
   useEffect(() => {
-    if (isDevEnvironment) return;
+    if (shouldUseDevMockSession) return;
     return subscribeToSession(setSession);
-  }, [isDevEnvironment]);
+  }, [shouldUseDevMockSession]);
 
   return useMemo(() => ({ session }), [session]);
 };
