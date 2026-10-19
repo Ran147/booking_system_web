@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
-import { LANGUAGE, STORAGE_KEY } from "@/constants";
+import { ThemeContext } from "@/app/providers/theme/ThemeContext";
+import { LANGUAGE, STORAGE_KEY, THEME_MODE } from "@/constants";
 import {
   COLLABORATOR_SESSION,
   renderWithProviders,
@@ -9,14 +10,17 @@ import {
 import { SettingsPage } from "../SettingsPage";
 import { createSettingsPage } from "./SettingsPage.page";
 import { saveUserLanguage } from "../api/saveUserLanguage";
+import { saveUserTheme } from "../api/saveUserTheme";
 
 vi.mock("../api/saveUserLanguage");
+vi.mock("../api/saveUserTheme");
 
 describe("SettingsPage", () => {
   beforeEach(async () => {
     localStorage.clear();
     await testI18n.changeLanguage(LANGUAGE.ES);
     vi.mocked(saveUserLanguage).mockResolvedValue();
+    vi.mocked(saveUserTheme).mockResolvedValue();
   });
 
   it("KAN-51: changes Spanish to English immediately and persists it", async () => {
@@ -98,5 +102,65 @@ describe("SettingsPage", () => {
         expect.objectContaining({ userId: COLLABORATOR_SESSION.userId }),
       ),
     );
+  });
+
+  it.each([
+    ["light", THEME_MODE.LIGHT],
+    ["dark", THEME_MODE.DARK],
+    ["system", THEME_MODE.SYSTEM],
+  ])("KAN-52: applies and persists the %s theme", async (_label, themeMode) => {
+    const setThemeMode = vi.fn();
+    const initialThemeMode =
+      themeMode === THEME_MODE.SYSTEM ? THEME_MODE.DARK : THEME_MODE.SYSTEM;
+    renderWithProviders(
+      <ThemeContext.Provider
+        value={{
+          isDarkApplied: false,
+          setThemeMode,
+          themeMode: initialThemeMode,
+        }}
+      >
+        <SettingsPage />
+      </ThemeContext.Provider>,
+      { initialPath: "/business/settings", session: SUBSCRIBER_SESSION },
+    );
+    const page = createSettingsPage();
+
+    if (themeMode === THEME_MODE.LIGHT) await page.selectLightTheme();
+    if (themeMode === THEME_MODE.DARK) await page.selectDarkTheme();
+    if (themeMode === THEME_MODE.SYSTEM) await page.selectSystemTheme();
+
+    expect(setThemeMode).toHaveBeenCalledWith(themeMode);
+    await waitFor(() =>
+      expect(saveUserTheme).toHaveBeenCalledWith({
+        theme: themeMode,
+        userId: SUBSCRIBER_SESSION.userId,
+      }),
+    );
+  });
+
+  it("KAN-52: keeps the local theme and reports a remote save failure", async () => {
+    vi.mocked(saveUserTheme).mockRejectedValue(new Error("offline"));
+    const setThemeMode = vi.fn();
+    renderWithProviders(
+      <ThemeContext.Provider
+        value={{
+          isDarkApplied: false,
+          setThemeMode,
+          themeMode: THEME_MODE.LIGHT,
+        }}
+      >
+        <SettingsPage />
+      </ThemeContext.Provider>,
+      { initialPath: "/business/settings", session: SUBSCRIBER_SESSION },
+    );
+
+    await createSettingsPage().selectDarkTheme();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "El tema cambió en este dispositivo",
+    );
+    expect(setThemeMode).toHaveBeenCalledWith(THEME_MODE.DARK);
+    expect(localStorage.getItem(STORAGE_KEY.THEME_PENDING_SYNC)).not.toBeNull();
   });
 });

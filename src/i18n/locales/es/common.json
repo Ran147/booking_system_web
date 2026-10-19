@@ -98,6 +98,11 @@
   "status": {
     "loading": "Cargando…"
   },
+  "theme": {
+    "darkLabel": "Oscuro",
+    "lightLabel": "Claro",
+    "systemLabel": "Sistema"
+  },
   "subscriptionStatus": {
     "active": "Activa",
     "cancelled": "Cancelada",

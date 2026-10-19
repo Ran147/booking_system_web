@@ -72,6 +72,11 @@ export type { PasswordInputProps } from "./password-input/models/passwordInput.m
 export { PasswordStrengthMeter } from "./password-strength-meter";
 export type { PasswordStrengthMeterProps } from "./password-strength-meter/models/passwordStrengthMeter.model";
 export { PortalShell, type PortalShellProps } from "./portal-shell/PortalShell";
+export {
+  RadioGroup,
+  type RadioGroupOption,
+  type RadioGroupProps,
+} from "./radio-group";
 export { RecaptchaField } from "./recaptcha-field";
 export type { RecaptchaFieldProps } from "./recaptcha-field";
 export { SearchInput, type SearchInputProps } from "./search-input/SearchInput";

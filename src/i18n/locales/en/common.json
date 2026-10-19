@@ -98,6 +98,11 @@
   "status": {
     "loading": "Loading…"
   },
+  "theme": {
+    "darkLabel": "Dark",
+    "lightLabel": "Light",
+    "systemLabel": "System"
+  },
   "subscriptionStatus": {
     "active": "Active",
     "cancelled": "Cancelled",

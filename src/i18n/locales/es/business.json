@@ -330,5 +330,21 @@
       "deactivateConfirmTitle": "Desactivar servicio",
       "deactivateSuccess": "Servicio desactivado."
     }
+  },
+  "settings": {
+    "description": "Administra las preferencias personales de tu cuenta.",
+    "language": {
+      "description": "Los textos, fechas, horas y precios utilizarán el idioma seleccionado.",
+      "label": "Idioma de la interfaz",
+      "saveError": "El idioma cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
+      "title": "Idioma"
+    },
+    "theme": {
+      "description": "Elige cómo se muestra la interfaz del portal del negocio.",
+      "label": "Tema de la interfaz",
+      "saveError": "El tema cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
+      "title": "Apariencia"
+    },
+    "title": "Configuración"
   }
 }

@@ -180,17 +180,20 @@ service cloud.firestore {
         && resource.data.customerUserId == request.auth.uid;
     }
 
-    // Each user reads only their own profile; sign-in needs User.language
-    // (AC-KAN-129-02). Business portal users may update only their language
-    // preference (KAN-51), including active collaborators.
+    // Each user reads only their own profile. Business portal users may update
+    // only their language and theme preferences (KAN-51, KAN-52), including
+    // active collaborators.
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
 
       allow update: if isSignedIn()
         && request.auth.uid == userId
         && isBusinessPortalUser()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['language'])
-        && request.resource.data.language in ['es', 'en'];
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['language', 'theme'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['language'])
+          || request.resource.data.language in ['es', 'en'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['theme'])
+          || request.resource.data.theme in ['light', 'dark', 'system']);
     }
 
     // Global parameters (KAN-182). Any signed-in user reads them (the idle
