@@ -1,6 +1,7 @@
 // Mirror of src/domain/business/BusinessSlug.constants.ts — keep in sync.
 // Static top-level route segments a business can never take as its slug.
 export const RESERVED_BUSINESS_SLUG = Object.freeze({
+  ABOUT: "about",
   ADMIN: "admin",
   BUSINESS: "business",
   CONTACT: "contact",

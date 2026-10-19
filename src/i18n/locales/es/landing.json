@@ -1,4 +1,78 @@
 {
+  "about": {
+    "hero": {
+      "badge": "Nuestra Trayectoria y Solución",
+      "description": "Transformamos la manera en que los negocios y profesionales gestionan sus agendas, ofreciendo una solución intuitiva, escalable y moderna.",
+      "title": "Impulsamos la digitalización de tus citas y servicios"
+    },
+    "history": {
+      "description": "Booking System nació de la necesidad real de simplificar la coordinación de citas entre negocios independientes y sus clientes. Lo que comenzó como una herramienta básica de reservas evolucionó hasta convertirse en una plataforma multi-inquilino robusta que conecta a negocios, profesionales y clientes en un ecosistema sincronizado en tiempo real.",
+      "milestones": {
+        "m1": {
+          "description": "Conceptualización de la arquitectura modular y lanzamiento del primer prototipo de gestión de citas.",
+          "title": "Nacimiento y Primeros Pasos",
+          "year": "2024"
+        },
+        "m2": {
+          "description": "Implementación del modelo multi-inquilino con portales independientes para suscriptores y clientes.",
+          "title": "Expansión Multi-Tenant",
+          "year": "2025"
+        },
+        "m3": {
+          "description": "Integración de pagos en línea, analítica avanzada, recordatorios automáticos y roles de colaboradores.",
+          "title": "Consolidación de la Plataforma",
+          "year": "2026"
+        }
+      },
+      "title": "Nuestra Historia y Trayectoria"
+    },
+    "offerings": {
+      "items": {
+        "analytics": {
+          "description": "Reportes en tiempo real sobre ingresos, ocupación y servicios más solicitados para tomar decisiones informadas.",
+          "title": "Analítica y Métricas Clave"
+        },
+        "booking": {
+          "description": "Permite que tus clientes agenden citas las 24 horas del día, los 7 días de la semana, desde cualquier dispositivo móvil o de escritorio.",
+          "title": "Reservas Online 24/7"
+        },
+        "collaboration": {
+          "description": "Asigna citas a colaboradores específicos, controla permisos y gestiona horarios de trabajo individuales.",
+          "title": "Gestión de Equipo y Horarios"
+        },
+        "reminders": {
+          "description": "Notificaciones automáticas para reducir ausencias y mantener a tus clientes siempre informados.",
+          "title": "Recordatorios y Notificaciones"
+        }
+      },
+      "subtitle": "Una suite completa diseñada para potenciar negocios de servicios de cualquier tamaño.",
+      "title": "Lo Que Ofrecemos"
+    },
+    "page": {
+      "ariaLabel": "Página de información sobre la empresa",
+      "description": "Conoce más sobre la historia, el equipo y la tecnología detrás de Booking System.",
+      "title": "Sobre Nosotros"
+    },
+    "stats": {
+      "bookings": {
+        "label": "Citas y reservas gestionadas",
+        "value": "+10,000"
+      },
+      "businesses": {
+        "label": "Negocios activos en la plataforma",
+        "value": "+500"
+      },
+      "support": {
+        "label": "Disponibilidad del servicio de soporte",
+        "value": "24/7"
+      },
+      "title": "Impacto y Cifras Clave",
+      "uptime": {
+        "label": "Tiempo de actividad garantizado",
+        "value": "99.9%"
+      }
+    }
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
