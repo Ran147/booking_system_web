@@ -28,6 +28,17 @@
       "status": "Estado",
       "title": "Detalle de la reserva"
     },
+    "filters": {
+      "all": "Todos",
+      "business": "Negocio",
+      "clearAction": "Limpiar filtros",
+      "from": "Desde",
+      "invalidRangeError": "La fecha final no puede ser anterior a la inicial.",
+      "label": "Filtros de reservas",
+      "noResultsEmpty": "Ninguna reserva coincide con los filtros.",
+      "status": "Estado",
+      "to": "Hasta"
+    },
     "history": {
       "empty": "Todavía no tienes reservas pasadas."
     },

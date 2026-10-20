@@ -28,6 +28,17 @@
       "status": "Status",
       "title": "Booking details"
     },
+    "filters": {
+      "all": "All",
+      "business": "Business",
+      "clearAction": "Clear filters",
+      "from": "From",
+      "invalidRangeError": "The end date cannot be before the start date.",
+      "label": "Booking filters",
+      "noResultsEmpty": "No booking matches the filters.",
+      "status": "Status",
+      "to": "To"
+    },
     "history": {
       "empty": "You have no past bookings yet."
     },

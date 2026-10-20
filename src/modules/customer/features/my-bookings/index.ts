@@ -6,5 +6,6 @@ export type {
   BookingDetailView,
   BookingDetailViewModel,
   MyBookingRow,
+  MyBookingsFiltersViewModel,
   MyBookingsViewModel,
 } from "./models";

@@ -11,17 +11,25 @@ import { mapMyBooking } from "./bookingDocument.schema";
 import { buildMyBookingsQuery } from "./buildMyBookingsQuery";
 import { sliceCursorPage } from "./sliceCursorPage";
 import type { MyBooking, MyBookingsQueryParams } from "../models";
+import { zonedDayBounds } from "../utils/zonedDayBounds";
 
 export const fetchMyBookingsPage = async ({
   customerUserId,
+  filters,
   pageCursor,
   pageSize,
   tab,
+  timeZone,
 }: MyBookingsQueryParams): Promise<CursorPage<MyBooking>> => {
   const filteredQuery = buildMyBookingsQuery({
     customerUserId,
+    filters,
     firestore,
     now: new Date(),
+    rangeEnd: filters.to ? zonedDayBounds(filters.to, timeZone).end : null,
+    rangeStart: filters.from
+      ? zonedDayBounds(filters.from, timeZone).start
+      : null,
     tab,
   });
   // One more than the page: tells whether there is a next page (sliceCursorPage).
