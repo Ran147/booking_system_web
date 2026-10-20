@@ -38,6 +38,13 @@
     },
     "title": "Perfil público del negocio"
   },
+  "businessStatus": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "En revisión",
+    "rejected": "Rechazado",
+    "suspended": "Suspendido"
+  },
   "collaborators": {
     "edit": {
       "serviceHasBookingsWarning": "Este colaborador tiene {{count}} reserva(s) futura(s) de este servicio que se mantendrán asignadas."
@@ -70,8 +77,7 @@
       },
       "businessStatus": {
         "helper": "Estado del tenant",
-        "label": "Estado del negocio",
-        "value": "Activo"
+        "label": "Estado del negocio"
       },
       "todayBookings": {
         "helper": "Próximas citas",
@@ -161,6 +167,10 @@
       "confirmTitle": "Cambios sin guardar",
       "unsavedChangesConfirm": "¿Deseas cerrar sesión? Tienes cambios sin guardar que se perderán."
     },
+    "statusGate": {
+      "retryAction": "Reintentar",
+      "signOutAction": "Cerrar sesión"
+    },
     "subscriptionBanner": {
       "ariaLabel": "Estado de la suscripción",
       "endsOn": "Finaliza el {{date}}",
@@ -174,19 +184,22 @@
     },
     "title": "Portal del negocio"
   },
+  "pendingApproval": {
+    "businessLabel": "Negocio",
+    "description": "Recibimos tu pago y tu registro. Un administrador de la plataforma está revisando tu negocio; cuando lo apruebe te avisaremos por correo y podrás usar tu panel completo.",
+    "signUpDateLabel": "Fecha de registro",
+    "title": "Tu negocio está en revisión"
+  },
   "placeholder": {
     "description": "Aquí gestionarás los servicios, la agenda y los clientes de tu negocio.",
     "title": "Panel del negocio"
   },
-  "settings": {
-    "description": "Administra las preferencias personales de tu cuenta.",
-    "language": {
-      "description": "Los textos, fechas, horas y precios utilizarán el idioma seleccionado.",
-      "label": "Idioma de la interfaz",
-      "saveError": "El idioma cambió en este dispositivo, pero no se pudo guardar en tu cuenta.",
-      "title": "Idioma"
-    },
-    "title": "Configuración"
+  "rejected": {
+    "businessLabel": "Negocio",
+    "contactLabel": "Si tienes dudas, escríbenos a",
+    "description": "Un administrador de la plataforma revisó tu negocio y no lo aprobó.",
+    "reasonLabel": "Motivo",
+    "title": "Tu solicitud fue rechazada"
   },
   "services": {
     "collaborators": {
