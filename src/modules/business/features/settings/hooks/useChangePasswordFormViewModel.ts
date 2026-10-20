@@ -1,0 +1,137 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "@/components";
+import {
+  FIREBASE_ERROR_CODE,
+  I18N_NAMESPACE,
+  STRING,
+  VALIDATION_MESSAGE_KEY,
+  type ValidationMessageKey,
+} from "@/constants";
+import type { MutationError, Nullable, NullableUndefined } from "@/types";
+import { useChangePasswordMutation } from "../api/useChangePasswordMutation";
+import {
+  CHANGE_PASSWORD_ERROR_CODE,
+  CHANGE_PASSWORD_ERROR_KEY,
+  CHANGE_PASSWORD_FORM_MODE,
+  DEFAULT_CHANGE_PASSWORD_VALUES,
+} from "../constants/ChangePassword.constants";
+import {
+  changePasswordFormSchema,
+  type ChangePasswordFormValues,
+  type ChangePasswordFormViewModel,
+} from "../models";
+
+const isValidationMessageKey = (
+  messageKey: string,
+): messageKey is ValidationMessageKey =>
+  Object.values(VALIDATION_MESSAGE_KEY).some(
+    (validationMessageKey) => validationMessageKey === messageKey,
+  );
+
+export const useChangePasswordFormViewModel =
+  (): ChangePasswordFormViewModel => {
+    const { t } = useTranslation([
+      I18N_NAMESPACE.BUSINESS,
+      I18N_NAMESPACE.COMMON,
+    ]);
+    const { t: translateValidation } = useTranslation(
+      I18N_NAMESPACE.VALIDATION,
+    );
+    const changePasswordMutation = useChangePasswordMutation();
+    const [submitErrorMessage, setSubmitErrorMessage] =
+      useState<Nullable<string>>(null);
+    const [visibilityResetKey, setVisibilityResetKey] = useState(0);
+    const form = useForm<ChangePasswordFormValues>({
+      defaultValues: DEFAULT_CHANGE_PASSWORD_VALUES,
+      mode: CHANGE_PASSWORD_FORM_MODE.VALIDATION,
+      resolver: zodResolver(changePasswordFormSchema),
+    });
+    const newPassword =
+      useWatch({ control: form.control, name: "newPassword" }) ?? STRING.EMPTY;
+
+    const resolveFieldErrorMessage = (
+      messageKey?: string,
+    ): NullableUndefined<string> => {
+      if (!messageKey) return undefined;
+      if (isValidationMessageKey(messageKey)) {
+        return translateValidation(messageKey);
+      }
+
+      const featureMessageByKey: Readonly<Record<string, string>> = {
+        [CHANGE_PASSWORD_ERROR_KEY.CONFIRMATION_MISMATCH]: t(
+          "business:settings.password.confirmationMismatch",
+        ),
+        [CHANGE_PASSWORD_ERROR_KEY.CURRENT_PASSWORD_INVALID]: t(
+          "business:settings.password.currentPasswordInvalid",
+        ),
+        [CHANGE_PASSWORD_ERROR_KEY.SAME_AS_CURRENT]: t(
+          "business:settings.password.sameAsCurrent",
+        ),
+      };
+
+      return featureMessageByKey[messageKey];
+    };
+
+    const handleMutationError = (mutationError: MutationError): void => {
+      if (
+        mutationError.code === FIREBASE_ERROR_CODE.INVALID_CREDENTIAL ||
+        mutationError.code === FIREBASE_ERROR_CODE.WRONG_PASSWORD
+      ) {
+        form.setError("currentPassword", {
+          message: CHANGE_PASSWORD_ERROR_KEY.CURRENT_PASSWORD_INVALID,
+        });
+        return;
+      }
+
+      if (
+        mutationError.code ===
+          CHANGE_PASSWORD_ERROR_CODE.AUTHENTICATED_USER_REQUIRED ||
+        mutationError.code === FIREBASE_ERROR_CODE.INVALID_USER_TOKEN ||
+        mutationError.code === FIREBASE_ERROR_CODE.REQUIRES_RECENT_LOGIN ||
+        mutationError.code === FIREBASE_ERROR_CODE.USER_MISMATCH ||
+        mutationError.code === FIREBASE_ERROR_CODE.USER_TOKEN_EXPIRED
+      ) {
+        setSubmitErrorMessage(t("business:settings.password.sessionExpired"));
+        return;
+      }
+
+      setSubmitErrorMessage(
+        mutationError.code === FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS
+          ? t("business:settings.password.tooManyAttempts")
+          : t(`common:${mutationError.messageKey}`),
+      );
+    };
+
+    const submitChangePassword = (
+      formValues: ChangePasswordFormValues,
+    ): void => {
+      setSubmitErrorMessage(null);
+      changePasswordMutation.mutate(
+        {
+          currentPassword: formValues.currentPassword,
+          newPassword: formValues.newPassword,
+        },
+        {
+          onError: handleMutationError,
+          onSuccess: () => {
+            toast.success(t("business:settings.password.successMessage"));
+            form.reset(DEFAULT_CHANGE_PASSWORD_VALUES);
+            setVisibilityResetKey((currentKey) => currentKey + 1);
+          },
+        },
+      );
+    };
+
+    return {
+      form,
+      handleSubmit: form.handleSubmit(submitChangePassword),
+      isSubmitting: changePasswordMutation.isPending,
+      newPassword,
+      resolveFieldErrorMessage,
+      submitErrorMessage,
+      visibilityResetKey,
+    };
+  };

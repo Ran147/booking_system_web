@@ -79,6 +79,10 @@
     "permissionDenied": "No tienes permiso para realizar esta acción.",
     "unknown": "Ocurrió un error inesperado. Inténtalo de nuevo."
   },
+  "language": {
+    "englishLabel": "Inglés",
+    "spanishLabel": "Español"
+  },
   "notFound": {
     "description": "La página que buscas no existe o cambió de dirección.",
     "homeAction": "Volver al inicio",
@@ -93,6 +97,11 @@
   },
   "status": {
     "loading": "Cargando…"
+  },
+  "theme": {
+    "darkLabel": "Oscuro",
+    "lightLabel": "Claro",
+    "systemLabel": "Sistema"
   },
   "subscriptionStatus": {
     "active": "Activa",

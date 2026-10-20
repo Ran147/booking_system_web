@@ -98,6 +98,26 @@ describe("app routes", () => {
     ).toBeInTheDocument();
   });
 
+  it.each([
+    ["subscriber", SUBSCRIBER_SESSION],
+    ["collaborator", COLLABORATOR_SESSION],
+  ])(
+    "KAN-53: opens business settings for an authenticated %s",
+    async (_roleName, session) => {
+      renderRoutesWithProviders(appRoutes, {
+        initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+        session,
+      });
+      const appRoutesPage = createAppRoutesPage();
+
+      expect(
+        await appRoutesPage.findPageHeading(
+          testI18n.t("business:settings.title"),
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
   it("KAN-86: redirects a collaborator from the admin portal to the business portal", async () => {
     renderRoutesWithProviders(appRoutes, {
       initialPath: ROUTE_PATH.ADMIN.ROOT,

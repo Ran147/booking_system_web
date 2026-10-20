@@ -45,6 +45,11 @@
     "rejected": "Rejected",
     "suspended": "Suspended"
   },
+  "collaborators": {
+    "edit": {
+      "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned."
+    }
+  },
   "errors": {
     "readOnly": "Your business is inactive or suspended. Changes cannot be made."
   },
@@ -197,6 +202,63 @@
     "title": "Your request was rejected"
   },
   "services": {
+    "collaborators": {
+      "collaboratorListDescription": "Check the collaborators authorized to provide this service.",
+      "collaboratorListTitle": "Available collaborators",
+      "emptyCollaborators": "There are no active or invited collaborators registered.",
+      "noCollaboratorNotice": "With no collaborators selected, the service is handled as a single business resource.",
+      "readOnlyNotice": "Your business is inactive or suspended. Collaborator assignment is disabled.",
+      "saveAction": "Save changes",
+      "saveSuccess": "Collaborator assignments updated successfully.",
+      "saving": "Saving…",
+      "selection": {
+        "automatic": "The system assigns an available one automatically",
+        "customerChoice": "The customer can choose which one",
+        "description": "Decide whether the customer chooses or the system assigns automatically.",
+        "title": "Assignment mode"
+      },
+      "subtitle": "Select which collaborators provide this service and how they are assigned.",
+      "title": "Assign collaborators"
+    },
+    "delete": {
+      "action": "Delete",
+      "cancelAction": "Cancel",
+      "confirmAction": "Delete",
+      "confirmDescription": "Are you sure you want to permanently delete this service? This action cannot be undone.",
+      "confirmTitle": "Delete service",
+      "hasBookingsError": "You cannot delete a service with pending or confirmed bookings.",
+      "mustBeInactiveError": "You can only delete deactivated services.",
+      "success": "Service deleted."
+    },
+    "discounts": {
+      "action": "Discounts",
+      "activeBadge": "Active",
+      "addDiscountAction": "Add discount",
+      "adding": "Saving…",
+      "emptyDescription": "Add a discount to incentivize your customers.",
+      "emptyTitle": "No promotions configured",
+      "endDateLabel": "End date",
+      "expiredBadge": "Expired",
+      "invalidDateRangeError": "The end date must be on or after the start date.",
+      "overlapError": "The date range overlaps with an existing discount.",
+      "readOnlyNotice": "Your business is inactive or suspended. Promotion management is disabled.",
+      "removeAction": "Remove",
+      "removeConfirmDescription": "Are you sure you want to remove this discount?",
+      "removeConfirmTitle": "Remove discount",
+      "removeSuccess": "Discount removed successfully.",
+      "saveSuccess": "Discount saved successfully.",
+      "startDateLabel": "Start date",
+      "subtitle": "Configure time-limited percentage or fixed-amount discounts.",
+      "title": "Discounts and promotions",
+      "typeFixedAmount": "Fixed amount",
+      "typeLabel": "Discount type",
+      "typePercentage": "Percentage (%)",
+      "upcomingBadge": "Upcoming",
+      "valueHelpFixed": "Enter discount amount in business currency (must be lower than price).",
+      "valueHelpPercentage": "Enter an integer percentage between 1 and 100.",
+      "valueLabel": "Value",
+      "valuePlaceholder": "0"
+    },
     "form": {
       "addFeatureAction": "Add feature",
       "backToServicesAction": "Back to services",
@@ -241,8 +303,10 @@
     "list": {
       "actions": "Actions",
       "clearFiltersAction": "Clear filters",
+      "collaboratorsAction": "Collaborators",
       "createServiceAction": "Create service",
       "description": "Manage your business's service catalog.",
+      "discountsAction": "Discounts",
       "duration": "Duration",
       "durationMinutes": "{{minutes}} min",
       "editAction": "Edit",
@@ -265,6 +329,51 @@
       "statusInactive": "Inactive",
       "title": "Services",
       "totalCount": "{{count}} services total"
+    },
+    "snapshot": {
+      "serviceUnavailableError": "The selected service is not available or has been deleted."
+    },
+    "status": {
+      "activateAction": "Activate",
+      "activateSuccess": "Service activated.",
+      "deactivateAction": "Deactivate",
+      "deactivateCancelAction": "Cancel",
+      "deactivateConfirmAction": "Deactivate",
+      "deactivateConfirmDescription": "Are you sure you want to deactivate this service? It will no longer appear in the public catalog for new bookings.",
+      "deactivateConfirmTitle": "Deactivate service",
+      "deactivateSuccess": "Service deactivated."
     }
+  },
+  "settings": {
+    "description": "Manage your personal account preferences.",
+    "language": {
+      "description": "Text, dates, times and prices will use the selected language.",
+      "label": "Interface language",
+      "saveError": "The language changed on this device, but it could not be saved to your account.",
+      "title": "Language"
+    },
+    "password": {
+      "confirmationMismatch": "The confirmation does not match the new password.",
+      "confirmPasswordLabel": "Confirm new password",
+      "currentPasswordInvalid": "The current password is incorrect.",
+      "currentPasswordLabel": "Current password",
+      "description": "Update the password you use to access your account.",
+      "newPasswordLabel": "New password",
+      "sameAsCurrent": "The new password must be different from the current password.",
+      "sessionExpired": "Your session is no longer valid. Sign in again before changing your password.",
+      "strengthLabel": "Password strength",
+      "submitAction": "Change password",
+      "submitting": "Changing…",
+      "successMessage": "Password updated successfully.",
+      "title": "Change password",
+      "tooManyAttempts": "Too many attempts were made. Wait a moment before trying again."
+    },
+    "theme": {
+      "description": "Choose how the business portal interface is displayed.",
+      "label": "Interface theme",
+      "saveError": "The theme changed on this device, but it could not be saved to your account.",
+      "title": "Appearance"
+    },
+    "title": "Settings"
   }
 }

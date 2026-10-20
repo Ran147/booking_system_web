@@ -18,6 +18,8 @@ import {
   SubscriptionBanner,
 } from "./components";
 import { useBusinessSidebarViewModel } from "./hooks";
+import { useBusinessLanguageSync } from "../features/settings/hooks/useBusinessLanguageSync";
+import { useBusinessThemeSync } from "../features/settings/hooks/useBusinessThemeSync";
 
 export const BusinessLayout = (): ReactElement => {
   const { t } = useTranslation([
@@ -26,6 +28,8 @@ export const BusinessLayout = (): ReactElement => {
   ]);
   const location = useLocation();
   const viewModel = useBusinessSidebarViewModel();
+  useBusinessLanguageSync();
+  useBusinessThemeSync();
 
   const placeholderQuickAccessItem = viewModel.activePlaceholderItem
     ? {
