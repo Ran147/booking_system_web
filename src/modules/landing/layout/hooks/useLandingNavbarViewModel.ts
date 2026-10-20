@@ -1,8 +1,15 @@
+import { signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { SESSION_STATUS, useSession } from "@/modules/auth";
-import { BROWSER_EVENT, I18N_NAMESPACE, ROUTE_PATH } from "@/shared/constants";
+import { auth } from "@/services/firebase";
+import {
+  BROWSER_EVENT,
+  I18N_NAMESPACE,
+  ROUTE_PATH,
+  STORAGE_KEY,
+} from "@/shared/constants";
 import { USER_ROLE, type UserRole } from "@/shared/domain";
 import {
   DEFAULT_NAVBAR_LINKS,
@@ -84,6 +91,22 @@ export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
     void navigate(targetPath);
   };
 
+  const handleSignOut = async (): Promise<void> => {
+    closeMobileMenu();
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY.LAST_ACTIVITY_AT);
+      } catch {
+        // Ignored
+      }
+    }
+    try {
+      await signOut(auth);
+    } catch {
+      // Ignored: UI still updates via auth listener
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (keyboardEvent: KeyboardEvent): void => {
       if (
@@ -105,6 +128,7 @@ export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
     closeMobileMenu,
     handleLogoImageError,
     handleNavigate,
+    handleSignOut,
     hasLogoImageError,
     isMobileMenuOpen,
     isSignedIn,
@@ -116,6 +140,7 @@ export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
     navLinks,
     portalActionLabel,
     portalActionPath,
+    signOutActionLabel: t("home.navbar.signOut"),
     signUpActionLabel: t("home.navbar.signUp"),
     signUpActionPath: ROUTE_PATH.LANDING.SIGN_UP,
     toggleMobileMenu,

@@ -13,8 +13,10 @@ export interface LandingNavbarMobileMenuProps {
   readonly mobileNavLabel: string;
   readonly navLinks: readonly NavbarNavLink[];
   readonly onNavigate: (path: string) => void;
+  readonly onSignOut?: () => void;
   readonly portalActionLabel: string;
   readonly portalActionPath: string;
+  readonly signOutActionLabel?: string;
   readonly signUpActionLabel?: string;
   readonly signUpActionPath?: string;
 }

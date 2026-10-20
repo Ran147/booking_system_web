@@ -1,6 +1,6 @@
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { FIRESTORE_COLLECTION, FUNCTION_NAME } from "@/constants";
+import { FIRESTORE_COLLECTION, FUNCTION_NAME, STORAGE_KEY } from "@/constants";
 import { auth, callFunction, firestore } from "@/services/firebase";
 import { USER_ROLE, type UserRole } from "@/shared/domain";
 import type { Nullable } from "@/shared/types";
@@ -68,6 +68,17 @@ export const signInWithPassword = async ({
 
   // The language is a preference: failing to read it never blocks sign-in.
   const language = await fetchUserLanguage(user.uid).catch(() => null);
+
+  if (typeof window !== "undefined" && window.localStorage) {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY.LAST_ACTIVITY_AT,
+        String(Date.now()),
+      );
+    } catch {
+      // Ignored
+    }
+  }
 
   return { language, session };
 };

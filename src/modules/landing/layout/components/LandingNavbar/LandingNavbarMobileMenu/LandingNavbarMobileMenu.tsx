@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogIn } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut } from "lucide-react";
 import type { MouseEvent, ReactElement } from "react";
 import { Button, BUTTON_SIZE, BUTTON_VARIANT } from "@/components/common";
 import { LANDING_NAVBAR_CONSTANTS } from "@/modules/landing/layout/constants/landingNavbar.constants";
@@ -12,8 +12,10 @@ export const LandingNavbarMobileMenu = ({
   mobileNavLabel,
   navLinks,
   onNavigate,
+  onSignOut,
   portalActionLabel,
   portalActionPath,
+  signOutActionLabel,
   signUpActionLabel,
   signUpActionPath,
 }: LandingNavbarMobileMenuProps): Nullable<ReactElement> => {
@@ -54,6 +56,19 @@ export const LandingNavbarMobileMenu = ({
           >
             {portalActionLabel}
           </Button>
+
+          {isSignedIn && onSignOut && signOutActionLabel && (
+            <Button
+              ariaLabel={signOutActionLabel}
+              className="w-full justify-center"
+              leftIcon={LogOut}
+              onClick={onSignOut}
+              size={BUTTON_SIZE.DEFAULT}
+              variant={BUTTON_VARIANT.OUTLINE}
+            >
+              {signOutActionLabel}
+            </Button>
+          )}
 
           {!isSignedIn && signUpActionLabel && signUpActionPath && (
             <Button

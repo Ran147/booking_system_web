@@ -14,6 +14,7 @@ export interface LandingNavbarViewModel {
   readonly closeMobileMenu: () => void;
   readonly handleLogoImageError: () => void;
   readonly handleNavigate: (targetPath: string) => void;
+  readonly handleSignOut: () => Promise<void>;
   readonly hasLogoImageError: boolean;
   readonly isMobileMenuOpen: boolean;
   readonly isSignedIn: boolean;
@@ -22,6 +23,7 @@ export interface LandingNavbarViewModel {
   readonly navLinks: readonly NavbarNavLink[];
   readonly portalActionLabel: string;
   readonly portalActionPath: string;
+  readonly signOutActionLabel: string;
   readonly signUpActionLabel: string;
   readonly signUpActionPath: string;
   readonly toggleMobileMenu: () => void;
