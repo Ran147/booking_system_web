@@ -37,6 +37,7 @@ Before writing or modifying any code, read these documents in order:
 
 ```text
 src/
+├── app/                     # App, providers (Query, i18n, Theme, Auth) y router
 ├── assets/                  # Logos, marcas y recursos visuales estaticos
 ├── components/              # Bloques de UI reutilizables
 │   ├── common/              # Atomos en carpetas kebab-case (button/, badge/, card/, modal/, spinner/)
@@ -47,10 +48,9 @@ src/
 │   │   └── index.ts         # Export barrel unificado de componentes comunes
 │   └── layout/              # Estructuras visuales (navbar/, sidebar/, footer/)
 ├── constants/               # Constantes globales congeladas (Object.freeze) ordenadas A-Z
-├── context/                 # React Context globales (AuthContext, ThemeContext)
-│   └── models/              # Contratos JSDoc de los ContextValues
 ├── domain/                  # Entidades del dominio y maquinas de estado canonicas
 ├── hooks/                   # Custom hooks transversales (useTheme, useDebounce)
+├── i18n/                    # Configuracion de i18next y locales/{es,en}
 ├── modules/                 # Paginas de negocio organizadas por dominio
 │   ├── landing/             # Portal publico: home, pricing (US-07), contact, onboarding
 │   ├── business/            # Portal dueno de negocio (B2B): services, schedule, subscription, customers, reports
@@ -58,6 +58,8 @@ src/
 │   ├── admin/               # Portal Super Admin: businesses, plans, parameters, dashboard, tickets, audit
 │   └── auth/                # Modulo compartido de login, registro, recuperacion y reCAPTCHA
 ├── services/                # Conexion a Firebase, Firestore queries, Cloud Functions y Mock Gateway
+├── shared/                  # DEPRECADO: solo reexports hacia las carpetas de arriba; no agregar codigo nuevo
+├── test-utils/              # renderWithProviders, fixtures de sesion y setup de Vitest
 ├── types/                   # Tipos TypeScript transversales (Nullable, CursorPage)
 └── utils/                   # Funciones puras (formateadores de divisa/fecha, validaciones)
 ```
@@ -76,11 +78,13 @@ Before implementing or reviewing code, agents **must** consult and follow every 
 | `constants-standards` | `.agents/skills/constants-standards/SKILL.md` | Centralizing technical literals & magic numbers into `@/constants/` with `Object.freeze()` and strict alphabetical sorting A-Z at every level. |
 | `dynamic-theming-standards`| `.agents/skills/dynamic-theming-standards/SKILL.md`| Styling with Tailwind v4 semantic tokens (`bg-background`, `text-foreground`, `bg-card`), forbidding static palette colors, ensuring Dark/Light mode (RNF-05). |
 | `git-workflow` | `.agents/skills/git-workflow/SKILL.md` | Managing branches (`US-XX` from `develop`), atomic Spanish commit subjects without accents, and opening PRs against `develop`. |
+| `responder-pr` | `.agents/skills/responder-pr/SKILL.md` | Atender los comentarios de revision de un PR propio: recogerlos, verificarlos contra el codigo, corregir y redactar respuestas sin publicar nada sin confirmacion. |
 | `revisor-agente` | `.agents/skills/revisor-agente/SKILL.md` | Auditing PRs or branches against project skills, running automated checks (format, lint, types, tests), and generating canonical review reports. |
 | `i18n-standards` | `.agents/skills/i18n-standards/SKILL.md` | Managing user-visible text in `src/i18n/locales/{es,en}/*.json` with `t(...)` keys and Intl currency/date formatting. |
 | `auth-and-roles` | `.agents/skills/auth-and-roles/SKILL.md` | Firebase Auth, RBAC permissions, route guards, idle session logout, reCAPTCHA, and tenant isolation. |
 | `api-query-standards` | `.agents/skills/api-query-standards/SKILL.md` | Reading data with TanStack Query hooks, query keys, cursor pagination, and Zod document adapters. |
 | `api-mutation-standards` | `.agents/skills/api-mutation-standards/SKILL.md` | Writing data to Firestore or Cloud Functions, optimistic updates, cache invalidation, and toast error feedback. |
+| `cloud-functions-standards` | `.agents/skills/cloud-functions-standards/SKILL.md` | Writing code inside `functions/`: callable layout, payload validation, `HttpsError` codes, server-side permission and reCAPTCHA checks, transactions, idempotency, Auth rollback and registering a function. |
 | `unit-testing-standards` | `.agents/skills/unit-testing-standards/SKILL.md` | Writing tests with Vitest, React Testing Library, and Page Object Model mapping acceptance criteria (KAN keys). |
 
 ---
@@ -107,6 +111,7 @@ Before saying a task is done or opening a PR, the following commands **must pass
 | `npm run typecheck` | TypeScript compilation (`tsc -b --noEmit`) |
 | `npm run test:run` | Vitest unit and component test suite |
 | `npm run test:rules` | `firestore.rules` tests against the emulator |
+| `npm run test:e2e` | Playwright end-to-end tests (`e2e/`); builds the app and serves it with `vite preview` |
 | `npm run dev` | Vite development server |
 | `npm run seed` | Seed local emulator data (`scripts/seed-emulator.ts`) |
 

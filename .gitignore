@@ -8,11 +8,17 @@ functions/lib/
 *.tsbuildinfo
 
 # Local environment (Firebase web config, reCAPTCHA key)
+.env
 .env.local
 .env.*.local
+# Example environment file
+.env.example
 
-# Firebase
+# Firebase & Deployment
 .firebase/
+.vercel/
+*-firebase-adminsdk-*.json
+serviceAccount*.json
 firebase-debug.log*
 firestore-debug.log*
 database-debug.log*
@@ -26,6 +32,13 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+
+# Knowledge graph (graphify)
+graphify-out/
 # Knowledge graph (graphify)
 graphify-out/
 .graphify/

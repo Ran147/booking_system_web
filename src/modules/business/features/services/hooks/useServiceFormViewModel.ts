@@ -1,0 +1,314 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "@/components/common";
+import {
+  ERROR_MESSAGE_KEY,
+  FIRESTORE_COLLECTION,
+  I18N_NAMESPACE,
+  MONEY,
+  STRING,
+} from "@/constants";
+import { BUSINESS_STATUS, type BusinessStatus } from "@/domain";
+import { useCurrentBusiness } from "@/modules/auth";
+import { uploadImageToImgbb } from "@/services";
+import type { Nullable } from "@/types";
+import {
+  fetchBusinessStatus,
+  useCreateServiceMutation,
+  useServiceDetailQuery,
+  useUpdateServiceMutation,
+} from "../api";
+import {
+  SERVICE_FEATURE_LIMIT,
+  SERVICE_IMAGE_LIMIT,
+} from "../constants/ServiceForm.constants";
+import { DEFAULT_SERVICE_FORM_VALUES } from "../constants/ServiceFormDefaults.constants";
+import type { ServiceDetail } from "../models";
+import {
+  serviceFormSchema,
+  type ServiceFormValues,
+} from "../models/ServiceForm.schema";
+import type { ServiceFormViewModel } from "../models/ServiceFormViewModel.interface";
+
+export interface UseServiceFormViewModelOptions {
+  readonly businessStatus?: BusinessStatus;
+  readonly initialService?: ServiceDetail;
+  readonly onCancel?: () => void;
+  readonly onSuccess?: (serviceId: string) => void;
+  readonly serviceId?: string;
+}
+
+export const useServiceFormViewModel = (
+  options: UseServiceFormViewModelOptions = {},
+): ServiceFormViewModel => {
+  const { t } = useTranslation([
+    I18N_NAMESPACE.BUSINESS,
+    I18N_NAMESPACE.COMMON,
+  ]);
+  const { businessId } = useCurrentBusiness();
+  const createServiceMutation = useCreateServiceMutation();
+  const updateServiceMutation = useUpdateServiceMutation();
+
+  const isEditMode = Boolean(options.serviceId);
+
+  const [imageError, setImageError] = useState<Nullable<string>>(null);
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] =
+    useState<Nullable<File>>(null);
+
+  const businessStatusQuery = useQuery<BusinessStatus>({
+    enabled: options.businessStatus === undefined,
+    queryFn: () => fetchBusinessStatus(businessId),
+    queryKey: [FIRESTORE_COLLECTION.BUSINESSES, businessId, "status"],
+  });
+
+  const serviceDetailQuery = useServiceDetailQuery({
+    businessId,
+    enabled: isEditMode && !options.initialService,
+    serviceId: options.serviceId ?? null,
+  });
+
+  const effectiveBusinessStatus =
+    options.businessStatus ??
+    businessStatusQuery.data ??
+    BUSINESS_STATUS.ACTIVE;
+
+  const isReadOnly = effectiveBusinessStatus !== BUSINESS_STATUS.ACTIVE;
+
+  const effectiveServiceDetail =
+    options.initialService ?? serviceDetailQuery.data;
+
+  const initialValues: ServiceFormValues = options.initialService
+    ? {
+        description: options.initialService.description ?? STRING.EMPTY,
+        durationMinutes: options.initialService.durationMinutes,
+        features: [...options.initialService.features],
+        imageUrl: options.initialService.imageUrl ?? null,
+        name: options.initialService.name,
+        price: options.initialService.priceInCents / MONEY.CENTS_PER_UNIT,
+      }
+    : DEFAULT_SERVICE_FORM_VALUES;
+
+  const form = useForm<ServiceFormValues>({
+    defaultValues: initialValues,
+    mode: "onBlur",
+    resolver: zodResolver(serviceFormSchema) as Resolver<ServiceFormValues>,
+  });
+
+  useEffect(() => {
+    if (effectiveServiceDetail) {
+      form.reset({
+        description: effectiveServiceDetail.description ?? STRING.EMPTY,
+        durationMinutes: effectiveServiceDetail.durationMinutes,
+        features: [...effectiveServiceDetail.features],
+        imageUrl: effectiveServiceDetail.imageUrl ?? null,
+        name: effectiveServiceDetail.name,
+        price: effectiveServiceDetail.priceInCents / MONEY.CENTS_PER_UNIT,
+      });
+    }
+  }, [effectiveServiceDetail, form]);
+
+  const currentFeatures =
+    useWatch({
+      control: form.control,
+      name: "features",
+    }) ?? [];
+
+  const currentImageUrl = useWatch({
+    control: form.control,
+    name: "imageUrl",
+  });
+
+  const selectedImagePreview: Nullable<string> = currentImageUrl ?? null;
+
+  const handleFileSelect = (file: Nullable<File>): void => {
+    if (!file) return;
+
+    const isAllowedType = (
+      SERVICE_IMAGE_LIMIT.ALLOWED_MIME_TYPES as readonly string[]
+    ).includes(file.type);
+    const isAllowedSize = file.size <= SERVICE_IMAGE_LIMIT.MAX_BYTES;
+
+    if (!isAllowedType || !isAllowedSize) {
+      setImageError(t("business:services.form.imageInvalidError"));
+      return;
+    }
+
+    setImageError(null);
+    setSelectedImageFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    form.setValue("imageUrl", objectUrl, { shouldDirty: true });
+  };
+
+  const handleRemoveImage = (): void => {
+    setImageError(null);
+    setSelectedImageFile(null);
+    form.setValue("imageUrl", null, { shouldDirty: true });
+  };
+
+  const handleAddFeature = (): void => {
+    if (currentFeatures.length >= SERVICE_FEATURE_LIMIT.MAX_ITEMS) return;
+    form.setValue("features", [...currentFeatures, ""], {
+      shouldDirty: true,
+    });
+  };
+
+  const handleFeatureChange = (
+    targetIndex: number,
+    textValue: string,
+  ): void => {
+    const updatedFeatures = currentFeatures.map((item, index) =>
+      index === targetIndex ? textValue : item,
+    );
+    form.setValue("features", updatedFeatures, { shouldDirty: true });
+  };
+
+  const handleMoveFeatureUp = (targetIndex: number): void => {
+    if (targetIndex <= 0) return;
+    const reordered = [...currentFeatures];
+    const temporary = reordered[targetIndex - 1];
+    const current = reordered[targetIndex];
+    if (temporary !== undefined && current !== undefined) {
+      reordered[targetIndex - 1] = current;
+      reordered[targetIndex] = temporary;
+      form.setValue("features", reordered, { shouldDirty: true });
+    }
+  };
+
+  const handleMoveFeatureDown = (targetIndex: number): void => {
+    if (targetIndex >= currentFeatures.length - 1) return;
+    const reordered = [...currentFeatures];
+    const temporary = reordered[targetIndex + 1];
+    const current = reordered[targetIndex];
+    if (temporary !== undefined && current !== undefined) {
+      reordered[targetIndex + 1] = current;
+      reordered[targetIndex] = temporary;
+      form.setValue("features", reordered, { shouldDirty: true });
+    }
+  };
+
+  const handleRemoveFeature = (targetIndex: number): void => {
+    const remainingFeatures = currentFeatures.filter(
+      (_item, index) => index !== targetIndex,
+    );
+    form.setValue("features", remainingFeatures, { shouldDirty: true });
+  };
+
+  const submitServiceForm = async (
+    formValues: ServiceFormValues,
+  ): Promise<void> => {
+    if (isReadOnly) {
+      toast.error(t("business:errors.readOnly"));
+      return;
+    }
+
+    let resolvedImageUrl = formValues.imageUrl;
+    if (
+      selectedImageFile &&
+      import.meta.env.VITE_IMGBB_API_KEY &&
+      !import.meta.env.VITEST
+    ) {
+      setIsImageUploading(true);
+      try {
+        resolvedImageUrl = await uploadImageToImgbb(selectedImageFile);
+      } catch {
+        setIsImageUploading(false);
+        setImageError(t("business:services.form.imageInvalidError"));
+        return;
+      }
+      setIsImageUploading(false);
+    }
+
+    const sanitizedFeatures = (formValues.features ?? [])
+      .map((feature) => feature.trim())
+      .filter((feature) => feature.length > 0);
+
+    const currentServiceId = options.serviceId;
+    if (isEditMode && currentServiceId) {
+      updateServiceMutation.mutate(
+        {
+          businessId,
+          formValues: {
+            ...formValues,
+            features: sanitizedFeatures,
+            imageUrl: resolvedImageUrl,
+          },
+          serviceId: currentServiceId,
+        },
+        {
+          onError: (mutationError) => {
+            toast.error(t(`common:${mutationError.messageKey}`));
+          },
+          onSuccess: () => {
+            toast.success(t("business:services.form.editSuccess"));
+            options.onSuccess?.(currentServiceId);
+          },
+        },
+      );
+      return;
+    }
+
+    createServiceMutation.mutate(
+      {
+        businessId,
+        formValues: {
+          ...formValues,
+          features: sanitizedFeatures,
+          imageUrl: resolvedImageUrl,
+        },
+      },
+      {
+        onError: (mutationError) => {
+          toast.error(t(`common:${mutationError.messageKey}`));
+        },
+        onSuccess: (response) => {
+          toast.success(t("business:services.form.createSuccess"));
+          form.reset(DEFAULT_SERVICE_FORM_VALUES);
+          setImageError(null);
+          setSelectedImageFile(null);
+          options.onSuccess?.(response.serviceId);
+        },
+      },
+    );
+  };
+
+  const isLoadError =
+    isEditMode && !options.initialService && serviceDetailQuery.isError;
+
+  const loadErrorMessageKey = isLoadError
+    ? (serviceDetailQuery.error?.messageKey ?? ERROR_MESSAGE_KEY.NETWORK)
+    : null;
+
+  const handleRetryLoad = (): void => {
+    void serviceDetailQuery.refetch();
+  };
+
+  return {
+    canAddFeature: currentFeatures.length < SERVICE_FEATURE_LIMIT.MAX_ITEMS,
+    form,
+    handleAddFeature,
+    handleFeatureChange,
+    handleFileSelect,
+    handleMoveFeatureDown,
+    handleMoveFeatureUp,
+    handleRemoveFeature,
+    handleRemoveImage,
+    handleRetryLoad,
+    handleSubmit: form.handleSubmit(submitServiceForm),
+    imageError,
+    isEditMode,
+    isLoadError,
+    isLoading:
+      isEditMode && !options.initialService && serviceDetailQuery.isPending,
+    isReadOnly,
+    isSubmitting:
+      createServiceMutation.isPending ||
+      updateServiceMutation.isPending ||
+      isImageUploading,
+    loadErrorMessageKey,
+    selectedImagePreview,
+  };
+};

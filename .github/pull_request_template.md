@@ -24,6 +24,7 @@ Como <rol>, quiero <objetivo>, para <beneficio>.
 - [ ] `npm run typecheck` (TypeScript) compila sin errores
 - [ ] `npm run test:run` (Vitest) pasa el 100% de las pruebas
 - [ ] `npm run test:rules` (si se modificó `firestore.rules`)
+- [ ] `npm run test:e2e` (si se modificó un flujo crítico: login, reservar, pagar)
 - [ ] Verificado visualmente con `npm run dev` en modo claro y oscuro
 
 Notas de la verificación:
@@ -41,6 +42,7 @@ Marcá solo lo que revisaste de verdad.
 
 ## Alcance y Fronteras
 
+- [ ] El PR no pasa de ~2000 lineas (sin lockfiles ni archivos generados); si pasa, la descripcion explica por que.
 - [ ] El diff no toca archivos ajenos a esta historia (sin refactors de paso / "drive-by refactors").
 - [ ] No se incluyen secretos, credenciales, `.env` ni carpetas temporales (`graphify-out/`).
 - [ ] Si el review revela un error de proceso o lección aprendida, se documenta en el registro correspondiente.

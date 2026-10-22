@@ -1,0 +1,148 @@
+import { signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
+import { SESSION_STATUS, useSession } from "@/modules/auth";
+import { auth } from "@/services/firebase";
+import {
+  BROWSER_EVENT,
+  I18N_NAMESPACE,
+  ROUTE_PATH,
+  STORAGE_KEY,
+} from "@/shared/constants";
+import { USER_ROLE, type UserRole } from "@/shared/domain";
+import {
+  DEFAULT_NAVBAR_LINKS,
+  LANDING_NAVBAR_CONSTANTS,
+} from "../constants/landingNavbar.constants";
+import type {
+  LandingNavbarViewModel,
+  NavbarNavLink,
+} from "../models/landingNavbar.model";
+
+const resolvePortalPath = (role: UserRole): string => {
+  if (role === USER_ROLE.SUPER_ADMIN) {
+    return ROUTE_PATH.ADMIN.ROOT;
+  }
+  if (
+    role === USER_ROLE.BUSINESS_OWNER ||
+    role === USER_ROLE.SUBSCRIBER ||
+    role === USER_ROLE.COLLABORATOR
+  ) {
+    return ROUTE_PATH.BUSINESS.ROOT;
+  }
+  return ROUTE_PATH.LANDING.HOME;
+};
+
+export const useLandingNavbarViewModel = (): LandingNavbarViewModel => {
+  const { t } = useTranslation(I18N_NAMESPACE.LANDING);
+  const navigate = useNavigate();
+  const session = useSession();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasLogoImageError, setHasLogoImageError] = useState(false);
+
+  const handleLogoImageError = (): void => {
+    setHasLogoImageError(true);
+  };
+
+  const isSignedIn = session.status === SESSION_STATUS.SIGNED_IN;
+
+  const portalActionLabel = isSignedIn
+    ? t("home.navbar.goToPortal")
+    : t("home.navbar.signIn");
+
+  const portalActionPath =
+    session.status === SESSION_STATUS.SIGNED_IN
+      ? resolvePortalPath(session.role)
+      : ROUTE_PATH.AUTH.SIGN_IN;
+
+  const navLinks: readonly NavbarNavLink[] = DEFAULT_NAVBAR_LINKS.map(
+    (item) => ({
+      href: item.HREF,
+      id: item.ID,
+      label: t(item.LABEL_KEY),
+    }),
+  );
+
+  const closeMobileMenu = (): void => {
+    setIsMobileMenuOpen(false);
+  };
+
+  const toggleMobileMenu = (): void => {
+    setIsMobileMenuOpen((previousState) => !previousState);
+  };
+
+  const handleNavigate = (targetPath: string): void => {
+    closeMobileMenu();
+
+    if (targetPath.includes("#")) {
+      const hashSegment = targetPath.split("#")[1];
+
+      if (hashSegment) {
+        const targetElement = document.getElementById(hashSegment);
+
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+      }
+    }
+
+    void navigate(targetPath);
+  };
+
+  const handleSignOut = async (): Promise<void> => {
+    closeMobileMenu();
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY.LAST_ACTIVITY_AT);
+      } catch {
+        // Ignored
+      }
+    }
+    try {
+      await signOut(auth);
+    } catch {
+      // Ignored: UI still updates via auth listener
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (keyboardEvent: KeyboardEvent): void => {
+      if (
+        keyboardEvent.key === LANDING_NAVBAR_CONSTANTS.ESCAPE_KEY &&
+        isMobileMenuOpen
+      ) {
+        closeMobileMenu();
+      }
+    };
+
+    window.addEventListener(BROWSER_EVENT.KEY_DOWN, handleKeyDown);
+    return (): void => {
+      window.removeEventListener(BROWSER_EVENT.KEY_DOWN, handleKeyDown);
+    };
+  }, [isMobileMenuOpen]);
+
+  return {
+    brandName: LANDING_NAVBAR_CONSTANTS.BRAND_NAME,
+    closeMobileMenu,
+    handleLogoImageError,
+    handleNavigate,
+    handleSignOut,
+    hasLogoImageError,
+    isMobileMenuOpen,
+    isSignedIn,
+    logoAlt: t("home.navbar.logoAlt"),
+    // In current MVP phase, default branding renders the semantic stylized mark
+    // (Calendar icon with dynamic tokens). logoUrl prepares the infrastructure
+    // for custom uploaded logos without breaking the MVVM contract.
+    logoUrl: undefined,
+    navLinks,
+    portalActionLabel,
+    portalActionPath,
+    signOutActionLabel: t("home.navbar.signOut"),
+    signUpActionLabel: t("home.navbar.signUp"),
+    signUpActionPath: ROUTE_PATH.LANDING.SIGN_UP,
+    toggleMobileMenu,
+  };
+};

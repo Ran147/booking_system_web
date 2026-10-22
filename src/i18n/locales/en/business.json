@@ -1,9 +1,376 @@
 {
+  "businessProfile": {
+    "contact": {
+      "emailLabel": "Contact email",
+      "phoneLabel": "Contact phone",
+      "title": "Contact"
+    },
+    "description": "Keep the information your customers see when they visit your business up to date.",
+    "descriptionField": {
+      "label": "Description"
+    },
+    "eyebrow": "Public presence",
+    "logo": {
+      "helper": "PNG, JPEG or WebP up to 2 MB.",
+      "label": "Business logo",
+      "removeAction": "Remove logo",
+      "undoAction": "Keep logo"
+    },
+    "name": {
+      "label": "Business name"
+    },
+    "readOnly": "This business is read-only and cannot be changed.",
+    "retryAction": "Retry",
+    "saveAction": "Save changes",
+    "saveSuccess": "The public profile was saved successfully.",
+    "slug": {
+      "label": "Public link",
+      "readOnlyHint": "The link is defined when the business is created and cannot be changed."
+    },
+    "socialLinks": {
+      "facebookLabel": "Facebook",
+      "helper": "Add HTTPS links only. Leave networks you do not use empty.",
+      "instagramLabel": "Instagram",
+      "tiktokLabel": "TikTok",
+      "title": "Social networks",
+      "websiteLabel": "Website",
+      "whatsappLabel": "WhatsApp"
+    },
+    "title": "Business public profile"
+  },
+  "collaborators": {
+    "edit": {
+      "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned."
+    }
+  },
+  "errors": {
+    "readOnly": "Your business is inactive or suspended. Changes cannot be made."
+  },
+  "home": {
+    "closeModal": "Got it",
+    "configs": {
+      "profile": {
+        "action": "Edit profile",
+        "description": "Name, logo, phone, address and social links visible to clients.",
+        "title": "Public business profile"
+      },
+      "settings": {
+        "action": "Configure",
+        "description": "Time zone, currency, notifications and appearance.",
+        "title": "General settings"
+      },
+      "subscription": {
+        "action": "View plan",
+        "description": "Details of your subscribed plan, receipts and renewal dates.",
+        "title": "Plan and subscription"
+      }
+    },
+    "configsDescription": "Manage general parameters and subscription for your business.",
+    "configsTitle": "Settings and configuration",
+    "metrics": {
+      "activeServices": {
+        "helper": "In public catalog",
+        "label": "Configured services",
+        "value": "1"
+      },
+      "businessStatus": {
+        "helper": "Tenant status",
+        "label": "Business status",
+        "value": "Active"
+      },
+      "todayBookings": {
+        "helper": "Upcoming bookings",
+        "label": "Bookings today",
+        "value": "0"
+      }
+    },
+    "placeholderModalDescription": "This tool is currently in development and will be available soon in your portal.",
+    "placeholderModalTitle": "Module under construction",
+    "roleBadge": "Subscriber",
+    "roleCollaboratorBadge": "Collaborator",
+    "status": {
+      "available": "Available",
+      "comingSoon": "Coming soon"
+    },
+    "subtitle": "Easily access management tools and settings for your business.",
+    "title": "Business dashboard",
+    "tools": {
+      "collaborators": {
+        "action": "Manage team",
+        "description": "Invite collaborators, assign services and manage permissions.",
+        "title": "Team and collaborators"
+      },
+      "customers": {
+        "action": "View customers",
+        "description": "Manage your customer directory, visit history and notes.",
+        "title": "Customer directory"
+      },
+      "reports": {
+        "action": "View stats",
+        "description": "Analyze estimated revenue, shift occupancy and metrics.",
+        "title": "Reports and statistics"
+      },
+      "schedule": {
+        "action": "View schedule",
+        "description": "Check appointments of the day, schedule shifts and manage blocks.",
+        "title": "Schedule and bookings"
+      },
+      "services": {
+        "action": "Create service",
+        "description": "Create, edit and organize services offered to your customers.",
+        "title": "Service management"
+      }
+    },
+    "toolsDescription": "Manage your service catalog, schedule, customers and operational reports.",
+    "toolsTitle": "Tools and quick access",
+    "welcome": "Welcome to your dashboard"
+  },
   "layout": {
+    "expiryWarning": {
+      "ariaLabel": "Subscription expiry notice",
+      "dismiss": "Dismiss warning",
+      "endsToday": "Your subscription ends today.",
+      "message": "Your subscription ends in {{count}} days ({{date}}).",
+      "pastDue": "Your subscription has a pending payment. Ends in {{count}} days ({{date}}).",
+      "pastDueNoCountdown": "Your subscription has a pending payment.",
+      "payLink": "Pay subscription"
+    },
+    "sidebar": {
+      "ariaLabel": "Business portal navigation",
+      "brandFallback": "BP",
+      "closeMenu": "Close menu",
+      "collaborator": "Collaborator: {{name}}",
+      "collaborators": "Team",
+      "collaboratorsDescription": "Collaborators and permission assignment",
+      "customers": "Customers",
+      "customersDescription": "Directory and customer management",
+      "dashboard": "Dashboard",
+      "dashboardDescription": "Business summary and statistics",
+      "logoAlt": "Logo of {{name}}",
+      "openMenu": "Open navigation menu",
+      "reports": "Reports",
+      "reportsDescription": "Occupancy and operational metrics",
+      "profile": "Public profile",
+      "profileDescription": "Business public information and presence",
+      "schedule": "Schedule",
+      "scheduleDescription": "Appointments, bookings and schedule blocks",
+      "services": "Services",
+      "servicesDescription": "Service catalog and pricing",
+      "settings": "Settings",
+      "settingsDescription": "System settings and profile",
+      "signOut": "Sign out",
+      "subscription": "Subscription",
+      "subscriptionDescription": "Subscribed plan and billing"
+    },
+    "signOut": {
+      "cancelAction": "Stay here",
+      "confirmAction": "Sign out",
+      "confirmTitle": "Unsaved changes",
+      "unsavedChangesConfirm": "Do you want to sign out? You have unsaved changes that will be lost."
+    },
+    "subscriptionBanner": {
+      "ariaLabel": "Subscription status",
+      "endsOn": "Ends on {{date}}",
+      "loadError": "Could not load subscription",
+      "payLink": "Pay now",
+      "readOnlyNotice": "Read-only mode",
+      "renewsOn": "Renews on {{date}}",
+      "retry": "Retry",
+      "suspendedNotice": "Business suspended by administration",
+      "viewPlan": "Manage subscription"
+    },
     "title": "Business portal"
   },
   "placeholder": {
     "description": "This is where you will manage your business's services, schedule and customers.",
     "title": "Business dashboard"
+  },
+  "settings": {
+    "description": "Manage your personal account preferences.",
+    "language": {
+      "description": "Text, dates, times and prices will use the selected language.",
+      "label": "Interface language",
+      "saveError": "The language changed on this device, but it could not be saved to your account.",
+      "title": "Language"
+    },
+    "title": "Settings"
+  },
+  "services": {
+    "collaborators": {
+      "collaboratorListDescription": "Check the collaborators authorized to provide this service.",
+      "collaboratorListTitle": "Available collaborators",
+      "emptyCollaborators": "There are no active or invited collaborators registered.",
+      "noCollaboratorNotice": "With no collaborators selected, the service is handled as a single business resource.",
+      "readOnlyNotice": "Your business is inactive or suspended. Collaborator assignment is disabled.",
+      "saveAction": "Save changes",
+      "saveSuccess": "Collaborator assignments updated successfully.",
+      "saving": "Saving…",
+      "selection": {
+        "automatic": "The system assigns an available one automatically",
+        "customerChoice": "The customer can choose which one",
+        "description": "Decide whether the customer chooses or the system assigns automatically.",
+        "title": "Assignment mode"
+      },
+      "subtitle": "Select which collaborators provide this service and how they are assigned.",
+      "title": "Assign collaborators"
+    },
+    "delete": {
+      "action": "Delete",
+      "cancelAction": "Cancel",
+      "confirmAction": "Delete",
+      "confirmDescription": "Are you sure you want to permanently delete this service? This action cannot be undone.",
+      "confirmTitle": "Delete service",
+      "hasBookingsError": "You cannot delete a service with pending or confirmed bookings.",
+      "mustBeInactiveError": "You can only delete deactivated services.",
+      "success": "Service deleted."
+    },
+    "discounts": {
+      "action": "Discounts",
+      "activeBadge": "Active",
+      "addDiscountAction": "Add discount",
+      "adding": "Saving…",
+      "basePriceLabel": "Base price: {{price}}",
+      "discountedPriceLabel": "Discounted price",
+      "emptyDescription": "Add a discount to incentivize your customers.",
+      "emptyTitle": "No promotions configured",
+      "endDateLabel": "End date",
+      "expiredBadge": "Expired",
+      "invalidDateRangeError": "The end date must be on or after the start date.",
+      "overlapError": "The date range overlaps with an existing discount.",
+      "previewPrice": "Resulting price: {{price}}",
+      "readOnlyNotice": "Your business is inactive or suspended. Promotion management is disabled.",
+      "removeAction": "Remove",
+      "removeConfirmDescription": "Are you sure you want to remove this discount?",
+      "removeConfirmTitle": "Remove discount",
+      "removeSuccess": "Discount removed successfully.",
+      "saveSuccess": "Discount saved successfully.",
+      "startDateLabel": "Start date",
+      "subtitle": "Configure time-limited percentage or fixed-amount discounts.",
+      "title": "Discounts and promotions",
+      "typeFixedAmount": "Fixed amount",
+      "typeLabel": "Discount type",
+      "typePercentage": "Percentage (%)",
+      "upcomingBadge": "Upcoming",
+      "valueHelpFixed": "Enter discount amount in business currency (must be lower than price).",
+      "valueHelpPercentage": "Enter an integer percentage between 1 and 100.",
+      "valueLabel": "Value",
+      "valuePlaceholder": "0"
+    },
+    "form": {
+      "addFeatureAction": "Add feature",
+      "backToServicesAction": "Back to services",
+      "cancelAction": "Cancel",
+      "createSuccess": "Service created.",
+      "currencySymbol": "$",
+      "descriptionHelp": "Maximum 1000 characters.",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Briefly describe what the service includes",
+      "durationHelp": "Between 5 and 480 minutes, in 5-minute increments.",
+      "durationLabel": "Duration (minutes)",
+      "durationPlaceholder": "60",
+      "editSubtitle": "Update the details and pricing for this service in your catalog.",
+      "editSuccess": "Service updated.",
+      "editTitle": "Edit service",
+      "featureItemLabel": "Feature {{index}}",
+      "featurePlaceholder": "e.g. Includes wash and styling",
+      "featuresDescription": "Add up to 10 features or benefits of the service.",
+      "featuresTitle": "Additional features",
+      "imageHelp": "JPEG, PNG or WebP format, up to 2 MB.",
+      "imageInvalidError": "The image must be JPEG, PNG or WebP and under 2 MB.",
+      "imageLabel": "Service image",
+      "imagePreviewAlt": "Service preview",
+      "imageRemoveAction": "Remove image",
+      "imageUploadAction": "Select image",
+      "imageUploadPrompt": "Drag an image or click to select",
+      "maxFeaturesReached": "You have reached the maximum of 10 features.",
+      "moveFeatureDownAction": "Move down",
+      "moveFeatureUpAction": "Move up",
+      "nameLabel": "Service name",
+      "namePlaceholder": "e.g. Classic haircut",
+      "priceHelp": "Enter the price in the business currency.",
+      "priceLabel": "Price",
+      "pricePlaceholder": "0.00",
+      "readOnlyNotice": "Your business is inactive or suspended. Service creation is disabled.",
+      "removeFeatureAction": "Remove feature",
+      "submitAction": "Save service",
+      "submitting": "Saving…",
+      "subtitle": "Fill in the details to add a new service to your business catalog.",
+      "title": "New service"
+    },
+    "list": {
+      "actions": "Actions",
+      "clearFiltersAction": "Clear filters",
+      "collaboratorsAction": "Collaborators",
+      "createServiceAction": "Create service",
+      "description": "Manage your business's service catalog.",
+      "discountsAction": "Discounts",
+      "duration": "Duration",
+      "durationMinutes": "{{minutes}} min",
+      "editAction": "Edit",
+      "emptyDescription": "There are no services registered at this time. Click 'Create service' to add the first one.",
+      "emptyTitle": "No services registered",
+      "filterStatusActive": "Active",
+      "filterStatusAll": "All statuses",
+      "filterStatusInactive": "Inactive",
+      "filterStatusLabel": "Filter by status",
+      "name": "Service",
+      "noResults": "No services match the selected filters.",
+      "noResultsDescription": "Try adjusting your search or clearing the filters to see all services.",
+      "price": "Price",
+      "readOnlyNotice": "Your business is inactive or suspended. Service creation and editing is disabled.",
+      "retryAction": "Retry",
+      "searchLabel": "Search services",
+      "searchPlaceholder": "Search by name…",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "title": "Services",
+      "totalCount": "{{count}} services total"
+    },
+    "snapshot": {
+      "serviceUnavailableError": "The selected service is not available or has been deleted."
+    },
+    "status": {
+      "activateAction": "Activate",
+      "activateSuccess": "Service activated.",
+      "deactivateAction": "Deactivate",
+      "deactivateCancelAction": "Cancel",
+      "deactivateConfirmAction": "Deactivate",
+      "deactivateConfirmDescription": "Are you sure you want to deactivate this service? It will no longer appear in the public catalog for new bookings.",
+      "deactivateConfirmTitle": "Deactivate service",
+      "deactivateSuccess": "Service deactivated."
+    }
+  },
+  "settings": {
+    "description": "Manage your personal account preferences.",
+    "language": {
+      "description": "Text, dates, times and prices will use the selected language.",
+      "label": "Interface language",
+      "saveError": "The language changed on this device, but it could not be saved to your account.",
+      "title": "Language"
+    },
+    "password": {
+      "confirmationMismatch": "The confirmation does not match the new password.",
+      "confirmPasswordLabel": "Confirm new password",
+      "currentPasswordInvalid": "The current password is incorrect.",
+      "currentPasswordLabel": "Current password",
+      "description": "Update the password you use to access your account.",
+      "newPasswordLabel": "New password",
+      "sameAsCurrent": "The new password must be different from the current password.",
+      "sessionExpired": "Your session is no longer valid. Sign in again before changing your password.",
+      "strengthLabel": "Password strength",
+      "submitAction": "Change password",
+      "submitting": "Changing…",
+      "successMessage": "Password updated successfully.",
+      "title": "Change password",
+      "tooManyAttempts": "Too many attempts were made. Wait a moment before trying again."
+    },
+    "theme": {
+      "description": "Choose how the business portal interface is displayed.",
+      "label": "Interface theme",
+      "saveError": "The theme changed on this device, but it could not be saved to your account.",
+      "title": "Appearance"
+    },
+    "title": "Settings"
   }
 }

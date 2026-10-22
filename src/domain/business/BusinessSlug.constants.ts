@@ -7,8 +7,11 @@ export const RESERVED_BUSINESS_SLUG = {
   BUSINESS: "business",
   CONTACT: "contact",
   PASSWORD_RECOVERY: "password-recovery",
+  PASSWORD_RESET: "password-reset",
+  PLANS: "plans",
   SIGN_IN: "sign-in",
   SIGN_UP: "sign-up",
+  TERMS: "terms",
 } as const;
 
 export type ReservedBusinessSlug =

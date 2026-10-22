@@ -1,0 +1,2 @@
+export const DEFAULT_SERVICE_LIST_CURRENCY = "CRC";
+export const SERVICE_TABLE_COLUMN_COUNT = 5;

@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from "react";
+import type { ComponentProps, ReactElement } from "react";
 import { Link } from "react-router";
 import { cn } from "@/shared/utils/cn";
 import {
@@ -7,8 +7,10 @@ import {
 } from "./AppLinkVariant.constants";
 import { buttonVariants } from "../ui/button";
 
-export interface AppLinkProps {
-  children: ReactNode;
+export interface AppLinkProps extends Omit<
+  ComponentProps<typeof Link>,
+  "className" | "to"
+> {
   className?: string;
   to: string;
   variant?: AppLinkVariant;
@@ -25,8 +27,13 @@ export const AppLink = ({
   className,
   to,
   variant = APP_LINK_VARIANT.TEXT,
+  ...restProperties
 }: AppLinkProps): ReactElement => (
-  <Link className={cn(CLASS_NAME_BY_VARIANT[variant], className)} to={to}>
+  <Link
+    className={cn(CLASS_NAME_BY_VARIANT[variant], className)}
+    to={to}
+    {...restProperties}
+  >
     {children}
   </Link>
 );
