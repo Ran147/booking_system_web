@@ -2,12 +2,15 @@ import { ERROR_MESSAGE_KEY, VIEW_STATE } from "@/constants";
 import { SESSION_STATUS, useSession } from "@/modules/auth";
 import { mapFirebaseError } from "@/services/firebase";
 import { useCustomerProfileQuery } from "../api/useCustomerProfileQuery";
+import { NO_CUSTOMER_USER_ID } from "../constants/Profile.constants";
 import type { UseProfileViewModelReturn } from "../models";
 
 export const useProfileViewModel = (): UseProfileViewModelReturn => {
   const session = useSession();
   const userId =
-    session.status === SESSION_STATUS.SIGNED_IN ? session.userId : "";
+    session.status === SESSION_STATUS.SIGNED_IN
+      ? session.userId
+      : NO_CUSTOMER_USER_ID;
   const profileQuery = useCustomerProfileQuery(userId);
 
   const viewState = profileQuery.isPending
