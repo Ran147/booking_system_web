@@ -1,4 +1,7 @@
 {
+  "actions": {
+    "retry": "Reintentar"
+  },
   "auth": {
     "idle": {
       "signOutAction": "Cerrar sesión",
