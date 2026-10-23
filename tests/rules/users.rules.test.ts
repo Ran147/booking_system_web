@@ -74,6 +74,28 @@ describe("firestore.rules: users", () => {
     await testEnvironment.cleanup();
   });
 
+  it("AC-KAN-129-02: lets a signed-in user read their own profile", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertSucceeds(customer.firestore().doc(CUSTOMER_PROFILE_PATH).get());
+  });
+
+  it("AC-KAN-129-02: denies reading another user's profile", async () => {
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(customer.firestore().doc(OTHER_PROFILE_PATH).get());
+  });
+
+  it("AC-KAN-129-02: denies reading a profile without signing in", async () => {
+    const visitor = testEnvironment.unauthenticatedContext();
+
+    await assertFails(visitor.firestore().doc(CUSTOMER_PROFILE_PATH).get());
+  });
+
   it("KAN-169: lets an authenticated customer read their own profile", async () => {
     const customer = testEnvironment.authenticatedContext("customer-1", {
       role: "customer",

@@ -33,7 +33,7 @@ describe("customer profile route", () => {
     expect(
       await screen.findByRole("heading", {
         level: 1,
-        name: "Panel del negocio",
+        name: testI18n.t("business:home.title"),
       }),
     ).toBeInTheDocument();
   });
