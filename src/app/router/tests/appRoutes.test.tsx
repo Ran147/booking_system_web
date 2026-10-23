@@ -1,3 +1,5 @@
+import { BUSINESS_STATUS } from "@/domain";
+import { fetchBusinessPublicProfileBySlug } from "@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug";
 import { ROUTE_PATH } from "@/shared/constants";
 import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
@@ -13,6 +15,22 @@ import { appRoutes } from "../appRoutes";
 import { createAppRoutesPage } from "./AppRoutes.page";
 
 const BUSINESS_PAGE_PATH = "/barberia-centro";
+
+vi.mock("@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug");
+
+beforeEach(() => {
+  vi.mocked(fetchBusinessPublicProfileBySlug).mockResolvedValue({
+    contactEmail: null,
+    contactPhone: null,
+    description: null,
+    id: "business-id",
+    logoUrl: null,
+    name: "Barbería Centro",
+    slug: "barberia-centro",
+    socialLinks: [],
+    status: BUSINESS_STATUS.ACTIVE,
+  });
+});
 
 describe("app routes", () => {
   it("shows the landing portal to a visitor", async () => {
