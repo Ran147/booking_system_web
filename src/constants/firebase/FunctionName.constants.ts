@@ -7,6 +7,7 @@ export const FUNCTION_NAME = {
   EXPORT_COLLECTION: "exportCollection",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
+  UPDATE_SERVICE_COLLABORATORS: "updateServiceCollaborators",
   VALIDATE_SIGN_UP_LINK: "validateSignUpLink",
   VERIFY_RECAPTCHA: "verifyRecaptcha",
 } as const;

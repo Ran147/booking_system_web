@@ -15,8 +15,49 @@ const serviceDocumentSchema = z.object({
   status: z.enum([SERVICE_STATUS.ACTIVE, SERVICE_STATUS.INACTIVE]),
 });
 
+const discountDocumentSchema = z.object({
+  endsAt: z.unknown().transform((value) => {
+    if (value instanceof Date) {
+      return value;
+    }
+    if (
+      value &&
+      typeof value === "object" &&
+      "toDate" in value &&
+      typeof (value as { toDate: () => Date }).toDate === "function"
+    ) {
+      return (value as { toDate: () => Date }).toDate();
+    }
+    if (typeof value === "string") {
+      return new Date(value);
+    }
+    return new Date(value as string | number);
+  }),
+  startsAt: z.unknown().transform((value) => {
+    if (value instanceof Date) {
+      return value;
+    }
+    if (
+      value &&
+      typeof value === "object" &&
+      "toDate" in value &&
+      typeof (value as { toDate: () => Date }).toDate === "function"
+    ) {
+      return (value as { toDate: () => Date }).toDate();
+    }
+    if (typeof value === "string") {
+      return new Date(value);
+    }
+    return new Date(value as string | number);
+  }),
+  type: z.enum(["fixed_amount", "percentage"]),
+  value: z.number(),
+});
+
 const serviceDetailDocumentSchema = z.object({
+  collaboratorSelection: z.enum(["automatic", "customer_choice"]).optional(),
   description: z.string().optional().default(""),
+  discounts: z.array(discountDocumentSchema).optional().default([]),
   durationMinutes: z.number().int().positive(),
   features: z.array(z.string()).optional().default([]),
   imageUrl: z.string().nullable().optional().default(null),
@@ -44,7 +85,9 @@ export const mapServiceDetail = (
 ): ServiceDetail => {
   const parsedData = serviceDetailDocumentSchema.parse(serviceDocument.data());
   return {
+    collaboratorSelection: parsedData.collaboratorSelection,
     description: parsedData.description,
+    discounts: parsedData.discounts,
     durationMinutes: parsedData.durationMinutes,
     features: parsedData.features,
     id: serviceDocument.id,

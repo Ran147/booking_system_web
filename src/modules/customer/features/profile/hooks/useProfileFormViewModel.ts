@@ -16,6 +16,7 @@ import {
   useCustomerProfileQuery,
   useUpdateCustomerProfileMutation,
 } from "../api";
+import { NO_CUSTOMER_USER_ID } from "../constants";
 import {
   profileFormSchema,
   type ProfileFormValues,
@@ -32,7 +33,9 @@ export const useProfileFormViewModel = (): ProfileFormViewModel => {
   const navigate = useNavigate();
   const session = useSession();
   const userId =
-    session.status === SESSION_STATUS.SIGNED_IN ? session.userId : "";
+    session.status === SESSION_STATUS.SIGNED_IN
+      ? session.userId
+      : NO_CUSTOMER_USER_ID;
   const profileQuery = useCustomerProfileQuery(userId);
   const updateMutation = useUpdateCustomerProfileMutation();
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
@@ -46,8 +49,8 @@ export const useProfileFormViewModel = (): ProfileFormViewModel => {
   useEffect(() => {
     if (profileQuery.data) {
       form.reset({
-        fullName: profileQuery.data.fullName,
-        phone: profileQuery.data.phone,
+        fullName: profileQuery.data.fullName ?? "",
+        phone: profileQuery.data.phone ?? "",
       });
     }
   }, [form, profileQuery.data]);
@@ -106,8 +109,8 @@ export const useProfileFormViewModel = (): ProfileFormViewModel => {
     isSubmitting: updateMutation.isPending,
     profile: profileQuery.data
       ? {
-          fullName: profileQuery.data.fullName,
-          phone: profileQuery.data.phone,
+          fullName: profileQuery.data.fullName ?? "",
+          phone: profileQuery.data.phone ?? "",
         }
       : null,
     retry: async () => profileQuery.refetch(),

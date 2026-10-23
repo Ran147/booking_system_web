@@ -4,7 +4,11 @@ import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/components/common";
 import { FIREBASE_ERROR_CODE } from "@/constants";
-import { CUSTOMER_SESSION, renderWithProviders } from "@/shared/test-utils";
+import {
+  CUSTOMER_SESSION,
+  renderWithProviders,
+  testI18n,
+} from "@/shared/test-utils";
 import { ProfileEditPage } from "../ProfileEditPage";
 import * as fetchProfileModule from "../api/fetchCustomerProfile";
 import * as updateProfileModule from "../api/updateCustomerProfile";
@@ -91,6 +95,38 @@ describe("ProfileEditPage (KAN-170)", () => {
     expect(updateSpy).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["A", testI18n.t("validation:tooShort")],
+    ["A".repeat(81), testI18n.t("validation:tooLong")],
+  ])("rejects an out-of-range full name", async (fullName, errorMessage) => {
+    const user = userEvent.setup();
+    const updateSpy = vi.spyOn(updateProfileModule, "updateCustomerProfile");
+    renderPage();
+
+    const nameInput = await screen.findByDisplayValue(PROFILE.fullName);
+    await user.clear(nameInput);
+    await user.type(nameInput, fullName);
+    await user.click(screen.getByRole("button", { name: /guardar cambios/i }));
+
+    expect(await screen.findByText(errorMessage)).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it("requires a phone number", async () => {
+    const user = userEvent.setup();
+    const updateSpy = vi.spyOn(updateProfileModule, "updateCustomerProfile");
+    renderPage();
+
+    const phoneInput = await screen.findByDisplayValue(PROFILE.phone);
+    await user.clear(phoneInput);
+    await user.click(screen.getByRole("button", { name: /guardar cambios/i }));
+
+    expect(
+      await screen.findByText(testI18n.t("validation:required")),
+    ).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
   it("keeps edited values and reports a persistence error", async () => {
     const user = userEvent.setup();
     vi.spyOn(updateProfileModule, "updateCustomerProfile").mockRejectedValue(
@@ -106,6 +142,27 @@ describe("ProfileEditPage (KAN-170)", () => {
 
     await waitFor(() => expect(errorSpy).toHaveBeenCalled());
     expect(phoneInput).toHaveValue("+506 7777-7777");
+  });
+
+  it("reports a permission error without clearing edited values", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(updateProfileModule, "updateCustomerProfile").mockRejectedValue(
+      new FirebaseError(FIREBASE_ERROR_CODE.PERMISSION_DENIED, "Denied"),
+    );
+    const errorSpy = vi.spyOn(toast, "error");
+    renderPage();
+
+    const nameInput = await screen.findByDisplayValue(PROFILE.fullName);
+    await user.clear(nameInput);
+    await user.type(nameInput, "Ana María Rodríguez");
+    await user.click(screen.getByRole("button", { name: /guardar cambios/i }));
+
+    await waitFor(() =>
+      expect(errorSpy).toHaveBeenCalledWith(
+        testI18n.t("common:errors.permissionDenied"),
+      ),
+    );
+    expect(nameInput).toHaveValue("Ana María Rodríguez");
   });
 
   it("asks for confirmation when cancelling with unsaved changes", async () => {

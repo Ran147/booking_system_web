@@ -7,9 +7,13 @@ import {
   RouterProvider,
   type RouteObject,
 } from "react-router";
+import { ThemeContext } from "@/app/providers/theme/ThemeContext";
+import { THEME_MODE } from "@/constants";
 import type { Session } from "@/modules/auth";
 import { AuthContext } from "@/modules/auth/context/AuthContext";
 import { testI18n } from "./testI18n";
+
+const setTestThemeMode = (): void => undefined;
 
 export interface RenderRoutesWithProvidersOptions {
   initialPath: string;
@@ -39,9 +43,17 @@ export const renderRoutesWithProviders = (
   const renderResult = render(
     <QueryClientProvider client={testQueryClient}>
       <I18nextProvider i18n={testI18n}>
-        <AuthContext.Provider value={{ session }}>
-          <RouterProvider router={testRouter} />
-        </AuthContext.Provider>
+        <ThemeContext.Provider
+          value={{
+            isDarkApplied: false,
+            setThemeMode: setTestThemeMode,
+            themeMode: THEME_MODE.SYSTEM,
+          }}
+        >
+          <AuthContext.Provider value={{ session }}>
+            <RouterProvider router={testRouter} />
+          </AuthContext.Provider>
+        </ThemeContext.Provider>
       </I18nextProvider>
     </QueryClientProvider>,
   );

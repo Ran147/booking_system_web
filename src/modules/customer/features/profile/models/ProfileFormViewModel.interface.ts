@@ -4,18 +4,19 @@ import type { ErrorMessageKey, ViewState } from "@/constants";
 import type { Nullable } from "@/types";
 import type { ProfileFormValues } from "./ProfileForm.schema";
 
+/** Public state and actions used by the customer profile edit page. */
 export interface ProfileFormViewModel {
-  canSubmit: boolean;
-  email: string;
-  errorMessageKey: ErrorMessageKey;
-  form: UseFormReturn<ProfileFormValues>;
-  handleCancel: () => void;
-  handleDiscardChanges: () => void;
-  handleKeepEditing: () => void;
-  handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
-  isDiscardDialogOpen: boolean;
-  isSubmitting: boolean;
-  profile: Nullable<ProfileFormValues>;
-  retry: () => Promise<unknown>;
-  viewState: ViewState;
+  readonly canSubmit: boolean;
+  readonly email: string;
+  readonly errorMessageKey: ErrorMessageKey;
+  readonly form: UseFormReturn<ProfileFormValues>;
+  readonly handleCancel: () => void;
+  readonly handleDiscardChanges: () => void;
+  readonly handleKeepEditing: () => void;
+  readonly handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
+  readonly isDiscardDialogOpen: boolean;
+  readonly isSubmitting: boolean;
+  readonly profile: Nullable<ProfileFormValues>;
+  readonly retry: () => Promise<unknown>;
+  readonly viewState: ViewState;
 }

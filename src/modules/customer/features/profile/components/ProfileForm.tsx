@@ -9,9 +9,12 @@ import {
   InputField,
   Modal,
 } from "@/components/common";
-import { I18N_NAMESPACE, type ValidationMessageKey } from "@/constants";
+import {
+  I18N_NAMESPACE,
+  VALIDATION_MESSAGE_KEY,
+  type ValidationMessageKey,
+} from "@/constants";
 import type { NullableUndefined } from "@/types";
-import { PROFILE_PHONE_INVALID_MESSAGE_KEY } from "../constants";
 import type { ProfileFormProps } from "../models";
 
 export const ProfileForm = ({ viewModel }: ProfileFormProps): ReactElement => {
@@ -33,7 +36,7 @@ export const ProfileForm = ({ viewModel }: ProfileFormProps): ReactElement => {
     messageKey?: NullableUndefined<string>,
   ): NullableUndefined<string> => {
     if (!messageKey) return undefined;
-    return messageKey === PROFILE_PHONE_INVALID_MESSAGE_KEY
+    return messageKey === VALIDATION_MESSAGE_KEY.PHONE_INVALID
       ? t("profile.edit.phoneInvalidError")
       : tValidation(messageKey as ValidationMessageKey);
   };

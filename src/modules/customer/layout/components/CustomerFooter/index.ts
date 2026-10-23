@@ -1,0 +1,1 @@
+export { CustomerFooter } from "./CustomerFooter";

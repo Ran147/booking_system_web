@@ -50,6 +50,12 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/businesses/$(businessId)).data.status == 'active';
     }
 
+    function isBusinessPortalUser() {
+      return hasRole('subscriber')
+        || (hasRole('collaborator')
+          && isCollaboratorOf(request.auth.token.businessId));
+    }
+
     function isOptionalNullableString(data, field, maximumLength) {
       return !(field in data)
         || data[field] == null
@@ -111,7 +117,8 @@ service cloud.firestore {
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
           || isCollaboratorOf(businessId);
-        allow create, update: if ownsBusiness(businessId) && businessIsWritable(businessId);
+        allow create, update: if (ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_services'))
+          && businessIsWritable(businessId);
         allow delete: if false; // via the deleteService function (KAN-59)
       }
 
@@ -173,25 +180,35 @@ service cloud.firestore {
         && resource.data.customerUserId == request.auth.uid;
     }
 
-    // Each user reads only their own profile; sign-in needs User.language
-    // (AC-KAN-129-02). Customers may update only their editable profile fields.
+    // Each user reads only their own profile. Business portal users may update
+    // only their language and theme preferences (KAN-51, KAN-52), including
+    // active collaborators.
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
 
-      allow update: if hasRole('customer')
+      allow update: if isSignedIn()
         && request.auth.uid == userId
+        && isBusinessPortalUser()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['language', 'theme'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['language'])
+          || request.resource.data.language in ['es', 'en'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['theme'])
+          || request.resource.data.theme in ['light', 'dark', 'system']);
+
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && hasRole('customer')
         && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['fullName', 'phone', 'updatedAt'])
+          .hasOnly(['fullName', 'phone', 'updatedAt'])
         && request.resource.data.fullName is string
         && request.resource.data.fullName.size() >= 2
         && request.resource.data.fullName.size() <= 80
         && request.resource.data.phone is string
         && request.resource.data.phone.size() >= 7
         && request.resource.data.phone.size() <= 20
-        && request.resource.data.phone.matches('^\\+?[0-9() -]+$')
-        && request.resource.data.phone.matches('^([^0-9]*[0-9]){7,15}[^0-9]*$');
-
-      allow create, delete: if false;
+        && request.resource.data.phone.matches('^[+]?[0-9 ()-]{7,20}$')
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['updatedAt'])
+          || request.resource.data.updatedAt == request.time);
     }
 
     // Global parameters (KAN-182). Any signed-in user reads them (the idle

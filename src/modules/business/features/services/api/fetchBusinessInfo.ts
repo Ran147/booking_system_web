@@ -8,6 +8,7 @@ import { DEFAULT_SERVICE_LIST_CURRENCY } from "../constants/ServiceList.constant
 export interface BusinessInfo {
   readonly currency: string;
   readonly status: BusinessStatus;
+  readonly timeZone?: string;
 }
 
 const businessInfoDocumentSchema = z.object({
@@ -22,6 +23,7 @@ const businessInfoDocumentSchema = z.object({
     ])
     .optional()
     .default(BUSINESS_STATUS.ACTIVE),
+  timeZone: z.string().optional().default("UTC"),
 });
 
 export const fetchBusinessInfo = async (
@@ -38,6 +40,7 @@ export const fetchBusinessInfo = async (
     return {
       currency: DEFAULT_SERVICE_LIST_CURRENCY,
       status: BUSINESS_STATUS.ACTIVE,
+      timeZone: "UTC",
     };
   }
 
@@ -48,5 +51,6 @@ export const fetchBusinessInfo = async (
   return {
     currency: documentData.currency,
     status: documentData.status,
+    timeZone: documentData.timeZone,
   };
 };

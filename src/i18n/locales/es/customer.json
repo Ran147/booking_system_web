@@ -1,5 +1,30 @@
 {
   "layout": {
+    "businessNotFound": "No encontramos el negocio solicitado.",
+    "footer": {
+      "contact": {
+        "emailLabel": "Enviar un correo electrónico a {{email}}",
+        "phoneLabel": "Llamar al {{phone}}",
+        "title": "Contacto"
+      },
+      "landmarkLabel": "Pie de página del negocio",
+      "social": {
+        "linkLabel": "Abrir {{network}} de {{businessName}} en una pestaña nueva",
+        "network": {
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "tiktok": "TikTok",
+          "website": "Sitio web",
+          "whatsapp": "WhatsApp"
+        },
+        "title": "Redes sociales"
+      },
+      "terms": {
+        "linkLabel": "Abrir los términos y condiciones en una pestaña nueva",
+        "navigationLabel": "Información legal",
+        "text": "Términos y condiciones"
+      }
+    },
     "title": "Portal del cliente"
   },
   "myBookings": {
@@ -78,6 +103,16 @@
       "saving": "Guardando…",
       "sectionTitle": "Datos personales",
       "title": "Editar mi perfil"
+    },
+    "view": {
+      "description": "Consulta la información personal asociada a tu cuenta.",
+      "emailLabel": "Correo electrónico",
+      "empty": "No hay datos personales disponibles para esta cuenta.",
+      "fullNameLabel": "Nombre completo",
+      "notProvidedHint": "No proporcionado",
+      "phoneLabel": "Teléfono",
+      "sectionTitle": "Información personal",
+      "title": "Mi perfil"
     }
   }
 }

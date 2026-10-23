@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { VALIDATION_MESSAGE_KEY } from "@/constants";
 import { FULL_NAME_RULE, isValidPhone } from "@/domain";
-import { PROFILE_PHONE_INVALID_MESSAGE_KEY } from "../constants";
 
 export const profileFormSchema = z.object({
   fullName: z
@@ -15,7 +14,7 @@ export const profileFormSchema = z.object({
     .string({ message: VALIDATION_MESSAGE_KEY.REQUIRED })
     .trim()
     .min(1, VALIDATION_MESSAGE_KEY.REQUIRED)
-    .refine(isValidPhone, PROFILE_PHONE_INVALID_MESSAGE_KEY),
+    .refine(isValidPhone, VALIDATION_MESSAGE_KEY.PHONE_INVALID),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;

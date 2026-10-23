@@ -1,1 +1,1 @@
-export { PROFILE_PHONE_INVALID_MESSAGE_KEY } from "./ProfileForm.constants";
+export { NO_CUSTOMER_USER_ID } from "./Profile.constants";

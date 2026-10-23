@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  PageTemplate,
   ViewStateSwitch,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
@@ -17,30 +18,28 @@ export const ProfileEditPage = (): ReactElement => {
   const viewModel = useProfileFormViewModel();
 
   return (
-    <div className="container mx-auto max-w-3xl space-y-6 px-4 py-8">
-      <header className="space-y-1">
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-          {t("profile.edit.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {t("profile.edit.description")}
-        </p>
-      </header>
-
-      <ViewStateSwitch
-        emptyMessage={t("profile.edit.empty")}
-        viewState={viewModel.viewState}
+    <div className="container mx-auto max-w-3xl px-4 py-8">
+      <PageTemplate
+        description={t("profile.edit.description")}
+        title={t("profile.edit.title")}
       >
-        <Card className="bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle>{t("profile.edit.sectionTitle")}</CardTitle>
-            <CardDescription>{t("profile.edit.description")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProfileForm viewModel={viewModel} />
-          </CardContent>
-        </Card>
-      </ViewStateSwitch>
+        <ViewStateSwitch
+          emptyMessage={t("profile.edit.empty")}
+          errorMessageKey={viewModel.errorMessageKey}
+          onRetry={() => void viewModel.retry()}
+          viewState={viewModel.viewState}
+        >
+          <Card className="bg-card shadow-sm">
+            <CardHeader>
+              <CardTitle>{t("profile.edit.sectionTitle")}</CardTitle>
+              <CardDescription>{t("profile.edit.description")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProfileForm viewModel={viewModel} />
+            </CardContent>
+          </Card>
+        </ViewStateSwitch>
+      </PageTemplate>
     </div>
   );
 };

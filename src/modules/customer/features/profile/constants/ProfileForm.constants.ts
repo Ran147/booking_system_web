@@ -1,1 +1,0 @@
-export const PROFILE_PHONE_INVALID_MESSAGE_KEY = "phoneInvalidError";
