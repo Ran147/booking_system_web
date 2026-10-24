@@ -6,6 +6,7 @@ import type { CurrentBusiness } from "../models/CurrentBusiness.interface";
 
 // Roles that work inside one business, taken from the businessId claim.
 const BUSINESS_PORTAL_ROLES: readonly UserRole[] = [
+  USER_ROLE.BUSINESS_OWNER,
   USER_ROLE.COLLABORATOR,
   USER_ROLE.SUBSCRIBER,
 ];

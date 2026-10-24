@@ -10,6 +10,7 @@ export interface LandingNavbarPageObject {
   clickNavigationLink: (label: string) => Promise<void>;
   clickPortalActionButton: () => Promise<void>;
   clickSignInButton: () => Promise<void>;
+  clickSignOutButton: () => Promise<void>;
   getAllNavigationLinks: () => HTMLElement[];
   getBrandName: () => HTMLElement;
   getLogo: () => HTMLElement;
@@ -20,10 +21,12 @@ export interface LandingNavbarPageObject {
   getNavigationLink: (label: string) => HTMLElement;
   getPortalActionButton: () => HTMLElement;
   getSignInButton: () => HTMLElement;
+  getSignOutButton: () => HTMLElement;
   queryLogoImage: () => Nullable<HTMLElement>;
   queryMobileMenu: () => Nullable<HTMLElement>;
   queryPortalActionButton: () => Nullable<HTMLElement>;
   querySignInButton: () => Nullable<HTMLElement>;
+  querySignOutButton: () => Nullable<HTMLElement>;
 }
 
 export const createLandingNavbarPage = (): LandingNavbarPageObject => {
@@ -84,6 +87,16 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
       name: testI18n.t("landing:home.navbar.goToPortal"),
     });
 
+  const getSignOutButton = (): HTMLElement =>
+    within(getNavbar()).getByRole("button", {
+      name: testI18n.t("landing:home.navbar.signOut"),
+    });
+
+  const querySignOutButton = (): Nullable<HTMLElement> =>
+    within(getNavbar()).queryByRole("button", {
+      name: testI18n.t("landing:home.navbar.signOut"),
+    });
+
   const getMobileMenuToggleButton = (): HTMLElement => {
     const openButton = within(getNavbar()).queryByRole("button", {
       name: testI18n.t("landing:home.navbar.menuOpen"),
@@ -103,6 +116,10 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
 
   const clickSignInButton = async (): Promise<void> => {
     await user.click(getSignInButton());
+  };
+
+  const clickSignOutButton = async (): Promise<void> => {
+    await user.click(getSignOutButton());
   };
 
   const clickPortalActionButton = async (): Promise<void> => {
@@ -127,6 +144,7 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
     clickNavigationLink,
     clickPortalActionButton,
     clickSignInButton,
+    clickSignOutButton,
     getAllNavigationLinks,
     getBrandName,
     getLogo,
@@ -137,9 +155,11 @@ export const createLandingNavbarPage = (): LandingNavbarPageObject => {
     getNavigationLink,
     getPortalActionButton,
     getSignInButton,
+    getSignOutButton,
     queryLogoImage,
     queryMobileMenu,
     queryPortalActionButton,
     querySignInButton,
+    querySignOutButton,
   };
 };

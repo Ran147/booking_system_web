@@ -20,7 +20,7 @@ export const assertCanManageServices = async (
   }
 
   const role = auth.token?.role;
-  const callerBusinessId = auth.token?.businessId;
+  const callerBusinessId = auth.token?.businessId ?? auth.token?.business_id;
 
   if (callerBusinessId !== businessId) {
     throw new HttpsError(
@@ -29,7 +29,7 @@ export const assertCanManageServices = async (
     );
   }
 
-  if (role === USER_ROLE.SUBSCRIBER) {
+  if (role === USER_ROLE.SUBSCRIBER || role === USER_ROLE.BUSINESS_OWNER) {
     return;
   }
 

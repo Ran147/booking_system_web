@@ -21,6 +21,8 @@ import type {
 import { completeSubscriberSignUpPayloadSchema } from "./models/SubscriberSignUp.schema.js";
 import { assertRecaptcha, RECAPTCHA_SECRETS } from "../auth/assertRecaptcha.js";
 import { BUSINESS_STATUS } from "../shared/constants/BusinessStatus.constants.js";
+import { COLLABORATOR_PERMISSION } from "../shared/constants/CollaboratorPermission.constants.js";
+import { COLLABORATOR_STATUS } from "../shared/constants/CollaboratorStatus.constants.js";
 import { FIREBASE_AUTH_ERROR_CODE } from "../shared/constants/FirebaseAuthErrorCode.constants.js";
 import { FIRESTORE_COLLECTION } from "../shared/constants/FirestoreCollection.constants.js";
 import { STRING } from "../shared/constants/String.constants.js";
@@ -95,8 +97,11 @@ const writeSignUpDocuments = async (
 
   transaction.create(businessReference, {
     createdAt,
+    id: businessReference.id,
     name: signUpPayload.businessName,
+    owner_id: signUpAccount.userId,
     ownerUserId: signUpAccount.userId,
+    plan_id: planCheckout.planId,
     planCheckoutId: planCheckoutReference.id,
     slug: signUpPayload.businessSlug,
     status: BUSINESS_STATUS.PENDING,
@@ -105,16 +110,41 @@ const writeSignUpDocuments = async (
   transaction.create(
     firestore.collection(FIRESTORE_COLLECTION.USERS).doc(signUpAccount.userId),
     {
+      business_id: businessReference.id,
+      businessId: businessReference.id,
       createdAt,
       email: signUpAccount.email,
       fullName: signUpAccount.fullName,
       language: signUpPayload.language,
       phone: signUpPayload.phone === STRING.EMPTY ? null : signUpPayload.phone,
+      role: USER_ROLE.BUSINESS_OWNER,
+      uid: signUpAccount.userId,
     },
   );
   transaction.create(slugLockReference, {
     businessId: businessReference.id,
     createdAt,
+  });
+
+  const ownerCollaboratorReference = businessReference
+    .collection(FIRESTORE_COLLECTION.COLLABORATORS)
+    .doc(signUpAccount.userId);
+  transaction.create(ownerCollaboratorReference, {
+    createdAt,
+    email: signUpAccount.email,
+    fullName: signUpAccount.fullName,
+    is_owner: true,
+    permissions: [
+      COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+      COLLABORATOR_PERMISSION.MANAGE_CUSTOMERS,
+      COLLABORATOR_PERMISSION.MANAGE_SCHEDULE_BLOCKS,
+      COLLABORATOR_PERMISSION.MANAGE_SERVICES,
+      COLLABORATOR_PERMISSION.VIEW_REPORTS,
+    ],
+    phone: signUpPayload.phone === STRING.EMPTY ? null : signUpPayload.phone,
+    service_ids: [],
+    status: COLLABORATOR_STATUS.ACTIVE,
+    uid: signUpAccount.userId,
   });
   // The checkout payment appears in the business's payment history
   // (KAN-46, KAN-178).
@@ -159,6 +189,11 @@ const undoSignUp = async (
   const batch = firestore.batch();
   batch.delete(
     businessReference
+      .collection(FIRESTORE_COLLECTION.COLLABORATORS)
+      .doc(signUpAccount.userId),
+  );
+  batch.delete(
+    businessReference
       .collection(FIRESTORE_COLLECTION.PAYMENTS)
       .doc(signUpDocuments.paymentId),
   );
@@ -195,7 +230,8 @@ const setSubscriberClaims = async (
     try {
       await auth.setCustomUserClaims(userId, {
         businessId,
-        role: USER_ROLE.SUBSCRIBER,
+        business_id: businessId,
+        role: USER_ROLE.BUSINESS_OWNER,
       });
       return;
     } catch (error) {
