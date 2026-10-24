@@ -15,6 +15,7 @@ import { fetchCustomerProfile } from "../api/fetchCustomerProfile";
 
 const PROFILE_PATH = "/barberia-centro/profile";
 const PROFILE_EDIT_PATH = "/barberia-centro/profile/edit";
+const PROFILE_PASSWORD_PATH = "/barberia-centro/profile/password";
 
 vi.mock("@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug");
 vi.mock("../api/fetchCustomerProfile");
@@ -74,6 +75,24 @@ describe("customer profile route", () => {
         name: testI18n.t("customer:profile.edit.title"),
       }),
     ).toBeInTheDocument();
+  });
+
+  it("KAN-171: navigates from the profile view to the password route", async () => {
+    const user = userEvent.setup();
+    const { router } = renderRoutesWithProviders(appRoutes, {
+      initialPath: PROFILE_PATH,
+      session: CUSTOMER_SESSION,
+    });
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: testI18n.t("customer:profile.view.changePasswordAction"),
+      }),
+    );
+
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe(PROFILE_PASSWORD_PATH),
+    );
   });
 
   it("KAN-169 AC-KAN-169-04: redirects a signed-out visitor to sign-in without loading profile data", async () => {

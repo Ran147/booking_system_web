@@ -1,0 +1,1 @@
+export { useChangePasswordViewModel } from "./useChangePasswordViewModel";

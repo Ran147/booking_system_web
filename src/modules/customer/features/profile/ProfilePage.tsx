@@ -7,14 +7,25 @@ import { useProfileViewModel } from "./hooks/useProfileViewModel";
 
 export const ProfilePage = (): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.CUSTOMER);
-  const { errorMessageKey, handleEdit, profile, retry, viewState } =
-    useProfileViewModel();
+  const {
+    errorMessageKey,
+    handleChangePassword,
+    handleEdit,
+    profile,
+    retry,
+    viewState,
+  } = useProfileViewModel();
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <PageTemplate
         actions={
-          <Button onClick={handleEdit}>{t("profile.view.editAction")}</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={handleChangePassword} variant="outline">
+              {t("profile.view.changePasswordAction")}
+            </Button>
+            <Button onClick={handleEdit}>{t("profile.view.editAction")}</Button>
+          </div>
         }
         description={t("profile.view.description")}
         title={t("profile.view.title")}
