@@ -6,6 +6,7 @@ import {
   type BusinessPublicProfile,
 } from "@/domain";
 import {
+  BUSINESS_OWNER_SESSION,
   renderWithProviders,
   SUBSCRIBER_SESSION,
   testI18n,
@@ -64,6 +65,26 @@ describe("BusinessProfilePage", () => {
       expect.objectContaining({
         businessId: SUBSCRIBER_SESSION.businessId,
         values: expect.objectContaining({ name: "Nuevo nombre" }),
+      }),
+    );
+  });
+
+  it("KAN-199: lets a business owner load and save their business profile", async () => {
+    renderWithProviders(<BusinessProfilePage />, {
+      initialPath: "/business/business-profile",
+      session: BUSINESS_OWNER_SESSION,
+    });
+    const page = createBusinessProfilePage();
+
+    expect(await page.findNameInput()).toHaveValue(profile.name);
+    await page.replaceName("Perfil del propietario");
+    await page.clickSave();
+
+    await waitFor(() => expect(saveBusinessPublicProfile).toHaveBeenCalled());
+    expect(vi.mocked(saveBusinessPublicProfile).mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({
+        businessId: BUSINESS_OWNER_SESSION.businessId,
+        values: expect.objectContaining({ name: "Perfil del propietario" }),
       }),
     );
   });

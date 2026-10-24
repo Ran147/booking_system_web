@@ -7,7 +7,7 @@ service firebase.storage {
     match /businesses/{businessId}/profile/logo {
       function ownsBusiness() {
         return request.auth != null
-          && request.auth.token.role == 'subscriber'
+          && request.auth.token.role in ['business_owner', 'subscriber']
           && request.auth.token.businessId == businessId
           && firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.ownerUserId == request.auth.uid;
       }

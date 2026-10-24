@@ -17,8 +17,10 @@ export const assertSubscriberOf = (
 
   const role = auth.token?.role;
   const callerBusinessId = auth.token?.businessId;
+  const isBusinessOwner =
+    role === USER_ROLE.BUSINESS_OWNER || role === USER_ROLE.SUBSCRIBER;
 
-  if (role !== USER_ROLE.SUBSCRIBER || callerBusinessId !== businessId) {
+  if (!isBusinessOwner || callerBusinessId !== businessId) {
     throw new HttpsError(
       "permission-denied",
       "Caller is not the subscriber of this business",

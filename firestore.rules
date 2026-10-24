@@ -18,10 +18,14 @@ service cloud.firestore {
       return hasRole('super_admin');
     }
 
-    // Tenant check: a subscriber's business comes from the businessId custom
-    // claim, never from the request path alone.
+    // Tenant check: the business comes from the server-issued businessId claim,
+    // never from the request path alone. Sprint_1 business owners must also be
+    // the owner recorded on the claimed business.
     function ownsBusiness(businessId) {
-      return hasRole('subscriber') && request.auth.token.businessId == businessId;
+      return request.auth.token.businessId == businessId
+        && (hasRole('subscriber')
+          || (hasRole('business_owner')
+            && get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUserId == request.auth.uid));
     }
 
     // Collaborator of the business (Q1): the businessId and collaboratorId
@@ -52,6 +56,9 @@ service cloud.firestore {
 
     function isBusinessPortalUser() {
       return hasRole('subscriber')
+        || (hasRole('business_owner')
+          && request.auth.token.businessId is string
+          && ownsBusiness(request.auth.token.businessId))
         || (hasRole('collaborator')
           && isCollaboratorOf(request.auth.token.businessId));
     }
@@ -157,8 +164,8 @@ service cloud.firestore {
     // "current" is the subscription document id the sidebar reads
     // (BUSINESS_LAYOUT_CONSTANTS.CURRENT_DOCUMENT_ID) and the seed writes.
     function isSubscribedToPlan(planId) {
-      return hasRole('subscriber')
-        && request.auth.token.businessId is string
+      return request.auth.token.businessId is string
+        && ownsBusiness(request.auth.token.businessId)
         && get(/databases/$(database)/documents/businesses/$(request.auth.token.businessId)/subscription/current).data.planId == planId;
     }
 

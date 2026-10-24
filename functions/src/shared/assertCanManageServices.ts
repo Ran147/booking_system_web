@@ -29,7 +29,7 @@ export const assertCanManageServices = async (
     );
   }
 
-  if (role === USER_ROLE.SUBSCRIBER) {
+  if (role === USER_ROLE.SUBSCRIBER || role === USER_ROLE.BUSINESS_OWNER) {
     return;
   }
 
