@@ -129,13 +129,6 @@
       "title": "Change password",
       "tooManyAttemptsError": "Too many attempts were made. Wait a moment before trying again."
     },
-    "preferences": {
-      "languageDescription": "Choose your preferred language for using GatherTable.",
-      "languageHint": "The change will apply immediately throughout the interface.",
-      "languageSectionTitle": "Interface language",
-      "languageTitle": "Language",
-      "syncError": "The language changed on this device, but we could not save it to your account."
-    },
     "view": {
       "changePasswordAction": "Change password",
       "description": "Review the personal information associated with your account.",

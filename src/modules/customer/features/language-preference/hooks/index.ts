@@ -1,1 +1,0 @@
-export { useLanguagePreferenceViewModel } from "./useLanguagePreferenceViewModel";

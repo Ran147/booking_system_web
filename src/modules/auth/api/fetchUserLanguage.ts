@@ -1,12 +1,12 @@
 import { doc, getDoc } from "firebase/firestore";
-import { FIRESTORE_COLLECTION } from "@/constants";
+import { FIRESTORE_COLLECTION, type Language } from "@/constants";
 import { firestore } from "@/services/firebase";
+import type { Nullable } from "@/types";
 import { UserLanguageDocumentSchema } from "./UserLanguageDocument.schema";
-import type { UserLanguagePreference } from "../models/UserLanguagePreference.model";
 
 export const fetchUserLanguage = async (
   userId: string,
-): Promise<UserLanguagePreference> => {
+): Promise<Nullable<Language>> => {
   const userSnapshot = await getDoc(
     doc(firestore, FIRESTORE_COLLECTION.USERS, userId),
   );
@@ -15,6 +15,6 @@ export const fetchUserLanguage = async (
   );
 
   return parsedUserDocument.success
-    ? parsedUserDocument.data
-    : { language: null };
+    ? (parsedUserDocument.data.language ?? null)
+    : null;
 };

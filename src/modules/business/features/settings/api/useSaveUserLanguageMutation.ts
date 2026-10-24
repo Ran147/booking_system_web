@@ -5,12 +5,9 @@ import {
 } from "@tanstack/react-query";
 import { mapFirebaseError } from "@/services";
 import type { MutationError } from "@/types";
+import type { SaveUserLanguageInput } from "../models";
 import { saveUserLanguage } from "./saveUserLanguage";
 import { userLanguageQueryKeys } from "./userLanguageQueryKeys";
-import type {
-  SaveUserLanguageInput,
-  UserLanguagePreference,
-} from "../models/UserLanguagePreference.model";
 
 export const useSaveUserLanguageMutation = (): UseMutationResult<
   void,
@@ -28,10 +25,9 @@ export const useSaveUserLanguageMutation = (): UseMutationResult<
       }
     },
     onSuccess: (_response, input) => {
-      queryClient.setQueryData<UserLanguagePreference>(
-        userLanguageQueryKeys.detail(input.userId),
-        { language: input.language },
-      );
+      queryClient.setQueryData(userLanguageQueryKeys.detail(input.userId), {
+        language: input.language,
+      });
     },
   });
 };

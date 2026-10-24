@@ -35,9 +35,7 @@ export const signInWithPassword = async ({
   }
 
   // The language is a preference: failing to read it never blocks sign-in.
-  const { language } = await fetchUserLanguage(user.uid).catch(() => ({
-    language: null,
-  }));
+  const language = await fetchUserLanguage(user.uid).catch(() => null);
 
   return { language, session };
 };

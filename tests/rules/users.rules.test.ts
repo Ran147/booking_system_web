@@ -6,8 +6,6 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import firebase from "firebase/compat/app";
-import "firebase/compat/firestore";
 
 // Runs only against the emulator: npm run test:rules.
 // KAN-169: a customer can read only their own user profile.
@@ -217,20 +215,7 @@ describe("firestore.rules: users", () => {
     );
   });
 
-  it("KAN-172: lets a customer update their own language", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertSucceeds(
-      customer.firestore().doc(CUSTOMER_PROFILE_PATH).update({
-        language: "es",
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      }),
-    );
-  });
-
-  it("KAN-172: denies a customer using an unsupported language", async () => {
+  it("KAN-51: does not add customer language writes before KAN-172", async () => {
     const customer = testEnvironment.authenticatedContext("customer-1", {
       role: "customer",
     });
@@ -239,56 +224,7 @@ describe("firestore.rules: users", () => {
       customer
         .firestore()
         .doc(CUSTOMER_PROFILE_PATH)
-        .update({ language: "fr" }),
-    );
-  });
-
-  it("KAN-172: denies a customer updating another user's language", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertFails(
-      customer.firestore().doc(OTHER_PROFILE_PATH).update({ language: "en" }),
-    );
-  });
-
-  it("KAN-172: denies an invalid updatedAt value", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertFails(
-      customer.firestore().doc(CUSTOMER_PROFILE_PATH).update({
-        language: "es",
-        updatedAt: "not-a-timestamp",
-      }),
-    );
-  });
-
-  it("KAN-172: denies language updates with extra fields", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertFails(
-      customer.firestore().doc(CUSTOMER_PROFILE_PATH).update({
-        language: "es",
-        theme: "dark",
-      }),
-    );
-  });
-
-  it("KAN-172: denies a customer changing protected fields", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertFails(
-      customer
-        .firestore()
-        .doc(CUSTOMER_PROFILE_PATH)
-        .update({ email: "otro@demo.test" }),
+        .update({ language: "es" }),
     );
   });
 
@@ -440,6 +376,7 @@ describe("firestore.rules: users", () => {
 
     await assertFails(profile.update({ role: "subscriber" }));
     await assertFails(profile.update({ email: "other@example.com" }));
+    await assertFails(profile.update({ language: "es" }));
   });
 
   it("KAN-170: denies another customer from updating the profile", async () => {
