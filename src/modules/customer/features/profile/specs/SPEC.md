@@ -95,6 +95,12 @@ A signed-in `customer` can check and update the personal data of their platform 
 | AS-6 | Language and theme are applied locally even if saving them to the account fails; the next successful switch saves them. | AC-KAN-172-04, AC-KAN-173-05 |
 | AS-7 | The theme switch offers light, dark and system (`theming-standards` §4), with system as default, although KAN-173 only mentions light and dark. | AC-KAN-173-03 |
 
+### Session invalidation verification note
+
+Firebase Authentication documents password changes as major account changes that expire previous refresh tokens while issuing new tokens to the session that performs the change. An ID token already issued can remain usable until it expires because ID tokens are stateless and short-lived.
+
+`change-password/tests/changePasswordSessions.emulator.test.ts` characterizes two independent Web SDK sessions against Firebase Authentication Emulator. It verifies that the changing session remains usable and that the other session keeps its already-issued ID token. The emulator also accepts a forced refresh from the other session with its previous refresh token, so it does not reproduce the production revocation behavior and cannot prove AC-KAN-171-08. That criterion requires an integration/manual test against a dedicated non-production Firebase project; it must not run against production.
+
 ## Backlog issues
 - KAN-173 mentions only light and dark; `theming-standards` defines `light`, `dark` and `system`. AS-7 keeps all three; confirm.
 - KAN-100 depends on a customer reminder opt-in, but no story in this epic (or elsewhere) lets the customer set it.
@@ -115,6 +121,7 @@ A signed-in `customer` can check and update the personal data of their platform 
 | --- | --- | --- |
 | KAN-169 | AC-KAN-169-01 … AC-KAN-169-04 | `tests/ProfilePage.test.tsx` |
 | KAN-170 | AC-KAN-170-01 … AC-KAN-170-07 | `tests/ProfilePage.test.tsx` |
-| KAN-171 | AC-KAN-171-01 … AC-KAN-171-08 | `tests/ChangePasswordForm.test.tsx` |
+| KAN-171 | AC-KAN-171-01 … AC-KAN-171-07 | `tests/ChangePasswordPage.test.tsx`, `tests/changeCurrentUserPassword.test.ts` |
+| KAN-171 | AC-KAN-171-08 pending production-parity evidence | Auth Emulator limitation characterized by `change-password/tests/changePasswordSessions.emulator.test.ts`; verify against a dedicated non-production Firebase project |
 | KAN-172 | AC-KAN-172-01 … AC-KAN-172-05 | `tests/PreferencesSection.test.tsx` |
 | KAN-173 | AC-KAN-173-01 … AC-KAN-173-05 | `tests/PreferencesSection.test.tsx` |
