@@ -102,17 +102,52 @@ service cloud.firestore {
 
     match /businesses/{businessId} {
       allow read: if true; // public profile (KAN-112)
-      allow update: if ownsBusiness(businessId)
+            allow update: if ownsBusiness(businessId)
         && businessIsWritable(businessId)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'contactEmail',
-          'contactPhone',
-          'description',
-          'logoUrl',
-          'name',
-          'socialLinks'
-        ])
-        && hasValidPublicProfile(request.resource.data);
+        && (
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'contactEmail',
+              'contactPhone',
+              'description',
+              'logoUrl',
+              'name',
+              'socialLinks'
+            ])
+            && hasValidPublicProfile(request.resource.data)
+          )
+          ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'reminderSettings'
+            ])
+            && request.resource.data.reminderSettings is map
+            && request.resource.data.reminderSettings.keys().hasOnly([
+              'isEnabled',
+              'leadTimesMinutes'
+            ])
+            && request.resource.data.reminderSettings.keys().hasAll([
+              'isEnabled',
+              'leadTimesMinutes'
+            ])
+            && request.resource.data.reminderSettings.isEnabled is bool
+            && request.resource.data.reminderSettings.leadTimesMinutes is list
+            && request.resource.data.reminderSettings.leadTimesMinutes.size() <= 2
+            && (
+              !request.resource.data.reminderSettings.isEnabled
+              || request.resource.data.reminderSettings.leadTimesMinutes.size() > 0
+            )
+            && request.resource.data.reminderSettings.leadTimesMinutes.toSet().size()
+              == request.resource.data.reminderSettings.leadTimesMinutes.size()
+            && request.resource.data.reminderSettings.leadTimesMinutes.toSet().hasOnly([
+              60,
+              120,
+              720,
+              1440,
+              2880
+            ])
+          )
+        );
 
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()

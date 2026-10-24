@@ -51,6 +51,12 @@ describe("firestore.rules: tenant isolation", () => {
       await adminFirestore
         .doc("businesses/business-pending")
         .set({ ownerUserId: "subscriber-pending", status: "pending" });
+      await adminFirestore
+        .doc("businesses/business-inactive")
+        .set({ ownerUserId: "subscriber-inactive", status: "inactive" });
+      await adminFirestore
+        .doc("businesses/business-suspended")
+        .set({ ownerUserId: "subscriber-suspended", status: "suspended" });
     });
   });
 
@@ -269,5 +275,97 @@ describe("firestore.rules: tenant isolation", () => {
     const visitor = testEnvironment.unauthenticatedContext();
 
     await assertFails(visitor.firestore().doc(BUSINESS_A_BOOKING_PATH).get());
+  });
+
+  const validReminderSettings = {
+    isEnabled: true,
+    leadTimesMinutes: [60, 1440],
+  };
+
+  it("KAN-100: lets the active owner update only reminder settings", async () => {
+    const owner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+    await assertSucceeds(
+      owner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ reminderSettings: validReminderSettings }),
+    );
+  });
+
+  it.each([
+    ["another subscriber", "subscriber-b", subscriberOf("business-b")],
+    [
+      "collaborator",
+      "collaborator-a",
+      {
+        businessId: "business-a",
+        collaboratorId: "collaborator-a",
+        role: "collaborator",
+      },
+    ],
+    ["customer", "customer-a", { role: "customer" }],
+    ["super admin", "admin-a", { role: "super_admin" }],
+  ])(
+    "KAN-100: denies %s changing reminder settings",
+    async (_name, uid, claims) => {
+      const actor = testEnvironment.authenticatedContext(uid, claims);
+      await assertFails(
+        actor
+          .firestore()
+          .doc("businesses/business-a")
+          .update({ reminderSettings: validReminderSettings }),
+      );
+    },
+  );
+
+  it.each(["inactive", "suspended"])(
+    "KAN-100: denies a %s business owner",
+    async (status) => {
+      const owner = testEnvironment.authenticatedContext(
+        `subscriber-${status}`,
+        subscriberOf(`business-${status}`),
+      );
+      await assertFails(
+        owner
+          .firestore()
+          .doc(`businesses/business-${status}`)
+          .update({ reminderSettings: validReminderSettings }),
+      );
+    },
+  );
+
+  it.each([
+    { isEnabled: "yes", leadTimesMinutes: [60] },
+    { isEnabled: true, leadTimesMinutes: [60, 120, 720] },
+    { isEnabled: true, leadTimesMinutes: [30] },
+    { isEnabled: true, leadTimesMinutes: [60, 60] },
+    { extra: true, isEnabled: true, leadTimesMinutes: [60] },
+  ])("KAN-100: rejects invalid reminder settings", async (reminderSettings) => {
+    const owner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+    await assertFails(
+      owner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ reminderSettings }),
+    );
+  });
+
+  it("KAN-100: rejects changing another business field", async () => {
+    const owner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+    await assertFails(
+      owner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Changed", reminderSettings: validReminderSettings }),
+    );
   });
 });
