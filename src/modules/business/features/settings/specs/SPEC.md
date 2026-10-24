@@ -18,6 +18,7 @@ The subscriber, or a collaborator, adjusts their own account from a settings scr
 | customer | Has equivalent settings in the customer portal (KAN-168 epic); not part of this spec. |
 | super admin | Not part of this spec. |
 | collaborator (own account only, `active`) | Change their own language, theme and password, exactly like the subscriber. No permission is needed (AS-5). |
+| business owner (own business) | Change their own language, theme and password. Can open the business profile, using the same authorization policy as its route guard. |
 
 ## In scope
 - Language switch between `es` and `en` for the business portal, saved to the subscriber's profile.
@@ -37,6 +38,11 @@ The subscriber, or a collaborator, adjusts their own account from a settings scr
 - No new fields.
 
 ## Acceptance criteria
+
+### KAN-199 — Settings navigation
+- [x] **AC-KAN-199-01** · happy · Given a signed-in subscriber or business owner, when they open settings, then they can navigate to the business profile and the route guard authorizes the same roles. [KAN-199]
+- [x] **AC-KAN-199-02** · authorization · Given a signed-in collaborator, when they open settings or navigate directly to the business profile, then the profile option is hidden and the route guard denies access. [KAN-199]
+- [x] **AC-KAN-199-03** · regression · Given any authorized business-portal user, when they open settings, then language, appearance and password remain available. [KAN-199]
 
 ### KAN-51 — Change language (Spanish / English)
 - [ ] **AC-KAN-51-01** · happy · Given a signed-in subscriber whose interface is in Spanish, when they choose English in settings, then every text of the business portal changes to English without reloading, and dates, times and prices are formatted with the English locale (still in the business `timeZone` and currency). [KAN-51]
@@ -101,3 +107,4 @@ None. No story of this epic is blocked; Q1 (2026-09-28) adds the collaborator as
 | KAN-51 | AC-KAN-51-05 | `functions/src/notifications/tests/recipientLanguage.test.ts` |
 | KAN-52 | AC-KAN-52-01 … AC-KAN-52-06 | `tests/SettingsPage.test.tsx` |
 | KAN-53 | AC-KAN-53-01 … AC-KAN-53-12 | `tests/ChangePasswordForm.test.tsx` |
+| KAN-199 | AC-KAN-199-01 … AC-KAN-199-03 | `tests/SettingsPage.test.tsx`, `src/app/router/tests/appRoutes.test.tsx` |

@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router";
 import { ROUTE_PATH } from "@/constants";
 import { USER_ROLE } from "@/domain";
 import { RequireRole } from "@/modules/auth";
+import { BUSINESS_PROFILE_ALLOWED_ROLES } from "./businessProfileAccess";
 import { BusinessLayout } from "./layout/BusinessLayout";
 
 // The subscriber and the collaborators of the business share this portal (Q1).
@@ -31,7 +32,9 @@ export const businessRoutes: RouteObject[] = [
                 path: ROUTE_PATH.BUSINESS.BUSINESS_PROFILE,
               },
             ],
-            element: <RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER]} />,
+            element: (
+              <RequireRole allowedRoles={BUSINESS_PROFILE_ALLOWED_ROLES} />
+            ),
           },
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
@@ -63,6 +66,14 @@ export const businessRoutes: RouteObject[] = [
           },
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { PasswordSettingsPage } =
+                await import("./features/settings");
+              return { Component: PasswordSettingsPage };
+            },
+            path: ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD,
+          },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ServiceCollaboratorsPage } =
                 await import("./features/services");
               return { Component: ServiceCollaboratorsPage };
@@ -83,7 +94,11 @@ export const businessRoutes: RouteObject[] = [
     ],
     element: (
       <RequireRole
-        allowedRoles={[USER_ROLE.SUBSCRIBER, USER_ROLE.COLLABORATOR]}
+        allowedRoles={[
+          USER_ROLE.BUSINESS_OWNER,
+          USER_ROLE.COLLABORATOR,
+          USER_ROLE.SUBSCRIBER,
+        ]}
       />
     ),
     path: ROUTE_PATH.BUSINESS.ROOT,

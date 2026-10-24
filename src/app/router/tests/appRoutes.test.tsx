@@ -1,9 +1,12 @@
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { BUSINESS_STATUS } from "@/domain";
 import { fetchBusinessPublicProfileBySlug } from "@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug";
 import { ROUTE_PATH } from "@/shared/constants";
 import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
 import {
+  BUSINESS_OWNER_SESSION,
   COLLABORATOR_SESSION,
   CUSTOMER_SESSION,
   SIGNED_OUT_SESSION,
@@ -101,7 +104,22 @@ describe("app routes", () => {
     ).toBeInTheDocument();
   });
 
+  it("KAN-199: opens the business portal for a business owner", async () => {
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: BUSINESS_OWNER_SESSION,
+    });
+    const appRoutesPage = createAppRoutesPage();
+
+    expect(
+      await appRoutesPage.findPageHeading(
+        testI18n.t("business:placeholder.title"),
+      ),
+    ).toBeInTheDocument();
+  });
+
   it.each([
+    ["business owner", BUSINESS_OWNER_SESSION],
     ["subscriber", SUBSCRIBER_SESSION],
     ["collaborator", COLLABORATOR_SESSION],
   ])(
@@ -120,6 +138,82 @@ describe("app routes", () => {
       ).toBeInTheDocument();
     },
   );
+
+  it.each([
+    ["business owner", BUSINESS_OWNER_SESSION],
+    ["subscriber", SUBSCRIBER_SESSION],
+    ["collaborator", COLLABORATOR_SESSION],
+  ])(
+    "KAN-53: lets an authenticated %s navigate from settings to the password view",
+    async (_roleName, session) => {
+      const user = userEvent.setup();
+      renderRoutesWithProviders(appRoutes, {
+        initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+        session,
+      });
+
+      await user.click(
+        await screen.findByRole("link", {
+          name: testI18n.t("business:settings.navigation.password.action"),
+        }),
+      );
+
+      expect(
+        await screen.findByRole("heading", {
+          level: 1,
+          name: testI18n.t("business:settings.password.title"),
+        }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it.each([
+    ["business owner", BUSINESS_OWNER_SESSION],
+    ["subscriber", SUBSCRIBER_SESSION],
+    ["collaborator", COLLABORATOR_SESSION],
+  ])(
+    "KAN-53: allows an authenticated %s to open password settings directly",
+    async (_roleName, session) => {
+      renderRoutesWithProviders(appRoutes, {
+        initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`,
+        session,
+      });
+
+      expect(
+        await screen.findByLabelText(
+          testI18n.t("business:settings.password.currentPasswordLabel"),
+          { exact: false, selector: 'input[name="currentPassword"]' },
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("KAN-199: keeps direct business-profile access blocked for collaborators", async () => {
+    renderRoutesWithProviders(appRoutes, {
+      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+      session: COLLABORATOR_SESSION,
+    });
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: testI18n.t("business:placeholder.title"),
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("KAN-199: allows a business owner to open the business profile", async () => {
+    const { router } = renderRoutesWithProviders(appRoutes, {
+      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+      session: BUSINESS_OWNER_SESSION,
+    });
+
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe(
+        `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+      ),
+    );
+  });
 
   it("KAN-86: redirects a collaborator from the admin portal to the business portal", async () => {
     renderRoutesWithProviders(appRoutes, {

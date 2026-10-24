@@ -9,7 +9,7 @@ import {
   testI18n,
 } from "@/test-utils";
 import { createChangePasswordFormPage } from "./ChangePasswordForm.page";
-import { SettingsPage } from "../SettingsPage";
+import { PasswordSettingsPage } from "../PasswordSettingsPage";
 import { changeCurrentUserPassword } from "../api/changeCurrentUserPassword";
 import { createAuthenticatedUserRequiredError } from "../models";
 
@@ -29,7 +29,7 @@ describe("ChangePasswordForm", () => {
 
   it("KAN-53: changes the authenticated subscriber password and clears the form", async () => {
     const successToast = vi.spyOn(toast, "success");
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -57,7 +57,7 @@ describe("ChangePasswordForm", () => {
     vi.mocked(changeCurrentUserPassword).mockRejectedValue(
       new FirebaseError(FIREBASE_ERROR_CODE.INVALID_CREDENTIAL, "invalid"),
     );
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -74,7 +74,7 @@ describe("ChangePasswordForm", () => {
   });
 
   it("KAN-53: rejects a weak password before calling Firebase", async () => {
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -94,7 +94,7 @@ describe("ChangePasswordForm", () => {
   });
 
   it("KAN-53: rejects a non-matching confirmation", async () => {
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -115,7 +115,7 @@ describe("ChangePasswordForm", () => {
   });
 
   it("KAN-53: rejects a new password equal to the current password next to the new-password field", async () => {
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -144,7 +144,7 @@ describe("ChangePasswordForm", () => {
     vi.mocked(changeCurrentUserPassword).mockRejectedValue(
       new FirebaseError(FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS, "technical"),
     );
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -167,7 +167,7 @@ describe("ChangePasswordForm", () => {
         "technical",
       ),
     );
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -197,7 +197,7 @@ describe("ChangePasswordForm", () => {
         "technical token detail",
       ),
     );
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -217,7 +217,7 @@ describe("ChangePasswordForm", () => {
     vi.mocked(changeCurrentUserPassword).mockRejectedValue(
       createAuthenticatedUserRequiredError(),
     );
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -243,7 +243,7 @@ describe("ChangePasswordForm", () => {
           resolvePasswordChange = resolve;
         }),
     );
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -268,7 +268,7 @@ describe("ChangePasswordForm", () => {
   });
 
   it("KAN-53: toggles each password field independently", async () => {
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
     });
@@ -281,7 +281,7 @@ describe("ChangePasswordForm", () => {
   });
 
   it("KAN-53: lets an active collaborator change only their own Auth password", async () => {
-    renderWithProviders(<SettingsPage />, {
+    renderWithProviders(<PasswordSettingsPage />, {
       initialPath: "/business/settings",
       session: COLLABORATOR_SESSION,
     });
