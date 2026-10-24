@@ -1,7 +1,4 @@
 {
-  "actions": {
-    "retry": "Reintentar"
-  },
   "auth": {
     "idle": {
       "signOutAction": "Cerrar sesión",
@@ -84,8 +81,6 @@
   },
   "language": {
     "englishLabel": "Inglés",
-    "savingHint": "Guardando tu preferencia…",
-    "selectorLabel": "Seleccionar idioma",
     "spanishLabel": "Español"
   },
   "notFound": {

@@ -8,21 +8,23 @@ import {
   THEME_MODE,
   type Language,
 } from "@/constants";
-import {
-  clearPendingLanguageSync,
-  resolveLanguage,
-  savePendingLanguageSync,
-  SESSION_STATUS,
-  useSaveUserLanguageMutation,
-  useSession,
-} from "@/modules/auth";
+import { useSession } from "@/modules/auth";
+import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
+import { useSaveUserLanguageMutation } from "../api/useSaveUserLanguageMutation";
 import { useSaveUserThemeMutation } from "../api/useSaveUserThemeMutation";
 import type { SettingsPageViewModel } from "../models";
 import { isThemeMode } from "../utils/isThemeMode";
 import {
+  clearPendingLanguageSync,
+  savePendingLanguageSync,
+} from "../utils/languagePreferenceStorage";
+import {
   clearPendingThemeSync,
   savePendingThemeSync,
 } from "../utils/themePreferenceStorage";
+
+const resolveLanguage = (language: string): Language =>
+  language.startsWith(LANGUAGE.EN) ? LANGUAGE.EN : LANGUAGE.ES;
 
 export const useSettingsPageViewModel = (): SettingsPageViewModel => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.COMMON);
