@@ -28,15 +28,6 @@ export const useProfileViewModel = (): UseProfileViewModelReturn => {
     errorMessageKey: profileQuery.error
       ? mapFirebaseError(profileQuery.error).messageKey
       : ERROR_MESSAGE_KEY.UNKNOWN,
-    handleChangePassword: (): void => {
-      if (!businessSlug) return;
-      navigate(
-        generatePath(
-          `${ROUTE_PATH.CUSTOMER.ROOT}/${ROUTE_PATH.CUSTOMER.CHANGE_PASSWORD}`,
-          { businessSlug },
-        ),
-      );
-    },
     handleEdit: (): void => {
       if (!businessSlug) return;
       navigate(

@@ -25,14 +25,6 @@ export const customerRoutes: RouteObject[] = [
         children: [
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-              const { ChangePasswordPage } =
-                await import("./features/change-password/ChangePasswordPage");
-              return { Component: ChangePasswordPage };
-            },
-            path: ROUTE_PATH.CUSTOMER.CHANGE_PASSWORD,
-          },
-          {
-            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { ProfilePage } =
                 await import("./features/profile/ProfilePage");
               return { Component: ProfilePage };
