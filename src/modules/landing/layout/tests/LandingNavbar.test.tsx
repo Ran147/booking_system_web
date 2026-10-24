@@ -22,6 +22,11 @@ const BRAND_NAME = "Booking System";
 const BROKEN_IMAGE_URL = "https://example.com/broken-logo.png";
 const TARGET_SECTION_ID = "plans-section";
 const mockNavigate = vi.fn();
+const mockSignOut = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("firebase/auth", () => ({
+  signOut: (): Promise<void> => mockSignOut(),
+}));
 
 vi.mock("react-router", async () => {
   const actual = await vi.importActual<typeof ReactRouter>("react-router");
@@ -115,12 +120,17 @@ describe("LandingNavbar (KAN-3, KAN-12)", () => {
     let page = createLandingNavbarPage();
     expect(page.querySignInButton()).not.toBeInTheDocument();
     expect(page.getPortalActionButton()).toBeInTheDocument();
+    expect(page.getSignOutButton()).toBeInTheDocument();
+
+    await page.clickSignOutButton();
+    expect(mockSignOut).toHaveBeenCalled();
 
     await page.clickPortalActionButton();
     expect(mockNavigate).toHaveBeenCalledWith(ROUTE_PATH.BUSINESS.ROOT);
 
     unmount();
     mockNavigate.mockClear();
+    mockSignOut.mockClear();
 
     renderWithProviders(<LandingNavbar />, {
       initialPath: ROUTE_PATH.LANDING.HOME,
@@ -129,6 +139,7 @@ describe("LandingNavbar (KAN-3, KAN-12)", () => {
 
     page = createLandingNavbarPage();
     expect(page.getPortalActionButton()).toBeInTheDocument();
+    expect(page.getSignOutButton()).toBeInTheDocument();
 
     await page.clickPortalActionButton();
     expect(mockNavigate).toHaveBeenCalledWith(ROUTE_PATH.ADMIN.ROOT);

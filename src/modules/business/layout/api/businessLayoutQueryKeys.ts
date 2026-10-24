@@ -1,5 +1,4 @@
 import { FIRESTORE_COLLECTION } from "@/constants";
-import { businessProfileQueryKeys } from "@/modules/business/features/business-profile";
 
 export const businessLayoutQueryKeys = Object.freeze({
   collaboratorProfile: (businessId: string, collaboratorId: string) =>
@@ -12,7 +11,8 @@ export const businessLayoutQueryKeys = Object.freeze({
   planName: (planId: string) => [FIRESTORE_COLLECTION.PLANS, planId] as const,
   platformSettings: () =>
     [FIRESTORE_COLLECTION.PLATFORM_SETTINGS, "current"] as const,
-  profile: (businessId: string) => businessProfileQueryKeys.detail(businessId),
+  profile: (businessId: string) =>
+    [FIRESTORE_COLLECTION.BUSINESSES, businessId, "layout-profile"] as const,
   subscription: (businessId: string) =>
     [
       FIRESTORE_COLLECTION.BUSINESSES,
