@@ -194,21 +194,6 @@ service cloud.firestore {
           || request.resource.data.language in ['es', 'en'])
         && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['theme'])
           || request.resource.data.theme in ['light', 'dark', 'system']);
-
-      allow update: if isSignedIn()
-        && request.auth.uid == userId
-        && hasRole('customer')
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['fullName', 'phone', 'updatedAt'])
-        && request.resource.data.fullName is string
-        && request.resource.data.fullName.size() >= 2
-        && request.resource.data.fullName.size() <= 80
-        && request.resource.data.phone is string
-        && request.resource.data.phone.size() >= 7
-        && request.resource.data.phone.size() <= 20
-        && request.resource.data.phone.matches('^[+]?[0-9 ()-]{7,20}$')
-        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['updatedAt'])
-          || request.resource.data.updatedAt == request.time);
     }
 
     // Global parameters (KAN-182). Any signed-in user reads them (the idle

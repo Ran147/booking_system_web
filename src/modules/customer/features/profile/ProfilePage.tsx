@@ -1,21 +1,17 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, PageTemplate, ViewStateSwitch } from "@/components/common";
+import { PageTemplate, ViewStateSwitch } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
 import { ProfileDetails } from "./components/ProfileDetails";
 import { useProfileViewModel } from "./hooks/useProfileViewModel";
 
 export const ProfilePage = (): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.CUSTOMER);
-  const { errorMessageKey, handleEdit, profile, retry, viewState } =
-    useProfileViewModel();
+  const { errorMessageKey, profile, retry, viewState } = useProfileViewModel();
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <PageTemplate
-        actions={
-          <Button onClick={handleEdit}>{t("profile.view.editAction")}</Button>
-        }
         description={t("profile.view.description")}
         title={t("profile.view.title")}
       >

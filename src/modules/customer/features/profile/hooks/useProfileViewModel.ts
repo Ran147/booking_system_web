@@ -1,5 +1,4 @@
-import { generatePath, useNavigate, useParams } from "react-router";
-import { ERROR_MESSAGE_KEY, ROUTE_PATH, VIEW_STATE } from "@/constants";
+import { ERROR_MESSAGE_KEY, VIEW_STATE } from "@/constants";
 import { SESSION_STATUS, useSession } from "@/modules/auth";
 import { mapFirebaseError } from "@/services/firebase";
 import { useCustomerProfileQuery } from "../api/useCustomerProfileQuery";
@@ -7,8 +6,6 @@ import { NO_CUSTOMER_USER_ID } from "../constants/Profile.constants";
 import type { UseProfileViewModelReturn } from "../models";
 
 export const useProfileViewModel = (): UseProfileViewModelReturn => {
-  const navigate = useNavigate();
-  const { businessSlug } = useParams<{ businessSlug: string }>();
   const session = useSession();
   const userId =
     session.status === SESSION_STATUS.SIGNED_IN
@@ -28,15 +25,6 @@ export const useProfileViewModel = (): UseProfileViewModelReturn => {
     errorMessageKey: profileQuery.error
       ? mapFirebaseError(profileQuery.error).messageKey
       : ERROR_MESSAGE_KEY.UNKNOWN,
-    handleEdit: (): void => {
-      if (!businessSlug) return;
-      navigate(
-        generatePath(
-          `${ROUTE_PATH.CUSTOMER.ROOT}/${ROUTE_PATH.CUSTOMER.PROFILE_EDIT}`,
-          { businessSlug },
-        ),
-      );
-    },
     profile: profileQuery.data ?? null,
     retry: (): void => {
       void profileQuery.refetch();

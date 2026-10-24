@@ -33,7 +33,6 @@ export const ROUTE_PATH = {
     BOOKING_DETAIL: "my-bookings/:bookingId",
     MY_BOOKINGS: "my-bookings",
     PROFILE: "profile",
-    PROFILE_EDIT: "profile/edit",
     ROOT: "/:businessSlug",
   },
   LANDING: {
