@@ -1,4 +1,61 @@
 {
+  "faq": {
+    "cta": {
+      "action": "Go to contact form",
+      "description": "Can't find the answer you're looking for? Our team is here to assist you.",
+      "title": "Still have questions?"
+    },
+    "empty": {
+      "action": "Contact us",
+      "description": "No frequently asked questions were found at this time.",
+      "title": "No questions available"
+    },
+    "groups": {
+      "accountAndSecurity": {
+        "items": {
+          "dataSecurity": {
+            "answer": "We use secure cloud infrastructure with encryption and tenant isolation to ensure your business and customer data remain confidential.",
+            "question": "Is my data and my customers' information secure?"
+          },
+          "multiUser": {
+            "answer": "Yes, depending on your plan you can invite team members and set custom permissions so they only access their assigned schedule or general management.",
+            "question": "Can I add my team members to the platform?"
+          }
+        },
+        "title": "Account & security"
+      },
+      "plansAndBilling": {
+        "items": {
+          "changePlan": {
+            "answer": "You can upgrade or change your plan at any time from your subscription dashboard as your business grows.",
+            "question": "Can I switch plans whenever needed?"
+          },
+          "paymentMethods": {
+            "answer": "We accept major credit and debit cards (Visa, Mastercard, American Express) processed through secure payment gateways.",
+            "question": "What payment methods are supported?"
+          }
+        },
+        "title": "Plans & billing"
+      },
+      "servicesAndBookings": {
+        "items": {
+          "calendarSync": {
+            "answer": "The platform updates availability in real time, automatically blocking booked slots to prevent scheduling conflicts.",
+            "question": "How are bookings synchronized with my business hours?"
+          },
+          "clientBooking": {
+            "answer": "Your customers visit your unique booking page, pick a service, select a collaborator and an available time slot, and receive instant confirmation.",
+            "question": "How do my clients book an appointment?"
+          }
+        },
+        "title": "Services & bookings"
+      }
+    },
+    "page": {
+      "description": "Find quick and clear answers to common questions about our platform, bookings, and subscription plans.",
+      "title": "Frequently Asked Questions"
+    }
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
