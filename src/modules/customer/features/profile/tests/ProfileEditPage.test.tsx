@@ -6,8 +6,9 @@ import { toast } from "@/components/common";
 import { FIREBASE_ERROR_CODE } from "@/constants";
 import {
   CUSTOMER_SESSION,
-  renderWithProviders,
+  renderRoutesWithProviders,
   testI18n,
+  type RenderRoutesWithProvidersResult,
 } from "@/shared/test-utils";
 import { ProfileEditPage } from "../ProfileEditPage";
 import * as fetchProfileModule from "../api/fetchCustomerProfile";
@@ -19,12 +20,14 @@ const PROFILE = {
   phone: "+506 8888-8888",
 };
 
-const renderPage = (): void => {
-  renderWithProviders(<ProfileEditPage />, {
-    initialPath: "/demo/profile",
-    session: CUSTOMER_SESSION,
-  });
-};
+const renderPage = (): RenderRoutesWithProvidersResult =>
+  renderRoutesWithProviders(
+    [{ element: <ProfileEditPage />, path: "/:businessSlug/profile/edit" }],
+    {
+      initialPath: "/demo/profile/edit",
+      session: CUSTOMER_SESSION,
+    },
+  );
 
 describe("ProfileEditPage (KAN-170)", () => {
   beforeEach(() => {
@@ -167,7 +170,7 @@ describe("ProfileEditPage (KAN-170)", () => {
 
   it("asks for confirmation when cancelling with unsaved changes", async () => {
     const user = userEvent.setup();
-    renderPage();
+    const { router } = renderPage();
 
     const nameInput = await screen.findByDisplayValue(PROFILE.fullName);
     await user.type(nameInput, " Editado");
@@ -175,5 +178,26 @@ describe("ProfileEditPage (KAN-170)", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText(/cambios sin guardar/i)).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", {
+        name: testI18n.t("customer:profile.edit.discardAction"),
+      }),
+    );
+    expect(router.state.location.pathname).toBe("/demo/profile");
+  });
+
+  it("returns to the profile view when cancelling without changes", async () => {
+    const user = userEvent.setup();
+    const { router } = renderPage();
+
+    await screen.findByDisplayValue(PROFILE.fullName);
+    await user.click(
+      screen.getByRole("button", {
+        name: testI18n.t("customer:profile.edit.cancelAction"),
+      }),
+    );
+
+    expect(router.state.location.pathname).toBe("/demo/profile");
   });
 });

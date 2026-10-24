@@ -2,11 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { generatePath, useNavigate, useParams } from "react-router";
 import { toast } from "@/components/common";
 import {
   ERROR_MESSAGE_KEY,
   I18N_NAMESPACE,
+  ROUTE_PATH,
   VIEW_STATE,
   type ViewState,
 } from "@/constants";
@@ -31,6 +32,7 @@ export const useProfileFormViewModel = (): ProfileFormViewModel => {
     I18N_NAMESPACE.COMMON,
   ]);
   const navigate = useNavigate();
+  const { businessSlug } = useParams<{ businessSlug: string }>();
   const session = useSession();
   const userId =
     session.status === SESSION_STATUS.SIGNED_IN
@@ -86,7 +88,23 @@ export const useProfileFormViewModel = (): ProfileFormViewModel => {
       setIsDiscardDialogOpen(true);
       return;
     }
-    navigate(-1);
+    if (!businessSlug) return;
+    navigate(
+      generatePath(
+        `${ROUTE_PATH.CUSTOMER.ROOT}/${ROUTE_PATH.CUSTOMER.PROFILE}`,
+        { businessSlug },
+      ),
+    );
+  };
+
+  const handleDiscardChanges = (): void => {
+    if (!businessSlug) return;
+    navigate(
+      generatePath(
+        `${ROUTE_PATH.CUSTOMER.ROOT}/${ROUTE_PATH.CUSTOMER.PROFILE}`,
+        { businessSlug },
+      ),
+    );
   };
 
   let viewState: ViewState = VIEW_STATE.READY;
@@ -102,7 +120,7 @@ export const useProfileFormViewModel = (): ProfileFormViewModel => {
       : ERROR_MESSAGE_KEY.UNKNOWN,
     form,
     handleCancel,
-    handleDiscardChanges: () => navigate(-1),
+    handleDiscardChanges,
     handleKeepEditing: () => setIsDiscardDialogOpen(false),
     handleSubmit: form.handleSubmit(submitProfile),
     isDiscardDialogOpen,

@@ -106,6 +106,7 @@
     },
     "view": {
       "description": "Review the personal information associated with your account.",
+      "editAction": "Edit",
       "emailLabel": "Email address",
       "empty": "No personal information is available for this account.",
       "fullNameLabel": "Full name",

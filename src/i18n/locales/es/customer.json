@@ -106,6 +106,7 @@
     },
     "view": {
       "description": "Consulta la información personal asociada a tu cuenta.",
+      "editAction": "Editar",
       "emailLabel": "Correo electrónico",
       "empty": "No hay datos personales disponibles para esta cuenta.",
       "fullNameLabel": "Nombre completo",
