@@ -1,22 +1,16 @@
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/components/common";
+import { I18N_NAMESPACE, STORAGE_KEY, type Language } from "@/constants";
 import {
-  DEFAULT_LANGUAGE,
-  I18N_NAMESPACE,
-  LANGUAGE,
-  STORAGE_KEY,
-  type Language,
-} from "@/constants";
-import { SESSION_STATUS, useSession } from "@/modules/auth";
-import {
-  useLanguagePreferenceQuery,
-  useUpdateLanguagePreferenceMutation,
-} from "../api";
+  clearPendingLanguageSyncIfMatches,
+  resolveLanguage,
+  savePendingLanguageSync,
+  SESSION_STATUS,
+  useSaveUserLanguageMutation,
+  useSession,
+  useUserLanguageQuery,
+} from "@/modules/auth";
 import type { LanguagePreferenceViewModel } from "../models";
-
-const resolveLanguage = (language: string): Language =>
-  language.startsWith(LANGUAGE.EN) ? LANGUAGE.EN : DEFAULT_LANGUAGE;
 
 export const useLanguagePreferenceViewModel =
   (): LanguagePreferenceViewModel => {
@@ -27,15 +21,8 @@ export const useLanguagePreferenceViewModel =
     const session = useSession();
     const userId =
       session.status === SESSION_STATUS.SIGNED_IN ? session.userId : "";
-    const preferenceQuery = useLanguagePreferenceQuery(userId);
-    const updateMutation = useUpdateLanguagePreferenceMutation();
-
-    useEffect(() => {
-      if (preferenceQuery.data) {
-        void i18n.changeLanguage(preferenceQuery.data);
-        localStorage.setItem(STORAGE_KEY.LANGUAGE, preferenceQuery.data);
-      }
-    }, [i18n, preferenceQuery.data]);
+    const preferenceQuery = useUserLanguageQuery(userId);
+    const updateMutation = useSaveUserLanguageMutation();
 
     const handleLanguageChange = async (language: Language): Promise<void> => {
       if (language === resolveLanguage(i18n.resolvedLanguage ?? i18n.language))
@@ -43,13 +30,16 @@ export const useLanguagePreferenceViewModel =
 
       await i18n.changeLanguage(language);
       localStorage.setItem(STORAGE_KEY.LANGUAGE, language);
-      updateMutation.mutate(
-        { language, userId },
-        {
-          onError: () =>
-            toast.error(t("customer:profile.preferences.syncError")),
-        },
-      );
+      const pendingLanguageSync = {
+        includeUpdatedAt: true,
+        language,
+        userId,
+      } as const;
+      savePendingLanguageSync(pendingLanguageSync);
+      updateMutation.mutate(pendingLanguageSync, {
+        onError: () => toast.error(t("customer:profile.preferences.syncError")),
+        onSuccess: () => clearPendingLanguageSyncIfMatches(pendingLanguageSync),
+      });
     };
 
     return {

@@ -3,6 +3,9 @@ import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "@/components/common";
 import { FIREBASE_ERROR_CODE, LANGUAGE, STORAGE_KEY } from "@/constants";
+import { fetchUserLanguage } from "@/modules/auth/api/fetchUserLanguage";
+import { saveUserLanguage } from "@/modules/auth/api/saveUserLanguage";
+import { useUserLanguageSync } from "@/modules/auth/hooks/useUserLanguageSync";
 import {
   CUSTOMER_SESSION,
   renderWithProviders,
@@ -10,11 +13,17 @@ import {
 } from "@/shared/test-utils";
 import { createLanguagePreferencePage } from "./LanguagePreferencePage.page";
 import { LanguagePreferencePage } from "../LanguagePreferencePage";
-import * as fetchPreferenceModule from "../api/fetchLanguagePreference";
-import * as updatePreferenceModule from "../api/updateLanguagePreference";
+
+vi.mock("@/modules/auth/api/fetchUserLanguage");
+vi.mock("@/modules/auth/api/saveUserLanguage");
+
+const LanguagePreferenceRoute = (): React.ReactElement => {
+  useUserLanguageSync(CUSTOMER_SESSION.userId);
+  return <LanguagePreferencePage />;
+};
 
 const renderPage = (): ReturnType<typeof createLanguagePreferencePage> => {
-  renderWithProviders(<LanguagePreferencePage />, {
+  renderWithProviders(<LanguagePreferenceRoute />, {
     initialPath: "/barberia/profile/language",
     session: CUSTOMER_SESSION,
   });
@@ -26,10 +35,7 @@ describe("LanguagePreferencePage (KAN-172)", () => {
     vi.restoreAllMocks();
     localStorage.clear();
     await testI18n.changeLanguage(LANGUAGE.ES);
-    vi.spyOn(
-      fetchPreferenceModule,
-      "fetchLanguagePreference",
-    ).mockResolvedValue(null);
+    vi.mocked(fetchUserLanguage).mockResolvedValue({ language: null });
   });
 
   it("AC-KAN-172-01: shows Spanish as the active language", async () => {
@@ -41,9 +47,7 @@ describe("LanguagePreferencePage (KAN-172)", () => {
   });
 
   it("AC-KAN-172-01: switches ES to EN immediately and persists it", async () => {
-    const updateSpy = vi
-      .spyOn(updatePreferenceModule, "updateLanguagePreference")
-      .mockResolvedValue();
+    vi.mocked(saveUserLanguage).mockResolvedValue();
     const page = renderPage();
     await waitFor(() => expect(page.getEnglishOption()).toBeEnabled());
 
@@ -54,7 +58,8 @@ describe("LanguagePreferencePage (KAN-172)", () => {
     ).toBeInTheDocument();
     expect(localStorage.getItem(STORAGE_KEY.LANGUAGE)).toBe(LANGUAGE.EN);
     await waitFor(() =>
-      expect(updateSpy).toHaveBeenCalledWith({
+      expect(saveUserLanguage).toHaveBeenCalledWith({
+        includeUpdatedAt: true,
         language: LANGUAGE.EN,
         userId: CUSTOMER_SESSION.userId,
       }),
@@ -64,10 +69,7 @@ describe("LanguagePreferencePage (KAN-172)", () => {
 
   it("AC-KAN-172-01: switches EN to ES immediately", async () => {
     await testI18n.changeLanguage(LANGUAGE.EN);
-    vi.spyOn(
-      updatePreferenceModule,
-      "updateLanguagePreference",
-    ).mockResolvedValue();
+    vi.mocked(saveUserLanguage).mockResolvedValue();
     const page = renderPage();
     await waitFor(() => expect(page.getSpanishOption()).toBeEnabled());
 
@@ -81,9 +83,7 @@ describe("LanguagePreferencePage (KAN-172)", () => {
   });
 
   it("AC-KAN-172-02: applies the language loaded from the user account", async () => {
-    vi.mocked(fetchPreferenceModule.fetchLanguagePreference).mockResolvedValue(
-      LANGUAGE.EN,
-    );
+    vi.mocked(fetchUserLanguage).mockResolvedValue({ language: LANGUAGE.EN });
     renderPage();
 
     expect(
@@ -92,10 +92,7 @@ describe("LanguagePreferencePage (KAN-172)", () => {
   });
 
   it("AC-KAN-172-04: keeps the local language when account sync fails", async () => {
-    vi.spyOn(
-      updatePreferenceModule,
-      "updateLanguagePreference",
-    ).mockRejectedValue(
+    vi.mocked(saveUserLanguage).mockRejectedValue(
       new FirebaseError(
         FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED,
         FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED,
@@ -111,6 +108,9 @@ describe("LanguagePreferencePage (KAN-172)", () => {
       await screen.findByRole("heading", { name: "Language" }),
     ).toBeInTheDocument();
     expect(localStorage.getItem(STORAGE_KEY.LANGUAGE)).toBe(LANGUAGE.EN);
+    expect(localStorage.getItem(STORAGE_KEY.LANGUAGE_PENDING_SYNC)).toContain(
+      CUSTOMER_SESSION.userId,
+    );
     await waitFor(() => expect(errorSpy).toHaveBeenCalled());
   });
 });

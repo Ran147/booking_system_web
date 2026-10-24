@@ -31,8 +31,11 @@ export const ROUTE_PATH = {
   },
   CUSTOMER: {
     BOOKING_DETAIL: "my-bookings/:bookingId",
+    CHANGE_PASSWORD: "profile/password",
     LANGUAGE_PREFERENCE: "profile/language",
     MY_BOOKINGS: "my-bookings",
+    PROFILE: "profile",
+    PROFILE_EDIT: "profile/edit",
     ROOT: "/:businessSlug",
   },
   LANDING: {
