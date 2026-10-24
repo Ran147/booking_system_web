@@ -76,31 +76,130 @@ describe("ChangePasswordPage (KAN-171)", () => {
     ).toBeInTheDocument();
   });
 
-  it("AC-KAN-171-03: keeps save disabled until the password is strong", async () => {
+  it("AC-KAN-171-03: rejects a weak password without sending it", async () => {
+    const changePasswordSpy = vi.spyOn(
+      changePasswordModule,
+      "changeCurrentUserPassword",
+    );
     const page = renderPage();
 
-    expect(page.getSaveButton()).toBeDisabled();
     await page.changeCurrentPassword(CURRENT_PASSWORD);
     await page.changeNewPassword("weak");
     await page.changeConfirmation("weak");
+    await page.clickSave();
 
-    expect(page.getSaveButton()).toBeDisabled();
     expect(
       await screen.findByText(testI18n.t("validation:passwordTooWeak")),
     ).toBeInTheDocument();
+    expect(changePasswordSpy).not.toHaveBeenCalled();
   });
 
   it("AC-KAN-171-04: rejects a confirmation that does not match", async () => {
+    const changePasswordSpy = vi.spyOn(
+      changePasswordModule,
+      "changeCurrentUserPassword",
+    );
     const page = renderPage();
 
     await page.changeCurrentPassword(CURRENT_PASSWORD);
     await page.changeNewPassword(NEW_PASSWORD);
     await page.changeConfirmation("Another3#");
+    await page.clickSave();
 
-    expect(page.getSaveButton()).toBeDisabled();
     expect(
       await screen.findByText(
         testI18n.t("customer:profile.password.mismatchError"),
+      ),
+    ).toBeInTheDocument();
+    expect(changePasswordSpy).not.toHaveBeenCalled();
+  });
+
+  it("AC-KAN-171-05: shows a translated network error", async () => {
+    vi.spyOn(
+      changePasswordModule,
+      "changeCurrentUserPassword",
+    ).mockRejectedValue(
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED,
+        FIREBASE_ERROR_CODE.NETWORK_REQUEST_FAILED,
+      ),
+    );
+    const page = renderPage();
+
+    await page.changeCurrentPassword(CURRENT_PASSWORD);
+    await page.changeNewPassword(NEW_PASSWORD);
+    await page.changeConfirmation(NEW_PASSWORD);
+    await page.clickSave();
+
+    expect(
+      await screen.findByText(testI18n.t("common:errors.network")),
+    ).toBeInTheDocument();
+  });
+
+  it("AC-KAN-171-05: shows the too-many-attempts error", async () => {
+    vi.spyOn(
+      changePasswordModule,
+      "changeCurrentUserPassword",
+    ).mockRejectedValue(
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS,
+        FIREBASE_ERROR_CODE.TOO_MANY_REQUESTS,
+      ),
+    );
+    const page = renderPage();
+
+    await page.changeCurrentPassword(CURRENT_PASSWORD);
+    await page.changeNewPassword(NEW_PASSWORD);
+    await page.changeConfirmation(NEW_PASSWORD);
+    await page.clickSave();
+
+    expect(
+      await screen.findByText(
+        testI18n.t("customer:profile.password.tooManyAttemptsError"),
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("AC-KAN-171-06: rejects a new password equal to the current password", async () => {
+    const changePasswordSpy = vi.spyOn(
+      changePasswordModule,
+      "changeCurrentUserPassword",
+    );
+    const page = renderPage();
+
+    await page.changeCurrentPassword(CURRENT_PASSWORD);
+    await page.changeNewPassword(CURRENT_PASSWORD);
+    await page.changeConfirmation(CURRENT_PASSWORD);
+    await page.clickSave();
+
+    expect(
+      await screen.findByText(
+        testI18n.t("customer:profile.password.sameAsCurrentError"),
+      ),
+    ).toBeInTheDocument();
+    expect(changePasswordSpy).not.toHaveBeenCalled();
+  });
+
+  it("KAN-171: shows the session error when reauthentication is no longer valid", async () => {
+    vi.spyOn(
+      changePasswordModule,
+      "changeCurrentUserPassword",
+    ).mockRejectedValue(
+      new FirebaseError(
+        FIREBASE_ERROR_CODE.REQUIRES_RECENT_LOGIN,
+        FIREBASE_ERROR_CODE.REQUIRES_RECENT_LOGIN,
+      ),
+    );
+    const page = renderPage();
+
+    await page.changeCurrentPassword(CURRENT_PASSWORD);
+    await page.changeNewPassword(NEW_PASSWORD);
+    await page.changeConfirmation(NEW_PASSWORD);
+    await page.clickSave();
+
+    expect(
+      await screen.findByText(
+        testI18n.t("customer:profile.password.reauthenticationError"),
       ),
     ).toBeInTheDocument();
   });

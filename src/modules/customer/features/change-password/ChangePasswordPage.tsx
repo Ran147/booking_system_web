@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  PageTemplate,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
 import { ChangePasswordForm } from "./components";
@@ -16,26 +17,23 @@ export const ChangePasswordPage = (): ReactElement => {
   const viewModel = useChangePasswordViewModel();
 
   return (
-    <main className="container mx-auto max-w-3xl space-y-6 px-4 py-8">
-      <header className="space-y-1">
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground">
-          {t("profile.password.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          {t("profile.password.description")}
-        </p>
-      </header>
-      <Card className="bg-card shadow-sm">
-        <CardHeader>
-          <CardTitle>{t("profile.password.sectionTitle")}</CardTitle>
-          <CardDescription>
-            {t("profile.password.securityHint")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChangePasswordForm viewModel={viewModel} />
-        </CardContent>
-      </Card>
-    </main>
+    <div className="container mx-auto max-w-3xl px-4 py-8">
+      <PageTemplate
+        description={t("profile.password.description")}
+        title={t("profile.password.title")}
+      >
+        <Card className="bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle>{t("profile.password.sectionTitle")}</CardTitle>
+            <CardDescription>
+              {t("profile.password.securityHint")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChangePasswordForm viewModel={viewModel} />
+          </CardContent>
+        </Card>
+      </PageTemplate>
+    </div>
   );
 };

@@ -4,7 +4,7 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { auth } from "@/services/firebase";
+import { auth } from "@/services";
 import { changeCurrentUserPassword } from "../api/changeCurrentUserPassword";
 
 vi.mock("firebase/auth", () => ({
@@ -13,7 +13,7 @@ vi.mock("firebase/auth", () => ({
   updatePassword: vi.fn(),
 }));
 
-vi.mock("@/services/firebase", () => ({
+vi.mock("@/services", () => ({
   auth: {
     currentUser: { email: "customer@example.com" },
   },
@@ -54,5 +54,23 @@ describe("changeCurrentUserPassword (KAN-171)", () => {
       "NewSecure2@",
     );
     expect(operationOrder).toEqual(["reauthenticate", "update"]);
+  });
+
+  it("AC-KAN-171-02: never updates the password when reauthentication fails", async () => {
+    const reauthenticationError = new Error("reauthentication failed");
+    vi.mocked(EmailAuthProvider.credential).mockReturnValue(
+      {} as ReturnType<typeof EmailAuthProvider.credential>,
+    );
+    vi.mocked(reauthenticateWithCredential).mockRejectedValue(
+      reauthenticationError,
+    );
+
+    await expect(
+      changeCurrentUserPassword({
+        currentPassword: "Wrong1!",
+        newPassword: "NewSecure2@",
+      }),
+    ).rejects.toBe(reauthenticationError);
+    expect(updatePassword).not.toHaveBeenCalled();
   });
 });

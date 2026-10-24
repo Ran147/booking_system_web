@@ -51,7 +51,7 @@ export const createChangePasswordPage = (): ChangePasswordPageObject => {
     clickShowPassword: async () =>
       user.click(
         screen.getAllByRole("button", {
-          name: testI18n.t("customer:profile.password.showPassword"),
+          name: testI18n.t("common:auth.password.show"),
         })[0]!,
       ),
     getConfirmationInput,
