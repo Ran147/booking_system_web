@@ -5,19 +5,19 @@ import { I18nextProvider } from "react-i18next";
 import { MemoryRouter } from "react-router";
 import { LANGUAGE, STORAGE_KEY } from "@/constants";
 import type { Session } from "@/modules/auth";
+import { fetchUserLanguage } from "@/modules/auth/api/fetchUserLanguage";
+import { saveUserLanguage } from "@/modules/auth/api/saveUserLanguage";
 import { AuthContext } from "@/modules/auth/context/AuthContext";
+import { savePendingLanguageSync } from "@/modules/auth/utils/languagePreferenceStorage";
 import {
   COLLABORATOR_SESSION,
   SUBSCRIBER_SESSION,
   testI18n,
 } from "@/test-utils";
-import { fetchUserLanguage } from "../api/fetchUserLanguage";
-import { saveUserLanguage } from "../api/saveUserLanguage";
 import { useBusinessLanguageSync } from "../hooks/useBusinessLanguageSync";
-import { savePendingLanguageSync } from "../utils/languagePreferenceStorage";
 
-vi.mock("../api/fetchUserLanguage");
-vi.mock("../api/saveUserLanguage");
+vi.mock("@/modules/auth/api/fetchUserLanguage");
+vi.mock("@/modules/auth/api/saveUserLanguage");
 
 interface LanguageSyncWrapperProps {
   readonly children: ReactNode;

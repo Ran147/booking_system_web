@@ -129,6 +129,13 @@
       "title": "Cambiar contraseña",
       "tooManyAttemptsError": "Se realizaron demasiados intentos. Espera un momento antes de volver a intentarlo."
     },
+    "preferences": {
+      "languageDescription": "Elige el idioma que prefieres para usar GatherTable.",
+      "languageHint": "El cambio se aplicará inmediatamente en toda la interfaz.",
+      "languageSectionTitle": "Idioma de la interfaz",
+      "languageTitle": "Idioma",
+      "syncError": "El idioma cambió en este dispositivo, pero no pudimos guardarlo en tu cuenta."
+    },
     "view": {
       "changePasswordAction": "Cambiar contraseña",
       "description": "Consulta la información personal asociada a tu cuenta.",

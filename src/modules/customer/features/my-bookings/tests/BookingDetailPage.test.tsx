@@ -1,21 +1,24 @@
-import { screen } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FirebaseError } from "firebase/app";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LANGUAGE } from "@/constants";
 import { BOOKING_STATUS, CANCELLATION_ACTOR } from "@/domain";
 import {
   CUSTOMER_SESSION,
   renderRoutesWithProviders,
 } from "@/shared/test-utils";
 import { testI18n } from "@/shared/test-utils/testI18n";
+import { formatDateTime, formatPrice } from "@/shared/utils/format";
 import * as fetchBookingBusinessBySlugModule from "../api/fetchBookingBusinessBySlug";
 import * as fetchMyBookingModule from "../api/fetchMyBooking";
 import { BookingDetailPage } from "../components/BookingDetailPage";
 import type { BookingBusiness, MyBooking } from "../models";
 
 const DETAIL_PATH = "/barberia-centro/my-bookings/booking-1";
+const BUSINESS_CURRENCY = "MXN";
 const BUSINESS: BookingBusiness = {
-  currency: "MXN",
+  currency: BUSINESS_CURRENCY,
   id: "business-a",
   name: "Barbería Centro",
   slug: "barberia-centro",
@@ -47,8 +50,9 @@ const renderDetail = (): void => {
 };
 
 describe("BookingDetailPage (KAN-152)", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.restoreAllMocks();
+    await testI18n.changeLanguage(LANGUAGE.ES);
     vi.spyOn(
       fetchBookingBusinessBySlugModule,
       "fetchBookingBusinessBySlug",
@@ -75,6 +79,49 @@ describe("BookingDetailPage (KAN-152)", () => {
     expect(
       screen.getByText(testI18n.t("common:bookingStatus.confirmed")),
     ).toBeInTheDocument();
+  });
+
+  it("AC-KAN-172-01: reformats date, time and price when the language changes without reload", async () => {
+    vi.spyOn(fetchMyBookingModule, "fetchMyBooking").mockResolvedValue(BOOKING);
+    renderDetail();
+    const spanishDate = formatDateTime(
+      BOOKING.startsAt,
+      BUSINESS.timeZone,
+      LANGUAGE.ES,
+    );
+    const spanishPrice = formatPrice(
+      BOOKING.priceInCents,
+      BUSINESS_CURRENCY,
+      LANGUAGE.ES,
+    );
+    const englishDate = formatDateTime(
+      BOOKING.startsAt,
+      BUSINESS.timeZone,
+      LANGUAGE.EN,
+    );
+    const englishPrice = formatPrice(
+      BOOKING.priceInCents,
+      BUSINESS_CURRENCY,
+      LANGUAGE.EN,
+    );
+
+    expect(await screen.findByText(spanishDate)).toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent === spanishPrice),
+    ).toBeInTheDocument();
+
+    await act(() => testI18n.changeLanguage(LANGUAGE.EN));
+
+    await waitFor(() => {
+      expect(screen.getByText(englishDate)).toBeInTheDocument();
+      expect(
+        screen.getByText((_, element) => element?.textContent === englishPrice),
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByText(spanishDate)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText((_, element) => element?.textContent === spanishPrice),
+    ).not.toBeInTheDocument();
   });
 
   it("AC-KAN-152-02: a cancelled booking shows who cancelled it and the penalty, never the note", async () => {

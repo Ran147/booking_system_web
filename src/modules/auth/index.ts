@@ -1,5 +1,10 @@
 export { authRoutes } from "./auth.routes";
 export { changeCurrentUserPassword } from "./api/changeCurrentUserPassword";
+export { fetchUserLanguage } from "./api/fetchUserLanguage";
+export { saveUserLanguage } from "./api/saveUserLanguage";
+export { userLanguageQueryKeys } from "./api/userLanguageQueryKeys";
+export { useSaveUserLanguageMutation } from "./api/useSaveUserLanguageMutation";
+export { useUserLanguageQuery } from "./api/useUserLanguageQuery";
 export { AuthProvider } from "./components/AuthProvider";
 export { GuestOnly } from "./components/GuestOnly";
 export { IdleSessionGuard } from "./components/IdleSessionGuard";
@@ -14,6 +19,7 @@ export { SESSION_STATUS } from "./constants/SessionStatus.constants";
 export { useCurrentBusiness } from "./hooks/useCurrentBusiness";
 export { useSession } from "./hooks/useSession";
 export { useSignOut } from "./hooks/useSignOut";
+export { useUserLanguageSync } from "./hooks/useUserLanguageSync";
 export { fullNameFieldSchema } from "./models/FullNameField.schema";
 export {
   createAuthenticatedUserRequiredError,
@@ -32,3 +38,15 @@ export {
 } from "./models/PhoneField.schema";
 export type { Session } from "./models/Session.types";
 export type { SignInLocationState } from "./models/SignInLocationState.interface";
+export type {
+  PendingLanguageSync,
+  SaveUserLanguageInput,
+  UserLanguagePreference,
+} from "./models/UserLanguagePreference.model";
+export {
+  clearPendingLanguageSync,
+  clearPendingLanguageSyncIfMatches,
+  readPendingLanguageSync,
+  savePendingLanguageSync,
+} from "./utils/languagePreferenceStorage";
+export { resolveLanguage } from "./utils/resolveLanguage";
