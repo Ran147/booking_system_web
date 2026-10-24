@@ -2,6 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import { ThemeContext } from "@/app/providers/theme/ThemeContext";
 import { LANGUAGE, ROUTE_PATH, STORAGE_KEY, THEME_MODE } from "@/constants";
 import {
+  BUSINESS_OWNER_SESSION,
   COLLABORATOR_SESSION,
   renderWithProviders,
   SUBSCRIBER_SESSION,
@@ -47,7 +48,7 @@ describe("SettingsPage", () => {
     );
   });
 
-  it("KAN-199: shows the business-profile option only to a subscriber", () => {
+  it("KAN-199: shows the business-profile option to a subscriber", () => {
     renderWithProviders(<SettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
@@ -56,6 +57,26 @@ describe("SettingsPage", () => {
     expect(createSettingsPage().getBusinessProfileLink()).toHaveAttribute(
       "href",
       `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+    );
+  });
+
+  it("KAN-199: shows the business-profile option to a business owner", () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: BUSINESS_OWNER_SESSION,
+    });
+
+    expect(createSettingsPage().getBusinessProfileLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+    );
+    expect(screen.getByRole("heading", { name: "Idioma" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Apariencia" }),
+    ).toBeInTheDocument();
+    expect(createSettingsPage().getPasswordSettingsLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`,
     );
   });
 

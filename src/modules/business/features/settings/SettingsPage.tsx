@@ -18,11 +18,11 @@ import { useSettingsPageViewModel } from "./hooks/useSettingsPageViewModel";
 export const SettingsPage = (): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const {
+    canManageBusinessProfile,
     currentLanguage,
     handleLanguageChange,
     handleThemeChange,
     isLanguageSaving,
-    isSubscriber,
     isThemeSaving,
     languageOptions,
     showLanguageSaveError,
@@ -98,7 +98,7 @@ export const SettingsPage = (): ReactElement => {
           to={passwordSettingsPath}
         />
 
-        {isSubscriber ? (
+        {canManageBusinessProfile ? (
           <SettingsNavigationCard
             description={t("settings.navigation.businessProfile.description")}
             icon={Building2}

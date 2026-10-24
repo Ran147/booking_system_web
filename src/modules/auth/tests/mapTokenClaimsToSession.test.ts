@@ -3,6 +3,21 @@ import { mapTokenClaimsToSession } from "../api/mapTokenClaimsToSession";
 import { SESSION_STATUS } from "../constants/SessionStatus.constants";
 
 describe("mapTokenClaimsToSession", () => {
+  it("KAN-199: reads the business owner role and businessId claims", () => {
+    expect(
+      mapTokenClaimsToSession("owner-1", {
+        businessId: "business-1",
+        role: USER_ROLE.BUSINESS_OWNER,
+      }),
+    ).toEqual({
+      businessId: "business-1",
+      collaboratorId: null,
+      role: USER_ROLE.BUSINESS_OWNER,
+      status: SESSION_STATUS.SIGNED_IN,
+      userId: "owner-1",
+    });
+  });
+
   it("KAN-28: reads the subscriber role and businessId claims", () => {
     expect(
       mapTokenClaimsToSession("user-1", {

@@ -40,8 +40,8 @@ export interface SettingsPageViewModel {
   handleThemeChange: (nextTheme: string) => void;
   /** Whether the language update is currently running. */
   isLanguageSaving: boolean;
-  /** Whether subscriber-only business settings may be shown. */
-  isSubscriber: boolean;
+  /** Whether the signed-in role may manage the business profile. */
+  canManageBusinessProfile: boolean;
   /** Whether the theme update is currently running. */
   isThemeSaving: boolean;
   /** Translated options rendered by the language selector. */
