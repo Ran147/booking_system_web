@@ -123,5 +123,9 @@ Firebase Authentication documents password changes as major account changes that
 | KAN-170 | AC-KAN-170-01 … AC-KAN-170-07 | `tests/ProfilePage.test.tsx` |
 | KAN-171 | AC-KAN-171-01 … AC-KAN-171-07 | `tests/ChangePasswordPage.test.tsx`, `tests/changeCurrentUserPassword.test.ts` |
 | KAN-171 | AC-KAN-171-08 pending production-parity evidence | Auth Emulator limitation characterized by `change-password/tests/changePasswordSessions.emulator.test.ts`; verify against a dedicated non-production Firebase project |
-| KAN-172 | AC-KAN-172-01 … AC-KAN-172-05 | `tests/PreferencesSection.test.tsx` |
+| KAN-172 | AC-KAN-172-01 | `src/modules/customer/features/language-preference/tests/LanguagePreferencePage.test.tsx`, `src/modules/customer/features/my-bookings/tests/BookingDetailPage.test.tsx` |
+| KAN-172 | AC-KAN-172-02 | `src/modules/customer/features/language-preference/tests/LanguagePreferencePage.test.tsx`, `src/modules/customer/layout/tests/CustomerLayout.test.tsx` |
+| KAN-172 | AC-KAN-172-03 | Pending KAN-163 booking-email implementation |
+| KAN-172 | AC-KAN-172-04 | `src/modules/customer/features/language-preference/tests/LanguagePreferencePage.test.tsx` |
+| KAN-172 | AC-KAN-172-05 | `src/i18n/tests/languageDetection.test.ts` |
 | KAN-173 | AC-KAN-173-01 … AC-KAN-173-05 | `tests/PreferencesSection.test.tsx` |
