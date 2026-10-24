@@ -9,12 +9,7 @@ import {
   PasswordStrengthMeter,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import type { ChangePasswordViewModel } from "../models";
-
-/** Props for the customer change-password form. */
-export interface ChangePasswordFormProps {
-  readonly viewModel: ChangePasswordViewModel;
-}
+import type { ChangePasswordFormProps } from "../models";
 
 export const ChangePasswordForm = ({
   viewModel,
