@@ -209,6 +209,15 @@ service cloud.firestore {
         && request.resource.data.phone.matches('^[+]?[0-9 ()-]{7,20}$')
         && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['updatedAt'])
           || request.resource.data.updatedAt == request.time);
+
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && hasRole('customer')
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['language', 'updatedAt'])
+        && request.resource.data.language in ['es', 'en']
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['updatedAt'])
+          || request.resource.data.updatedAt == request.time);
     }
 
     // Global parameters (KAN-182). Any signed-in user reads them (the idle

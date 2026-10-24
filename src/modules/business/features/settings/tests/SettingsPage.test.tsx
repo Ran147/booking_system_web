@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import { ThemeContext } from "@/app/providers/theme/ThemeContext";
 import { LANGUAGE, STORAGE_KEY, THEME_MODE } from "@/constants";
+import { saveUserLanguage } from "@/modules/auth/api/saveUserLanguage";
 import {
   COLLABORATOR_SESSION,
   renderWithProviders,
@@ -9,10 +10,9 @@ import {
 } from "@/test-utils";
 import { SettingsPage } from "../SettingsPage";
 import { createSettingsPage } from "./SettingsPage.page";
-import { saveUserLanguage } from "../api/saveUserLanguage";
 import { saveUserTheme } from "../api/saveUserTheme";
 
-vi.mock("../api/saveUserLanguage");
+vi.mock("@/modules/auth/api/saveUserLanguage");
 vi.mock("../api/saveUserTheme");
 
 describe("SettingsPage", () => {

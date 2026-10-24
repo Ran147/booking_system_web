@@ -84,6 +84,8 @@
   },
   "language": {
     "englishLabel": "English",
+    "savingHint": "Saving your preference…",
+    "selectorLabel": "Select language",
     "spanishLabel": "Spanish"
   },
   "notFound": {

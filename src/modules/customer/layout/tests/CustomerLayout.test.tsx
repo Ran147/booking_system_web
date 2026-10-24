@@ -1,11 +1,15 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import type { RouteObject } from "react-router";
+import { LANGUAGE } from "@/constants";
 import {
   BUSINESS_STATUS,
   SOCIAL_NETWORK,
   type BusinessPublicProfile,
 } from "@/domain";
+import type { Session } from "@/modules/auth";
+import { fetchUserLanguage } from "@/modules/auth/api/fetchUserLanguage";
 import {
+  CUSTOMER_SESSION,
   renderRoutesWithProviders,
   SIGNED_OUT_SESSION,
   testI18n,
@@ -15,6 +19,7 @@ import { createCustomerFooterPage } from "./CustomerFooter.page";
 import { fetchBusinessPublicProfileBySlug } from "../api/fetchBusinessPublicProfileBySlug";
 
 vi.mock("../api/fetchBusinessPublicProfileBySlug");
+vi.mock("@/modules/auth/api/fetchUserLanguage");
 
 const BUSINESS_PROFILE = {
   contactEmail: "contacto@negocio.test",
@@ -41,14 +46,18 @@ const ROUTES: RouteObject[] = [
   },
 ];
 
-const renderLayout = (): void => {
+const renderLayout = (session: Session = SIGNED_OUT_SESSION): void => {
   renderRoutesWithProviders(ROUTES, {
     initialPath: "/negocio-real",
-    session: SIGNED_OUT_SESSION,
+    session,
   });
 };
 
 describe("CustomerLayout", () => {
+  beforeEach(() => {
+    vi.mocked(fetchUserLanguage).mockResolvedValue({ language: null });
+  });
+
   it("KAN-117: shares the profile resolved from the URL with the footer", async () => {
     vi.mocked(fetchBusinessPublicProfileBySlug).mockResolvedValue(
       BUSINESS_PROFILE,
@@ -61,6 +70,18 @@ describe("CustomerLayout", () => {
       BUSINESS_PROFILE.slug,
     );
     expect(screen.getByText("Contenido Customer")).toBeInTheDocument();
+  });
+
+  it("KAN-172: applies the remote language for a restored customer session", async () => {
+    vi.mocked(fetchBusinessPublicProfileBySlug).mockResolvedValue(
+      BUSINESS_PROFILE,
+    );
+    vi.mocked(fetchUserLanguage).mockResolvedValue({ language: LANGUAGE.EN });
+
+    renderLayout(CUSTOMER_SESSION);
+
+    await waitFor(() => expect(testI18n.resolvedLanguage).toBe(LANGUAGE.EN));
+    expect(fetchUserLanguage).toHaveBeenCalledWith(CUSTOMER_SESSION.userId);
   });
 
   it("KAN-117: exposes an accessible loading state", () => {

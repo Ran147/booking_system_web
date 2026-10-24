@@ -49,6 +49,14 @@ export const customerRoutes: RouteObject[] = [
           },
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { LanguagePreferencePage } =
+                await import("./features/language-preference/LanguagePreferencePage");
+              return { Component: LanguagePreferencePage };
+            },
+            path: ROUTE_PATH.CUSTOMER.LANGUAGE_PREFERENCE,
+          },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { MyBookingsPage } = await import("./features/my-bookings");
               return { Component: MyBookingsPage };
             },

@@ -1,0 +1,1 @@
+export { LanguagePreferencePage } from "./LanguagePreferencePage";

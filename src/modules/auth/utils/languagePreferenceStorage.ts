@@ -1,6 +1,6 @@
 import { LANGUAGE, STORAGE_KEY, type Language } from "@/constants";
 import type { Nullable } from "@/types";
-import type { PendingLanguageSync } from "../models";
+import type { PendingLanguageSync } from "../models/UserLanguagePreference.model";
 
 const isLanguage = (value: unknown): value is Language =>
   Object.values(LANGUAGE).some((language) => language === value);
@@ -15,7 +15,13 @@ export const readPendingLanguageSync = (): Nullable<PendingLanguageSync> => {
       typeof parsedValue.userId === "string" &&
       isLanguage(parsedValue.language)
     ) {
-      return { language: parsedValue.language, userId: parsedValue.userId };
+      return {
+        ...(parsedValue.includeUpdatedAt === true
+          ? { includeUpdatedAt: true }
+          : {}),
+        language: parsedValue.language,
+        userId: parsedValue.userId,
+      };
     }
   } catch {
     // Invalid local state is discarded below so it cannot block profile sync.
