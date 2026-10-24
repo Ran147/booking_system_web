@@ -1,7 +1,4 @@
 {
-  "actions": {
-    "retry": "Retry"
-  },
   "auth": {
     "idle": {
       "signOutAction": "Sign out",

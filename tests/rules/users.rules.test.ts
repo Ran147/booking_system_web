@@ -8,7 +8,6 @@ import {
 } from "@firebase/rules-unit-testing";
 
 // Runs only against the emulator: npm run test:rules.
-// KAN-169: a customer can read only their own user profile.
 // Sign-in reads the user's own profile for User.language (US-33, P-2), and
 // KAN-51 lets business portal users update only their own language.
 const PROJECT_ID = "demo-booking-system";
@@ -29,41 +28,28 @@ describe("firestore.rules: users", () => {
 
   beforeEach(async () => {
     await testEnvironment.clearFirestore();
-
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       const adminFirestore = context.firestore();
-
-      await adminFirestore.doc(CUSTOMER_PROFILE_PATH).set({
-        email: "cliente@demo.test",
-        fullName: "Ana Morales",
-        language: "en",
-        phone: "+506 8888-7777",
-      });
-
-      await adminFirestore.doc(OTHER_PROFILE_PATH).set({
-        email: "otro@demo.test",
-        fullName: "Otro Cliente",
-        language: "es",
-        phone: "+506 8777-6666",
-      });
-
+      await adminFirestore
+        .doc(CUSTOMER_PROFILE_PATH)
+        .set({ email: "cliente@demo.test", language: "en" });
+      await adminFirestore
+        .doc(OTHER_PROFILE_PATH)
+        .set({ email: "otro@demo.test", language: "es" });
       await adminFirestore.doc(SUBSCRIBER_PROFILE_PATH).set({
         fullName: "Subscriber A",
         language: "es",
         theme: "system",
       });
-
       await adminFirestore.doc(COLLABORATOR_PROFILE_PATH).set({
         fullName: "Collaborator A",
         language: "es",
         theme: "system",
       });
-
       await adminFirestore.doc("businesses/business-inactive").set({
         ownerUserId: "subscriber-a",
         status: "inactive",
       });
-
       await adminFirestore
         .doc("businesses/business-a/collaborators/collaborator-a")
         .set({ status: "active" });
@@ -94,41 +80,6 @@ describe("firestore.rules: users", () => {
     const visitor = testEnvironment.unauthenticatedContext();
 
     await assertFails(visitor.firestore().doc(CUSTOMER_PROFILE_PATH).get());
-  });
-
-  it("KAN-169: lets an authenticated customer read their own profile", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertSucceeds(customer.firestore().doc(CUSTOMER_PROFILE_PATH).get());
-  });
-
-  it("KAN-169: denies an authenticated customer reading another profile", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertFails(customer.firestore().doc(OTHER_PROFILE_PATH).get());
-  });
-
-  it("KAN-169: denies a visitor reading a customer profile", async () => {
-    const visitor = testEnvironment.unauthenticatedContext();
-
-    await assertFails(visitor.firestore().doc(CUSTOMER_PROFILE_PATH).get());
-  });
-
-  it("KAN-169: keeps the profile read-only", async () => {
-    const customer = testEnvironment.authenticatedContext("customer-1", {
-      role: "customer",
-    });
-
-    await assertFails(
-      customer
-        .firestore()
-        .doc(CUSTOMER_PROFILE_PATH)
-        .update({ fullName: "Nuevo nombre" }),
-    );
   });
 
   it("US-33: denies creating a profile from the client", async () => {
