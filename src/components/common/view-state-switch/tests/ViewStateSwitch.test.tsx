@@ -1,6 +1,11 @@
 import { render } from "@testing-library/react";
 import { I18nextProvider } from "react-i18next";
-import { VIEW_STATE, type ViewState } from "@/shared/constants";
+import {
+  ERROR_MESSAGE_KEY,
+  VIEW_STATE,
+  type ErrorMessageKey,
+  type ViewState,
+} from "@/shared/constants";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { ViewStateSwitch } from "../ViewStateSwitch";
 import { createViewStateSwitchPage } from "./ViewStateSwitch.page";
@@ -8,10 +13,23 @@ import { createViewStateSwitchPage } from "./ViewStateSwitch.page";
 const EMPTY_MESSAGE = "Nothing here yet";
 const CONTENT_TEXT = "Loaded content";
 
-const renderViewStateSwitch = (viewState: ViewState): void => {
+interface RenderViewStateSwitchOptions {
+  errorMessageKey?: ErrorMessageKey;
+  onRetry?: () => void;
+}
+
+const renderViewStateSwitch = (
+  viewState: ViewState,
+  options: RenderViewStateSwitchOptions = {},
+): void => {
   render(
     <I18nextProvider i18n={testI18n}>
-      <ViewStateSwitch emptyMessage={EMPTY_MESSAGE} viewState={viewState}>
+      <ViewStateSwitch
+        emptyMessage={EMPTY_MESSAGE}
+        errorMessageKey={options.errorMessageKey}
+        onRetry={options.onRetry}
+        viewState={viewState}
+      >
         <p>{CONTENT_TEXT}</p>
       </ViewStateSwitch>
     </I18nextProvider>,
@@ -34,6 +52,27 @@ describe("ViewStateSwitch", () => {
     expect(viewStateSwitchPage.queryErrorAlert()).toHaveTextContent(
       testI18n.t("errors.unknown"),
     );
+  });
+
+  it("shows the requested translated error on error", () => {
+    renderViewStateSwitch(VIEW_STATE.ERROR, {
+      errorMessageKey: ERROR_MESSAGE_KEY.NETWORK,
+    });
+    const viewStateSwitchPage = createViewStateSwitchPage();
+
+    expect(viewStateSwitchPage.queryErrorAlert()).toHaveTextContent(
+      testI18n.t("errors.network"),
+    );
+  });
+
+  it("runs the retry action from the error state", async () => {
+    const onRetry = vi.fn();
+    renderViewStateSwitch(VIEW_STATE.ERROR, { onRetry });
+    const viewStateSwitchPage = createViewStateSwitchPage();
+
+    await viewStateSwitchPage.clickRetry();
+
+    expect(onRetry).toHaveBeenCalledOnce();
   });
 
   it("shows the empty message when there is nothing to show", () => {
