@@ -11,11 +11,13 @@ import {
 import { HTTP_METHOD } from "../src/constants/common/HttpMethod.constants";
 import { HTTP_STATUS } from "../src/constants/common/HttpStatus.constants";
 import { FUNCTION_NAME } from "../src/constants/firebase/FunctionName.constants";
+import { MONEY } from "../src/constants/numbers/Money.constants";
 import { TIME_MS } from "../src/constants/numbers/Time.constants";
 import { BUSINESS_STATUS } from "../src/domain/business/BusinessStatus.constants";
 import { SERVICE_STATUS } from "../src/domain/service/ServiceStatus.constants";
 import { CHECKOUT_SIMULATION } from "../src/modules/landing/features/plan-checkout/constants/PlanCheckout.constants";
 import type { Nullable } from "../src/types/Nullable";
+import { normalizeSearchTerm } from "../src/utils/normalizeSearchTerm";
 
 interface CallFunctionRequestBody {
   readonly functionName?: string;
@@ -249,6 +251,106 @@ export default async function handler(
       await serviceReference.delete();
       sendJsonResponse(response, HTTP_STATUS.OK, {
         deletedServiceId: serviceId,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.CREATE_SERVICE) {
+      const businessId = String(payload.businessId || "");
+      const formValues = (payload.formValues || {}) as {
+        description?: string;
+        durationMinutes?: number;
+        features?: string[];
+        imageUrl?: Nullable<string>;
+        name?: string;
+        price?: number;
+      };
+
+      if (!businessId || !formValues.name) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "missing-parameters",
+        });
+        return;
+      }
+
+      const sanitizedFeatures = (formValues.features ?? [])
+        .map((feature) => feature.trim())
+        .filter((feature) => feature.length > 0);
+
+      const priceInCents = Math.round(
+        Number(formValues.price || 0) * MONEY.CENTS_PER_UNIT,
+      );
+
+      const servicesCollectionReference = firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("services");
+
+      const documentReference = await servicesCollectionReference.add({
+        createdAt: Timestamp.now(),
+        description: (formValues.description || "").trim(),
+        durationMinutes: Number(formValues.durationMinutes ?? 0),
+        features: sanitizedFeatures,
+        imageUrl: formValues.imageUrl ?? null,
+        name: formValues.name.trim(),
+        priceInCents,
+        searchName: normalizeSearchTerm(formValues.name),
+        status: SERVICE_STATUS.ACTIVE,
+        updatedAt: Timestamp.now(),
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        serviceId: documentReference.id,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.UPDATE_SERVICE) {
+      const businessId = String(payload.businessId || "");
+      const serviceId = String(payload.serviceId || "");
+      const formValues = (payload.formValues || {}) as {
+        description?: string;
+        durationMinutes?: number;
+        features?: string[];
+        imageUrl?: Nullable<string>;
+        name?: string;
+        price?: number;
+      };
+
+      if (!businessId || !serviceId || !formValues.name) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "missing-parameters",
+        });
+        return;
+      }
+
+      const sanitizedFeatures = (formValues.features ?? [])
+        .map((feature) => feature.trim())
+        .filter((feature) => feature.length > 0);
+
+      const priceInCents = Math.round(
+        Number(formValues.price || 0) * MONEY.CENTS_PER_UNIT,
+      );
+
+      const serviceDocumentReference = firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("services")
+        .doc(serviceId);
+
+      await serviceDocumentReference.update({
+        description: (formValues.description || "").trim(),
+        durationMinutes: Number(formValues.durationMinutes ?? 0),
+        features: sanitizedFeatures,
+        imageUrl: formValues.imageUrl ?? null,
+        name: formValues.name.trim(),
+        priceInCents,
+        searchName: normalizeSearchTerm(formValues.name),
+        updatedAt: Timestamp.now(),
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        serviceId,
       });
       return;
     }
