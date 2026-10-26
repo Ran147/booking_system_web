@@ -48,12 +48,12 @@ The subscriber, or a collaborator, adjusts their own account from a settings scr
 - [ ] **AC-KAN-51-07** · happy · Given a signed-in `active` collaborator, when they choose another language in settings, then the result is the same as AC-KAN-51-01 and AC-KAN-51-02, saved to their own `User.language`. See AS-5. [KAN-51]
 
 ### KAN-52 — Change theme (light / dark)
-- [ ] **AC-KAN-52-01** · happy · Given a signed-in subscriber using the light theme, when they choose dark in settings, then the whole business portal switches to the dark theme immediately, and the choice is kept after reloading. [KAN-52]
-- [ ] **AC-KAN-52-02** · happy · Given the subscriber chose a theme, when they sign in again on another device, then the portal opens in that theme (`User.theme`). [KAN-52]
-- [ ] **AC-KAN-52-03** · error · Given saving the choice to the profile fails because of the network, when the subscriber changes the theme, then the theme still changes on this device, and `business:settings.theme.saveError` is shown to say it was not saved to the account. [KAN-52]
-- [ ] **AC-KAN-52-04** · edge · Given the `system` option is selected, when the operating system switches between light and dark, then the portal follows it without reloading. See AS-2. [KAN-52]
-- [ ] **AC-KAN-52-05** · edge · Given a stored theme, when the portal loads, then it opens directly in that theme without first flashing the other one. [KAN-52]
-- [ ] **AC-KAN-52-06** · edge · Given a business that is `inactive` or `suspended`, when the subscriber changes the theme, then the change is allowed. See AS-1. [KAN-52, KAN-49]
+- [x] **AC-KAN-52-01** · happy · Given a signed-in subscriber using the light theme, when they choose dark in settings, then the whole business portal switches to the dark theme immediately, and the choice is kept after reloading. [KAN-52]
+- [x] **AC-KAN-52-02** · happy · Given the subscriber chose a theme, when they sign in again on another device, then the portal opens in that theme (`User.theme`). [KAN-52]
+- [x] **AC-KAN-52-03** · error · Given saving the choice to the profile fails because of the network, when the subscriber changes the theme, then the theme still changes on this device, and `business:settings.theme.saveError` is shown to say it was not saved to the account. [KAN-52]
+- [x] **AC-KAN-52-04** · edge · Given the `system` option is selected, when the operating system switches between light and dark, then the portal follows it without reloading. See AS-2. [KAN-52]
+- [x] **AC-KAN-52-05** · edge · Given a stored theme, when the portal loads, then it opens directly in that theme without first flashing the other one. [KAN-52]
+- [x] **AC-KAN-52-06** · edge · Given a business that is `inactive` or `suspended`, when the subscriber changes the theme, then the change is allowed. See AS-1. [KAN-52, KAN-49]
 
 ### KAN-53 — Change password from settings
 - [ ] **AC-KAN-53-01** · happy · Given a signed-in subscriber, when they enter their current password and a new password that meets the password rules, confirm it and save, then the password is changed, `business:settings.password.successMessage` is shown, and the next sign-in only works with the new password. [KAN-53]

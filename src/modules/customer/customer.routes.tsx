@@ -39,7 +39,9 @@ export const customerRoutes: RouteObject[] = [
             path: ROUTE_PATH.CUSTOMER.BOOKING_DETAIL,
           },
         ],
-        element: <RequireRole allowedRoles={[USER_ROLE.CUSTOMER]} />,
+        element: (
+          <RequireRole allowedRoles={[USER_ROLE.CLIENT, USER_ROLE.CUSTOMER]} />
+        ),
       },
     ],
     element: <CustomerLayout />,

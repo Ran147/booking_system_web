@@ -251,14 +251,15 @@ describe("PlanDetailPage (KAN-21)", () => {
 
     await userEvent.click(getContractButton());
 
+    const noticeElement = screen.getByRole(ARIA_ROLE.ALERT);
     expect(
-      screen.getByText(
+      within(noticeElement).getByText(
         testI18n.t("landing:planCheckout.detail.signedInNotice"),
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText(CHECKOUT_TEXT)).not.toBeInTheDocument();
     await userEvent.click(
-      screen.getByRole(ARIA_ROLE.BUTTON, {
+      within(noticeElement).getByRole(ARIA_ROLE.BUTTON, {
         name: testI18n.t("landing:planCheckout.detail.signOutAction"),
       }),
     );

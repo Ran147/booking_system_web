@@ -3,12 +3,14 @@ import { useTranslation } from "react-i18next";
 import {
   ALERT_VARIANT,
   Alert,
+  AppLink,
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
 } from "@/components/common";
-import { ARIA_ROLE, I18N_NAMESPACE } from "@/constants";
+import { ARIA_ROLE, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import { SignInErrorAlert } from "./components/SignInErrorAlert";
 import { SignInForm } from "./components/SignInForm";
 import { useSignInViewModel } from "./hooks/useSignInViewModel";
@@ -24,6 +26,15 @@ export const SignInPage = (): ReactElement => {
     <main className="flex min-h-svh items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <div className="mb-2">
+            <AppLink
+              className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
+              to={ROUTE_PATH.LANDING.HOME}
+            >
+              <span>←</span>
+              <span>{t("auth.signIn.backToHome")}</span>
+            </AppLink>
+          </div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {t("auth.signIn.title")}
           </h1>
@@ -52,6 +63,17 @@ export const SignInPage = (): ReactElement => {
           />
           <SignInForm signInViewModel={signInViewModel} />
         </CardContent>
+        <CardFooter className="flex flex-col items-center gap-2 border-t border-border/40 pt-4 text-center text-xs text-muted-foreground">
+          <p>
+            {t("auth.signIn.noAccountPrompt")}{" "}
+            <AppLink
+              className="font-medium text-primary hover:underline"
+              to="/#plans-section"
+            >
+              {t("auth.signIn.explorePlansAction")}
+            </AppLink>
+          </p>
+        </CardFooter>
       </Card>
     </main>
   );

@@ -15,7 +15,7 @@ import type { Nullable } from "@/types";
 export interface ServiceImageUploaderProps {
   readonly disabled?: boolean;
   readonly errorMessage?: Nullable<string>;
-  readonly onFileSelect: (file: Nullable<File>) => void;
+  readonly onFileSelect: (file: Nullable<File>) => void | Promise<void>;
   readonly onRemoveImage: () => void;
   readonly previewUrl: Nullable<string>;
 }

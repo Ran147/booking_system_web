@@ -8,6 +8,8 @@ import { DEFAULT_LANGUAGE } from "@/constants";
 import { recaptchaSiteKey } from "@/services/firebase";
 import type { Nullable, NullableRef } from "@/types";
 import { useRedirectAfterSignIn } from "./useRedirectAfterSignIn";
+import { mapSignInError } from "../api/mapSignInError";
+import { signInWithGoogle } from "../api/signInWithGoogle";
 import { useSignInMutation } from "../api/useSignInMutation";
 import {
   SIGN_IN_ERROR_KEY,
@@ -34,6 +36,7 @@ export const useSignInViewModel = (): SignInViewModel => {
   const resolveSignInDestination = useRedirectAfterSignIn();
   const signInMutation = useSignInMutation();
   const serverErrorAlertReference = useRef<NullableRef<HTMLDivElement>>(null);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<Nullable<string>>(null);
   const [recaptchaResetSignal, setRecaptchaResetSignal] = useState(0);
@@ -75,14 +78,34 @@ export const useSignInViewModel = (): SignInViewModel => {
     setRecaptchaResetSignal((previousSignal) => previousSignal + 1);
   };
 
+  const handleGoogleSignIn = async (): Promise<void> => {
+    setIsGoogleSubmitting(true);
+    setServerErrorKey(null);
+
+    try {
+      const { language, session } = await signInWithGoogle();
+      if (language) await i18n.changeLanguage(language);
+      void navigate(resolveSignInDestination(session.role), {
+        replace: true,
+      });
+    } catch (error) {
+      const mappedError = mapSignInError(error);
+      if (mappedError.messageKey) {
+        setServerErrorKey(mappedError.messageKey);
+      }
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  };
+
   const submitSignInForm = (signInFormValues: SignInFormValues): void => {
-    if (!recaptchaToken) return;
+    if (Boolean(recaptchaSiteKey) && !recaptchaToken) return;
 
     // AS-1: mask the password in the DOM before the request leaves the page.
     flushSync(() => setIsPasswordVisible(false));
     setServerErrorKey(null);
     signInMutation.mutate(
-      { ...signInFormValues, recaptchaToken },
+      { ...signInFormValues, recaptchaToken: recaptchaToken ?? "" },
       {
         onError: handleSignInError,
         onSuccess: ({ session }) => {
@@ -95,16 +118,22 @@ export const useSignInViewModel = (): SignInViewModel => {
   };
 
   const emailValue = useWatch({ control: form.control, name: "email" });
-  const isSubmitting = form.formState.isSubmitting || signInMutation.isPending;
+  const isSubmitting =
+    form.formState.isSubmitting ||
+    signInMutation.isPending ||
+    isGoogleSubmitting;
+  const isSubmitDisabled = !recaptchaToken || isSubmitting;
 
   return {
     form,
+    handleGoogleSignIn,
     handleRecaptchaTokenChange: setRecaptchaToken,
     handleSubmit: form.handleSubmit(submitSignInForm),
     handleTogglePasswordVisibility: () =>
       setIsPasswordVisible((wasVisible) => !wasVisible),
+    isGoogleSubmitting,
     isPasswordVisible,
-    isSubmitDisabled: !recaptchaToken || isSubmitting,
+    isSubmitDisabled,
     isSubmitting,
     language: i18n.resolvedLanguage ?? DEFAULT_LANGUAGE,
     // AC-KAN-36-01: the recovery page starts with the email typed here.

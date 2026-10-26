@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "@/components/common";
 import {
+  CURRENCY_CODE,
   FIREBASE_ERROR_CODE,
   FIRESTORE_COLLECTION,
   I18N_NAMESPACE,
@@ -76,10 +77,11 @@ export const useServiceListViewModel = (
     businessInfoQuery.data?.status ??
     BUSINESS_STATUS.ACTIVE;
 
+  const rawCurrency = options.currency ?? businessInfoQuery.data?.currency;
   const effectiveCurrency =
-    options.currency ??
-    businessInfoQuery.data?.currency ??
-    DEFAULT_SERVICE_LIST_CURRENCY;
+    rawCurrency === CURRENCY_CODE.MXN
+      ? DEFAULT_SERVICE_LIST_CURRENCY
+      : (rawCurrency ?? DEFAULT_SERVICE_LIST_CURRENCY);
 
   const isReadOnly = effectiveBusinessStatus !== BUSINESS_STATUS.ACTIVE;
 

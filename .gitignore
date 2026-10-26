@@ -14,8 +14,11 @@ functions/lib/
 # Example environment file
 .env.example
 
-# Firebase
+# Firebase & Deployment
 .firebase/
+.vercel/
+*-firebase-adminsdk-*.json
+serviceAccount*.json
 firebase-debug.log*
 firestore-debug.log*
 database-debug.log*
