@@ -26,6 +26,11 @@
       },
       "title": "Nuestra Historia y Trayectoria"
     },
+    "mission": {
+      "description": "Democratizar y simplificar la gestión de reservas para profesionales y empresas de servicios, proporcionando herramientas tecnológicas intuitivas, robustas y de alto rendimiento que automaticen sus operaciones diarias y potencien su crecimiento sostenible.",
+      "sectionAriaLabel": "Misión y visión de la empresa",
+      "title": "Nuestra Misión"
+    },
     "offerings": {
       "items": {
         "analytics": {
@@ -71,6 +76,32 @@
         "label": "Tiempo de actividad garantizado",
         "value": "99.9%"
       }
+    },
+    "values": {
+      "items": {
+        "innovation": {
+          "description": "Evolucionamos continuamente nuestra plataforma adoptando las mejores prácticas y tecnologías modernas.",
+          "title": "Innovación Constante"
+        },
+        "reliability": {
+          "description": "Garantizamos disponibilidad, seguridad de datos y consistencia operativa en cada cita reservada.",
+          "title": "Confiabilidad y Seguridad"
+        },
+        "transparency": {
+          "description": "Fomentamos relaciones claras y honestas, sin costos ocultos y con términos comprensibles para todos.",
+          "title": "Transparencia Absoluta"
+        },
+        "userFocus": {
+          "description": "Diseñamos cada funcionalidad pensando en simplificar la experiencia tanto de los negocios como de sus clientes.",
+          "title": "Enfoque en el Usuario"
+        }
+      },
+      "subtitle": "Los principios fundamentales que guían cada decisión técnica y humana en nuestra plataforma.",
+      "title": "Nuestros Valores"
+    },
+    "vision": {
+      "description": "Ser la plataforma líder y referente en gestión de reservas y citas en la región, reconocida por su excelencia técnica, accesibilidad universal y capacidad de conectar a millones de clientes con los mejores prestadores de servicios.",
+      "title": "Nuestra Visión"
     }
   },
   "contact": {

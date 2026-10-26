@@ -26,6 +26,11 @@
       },
       "title": "Our History & Journey"
     },
+    "mission": {
+      "description": "To democratize and streamline booking management for service professionals and businesses by delivering intuitive, robust, high-performance technology that automates daily operations and fosters sustainable growth.",
+      "sectionAriaLabel": "Company mission and vision",
+      "title": "Our Mission"
+    },
     "offerings": {
       "items": {
         "analytics": {
@@ -71,6 +76,32 @@
         "label": "Guaranteed system uptime",
         "value": "99.9%"
       }
+    },
+    "values": {
+      "items": {
+        "innovation": {
+          "description": "We continually evolve our platform by adopting modern architectural patterns and best engineering practices.",
+          "title": "Continuous Innovation"
+        },
+        "reliability": {
+          "description": "We guarantee high availability, data security, and operational consistency for every booked appointment.",
+          "title": "Reliability & Security"
+        },
+        "transparency": {
+          "description": "We build open and honest relationships with zero hidden fees and transparent terms for everyone.",
+          "title": "Absolute Transparency"
+        },
+        "userFocus": {
+          "description": "We craft every feature with a relentless focus on simplifying the experience for both businesses and their clients.",
+          "title": "User-Centric Focus"
+        }
+      },
+      "subtitle": "The foundational principles that guide every technical and product decision we make.",
+      "title": "Our Core Values"
+    },
+    "vision": {
+      "description": "To be the leading and benchmark booking and appointment platform in the region, recognized for technical excellence, universal accessibility, and the ability to seamlessly connect millions of customers with top service providers.",
+      "title": "Our Vision"
     }
   },
   "contact": {

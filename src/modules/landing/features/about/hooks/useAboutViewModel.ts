@@ -4,13 +4,17 @@ import { I18N_NAMESPACE } from "@/constants";
 import {
   ABOUT_ICON_TYPE,
   ABOUT_MILESTONES,
+  ABOUT_MISSION_VISION,
   ABOUT_OFFERINGS,
   ABOUT_STATS,
+  ABOUT_VALUES,
 } from "../constants/about.constants";
 import type {
   AboutMilestoneItem,
+  AboutMissionVisionItem,
   AboutOfferingItem,
   AboutStatItem,
+  AboutValueItem,
   UseAboutViewModelReturn,
 } from "../models/about.model";
 
@@ -30,6 +34,11 @@ const MILESTONE_KEYS = {
     title: "about.history.milestones.m3.title",
     year: "about.history.milestones.m3.year",
   },
+} as const;
+
+const MISSION_KEYS = {
+  description: "about.mission.description",
+  title: "about.mission.title",
 } as const;
 
 const OFFERING_KEYS = {
@@ -74,12 +83,89 @@ const STAT_KEYS = {
   },
 } as const;
 
+const VALUE_KEYS = {
+  [ABOUT_VALUES.INNOVATION]: {
+    description: "about.values.items.innovation.description",
+    icon: ABOUT_ICON_TYPE.INNOVATION,
+    title: "about.values.items.innovation.title",
+  },
+  [ABOUT_VALUES.RELIABILITY]: {
+    description: "about.values.items.reliability.description",
+    icon: ABOUT_ICON_TYPE.RELIABILITY,
+    title: "about.values.items.reliability.title",
+  },
+  [ABOUT_VALUES.TRANSPARENCY]: {
+    description: "about.values.items.transparency.description",
+    icon: ABOUT_ICON_TYPE.TRANSPARENCY,
+    title: "about.values.items.transparency.title",
+  },
+  [ABOUT_VALUES.USER_FOCUS]: {
+    description: "about.values.items.userFocus.description",
+    icon: ABOUT_ICON_TYPE.USER_FOCUS,
+    title: "about.values.items.userFocus.title",
+  },
+} as const;
+
+const VISION_KEYS = {
+  description: "about.vision.description",
+  title: "about.vision.title",
+} as const;
+
 /**
- * ViewModel hook para la pagina Sobre Nosotros (US-16 / KAN-16).
- * Encapsula la localizacion y estructura de datos de trayectoria, soluciones y metricas.
+ * ViewModel hook para la pagina Sobre Nosotros (US-15 & US-16).
+ * Encapsula la localizacion y estructura de datos de mision, vision, valores,
+ * trayectoria, soluciones y metricas.
  */
 export const useAboutViewModel = (): UseAboutViewModelReturn => {
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
+
+  const mission: AboutMissionVisionItem = useMemo(
+    () => ({
+      description: t(MISSION_KEYS.description),
+      id: ABOUT_MISSION_VISION.MISSION,
+      title: t(MISSION_KEYS.title),
+    }),
+    [t],
+  );
+
+  const vision: AboutMissionVisionItem = useMemo(
+    () => ({
+      description: t(VISION_KEYS.description),
+      id: ABOUT_MISSION_VISION.VISION,
+      title: t(VISION_KEYS.title),
+    }),
+    [t],
+  );
+
+  const values: AboutValueItem[] = useMemo(
+    () => [
+      {
+        description: t(VALUE_KEYS[ABOUT_VALUES.INNOVATION].description),
+        icon: VALUE_KEYS[ABOUT_VALUES.INNOVATION].icon,
+        id: ABOUT_VALUES.INNOVATION,
+        title: t(VALUE_KEYS[ABOUT_VALUES.INNOVATION].title),
+      },
+      {
+        description: t(VALUE_KEYS[ABOUT_VALUES.RELIABILITY].description),
+        icon: VALUE_KEYS[ABOUT_VALUES.RELIABILITY].icon,
+        id: ABOUT_VALUES.RELIABILITY,
+        title: t(VALUE_KEYS[ABOUT_VALUES.RELIABILITY].title),
+      },
+      {
+        description: t(VALUE_KEYS[ABOUT_VALUES.TRANSPARENCY].description),
+        icon: VALUE_KEYS[ABOUT_VALUES.TRANSPARENCY].icon,
+        id: ABOUT_VALUES.TRANSPARENCY,
+        title: t(VALUE_KEYS[ABOUT_VALUES.TRANSPARENCY].title),
+      },
+      {
+        description: t(VALUE_KEYS[ABOUT_VALUES.USER_FOCUS].description),
+        icon: VALUE_KEYS[ABOUT_VALUES.USER_FOCUS].icon,
+        id: ABOUT_VALUES.USER_FOCUS,
+        title: t(VALUE_KEYS[ABOUT_VALUES.USER_FOCUS].title),
+      },
+    ],
+    [t],
+  );
 
   const milestones: AboutMilestoneItem[] = useMemo(
     () => [
@@ -165,7 +251,10 @@ export const useAboutViewModel = (): UseAboutViewModelReturn => {
 
   return {
     milestones,
+    mission,
     offerings,
     stats,
+    values,
+    vision,
   };
 };
