@@ -118,6 +118,49 @@
       "x": "X de Booking System (abre en una nueva pestaña)"
     }
   },
+  "help": {
+    "page": {
+      "contactPrompt": "¿Tienes otra duda?",
+      "description": "Encuentra orientación paso a paso sobre el funcionamiento de Booking System y los canales de soporte disponibles.",
+      "faqAction": "Preguntas frecuentes",
+      "faqPrompt": "¿Buscas respuestas rápidas?",
+      "title": "Centro de ayuda y soporte"
+    },
+    "publicSupport": {
+      "action": "Escríbenos",
+      "description": "Si tienes consultas generales o necesitas demostración, nuestro equipo está listo para ayudarte.",
+      "title": "¿Necesitas atención personalizada?"
+    },
+    "subscriberSupport": {
+      "action": "Ir a tickets de soporte",
+      "badge": "Exclusivo suscriptores",
+      "description": "Como suscriptor puedes registrar y dar seguimiento a incidencias técnicas desde tu panel de negocio.",
+      "title": "Soporte técnico prioritario"
+    },
+    "topics": {
+      "gettingStarted": {
+        "description": "Aprende los conceptos básicos para configurar tu cuenta y comenzar a utilizar la plataforma.",
+        "step1": "Regístrate como suscriptor y elige el plan ideal para tu negocio.",
+        "step2": "Configura el perfil de tu empresa, logotipo y enlaces de contacto.",
+        "step3": "Comparte el enlace de tu catálogo con tus clientes para recibir reservas.",
+        "title": "Primeros pasos"
+      },
+      "managingSchedule": {
+        "description": "Gestiona horarios, disponibilidad de colaboradores y servicios ofrecidos.",
+        "step1": "Define tus días laborales y franjas horarias de atención.",
+        "step2": "Agrega servicios con sus duraciones y precios respectivos.",
+        "step3": "Asigna colaboradores a los servicios para control individual de citas.",
+        "title": "Gestión de agenda y citas"
+      },
+      "subscriptionsAndPlans": {
+        "description": "Conoce cómo funcionan las suscripciones, renovaciones y métodos de pago.",
+        "step1": "Revisa los detalles de tu plan activo desde tu panel.",
+        "step2": "Mejora o cambia tu plan en cualquier momento según tus necesidades.",
+        "step3": "Accede a tus comprobantes de pago de forma segura.",
+        "title": "Planes y suscripción"
+      }
+    }
+  },
   "home": {
     "hero": {
       "badge": "Gestión de citas y reservas para profesionales",

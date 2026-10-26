@@ -118,6 +118,49 @@
       "x": "Booking System X (opens in a new tab)"
     }
   },
+  "help": {
+    "page": {
+      "contactPrompt": "Have another question?",
+      "description": "Find step-by-step guidance on how Booking System works and access available support channels.",
+      "faqAction": "Frequently asked questions",
+      "faqPrompt": "Looking for quick answers?",
+      "title": "Help & Support Center"
+    },
+    "publicSupport": {
+      "action": "Contact us",
+      "description": "If you have general inquiries or need a personalized demo, our team is ready to help.",
+      "title": "Need personalized assistance?"
+    },
+    "subscriberSupport": {
+      "action": "Go to support tickets",
+      "badge": "Subscribers only",
+      "description": "As a subscriber you can submit and track technical support tickets directly from your business dashboard.",
+      "title": "Priority technical support"
+    },
+    "topics": {
+      "gettingStarted": {
+        "description": "Learn the basics to set up your account and start using the platform.",
+        "step1": "Sign up as a subscriber and choose the right plan for your business.",
+        "step2": "Configure your business profile, logo, and contact links.",
+        "step3": "Share your catalog link with your customers to start receiving bookings.",
+        "title": "Getting started"
+      },
+      "managingSchedule": {
+        "description": "Manage business hours, collaborator availability, and offered services.",
+        "step1": "Define your working days and available service hours.",
+        "step2": "Add services along with their respective durations and prices.",
+        "step3": "Assign collaborators to services for individual booking control.",
+        "title": "Schedule & booking management"
+      },
+      "subscriptionsAndPlans": {
+        "description": "Understand how subscriptions, renewals, and payment methods work.",
+        "step1": "Review your active plan details from your dashboard.",
+        "step2": "Upgrade or switch your plan anytime based on your business needs.",
+        "step3": "Access your payment receipts securely.",
+        "title": "Plans & subscription"
+      }
+    }
+  },
   "home": {
     "hero": {
       "badge": "Appointment & booking management for professionals",
