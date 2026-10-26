@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import {
+  CURRENCY_CODE,
   ERROR_MESSAGE_KEY,
   ROUTE_PATH,
   VIEW_STATE,
@@ -76,7 +77,9 @@ export const useBookingDetailViewModel = (): BookingDetailViewModel => {
           ),
           priceLabel: formatPrice(
             booking.priceInCents,
-            business.currency ?? DEFAULT_BUSINESS_CURRENCY,
+            business.currency === CURRENCY_CODE.MXN
+              ? DEFAULT_BUSINESS_CURRENCY
+              : (business.currency ?? DEFAULT_BUSINESS_CURRENCY),
             i18n.language,
           ),
           serviceName: booking.serviceName,

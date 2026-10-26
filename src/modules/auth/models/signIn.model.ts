@@ -46,11 +46,13 @@ export interface RoleGateTargets {
  */
 export interface SignInViewModel {
   readonly form: UseFormReturn<SignInFormValues>;
+  readonly handleGoogleSignIn: () => Promise<void>;
   readonly handleRecaptchaTokenChange: (
     recaptchaToken: Nullable<string>,
   ) => void;
   readonly handleSubmit: (event?: BaseSyntheticEvent) => Promise<void>;
   readonly handleTogglePasswordVisibility: () => void;
+  readonly isGoogleSubmitting: boolean;
   readonly isPasswordVisible: boolean;
   readonly isSubmitDisabled: boolean;
   readonly isSubmitting: boolean;

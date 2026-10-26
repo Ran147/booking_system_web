@@ -30,7 +30,10 @@ export const createBooking = onCall<
     );
   }
 
-  if (request.auth.token.role !== USER_ROLE.CUSTOMER) {
+  if (
+    request.auth.token.role !== USER_ROLE.CUSTOMER &&
+    request.auth.token.role !== USER_ROLE.CLIENT
+  ) {
     throw new HttpsError(
       "permission-denied",
       CREATE_BOOKING_ERROR.PERMISSION_DENIED,

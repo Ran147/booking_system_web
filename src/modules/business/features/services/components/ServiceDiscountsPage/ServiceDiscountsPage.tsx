@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router";
 import { Button, BUTTON_VARIANT, Spinner } from "@/components/common";
 import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import { useServiceDiscountsViewModel } from "@/modules/business/features/services";
+import { formatPrice } from "@/utils";
 import { AddDiscountForm } from "./components/AddDiscountForm";
 import { DiscountsTable } from "./components/DiscountsTable";
 import type { ServiceDiscountsPageProps } from "./types/ServiceDiscountsPage.types";
@@ -18,7 +19,7 @@ export const ServiceDiscountsPage = ({
   userPermissions,
   userRole,
 }: ServiceDiscountsPageProps): ReactElement => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+  const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const navigate = useNavigate();
   const routeParameters = useParams<{ serviceId?: string }>();
   const effectiveServiceId = serviceId ?? routeParameters.serviceId;
@@ -71,6 +72,19 @@ export const ServiceDiscountsPage = ({
           {viewModel.service?.name
             ? `${viewModel.service.name} — ${t("services.discounts.subtitle")}`
             : t("services.discounts.subtitle")}
+          {viewModel.service?.priceInCents !== undefined && (
+            <span className="ml-2 font-medium text-foreground">
+              (
+              {t("services.discounts.basePriceLabel", {
+                price: formatPrice(
+                  viewModel.service.priceInCents,
+                  viewModel.currency,
+                  i18n.language,
+                ),
+              })}
+              )
+            </span>
+          )}
         </p>
       </div>
 
@@ -91,12 +105,14 @@ export const ServiceDiscountsPage = ({
       )}
 
       <AddDiscountForm
+        currency={viewModel.currency}
         formError={viewModel.formError}
         formState={viewModel.formState}
         isPending={viewModel.isAddPending}
         isReadOnly={viewModel.isReadOnly}
         onFormChange={viewModel.handleFormChange}
         onSubmit={viewModel.handleAddDiscount}
+        servicePriceInCents={viewModel.service?.priceInCents}
       />
 
       {viewModel.discounts.length === 0 ? (
@@ -114,6 +130,7 @@ export const ServiceDiscountsPage = ({
           discounts={viewModel.discounts}
           isReadOnly={viewModel.isReadOnly}
           onRemoveDiscount={viewModel.handleRemoveDiscount}
+          servicePriceInCents={viewModel.service?.priceInCents}
           timeZone={viewModel.timeZone}
         />
       )}

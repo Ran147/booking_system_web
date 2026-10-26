@@ -1,3 +1,5 @@
+import { BUSINESS_STATUS } from "@/domain";
+import { fetchBusinessPublicProfileBySlug } from "@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug";
 import { ROUTE_PATH } from "@/shared/constants";
 import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
@@ -13,6 +15,22 @@ import { appRoutes } from "../appRoutes";
 import { createAppRoutesPage } from "./AppRoutes.page";
 
 const BUSINESS_PAGE_PATH = "/barberia-centro";
+
+vi.mock("@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug");
+
+beforeEach(() => {
+  vi.mocked(fetchBusinessPublicProfileBySlug).mockResolvedValue({
+    contactEmail: null,
+    contactPhone: null,
+    description: null,
+    id: "business-id",
+    logoUrl: null,
+    name: "Barbería Centro",
+    slug: "barberia-centro",
+    socialLinks: [],
+    status: BUSINESS_STATUS.ACTIVE,
+  });
+});
 
 describe("app routes", () => {
   it("shows the landing portal to a visitor", async () => {
@@ -82,6 +100,26 @@ describe("app routes", () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it.each([
+    ["subscriber", SUBSCRIBER_SESSION],
+    ["collaborator", COLLABORATOR_SESSION],
+  ])(
+    "KAN-53: opens business settings for an authenticated %s",
+    async (_roleName, session) => {
+      renderRoutesWithProviders(appRoutes, {
+        initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+        session,
+      });
+      const appRoutesPage = createAppRoutesPage();
+
+      expect(
+        await appRoutesPage.findPageHeading(
+          testI18n.t("business:settings.title"),
+        ),
+      ).toBeInTheDocument();
+    },
+  );
 
   it("KAN-86: redirects a collaborator from the admin portal to the business portal", async () => {
     renderRoutesWithProviders(appRoutes, {
