@@ -31,19 +31,22 @@ export const callFunction = async <Payload, Response>(
         return (await serverResponse.json()) as Response;
       }
 
-      if (
-        serverResponse.status >= HTTP_STATUS.BAD_REQUEST &&
-        serverResponse.status < HTTP_STATUS.INTERNAL_SERVER_ERROR
-      ) {
-        const errorJson =
-          (await serverResponse.json()) as CallFunctionErrorPayload;
-        const rawCode = (
-          errorJson.code ||
-          errorJson.error ||
-          "internal"
-        ).replace("functions/", "") as FunctionsErrorCodeCore;
-        const errorMessage = errorJson.message || "Function call failed";
-        throw new FunctionsError(rawCode, errorMessage, errorJson.details);
+      if (serverResponse.status >= HTTP_STATUS.BAD_REQUEST) {
+        try {
+          const errorJson =
+            (await serverResponse.json()) as CallFunctionErrorPayload;
+          const rawCode = (
+            errorJson.code ||
+            errorJson.error ||
+            "internal"
+          ).replace("functions/", "") as FunctionsErrorCodeCore;
+          const errorMessage = errorJson.message || "Function call failed";
+          throw new FunctionsError(rawCode, errorMessage, errorJson.details);
+        } catch (jsonError) {
+          if (jsonError instanceof FunctionsError) {
+            throw jsonError;
+          }
+        }
       }
     } catch (apiError) {
       if (apiError instanceof FirebaseError) {

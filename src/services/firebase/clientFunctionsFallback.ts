@@ -6,6 +6,7 @@ import {
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   setDoc,
@@ -220,7 +221,22 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
   }
 
   if (functionName === FUNCTION_NAME.DELETE_SERVICE) {
+    const businessId = String(genericPayload.businessId ?? "");
     const serviceId = String(genericPayload.serviceId ?? "");
+
+    if (!businessId || !serviceId) {
+      throw new Error("Missing businessId or serviceId for deleteService");
+    }
+
+    const serviceDocumentReference = doc(
+      firestore,
+      "businesses",
+      businessId,
+      "services",
+      serviceId,
+    );
+
+    await deleteDoc(serviceDocumentReference);
     return { deletedServiceId: serviceId } as Response;
   }
 

@@ -13,6 +13,7 @@ import { HTTP_STATUS } from "../src/constants/common/HttpStatus.constants";
 import { FUNCTION_NAME } from "../src/constants/firebase/FunctionName.constants";
 import { MONEY } from "../src/constants/numbers/Money.constants";
 import { TIME_MS } from "../src/constants/numbers/Time.constants";
+import { BOOKING_STATUS } from "../src/domain/booking/BookingStatus.constants";
 import { BUSINESS_STATUS } from "../src/domain/business/BusinessStatus.constants";
 import { SERVICE_STATUS } from "../src/domain/service/ServiceStatus.constants";
 import { CHECKOUT_SIMULATION } from "../src/modules/landing/features/plan-checkout/constants/PlanCheckout.constants";
@@ -224,9 +225,23 @@ export default async function handler(
         return;
       }
 
-      const serviceReference = firestore
+      const businessReference = firestore
         .collection("businesses")
-        .doc(businessId)
+        .doc(businessId);
+      const businessSnapshot = await businessReference.get();
+      if (
+        !businessSnapshot.exists ||
+        businessSnapshot.data()?.status !== BUSINESS_STATUS.ACTIVE
+      ) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: { reason: "business_not_active" },
+          error: "failed-precondition",
+          message: "business_not_active",
+        });
+        return;
+      }
+
+      const serviceReference = businessReference
         .collection("services")
         .doc(serviceId);
 
@@ -244,6 +259,25 @@ export default async function handler(
           details: { reason: "must_be_inactive" },
           error: "failed-precondition",
           message: "must_be_inactive",
+        });
+        return;
+      }
+
+      const activeBookingsSnapshot = await businessReference
+        .collection("bookings")
+        .where("serviceId", "==", serviceId)
+        .where("status", "in", [
+          BOOKING_STATUS.PENDING,
+          BOOKING_STATUS.CONFIRMED,
+        ])
+        .limit(1)
+        .get();
+
+      if (!activeBookingsSnapshot.empty) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: { reason: "has_active_bookings" },
+          error: "failed-precondition",
+          message: "has_active_bookings",
         });
         return;
       }
