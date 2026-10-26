@@ -1,4 +1,93 @@
 {
+  "contact": {
+    "about": {
+      "company": {
+        "description": "Born from the real needs of service businesses that lost valuable time coordinating appointments manually. We built Booking System to transform that complexity into a seamless, reliable, and modern experience.",
+        "plansAction": "Explore subscription plans",
+        "title": "Our story and commitment"
+      },
+      "mission": {
+        "description": "Empower professionals and service businesses with intuitive technology that automates scheduling and strengthens client relationships.",
+        "title": "Mission"
+      },
+      "vision": {
+        "description": "To be the leading platform in digital transformation and smart scheduling for service businesses across the region.",
+        "title": "Vision"
+      }
+    },
+    "backToHome": "Back to home",
+    "channels": {
+      "cardDescription": "Reach out directly to our team through any of the following official channels.",
+      "cardTitle": "Direct support channels",
+      "emailAriaLabel": "Send email to {{email}}",
+      "emailLabel": "Email address",
+      "fallbackNotice": "Currently, all support requests are handled through our contact form.",
+      "phoneAriaLabel": "Call phone number {{phone}}",
+      "phoneLabel": "Phone number",
+      "sectionAriaLabel": "Direct contact channels",
+      "social": {
+        "facebook": "Booking System Facebook (opens in a new tab)",
+        "instagram": "Booking System Instagram (opens in a new tab)",
+        "linkedin": "Booking System LinkedIn (opens in a new tab)",
+        "x": "Booking System X (opens in a new tab)"
+      },
+      "socialTitle": "Official social networks"
+    },
+    "faq": {
+      "items": {
+        "item1": {
+          "answer": "Choose your ideal plan from our catalog, complete the simulated payment, and configure your hours and services in minutes.",
+          "question": "How do I get started with Booking System?"
+        },
+        "item2": {
+          "answer": "No. Your clients can book directly from any web browser on their mobile phone or computer via your custom link.",
+          "question": "Do my clients need to install an app?"
+        },
+        "item3": {
+          "answer": "Yes, our advanced plans allow inviting staff members, assigning specific schedules, and selecting services for each.",
+          "question": "Can I register my staff members?"
+        },
+        "item4": {
+          "answer": "We accept Visa, Mastercard credit/debit cards, and bank transfers depending on your region via our payment gateway.",
+          "question": "What payment methods are accepted for subscriptions?"
+        },
+        "item5": {
+          "answer": "There are no long-term contracts. You can upgrade, change, or cancel your plan at any time from your business dashboard.",
+          "question": "Can I cancel or switch my subscription?"
+        }
+      },
+      "subtitle": "Clear answers to the most common questions about the platform.",
+      "title": "Frequently asked questions"
+    },
+    "form": {
+      "dismissAction": "Dismiss",
+      "dismissAlert": "Dismiss alert",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@email.com",
+      "messageLabel": "Message or inquiry",
+      "messagePlaceholder": "Write your detailed message here...",
+      "nameLabel": "Full name",
+      "namePlaceholder": "Your first and last name",
+      "recaptchaLabel": "Security check",
+      "serverError": "An error occurred while sending your message. Please try again.",
+      "submitButton": "Send message",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "How can we help you?",
+      "success": "Message sent successfully! Our team will get back to you shortly.",
+      "title": "Contact form"
+    },
+    "help": {
+      "action": "View plans",
+      "description": "Need a tailored solution or have custom requirements? Our team is here to support you every step of the way.",
+      "title": "Have additional questions?"
+    },
+    "page": {
+      "description": "Have questions about Booking System or need a personalized demo? Reach out to our team and we'll be happy to help.",
+      "title": "Contact us"
+    },
+    "subtitle": "Learn who we are, find answers, and reach out to our support team.",
+    "title": "Contact and customer support"
+  },
   "faq": {
     "cta": {
       "action": "Go to contact form",
@@ -8,51 +97,51 @@
     "empty": {
       "action": "Contact us",
       "description": "No frequently asked questions were found at this time.",
-      "title": "No questions available"
+      "title": "No FAQ items found"
     },
     "groups": {
       "accountAndSecurity": {
         "items": {
           "dataSecurity": {
-            "answer": "We use secure cloud infrastructure with encryption and tenant isolation to ensure your business and customer data remain confidential.",
-            "question": "Is my data and my customers' information secure?"
+            "answer": "We use secure cloud infrastructure with data encryption and per-business isolation (multi-tenant) to ensure the confidentiality of your information.",
+            "question": "Is my data and my customers' data secure?"
           },
           "multiUser": {
-            "answer": "Yes, depending on your plan you can invite team members and set custom permissions so they only access their assigned schedule or general management.",
+            "answer": "Yes, depending on your plan, you can invite collaborators and set custom permissions so they only access their agenda or overall management.",
             "question": "Can I add my team members to the platform?"
           }
         },
-        "title": "Account & security"
+        "title": "Account & Security"
       },
       "plansAndBilling": {
         "items": {
           "changePlan": {
-            "answer": "You can upgrade or change your plan at any time from your subscription dashboard as your business grows.",
-            "question": "Can I switch plans whenever needed?"
+            "answer": "You can change or upgrade your plan anytime from your subscription dashboard to match your business growth.",
+            "question": "Can I change my plan whenever I need to?"
           },
           "paymentMethods": {
             "answer": "We accept major credit and debit cards (Visa, Mastercard, American Express) processed through secure payment gateways.",
-            "question": "What payment methods are supported?"
+            "question": "What payment methods are accepted?"
           }
         },
-        "title": "Plans & billing"
+        "title": "Plans & Billing"
       },
       "servicesAndBookings": {
         "items": {
           "calendarSync": {
-            "answer": "The platform updates availability in real time, automatically blocking booked slots to prevent scheduling conflicts.",
-            "question": "How are bookings synchronized with my business hours?"
+            "answer": "The system updates schedule availability in real time, automatically blocking busy slots to prevent double bookings.",
+            "question": "How do bookings synchronize with my business hours?"
           },
           "clientBooking": {
-            "answer": "Your customers visit your unique booking page, pick a service, select a collaborator and an available time slot, and receive instant confirmation.",
-            "question": "How do my clients book an appointment?"
+            "answer": "Your clients access your custom link, select the service, staff member, and available time, receiving instant confirmation without requiring mandatory sign up.",
+            "question": "How do my clients book appointments?"
           }
         },
-        "title": "Services & bookings"
+        "title": "Services & Bookings"
       }
     },
     "page": {
-      "description": "Find quick and clear answers to common questions about our platform, bookings, and subscription plans.",
+      "description": "Find clear and fast answers to common questions about the platform, bookings, and subscription plans.",
       "title": "Frequently Asked Questions"
     }
   },
@@ -84,6 +173,49 @@
       "linkedin": "Booking System LinkedIn (opens in a new tab)",
       "title": "Social media",
       "x": "Booking System X (opens in a new tab)"
+    }
+  },
+  "help": {
+    "page": {
+      "contactPrompt": "Have another question?",
+      "description": "Find step-by-step guidance on how Booking System works and available support channels.",
+      "faqAction": "Frequently Asked Questions",
+      "faqPrompt": "Looking for quick answers?",
+      "title": "Help Center & Support"
+    },
+    "publicSupport": {
+      "action": "Write to us",
+      "description": "For general inquiries or to request a demo, our team is ready to assist you.",
+      "title": "Need dedicated assistance?"
+    },
+    "subscriberSupport": {
+      "action": "Go to support tickets",
+      "badge": "Subscribers only",
+      "description": "As a subscriber, you can create and track technical support tickets directly from your dashboard.",
+      "title": "Priority Technical Support"
+    },
+    "topics": {
+      "gettingStarted": {
+        "description": "Learn the basics to set up your account and get started with the platform.",
+        "step1": "Sign up as a subscriber and pick the ideal plan for your business.",
+        "step2": "Set up your business profile, logo, and contact links.",
+        "step3": "Share your catalog link with clients to start receiving bookings.",
+        "title": "Getting Started"
+      },
+      "managingSchedule": {
+        "description": "Manage working hours, staff availability, and offered services.",
+        "step1": "Define your working days and daily availability time slots.",
+        "step2": "Add services along with durations and prices.",
+        "step3": "Assign collaborators to services for individual booking management.",
+        "title": "Schedule & Appointment Management"
+      },
+      "subscriptionsAndPlans": {
+        "description": "Understand subscriptions, renewal cycles, and payment methods.",
+        "step1": "Review your active plan details from your dashboard.",
+        "step2": "Upgrade or adjust your plan whenever your business needs evolve.",
+        "step3": "Access payment receipts and invoices securely.",
+        "title": "Plans & Subscriptions"
+      }
     }
   },
   "home": {
@@ -119,7 +251,9 @@
       "menuClose": "Close navigation menu",
       "menuOpen": "Open navigation menu",
       "mobileNavLabel": "Mobile navigation",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "signOut": "Sign out",
+      "signUp": "Sign up"
     },
     "plans": {
       "billingPeriod": {
@@ -167,6 +301,40 @@
     "title": "Welcome to Booking System"
   },
   "planCheckout": {
+    "checkout": {
+      "backToDetail": "Back to plan details",
+      "cardCvcHint": "3 or 4 security digits",
+      "cardCvcLabel": "CVC / CVV",
+      "cardExpiryHint": "MM/YY",
+      "cardExpiryLabel": "Expiration date",
+      "cardNumberHint": "Use 4000 0000 0000 0001 to approve, or ending in 2 to decline",
+      "cardNumberLabel": "Card number",
+      "cardholderNameHint": "As shown on card",
+      "cardholderNameLabel": "Cardholder name",
+      "contactEmailLabel": "Contact email:",
+      "declinedError": "Payment was declined by the simulated gateway. Check your details or use another card.",
+      "emailHint": "Use the email address you want to use for your business account.",
+      "emailLabel": "Contact email address",
+      "paidAmountLabel": "Amount paid:",
+      "payAction": "Pay and continue to sign up",
+      "paying": "Processing simulated payment…",
+      "planSummaryTitle": "Plan summary",
+      "recaptchaLabel": "Security verification",
+      "selectedPlanLabel": "Selected plan:",
+      "simulationNotice": "Test environment: this payment is simulated for demonstration and evaluation.",
+      "statusApproved": "Approved (Simulation)",
+      "stepTitle": "Subscription checkout",
+      "subscriptionBadge": "Subscription",
+      "subtitle": "You are one step away from managing your business with Booking System.",
+      "successAction": "Complete business sign up",
+      "successDescription": "We confirmed your payment for plan {{planName}}. Now finish setting up your business to activate your portal.",
+      "successTitle": "Payment processed successfully!",
+      "termsAcceptance": "I have read and accept the",
+      "termsLink": "Terms and conditions of service",
+      "termsRequired": "You must accept the terms and conditions to continue",
+      "title": "Complete plan checkout",
+      "transactionStatusLabel": "Transaction status:"
+    },
     "detail": {
       "backToPlans": "← Back to plans",
       "billingPeriod": {
@@ -202,6 +370,7 @@
       "businessSlugLabel": "Business address",
       "businessTitle": "Your business",
       "cannotCreateAccount": "We could not create the account with this email. If you already have one, sign in or recover your password.",
+      "changeEmail": "Change",
       "emailHint": "The email you paid the plan with.",
       "emailLabel": "Email",
       "firstNameLabel": "First name",

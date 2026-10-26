@@ -7,14 +7,6 @@ import { SERVICE_STATUS } from "@/domain";
 import type { ServiceDetail } from "../models/ServiceDetail.interface";
 import type { ServiceListItem } from "../models/ServiceListItem.interface";
 
-const serviceDocumentSchema = z.object({
-  description: z.string().optional(),
-  durationMinutes: z.number().int().positive(),
-  name: z.string(),
-  priceInCents: z.number().int().nonnegative(),
-  status: z.enum([SERVICE_STATUS.ACTIVE, SERVICE_STATUS.INACTIVE]),
-});
-
 const discountDocumentSchema = z.object({
   endsAt: z.unknown().transform((value) => {
     if (value instanceof Date) {
@@ -54,6 +46,15 @@ const discountDocumentSchema = z.object({
   value: z.number(),
 });
 
+const serviceDocumentSchema = z.object({
+  description: z.string().optional(),
+  discounts: z.array(discountDocumentSchema).optional().default([]),
+  durationMinutes: z.number().int().positive(),
+  name: z.string(),
+  priceInCents: z.number().int().nonnegative(),
+  status: z.enum([SERVICE_STATUS.ACTIVE, SERVICE_STATUS.INACTIVE]),
+});
+
 const serviceDetailDocumentSchema = z.object({
   collaboratorSelection: z.enum(["automatic", "customer_choice"]).optional(),
   description: z.string().optional().default(""),
@@ -72,6 +73,7 @@ export const mapServiceListItem = (
   const parsedData = serviceDocumentSchema.parse(serviceDocument.data());
   return {
     description: parsedData.description,
+    discounts: parsedData.discounts,
     durationMinutes: parsedData.durationMinutes,
     id: serviceDocument.id,
     name: parsedData.name,

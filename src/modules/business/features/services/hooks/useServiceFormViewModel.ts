@@ -13,6 +13,7 @@ import {
 } from "@/constants";
 import { BUSINESS_STATUS, type BusinessStatus } from "@/domain";
 import { useCurrentBusiness } from "@/modules/auth";
+import { uploadImageToImgbb } from "@/services";
 import type { Nullable } from "@/types";
 import {
   fetchBusinessStatus,
@@ -54,6 +55,9 @@ export const useServiceFormViewModel = (
   const isEditMode = Boolean(options.serviceId);
 
   const [imageError, setImageError] = useState<Nullable<string>>(null);
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] =
+    useState<Nullable<File>>(null);
 
   const businessStatusQuery = useQuery<BusinessStatus>({
     enabled: options.businessStatus === undefined,
@@ -134,12 +138,14 @@ export const useServiceFormViewModel = (
     }
 
     setImageError(null);
+    setSelectedImageFile(file);
     const objectUrl = URL.createObjectURL(file);
     form.setValue("imageUrl", objectUrl, { shouldDirty: true });
   };
 
   const handleRemoveImage = (): void => {
     setImageError(null);
+    setSelectedImageFile(null);
     form.setValue("imageUrl", null, { shouldDirty: true });
   };
 
@@ -191,10 +197,29 @@ export const useServiceFormViewModel = (
     form.setValue("features", remainingFeatures, { shouldDirty: true });
   };
 
-  const submitServiceForm = (formValues: ServiceFormValues): void => {
+  const submitServiceForm = async (
+    formValues: ServiceFormValues,
+  ): Promise<void> => {
     if (isReadOnly) {
       toast.error(t("business:errors.readOnly"));
       return;
+    }
+
+    let resolvedImageUrl = formValues.imageUrl;
+    if (
+      selectedImageFile &&
+      import.meta.env.VITE_IMGBB_API_KEY &&
+      !import.meta.env.VITEST
+    ) {
+      setIsImageUploading(true);
+      try {
+        resolvedImageUrl = await uploadImageToImgbb(selectedImageFile);
+      } catch {
+        setIsImageUploading(false);
+        setImageError(t("business:services.form.imageInvalidError"));
+        return;
+      }
+      setIsImageUploading(false);
     }
 
     const sanitizedFeatures = (formValues.features ?? [])
@@ -209,6 +234,7 @@ export const useServiceFormViewModel = (
           formValues: {
             ...formValues,
             features: sanitizedFeatures,
+            imageUrl: resolvedImageUrl,
           },
           serviceId: currentServiceId,
         },
@@ -231,6 +257,7 @@ export const useServiceFormViewModel = (
         formValues: {
           ...formValues,
           features: sanitizedFeatures,
+          imageUrl: resolvedImageUrl,
         },
       },
       {
@@ -241,6 +268,7 @@ export const useServiceFormViewModel = (
           toast.success(t("business:services.form.createSuccess"));
           form.reset(DEFAULT_SERVICE_FORM_VALUES);
           setImageError(null);
+          setSelectedImageFile(null);
           options.onSuccess?.(response.serviceId);
         },
       },
@@ -277,7 +305,9 @@ export const useServiceFormViewModel = (
       isEditMode && !options.initialService && serviceDetailQuery.isPending,
     isReadOnly,
     isSubmitting:
-      createServiceMutation.isPending || updateServiceMutation.isPending,
+      createServiceMutation.isPending ||
+      updateServiceMutation.isPending ||
+      isImageUploading,
     loadErrorMessageKey,
     selectedImagePreview,
   };

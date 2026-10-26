@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Button,
   InputField,
   PasswordInput,
   PasswordStrengthMeter,
@@ -11,6 +12,8 @@ import type { AccountSectionProps } from "../models/AccountSectionProps.interfac
 export const AccountSection = ({
   fieldErrors,
   fields,
+  handleUnlockEmail,
+  isEmailReadOnly = true,
   password,
 }: AccountSectionProps): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
@@ -23,9 +26,22 @@ export const AccountSection = ({
       <InputField
         {...fields.email}
         autoComplete="email"
+        endAdornment={
+          isEmailReadOnly && handleUnlockEmail ? (
+            <Button
+              className="h-7 px-2 text-xs"
+              onClick={handleUnlockEmail}
+              type="button"
+              variant="ghost"
+            >
+              {t("subscriberSignUp.form.changeEmail")}
+            </Button>
+          ) : null
+        }
+        error={fieldErrors.email}
         helperText={t("subscriberSignUp.form.emailHint")}
         label={t("subscriberSignUp.form.emailLabel")}
-        readOnly
+        readOnly={isEmailReadOnly}
         type="email"
       />
       <PasswordInput

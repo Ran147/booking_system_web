@@ -70,6 +70,13 @@ export const useSubscriberSignUpFormViewModel = ({
     useState<Nullable<SignUpSubmitError>>(null);
   const [recaptchaToken, setRecaptchaToken] = useState<Nullable<string>>(null);
   const [recaptchaResetSignal, setRecaptchaResetSignal] = useState(0);
+  const [isEmailReadOnly, setIsEmailReadOnly] = useState(
+    Boolean(checkoutEmail),
+  );
+
+  const handleUnlockEmail = (): void => {
+    setIsEmailReadOnly(false);
+  };
 
   // Schemas store message keys; validation keys live in their own namespace,
   // the rest are feature keys under landing:subscriberSignUp.
@@ -246,6 +253,8 @@ export const useSubscriberSignUpFormViewModel = ({
     },
     handleRecaptchaTokenChange: setRecaptchaToken,
     handleSubmit: form.handleSubmit(submitSignUp),
+    handleUnlockEmail,
+    isEmailReadOnly,
     // Disabled until the reCAPTCHA is solved (AC-KAN-25-08).
     isRecaptchaMissing: !recaptchaToken,
     // Disabled until the server answers, so a double click creates one
