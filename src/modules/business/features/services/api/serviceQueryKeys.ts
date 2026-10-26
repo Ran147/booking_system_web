@@ -9,6 +9,17 @@ export const serviceQueryKeys = Object.freeze({
       businessId,
       FIRESTORE_COLLECTION.SERVICES,
     ] as const),
+  collaborators: (
+    businessId: string,
+    serviceId: string,
+  ): readonly [string, string, string, string, string] =>
+    Object.freeze([
+      FIRESTORE_COLLECTION.BUSINESSES,
+      businessId,
+      FIRESTORE_COLLECTION.SERVICES,
+      serviceId,
+      "collaborators",
+    ] as const),
   detail: (
     businessId: string,
     serviceId: string,

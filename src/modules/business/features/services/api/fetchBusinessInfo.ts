@@ -1,6 +1,6 @@
 import { doc, getDoc } from "firebase/firestore";
 import { z } from "zod";
-import { FIRESTORE_COLLECTION } from "@/constants";
+import { CURRENCY_CODE, FIRESTORE_COLLECTION } from "@/constants";
 import { BUSINESS_STATUS, type BusinessStatus } from "@/domain";
 import { firestore } from "@/services/firebase";
 import { DEFAULT_SERVICE_LIST_CURRENCY } from "../constants/ServiceList.constants";
@@ -8,6 +8,7 @@ import { DEFAULT_SERVICE_LIST_CURRENCY } from "../constants/ServiceList.constant
 export interface BusinessInfo {
   readonly currency: string;
   readonly status: BusinessStatus;
+  readonly timeZone?: string;
 }
 
 const businessInfoDocumentSchema = z.object({
@@ -22,6 +23,7 @@ const businessInfoDocumentSchema = z.object({
     ])
     .optional()
     .default(BUSINESS_STATUS.ACTIVE),
+  timeZone: z.string().optional().default("UTC"),
 });
 
 export const fetchBusinessInfo = async (
@@ -38,6 +40,7 @@ export const fetchBusinessInfo = async (
     return {
       currency: DEFAULT_SERVICE_LIST_CURRENCY,
       status: BUSINESS_STATUS.ACTIVE,
+      timeZone: "UTC",
     };
   }
 
@@ -45,8 +48,15 @@ export const fetchBusinessInfo = async (
     documentSnapshot.data() ?? {},
   );
 
+  const rawCurrency = documentData.currency;
+  const normalizedCurrency =
+    rawCurrency === CURRENCY_CODE.MXN
+      ? DEFAULT_SERVICE_LIST_CURRENCY
+      : rawCurrency;
+
   return {
-    currency: documentData.currency,
+    currency: normalizedCurrency,
     status: documentData.status,
+    timeZone: documentData.timeZone,
   };
 };

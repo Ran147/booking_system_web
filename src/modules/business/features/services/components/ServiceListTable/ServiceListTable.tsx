@@ -4,10 +4,13 @@ import {
   Pencil,
   Power,
   PowerOff,
+  Tag,
   Trash2,
+  Users,
 } from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import {
   Button,
   BUTTON_SIZE,
@@ -22,6 +25,12 @@ import {
 } from "@/components/common";
 import { I18N_NAMESPACE, TONE } from "@/constants";
 import { SERVICE_STATUS } from "@/domain";
+import {
+  calculateDiscountedPrice,
+  DISCOUNT_STATUS,
+  DISCOUNT_TYPE,
+  getDiscountStatus,
+} from "@/modules/business/features/services";
 import { formatPrice } from "@/utils";
 import type { ServiceListTableProps } from "./types/ServiceListTable.types";
 
@@ -31,10 +40,13 @@ export const ServiceListTable = ({
   isReadOnly,
   onActivateService,
   onEditService,
+  onNavigateToCollaborators,
+  onNavigateToDiscounts,
   onOpenDeactivateModal,
   onOpenDeleteModal,
   services,
 }: ServiceListTableProps): ReactElement => {
+  const navigate = useNavigate();
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
 
   return (
@@ -55,6 +67,16 @@ export const ServiceListTable = ({
           {services.map((serviceItem) => {
             const isServiceActive =
               serviceItem.status === SERVICE_STATUS.ACTIVE;
+            const activeDiscount = serviceItem.discounts?.find(
+              (discount) =>
+                getDiscountStatus(discount) === DISCOUNT_STATUS.ACTIVE,
+            );
+            const discountedPriceInCents = activeDiscount
+              ? calculateDiscountedPrice(
+                  serviceItem.priceInCents,
+                  activeDiscount,
+                )
+              : serviceItem.priceInCents;
 
             return (
               <TableRow key={serviceItem.id}>
@@ -75,11 +97,43 @@ export const ServiceListTable = ({
                     minutes: serviceItem.durationMinutes,
                   })}
                 </TableCell>
-                <TableCell className="font-semibold text-foreground">
-                  {formatPrice(
-                    serviceItem.priceInCents,
-                    currency,
-                    i18n.language,
+                <TableCell>
+                  {activeDiscount ? (
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-foreground">
+                          {formatPrice(
+                            discountedPriceInCents,
+                            currency,
+                            i18n.language,
+                          )}
+                        </span>
+                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary">
+                          {activeDiscount.type === DISCOUNT_TYPE.PERCENTAGE
+                            ? `-${activeDiscount.value}%`
+                            : `-${formatPrice(
+                                activeDiscount.value,
+                                currency,
+                                i18n.language,
+                              )}`}
+                        </span>
+                      </div>
+                      <span className="block text-xs text-muted-foreground line-through">
+                        {formatPrice(
+                          serviceItem.priceInCents,
+                          currency,
+                          i18n.language,
+                        )}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="font-semibold text-foreground">
+                      {formatPrice(
+                        serviceItem.priceInCents,
+                        currency,
+                        i18n.language,
+                      )}
+                    </span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -112,6 +166,38 @@ export const ServiceListTable = ({
                       variant={BUTTON_VARIANT.GHOST}
                     >
                       {t("services.list.editAction")}
+                    </Button>
+                    <Button
+                      ariaLabel={t("services.list.discountsAction")}
+                      leftIcon={Tag}
+                      onClick={() =>
+                        onNavigateToDiscounts
+                          ? onNavigateToDiscounts(serviceItem.id)
+                          : navigate(
+                              `/business/services/${serviceItem.id}/discounts`,
+                            )
+                      }
+                      size={BUTTON_SIZE.SM}
+                      type="button"
+                      variant={BUTTON_VARIANT.GHOST}
+                    >
+                      {t("services.list.discountsAction")}
+                    </Button>
+                    <Button
+                      ariaLabel={t("services.list.collaboratorsAction")}
+                      leftIcon={Users}
+                      onClick={() =>
+                        onNavigateToCollaborators
+                          ? onNavigateToCollaborators(serviceItem.id)
+                          : navigate(
+                              `/business/services/${serviceItem.id}/collaborators`,
+                            )
+                      }
+                      size={BUTTON_SIZE.SM}
+                      type="button"
+                      variant={BUTTON_VARIANT.GHOST}
+                    >
+                      {t("services.list.collaboratorsAction")}
                     </Button>
                     {isServiceActive ? (
                       <Button

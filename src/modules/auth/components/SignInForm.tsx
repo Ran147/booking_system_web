@@ -14,6 +14,7 @@ import {
   RecaptchaField,
 } from "@/components/common";
 import { ROUTE_PATH } from "@/constants";
+import { GoogleIcon } from "./GoogleIcon";
 import type { SignInFormProps } from "../models/signIn.model";
 
 export const SignInForm = ({
@@ -22,9 +23,11 @@ export const SignInForm = ({
   const { t } = useTranslation();
   const {
     form,
+    handleGoogleSignIn,
     handleRecaptchaTokenChange,
     handleSubmit,
     handleTogglePasswordVisibility,
+    isGoogleSubmitting,
     isPasswordVisible,
     isSubmitDisabled,
     isSubmitting,
@@ -37,6 +40,29 @@ export const SignInForm = ({
   return (
     <Form {...form}>
       <form className="flex flex-col gap-4" noValidate onSubmit={handleSubmit}>
+        <Button
+          className="h-10 font-medium border-border/80 hover:bg-muted/60 transition-colors"
+          disabled={isSubmitting || isGoogleSubmitting}
+          fullWidth
+          isLoading={isGoogleSubmitting}
+          leftIcon={GoogleIcon}
+          onClick={() => {
+            void handleGoogleSignIn();
+          }}
+          type="button"
+          variant="outline"
+        >
+          {t("auth.signIn.googleSignInAction")}
+        </Button>
+
+        <div className="relative my-1 flex items-center justify-center text-xs text-muted-foreground uppercase">
+          <span className="w-full border-t border-border" />
+          <span className="bg-card px-2 text-muted-foreground">
+            {t("auth.signIn.orDivider")}
+          </span>
+          <span className="w-full border-t border-border" />
+        </div>
+
         <FormField
           control={form.control}
           name="email"
