@@ -35,6 +35,7 @@ export const ROUTE_PATH = {
     ROOT: "/:businessSlug",
   },
   LANDING: {
+    ABOUT: "/about",
     CONTACT: "/contact",
     FAQ: "/faq",
     HELP: "/help",

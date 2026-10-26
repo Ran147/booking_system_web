@@ -1,4 +1,78 @@
 {
+  "about": {
+    "hero": {
+      "badge": "Our Journey & Solution",
+      "description": "We transform how businesses and service professionals manage their schedules, offering an intuitive, scalable, and modern solution.",
+      "title": "Powering the digital management of appointments and services"
+    },
+    "history": {
+      "description": "Booking System was born from the real need to simplify appointment coordination between independent businesses and their clients. What started as a basic scheduling tool evolved into a robust multi-tenant platform connecting businesses, professionals, and clients in a real-time synchronized ecosystem.",
+      "milestones": {
+        "m1": {
+          "description": "Modular architecture design and launch of the initial appointment scheduling prototype.",
+          "title": "Inception & First Steps",
+          "year": "2024"
+        },
+        "m2": {
+          "description": "Multi-tenant architecture rollout featuring dedicated portals for subscribers and customers.",
+          "title": "Multi-Tenant Expansion",
+          "year": "2025"
+        },
+        "m3": {
+          "description": "Integration of online payments, advanced analytics, automated reminders, and collaborator roles.",
+          "title": "Platform Consolidation",
+          "year": "2026"
+        }
+      },
+      "title": "Our History & Journey"
+    },
+    "offerings": {
+      "items": {
+        "analytics": {
+          "description": "Real-time reporting on revenue, occupancy, and top requested services to drive informed business decisions.",
+          "title": "Analytics & Key Metrics"
+        },
+        "booking": {
+          "description": "Empower your clients to book appointments 24/7 from any mobile or desktop device.",
+          "title": "24/7 Online Booking"
+        },
+        "collaboration": {
+          "description": "Assign appointments to team members, manage permissions, and configure individual working schedules.",
+          "title": "Team & Schedule Management"
+        },
+        "reminders": {
+          "description": "Automated notifications to minimize no-shows and keep your clients updated at all times.",
+          "title": "Reminders & Notifications"
+        }
+      },
+      "subtitle": "A comprehensive suite built to empower service businesses of all sizes.",
+      "title": "What We Offer"
+    },
+    "page": {
+      "ariaLabel": "About company page",
+      "description": "Learn more about the history, team, and technology behind Booking System.",
+      "title": "About Us"
+    },
+    "stats": {
+      "bookings": {
+        "label": "Appointments and bookings processed",
+        "value": "+10,000"
+      },
+      "businesses": {
+        "label": "Active businesses on the platform",
+        "value": "+500"
+      },
+      "support": {
+        "label": "Customer support availability",
+        "value": "24/7"
+      },
+      "title": "Impact & Key Metrics",
+      "uptime": {
+        "label": "Guaranteed system uptime",
+        "value": "99.9%"
+      }
+    }
+  },
   "contact": {
     "about": {
       "company": {
