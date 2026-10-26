@@ -5,6 +5,7 @@ import { renderWithProviders, SIGNED_OUT_SESSION } from "@/shared/test-utils";
 import { testI18n } from "@/test-utils/testI18n";
 import { createFaqPageObject } from "./FaqPage.page";
 import { FaqPage } from "../FaqPage";
+import * as faqViewModelModule from "../hooks/useFaqViewModel";
 
 const mockNavigate = vi.fn();
 
@@ -19,6 +20,7 @@ vi.mock("react-router", async () => {
 describe("FaqPage (US-18 / KAN-18)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("KAN-18: AC-KAN-18-01 toggles answer visibility and updates aria-expanded state", async () => {
@@ -85,6 +87,30 @@ describe("FaqPage (US-18 / KAN-18)", () => {
     expect(page.getContactCtaButton()).toBeInTheDocument();
 
     await page.clickContactCtaButton();
+    expect(mockNavigate).toHaveBeenCalledWith(ROUTE_PATH.LANDING.CONTACT);
+  });
+
+  it("KAN-18: AC-KAN-18-04 renders empty state and navigates to contact via empty state cta", async () => {
+    vi.spyOn(faqViewModelModule, "useFaqViewModel").mockReturnValueOnce({
+      expandedItemIds: new Set<string>(),
+      groups: [],
+      handleGoToContact: (): void => {
+        void mockNavigate(ROUTE_PATH.LANDING.CONTACT);
+      },
+      isEmpty: true,
+      toggleItem: vi.fn(),
+    });
+
+    renderWithProviders(<FaqPage />, {
+      initialPath: ROUTE_PATH.LANDING.FAQ,
+      session: SIGNED_OUT_SESSION,
+    });
+
+    const page = createFaqPageObject();
+    expect(page.getEmptyStateMessage()).toBeInTheDocument();
+    expect(page.getEmptyStateCtaButton()).toBeInTheDocument();
+
+    await page.clickEmptyStateCtaButton();
     expect(mockNavigate).toHaveBeenCalledWith(ROUTE_PATH.LANDING.CONTACT);
   });
 

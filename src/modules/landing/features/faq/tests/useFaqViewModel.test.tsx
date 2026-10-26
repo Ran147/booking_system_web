@@ -4,10 +4,16 @@ import { I18nextProvider } from "react-i18next";
 import type * as ReactRouter from "react-router";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ROUTE_PATH } from "@/shared/constants";
+import { ROUTE_PATH, STRING } from "@/shared/constants";
 import { testI18n } from "@/test-utils/testI18n";
 import { FAQ_CONSTANTS } from "../constants/faq.constants";
 import { useFaqViewModel } from "../hooks/useFaqViewModel";
+
+const BLANK_ANSWER = "   ";
+const CALENDAR_SYNC_QUESTION_KEY =
+  "faq.groups.servicesAndBookings.items.calendarSync.question";
+const CLIENT_BOOKING_ANSWER_KEY =
+  "faq.groups.servicesAndBookings.items.clientBooking.answer";
 
 const mockNavigate = vi.fn();
 
@@ -76,5 +82,39 @@ describe("useFaqViewModel", () => {
 
     result.current.handleGoToContact();
     expect(mockNavigate).toHaveBeenCalledWith(ROUTE_PATH.LANDING.CONTACT);
+  });
+
+  it("KAN-18: AC-KAN-18-03 omits items without question or answer and removes empty groups", () => {
+    vi.spyOn(testI18n, "t").mockImplementation(((translationKey: string) => {
+      if (translationKey === CLIENT_BOOKING_ANSWER_KEY) {
+        return BLANK_ANSWER;
+      }
+      if (translationKey === CALENDAR_SYNC_QUESTION_KEY) {
+        return STRING.EMPTY;
+      }
+      return translationKey;
+    }) as never);
+
+    const { result } = renderHook(() => useFaqViewModel(), {
+      wrapper: createTestWrapper(),
+    });
+
+    const groupIds = result.current.groups.map((group) => group.id);
+    expect(groupIds).not.toContain(
+      FAQ_CONSTANTS.GROUP_IDS.SERVICES_AND_BOOKINGS,
+    );
+    expect(groupIds).toContain(FAQ_CONSTANTS.GROUP_IDS.PLANS_AND_BILLING);
+    expect(groupIds).toContain(FAQ_CONSTANTS.GROUP_IDS.ACCOUNT_AND_SECURITY);
+  });
+
+  it("KAN-18: marks catalog as empty when all groups have no complete items", () => {
+    vi.spyOn(testI18n, "t").mockReturnValue("" as never);
+
+    const { result } = renderHook(() => useFaqViewModel(), {
+      wrapper: createTestWrapper(),
+    });
+
+    expect(result.current.isEmpty).toBe(true);
+    expect(result.current.groups).toHaveLength(0);
   });
 });

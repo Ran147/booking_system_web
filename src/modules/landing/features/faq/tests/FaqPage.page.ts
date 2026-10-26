@@ -5,10 +5,13 @@ import { testI18n } from "@/test-utils/testI18n";
 
 export interface FaqPageObject {
   clickContactCtaButton: () => Promise<void>;
+  clickEmptyStateCtaButton: () => Promise<void>;
   clickQuestion: (questionText: string) => Promise<void>;
   getAnswer: (answerText: string) => HTMLElement;
   getContactCtaButton: () => HTMLButtonElement;
   getDescription: () => HTMLElement;
+  getEmptyStateCtaButton: () => HTMLButtonElement;
+  getEmptyStateMessage: () => HTMLElement;
   getGroupHeadings: () => HTMLElement[];
   getMainHeading: () => HTMLHeadingElement;
   getQuestionButton: (questionText: string) => HTMLButtonElement;
@@ -46,6 +49,14 @@ export const createFaqPageObject = (): FaqPageObject => {
       name: testI18n.t("landing:faq.cta.action"),
     }) as HTMLButtonElement;
 
+  const getEmptyStateMessage = (): HTMLElement =>
+    screen.getByText(testI18n.t("landing:faq.empty.description"));
+
+  const getEmptyStateCtaButton = (): HTMLButtonElement =>
+    screen.getByRole("button", {
+      name: testI18n.t("landing:faq.empty.action"),
+    }) as HTMLButtonElement;
+
   const clickQuestion = async (questionText: string): Promise<void> => {
     await user.click(getQuestionButton(questionText));
   };
@@ -54,12 +65,19 @@ export const createFaqPageObject = (): FaqPageObject => {
     await user.click(getContactCtaButton());
   };
 
+  const clickEmptyStateCtaButton = async (): Promise<void> => {
+    await user.click(getEmptyStateCtaButton());
+  };
+
   return {
     clickContactCtaButton,
+    clickEmptyStateCtaButton,
     clickQuestion,
     getAnswer,
     getContactCtaButton,
     getDescription,
+    getEmptyStateCtaButton,
+    getEmptyStateMessage,
     getGroupHeadings,
     getMainHeading,
     getQuestionButton,
