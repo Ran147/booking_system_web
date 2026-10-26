@@ -9,9 +9,9 @@ export interface SendContactMessageResponse {
 export const sendContactMessage = async (
   payload: ContactFormData,
 ): Promise<SendContactMessageResponse> => {
-  await callFunction<{ token: string }, { valid: boolean }>(
-    FUNCTION_NAME.VERIFY_RECAPTCHA,
-    { token: payload.recaptchaToken },
+  await callFunction<ContactFormData, { isSent: boolean }>(
+    FUNCTION_NAME.SEND_CONTACT_MESSAGE,
+    payload,
   );
 
   return { success: true };

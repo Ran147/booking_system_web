@@ -16,6 +16,7 @@ import {
 import { I18N_NAMESPACE, TONE } from "@/constants";
 import type { ServiceDiscount } from "@/domain";
 import {
+  calculateDiscountedPrice,
   DISCOUNT_STATUS,
   DISCOUNT_TYPE,
   getDiscountStatus,
@@ -27,6 +28,7 @@ export interface DiscountsTableProps {
   readonly discounts: readonly ServiceDiscount[];
   readonly isReadOnly: boolean;
   readonly onRemoveDiscount: (index: number) => void;
+  readonly servicePriceInCents?: number;
   readonly timeZone: string;
 }
 
@@ -35,6 +37,7 @@ export const DiscountsTable = ({
   discounts,
   isReadOnly,
   onRemoveDiscount,
+  servicePriceInCents,
   timeZone,
 }: DiscountsTableProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
@@ -75,6 +78,11 @@ export const DiscountsTable = ({
           <TableRow>
             <TableHead>{t("services.discounts.typeLabel")}</TableHead>
             <TableHead>{t("services.discounts.valueLabel")}</TableHead>
+            {servicePriceInCents !== undefined && (
+              <TableHead>
+                {t("services.discounts.discountedPriceLabel")}
+              </TableHead>
+            )}
             <TableHead>{t("services.discounts.startDateLabel")}</TableHead>
             <TableHead>{t("services.discounts.endDateLabel")}</TableHead>
             <TableHead>{t("services.list.status")}</TableHead>
@@ -101,6 +109,15 @@ export const DiscountsTable = ({
                 <TableCell className="text-foreground">
                   {formattedValue}
                 </TableCell>
+                {servicePriceInCents !== undefined && (
+                  <TableCell className="font-semibold text-foreground">
+                    {formatPrice(
+                      calculateDiscountedPrice(servicePriceInCents, discount),
+                      currency,
+                      i18n.language,
+                    )}
+                  </TableCell>
+                )}
                 <TableCell className="text-muted-foreground">
                   {formatDate(discount.startsAt)}
                 </TableCell>

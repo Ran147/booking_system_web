@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogIn } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut } from "lucide-react";
 import type { MouseEvent, ReactElement } from "react";
 import { Button, BUTTON_SIZE, BUTTON_VARIANT } from "@/components/common";
 import { LANDING_NAVBAR_CONSTANTS } from "@/modules/landing/layout/constants/landingNavbar.constants";
@@ -12,8 +12,12 @@ export const LandingNavbarMobileMenu = ({
   mobileNavLabel,
   navLinks,
   onNavigate,
+  onSignOut,
   portalActionLabel,
   portalActionPath,
+  signOutActionLabel,
+  signUpActionLabel,
+  signUpActionPath,
 }: LandingNavbarMobileMenuProps): Nullable<ReactElement> => {
   if (!isOpen) {
     return null;
@@ -39,7 +43,7 @@ export const LandingNavbarMobileMenu = ({
           </AppLink>
         ))}
 
-        <div className="pt-4 sm:hidden">
+        <div className="flex flex-col gap-2 pt-4 sm:hidden">
           <Button
             ariaLabel={portalActionLabel}
             className="w-full justify-center"
@@ -52,6 +56,31 @@ export const LandingNavbarMobileMenu = ({
           >
             {portalActionLabel}
           </Button>
+
+          {isSignedIn && onSignOut && signOutActionLabel && (
+            <Button
+              ariaLabel={signOutActionLabel}
+              className="w-full justify-center"
+              leftIcon={LogOut}
+              onClick={onSignOut}
+              size={BUTTON_SIZE.DEFAULT}
+              variant={BUTTON_VARIANT.OUTLINE}
+            >
+              {signOutActionLabel}
+            </Button>
+          )}
+
+          {!isSignedIn && signUpActionLabel && signUpActionPath && (
+            <Button
+              ariaLabel={signUpActionLabel}
+              className="w-full justify-center"
+              onClick={(): void => onNavigate(signUpActionPath)}
+              size={BUTTON_SIZE.DEFAULT}
+              variant={BUTTON_VARIANT.DEFAULT}
+            >
+              {signUpActionLabel}
+            </Button>
+          )}
         </div>
       </nav>
     </div>

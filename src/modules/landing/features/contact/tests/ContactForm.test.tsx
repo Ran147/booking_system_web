@@ -52,8 +52,13 @@ describe("ContactForm (US-05 / KAN-5)", () => {
     expect(page.getEmailInput()).toHaveValue("");
     expect(page.getSubjectInput()).toHaveValue("");
     expect(page.getMessageInput()).toHaveValue("");
-    expect(callFunction).toHaveBeenCalledWith("verifyRecaptcha", {
-      token: "recaptcha-token",
+    expect(callFunction).toHaveBeenCalledWith("sendContactMessage", {
+      email: "laura@example.com",
+      message:
+        "Quisiera agendar una reunión para conocer la plataforma a fondo.",
+      name: "Laura Gomez",
+      recaptchaToken: "recaptcha-token",
+      subject: "Demostración de software",
     });
   });
 

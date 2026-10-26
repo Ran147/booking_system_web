@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "@/components/common";
 import {
+  CURRENCY_CODE,
   ERROR_MESSAGE_KEY,
   I18N_NAMESPACE,
   MONEY,
@@ -26,9 +27,10 @@ import {
 } from "../api";
 import type { BusinessInfo } from "../api";
 import {
+  DEFAULT_SERVICE_LIST_CURRENCY,
   DISCOUNT_LIMIT,
   DISCOUNT_TYPE,
-} from "../constants/ServiceDiscount.constants";
+} from "../constants";
 import type { ServiceDetail } from "../models/ServiceDetail.interface";
 import type {
   DiscountFormState,
@@ -268,7 +270,10 @@ export const useServiceDiscountsViewModel = (
   };
 
   return {
-    currency: businessInfo?.currency ?? "USD",
+    currency:
+      businessInfo?.currency === CURRENCY_CODE.MXN || !businessInfo?.currency
+        ? DEFAULT_SERVICE_LIST_CURRENCY
+        : businessInfo.currency,
     discounts,
     formError,
     formState,

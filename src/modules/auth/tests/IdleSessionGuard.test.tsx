@@ -4,7 +4,7 @@ import type * as FirebaseAuth from "firebase/auth";
 import type { ReactElement } from "react";
 import { useLocation, type RouteObject } from "react-router";
 import { RootLayout } from "@/app/router/RootLayout";
-import { LANGUAGE, ROUTE_PATH } from "@/constants";
+import { LANGUAGE, ROUTE_PATH, STORAGE_KEY } from "@/constants";
 import { DEFAULT_PLATFORM_SETTINGS } from "@/domain";
 import { renderRoutesWithProviders } from "@/test-utils/renderRoutesWithProviders";
 import {
@@ -130,6 +130,7 @@ const receiveFromOtherTab = (message: unknown): void => {
 
 describe("IdleSessionGuard", () => {
   beforeEach(() => {
+    localStorage.clear();
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.stubGlobal("BroadcastChannel", FakeBroadcastChannel);
     FakeBroadcastChannel.instances = [];
@@ -140,6 +141,7 @@ describe("IdleSessionGuard", () => {
   });
 
   afterEach(async () => {
+    localStorage.clear();
     vi.useRealTimers();
     vi.unstubAllGlobals();
     vi.clearAllMocks();
@@ -321,6 +323,20 @@ describe("IdleSessionGuard", () => {
         );
         await vi.advanceTimersByTimeAsync(0);
       });
+
+      expect(guardPage.queryWarning()).toBeNull();
+      expect(signOut).toHaveBeenCalledTimes(1);
+      expect(guardPage.readSignOutReason()).toBe(SIGN_OUT_REASON.IDLE);
+    });
+
+    it("AC-KAN-38-08: signs out immediately on mount when last activity in localStorage exceeds idle timeout", async () => {
+      const fourteenHoursMs = 14 * 60 * MINUTE_MS;
+      localStorage.setItem(
+        STORAGE_KEY.LAST_ACTIVITY_AT,
+        String(Date.now() - fourteenHoursMs),
+      );
+
+      const guardPage = await renderGuard();
 
       expect(guardPage.queryWarning()).toBeNull();
       expect(signOut).toHaveBeenCalledTimes(1);
