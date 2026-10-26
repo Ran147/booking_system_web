@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { signOut } from "firebase/auth";
 import type { FC, ReactElement, ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { MemoryRouter } from "react-router";
@@ -13,6 +14,10 @@ import {
 } from "@/shared/test-utils";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { useLandingNavbarViewModel } from "../hooks/useLandingNavbarViewModel";
+
+vi.mock("firebase/auth", () => ({
+  signOut: vi.fn().mockResolvedValue(undefined),
+}));
 
 const createWrapper = (
   session: Session = SIGNED_OUT_SESSION,
@@ -116,5 +121,22 @@ describe("useLandingNavbarViewModel", () => {
     });
 
     expect(result.current.hasLogoImageError).toBe(true);
+  });
+
+  it("executes signOut when handleSignOut is called for signed in user", async () => {
+    const { result } = renderHook(() => useLandingNavbarViewModel(), {
+      wrapper: createWrapper(SUBSCRIBER_SESSION),
+    });
+
+    expect(result.current.isSignedIn).toBe(true);
+    expect(result.current.signOutActionLabel).toBe(
+      testI18n.t("landing:home.navbar.signOut"),
+    );
+
+    await act(async () => {
+      await result.current.handleSignOut();
+    });
+
+    expect(signOut).toHaveBeenCalled();
   });
 });

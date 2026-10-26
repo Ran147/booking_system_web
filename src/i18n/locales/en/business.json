@@ -49,6 +49,11 @@
   "home": {
     "closeModal": "Got it",
     "configs": {
+      "profile": {
+        "action": "Edit profile",
+        "description": "Name, logo, phone, address and social links visible to clients.",
+        "title": "Public business profile"
+      },
       "settings": {
         "action": "Configure",
         "description": "Time zone, currency, notifications and appearance.",
@@ -145,6 +150,8 @@
       "openMenu": "Open navigation menu",
       "reports": "Reports",
       "reportsDescription": "Occupancy and operational metrics",
+      "profile": "Public profile",
+      "profileDescription": "Business public information and presence",
       "schedule": "Schedule",
       "scheduleDescription": "Appointments, bookings and schedule blocks",
       "services": "Services",
@@ -222,12 +229,15 @@
       "activeBadge": "Active",
       "addDiscountAction": "Add discount",
       "adding": "Saving…",
+      "basePriceLabel": "Base price: {{price}}",
+      "discountedPriceLabel": "Discounted price",
       "emptyDescription": "Add a discount to incentivize your customers.",
       "emptyTitle": "No promotions configured",
       "endDateLabel": "End date",
       "expiredBadge": "Expired",
       "invalidDateRangeError": "The end date must be on or after the start date.",
       "overlapError": "The date range overlaps with an existing discount.",
+      "previewPrice": "Resulting price: {{price}}",
       "readOnlyNotice": "Your business is inactive or suspended. Promotion management is disabled.",
       "removeAction": "Remove",
       "removeConfirmDescription": "Are you sure you want to remove this discount?",
@@ -330,5 +340,37 @@
       "deactivateConfirmTitle": "Deactivate service",
       "deactivateSuccess": "Service deactivated."
     }
+  },
+  "settings": {
+    "description": "Manage your personal account preferences.",
+    "language": {
+      "description": "Text, dates, times and prices will use the selected language.",
+      "label": "Interface language",
+      "saveError": "The language changed on this device, but it could not be saved to your account.",
+      "title": "Language"
+    },
+    "password": {
+      "confirmationMismatch": "The confirmation does not match the new password.",
+      "confirmPasswordLabel": "Confirm new password",
+      "currentPasswordInvalid": "The current password is incorrect.",
+      "currentPasswordLabel": "Current password",
+      "description": "Update the password you use to access your account.",
+      "newPasswordLabel": "New password",
+      "sameAsCurrent": "The new password must be different from the current password.",
+      "sessionExpired": "Your session is no longer valid. Sign in again before changing your password.",
+      "strengthLabel": "Password strength",
+      "submitAction": "Change password",
+      "submitting": "Changing…",
+      "successMessage": "Password updated successfully.",
+      "title": "Change password",
+      "tooManyAttempts": "Too many attempts were made. Wait a moment before trying again."
+    },
+    "theme": {
+      "description": "Choose how the business portal interface is displayed.",
+      "label": "Interface theme",
+      "saveError": "The theme changed on this device, but it could not be saved to your account.",
+      "title": "Appearance"
+    },
+    "title": "Settings"
   }
 }

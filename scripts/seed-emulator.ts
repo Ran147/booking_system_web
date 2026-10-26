@@ -36,6 +36,7 @@ import { seedCustomerBookings } from "./seedCustomerBookings";
 import { seedSignUpCheckouts } from "./seedSignUpCheckout";
 import { FIRESTORE_COLLECTION } from "../src/constants/firestore/FirestoreCollection.constants";
 import { DEFAULT_LANGUAGE } from "../src/constants/i18n/Language.constants";
+import { THEME_MODE } from "../src/constants/theme/ThemeMode.constants";
 import { BUSINESS_STATUS } from "../src/domain/business/BusinessStatus.constants";
 import { isReservedBusinessSlug } from "../src/domain/business/isReservedBusinessSlug";
 import { COLLABORATOR_PERMISSION } from "../src/domain/collaborator/CollaboratorPermission.constants";
@@ -122,6 +123,7 @@ const writeUserProfile = async (
     // Sign-in switches the interface to User.language (AC-KAN-129-02).
     language: DEFAULT_LANGUAGE,
     phone: seedUser.PHONE,
+    theme: THEME_MODE.SYSTEM,
   });
 };
 

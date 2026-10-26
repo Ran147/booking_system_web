@@ -2,6 +2,7 @@ import { FirebaseError } from "firebase/app";
 import { FIREBASE_ERROR_CODE } from "@/constants";
 import {
   SIGN_IN_ERROR_KEY,
+  SIGN_IN_FAILURE,
   type SignInErrorKey,
 } from "../constants/SignInErrorKey.constants";
 import type { SignInError } from "../models/SignIn.mutation";
@@ -26,7 +27,24 @@ const MESSAGE_KEY_BY_CODE: Readonly<Record<string, SignInErrorKey>> = {
 };
 
 export const mapSignInError = (error: unknown): SignInError => {
+  if (
+    error instanceof Error &&
+    error.message === SIGN_IN_FAILURE.MISSING_ROLE_CLAIM
+  ) {
+    return {
+      code: FIREBASE_ERROR_CODE.PERMISSION_DENIED,
+      messageKey: SIGN_IN_ERROR_KEY.NO_ROLE_ASSIGNED,
+    };
+  }
+
   if (error instanceof FirebaseError) {
+    if (error.code === FIREBASE_ERROR_CODE.POPUP_CLOSED_BY_USER) {
+      return {
+        code: error.code,
+        messageKey: null as unknown as SignInErrorKey,
+      };
+    }
+
     return {
       code: error.code,
       messageKey: MESSAGE_KEY_BY_CODE[error.code] ?? SIGN_IN_ERROR_KEY.UNKNOWN,

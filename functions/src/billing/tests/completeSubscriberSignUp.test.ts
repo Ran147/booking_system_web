@@ -100,9 +100,20 @@ describe("completeSubscriberSignUp", () => {
       status: "pending",
       timeZone: "America/Mexico_City",
     });
-    expect(userRecord.customClaims).toEqual({
+    expect(userRecord.customClaims).toMatchObject({
       businessId: businessSnapshot?.id,
-      role: "subscriber",
+      business_id: businessSnapshot?.id,
+      role: "business_owner",
+    });
+
+    const ownerCollaboratorSnapshot = await businessSnapshot!.ref
+      .collection(FIRESTORE_COLLECTION.COLLABORATORS)
+      .doc(userRecord.uid)
+      .get();
+    expect(ownerCollaboratorSnapshot.data()).toMatchObject({
+      is_owner: true,
+      status: "active",
+      uid: userRecord.uid,
     });
 
     const userSnapshot = await firestore
@@ -262,7 +273,7 @@ describe("completeSubscriberSignUp", () => {
 
     expect(signUpResponse).toEqual({ email: TEST_CHECKOUT_EMAIL });
     const userRecord = await auth.getUserByEmail(TEST_CHECKOUT_EMAIL);
-    expect(userRecord.customClaims).toMatchObject({ role: "subscriber" });
+    expect(userRecord.customClaims).toMatchObject({ role: "business_owner" });
     expect(wait).toHaveBeenCalledExactlyOnceWith(
       SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS,
     );

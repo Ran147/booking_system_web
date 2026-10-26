@@ -18,7 +18,7 @@ export const useAuthSessionController = (): AuthContextValue => {
   const shouldUseDevMockSession = Boolean(
     import.meta.env.DEV &&
     !import.meta.env.VITEST &&
-    import.meta.env.VITE_USE_EMULATORS !== ENV_FLAG.ENABLED,
+    import.meta.env.VITE_DEV_MOCK_AUTH === ENV_FLAG.ENABLED,
   );
 
   const [session, setSession] = useState<Session>(() =>

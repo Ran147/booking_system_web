@@ -31,7 +31,11 @@ export const businessRoutes: RouteObject[] = [
                 path: ROUTE_PATH.BUSINESS.BUSINESS_PROFILE,
               },
             ],
-            element: <RequireRole allowedRoles={[USER_ROLE.SUBSCRIBER]} />,
+            element: (
+              <RequireRole
+                allowedRoles={[USER_ROLE.BUSINESS_OWNER, USER_ROLE.SUBSCRIBER]}
+              />
+            ),
           },
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
@@ -83,7 +87,11 @@ export const businessRoutes: RouteObject[] = [
     ],
     element: (
       <RequireRole
-        allowedRoles={[USER_ROLE.SUBSCRIBER, USER_ROLE.COLLABORATOR]}
+        allowedRoles={[
+          USER_ROLE.BUSINESS_OWNER,
+          USER_ROLE.COLLABORATOR,
+          USER_ROLE.SUBSCRIBER,
+        ]}
       />
     ),
     path: ROUTE_PATH.BUSINESS.ROOT,

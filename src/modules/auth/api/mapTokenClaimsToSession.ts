@@ -23,7 +23,9 @@ export const mapTokenClaimsToSession = (
   if (!isUserRole(roleClaim)) return { status: SESSION_STATUS.SIGNED_OUT };
 
   return {
-    businessId: readStringClaim(tokenClaims[AUTH_CLAIM.BUSINESS_ID]),
+    businessId:
+      readStringClaim(tokenClaims[AUTH_CLAIM.BUSINESS_ID]) ??
+      readStringClaim(tokenClaims[AUTH_CLAIM.BUSINESS_ID_SNAKE]),
     collaboratorId: readStringClaim(tokenClaims[AUTH_CLAIM.COLLABORATOR_ID]),
     role: roleClaim,
     status: SESSION_STATUS.SIGNED_IN,

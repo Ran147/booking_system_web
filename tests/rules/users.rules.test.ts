@@ -39,10 +39,12 @@ describe("firestore.rules: users", () => {
       await adminFirestore.doc(SUBSCRIBER_PROFILE_PATH).set({
         fullName: "Subscriber A",
         language: "es",
+        theme: "system",
       });
       await adminFirestore.doc(COLLABORATOR_PROFILE_PATH).set({
         fullName: "Collaborator A",
         language: "es",
+        theme: "system",
       });
       await adminFirestore.doc("businesses/business-inactive").set({
         ownerUserId: "subscriber-a",
@@ -202,6 +204,105 @@ describe("firestore.rules: users", () => {
         .firestore()
         .doc(SUBSCRIBER_PROFILE_PATH)
         .update({ fullName: "Changed" }),
+    );
+  });
+
+  it("KAN-52: lets a subscriber update their own theme", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertSucceeds(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ theme: "dark" }),
+    );
+  });
+
+  it("KAN-52: lets an active collaborator update their own theme", async () => {
+    const collaborator = testEnvironment.authenticatedContext(
+      "collaborator-user-a",
+      {
+        businessId: "business-a",
+        collaboratorId: "collaborator-a",
+        role: "collaborator",
+      },
+    );
+
+    await assertSucceeds(
+      collaborator
+        .firestore()
+        .doc(COLLABORATOR_PROFILE_PATH)
+        .update({ theme: "dark" }),
+    );
+  });
+
+  it("KAN-51/KAN-52: lets a subscriber update language and theme together", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertSucceeds(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en", theme: "light" }),
+    );
+  });
+
+  it("KAN-52: denies updating another user's theme", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-b", {
+      businessId: "business-b",
+      role: "subscriber",
+    });
+
+    await assertFails(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ theme: "dark" }),
+    );
+  });
+
+  it("KAN-52: denies unauthenticated theme updates", async () => {
+    const visitor = testEnvironment.unauthenticatedContext();
+
+    await assertFails(
+      visitor
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ theme: "dark" }),
+    );
+  });
+
+  it("KAN-52: denies an unsupported theme", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertFails(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ theme: "sepia" }),
+    );
+  });
+
+  it("KAN-51/KAN-52: denies preference updates with arbitrary fields", async () => {
+    const subscriber = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertFails(
+      subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ fullName: "Changed", language: "en", theme: "dark" }),
     );
   });
 });

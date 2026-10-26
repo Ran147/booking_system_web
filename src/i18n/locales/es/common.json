@@ -53,9 +53,15 @@
     },
     "signIn": {
       "accountDisabled": "Tu cuenta está desactivada. Si crees que es un error, contacta a quien te dio acceso.",
+      "backToHome": "Volver al inicio",
       "emailLabel": "Correo electrónico",
+      "explorePlansAction": "Conoce nuestros planes y regístrate",
       "forgotPassword": "¿Olvidaste tu contraseña?",
+      "googleSignInAction": "Continuar con Google",
       "invalidCredentials": "El correo o la contraseña no son correctos.",
+      "noAccountPrompt": "¿No tienes una cuenta aún?",
+      "noRoleAssigned": "Esta cuenta de Google no tiene un negocio o rol asignado. Contrata un plan para registrarte o solicita acceso.",
+      "orDivider": "o",
       "passwordLabel": "Contraseña",
       "recaptchaLabel": "Verificación de seguridad",
       "recoverPasswordAction": "Recuperar contraseña",
@@ -97,6 +103,11 @@
   },
   "status": {
     "loading": "Cargando…"
+  },
+  "theme": {
+    "darkLabel": "Oscuro",
+    "lightLabel": "Claro",
+    "systemLabel": "Sistema"
   },
   "subscriptionStatus": {
     "active": "Activa",

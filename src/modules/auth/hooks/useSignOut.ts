@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router";
-import { ROUTE_PATH } from "@/constants";
+import { ROUTE_PATH, STORAGE_KEY } from "@/constants";
 import { auth } from "@/services/firebase";
 import type { SignOutLocationState } from "../models/SignOutLocationState.interface";
 import type { SignOutOptions } from "../models/idleSession.model";
@@ -32,6 +32,14 @@ export const useSignOut = (): ((
     } catch {
       // Cleared and navigated below either way; the caller can try again.
       wasSignedOut = false;
+    }
+
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY.LAST_ACTIVITY_AT);
+      } catch {
+        // Ignored
+      }
     }
 
     const locationState: SignOutLocationState = { reason };

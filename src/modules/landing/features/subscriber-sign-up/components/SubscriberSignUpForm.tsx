@@ -19,6 +19,8 @@ export const SubscriberSignUpForm = (
     fields,
     handleRecaptchaTokenChange,
     handleSubmit,
+    handleUnlockEmail,
+    isEmailReadOnly,
     isRecaptchaMissing,
     isSubmitting,
     language,
@@ -34,6 +36,8 @@ export const SubscriberSignUpForm = (
       <AccountSection
         fieldErrors={fieldErrors}
         fields={fields}
+        handleUnlockEmail={handleUnlockEmail}
+        isEmailReadOnly={isEmailReadOnly}
         password={password}
       />
       <BusinessSection

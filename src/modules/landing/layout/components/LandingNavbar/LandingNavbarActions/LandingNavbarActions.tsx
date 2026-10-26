@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogIn, Menu, X } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut, Menu, X } from "lucide-react";
 import type { ReactElement } from "react";
 import { Button, BUTTON_SIZE, BUTTON_VARIANT } from "@/components/common";
 import { LANDING_NAVBAR_CONSTANTS } from "@/modules/landing/layout/constants/landingNavbar.constants";
@@ -9,14 +9,18 @@ export const LandingNavbarActions = ({
   isMobileMenuOpen,
   isSignedIn,
   onNavigate,
+  onSignOut,
   onToggleMobileMenu,
   openMenuLabel,
   portalActionLabel,
   portalActionPath,
+  signOutActionLabel,
+  signUpActionLabel,
+  signUpActionPath,
 }: LandingNavbarActionsProps): ReactElement => {
   return (
     <div className="flex items-center gap-2">
-      <div className="hidden sm:block">
+      <div className="hidden items-center gap-2 sm:flex">
         <Button
           ariaLabel={portalActionLabel}
           leftIcon={isSignedIn ? LayoutDashboard : LogIn}
@@ -26,6 +30,29 @@ export const LandingNavbarActions = ({
         >
           {portalActionLabel}
         </Button>
+
+        {isSignedIn && onSignOut && signOutActionLabel && (
+          <Button
+            ariaLabel={signOutActionLabel}
+            leftIcon={LogOut}
+            onClick={onSignOut}
+            size={BUTTON_SIZE.DEFAULT}
+            variant={BUTTON_VARIANT.OUTLINE}
+          >
+            {signOutActionLabel}
+          </Button>
+        )}
+
+        {!isSignedIn && signUpActionLabel && signUpActionPath && (
+          <Button
+            ariaLabel={signUpActionLabel}
+            onClick={(): void => onNavigate(signUpActionPath)}
+            size={BUTTON_SIZE.DEFAULT}
+            variant={BUTTON_VARIANT.DEFAULT}
+          >
+            {signUpActionLabel}
+          </Button>
+        )}
       </div>
 
       <div className="md:hidden">

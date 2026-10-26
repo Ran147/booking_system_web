@@ -56,6 +56,10 @@ export interface SubscriberSignUpFormViewModel {
     recaptchaToken: Nullable<string>,
   ) => void;
   readonly handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
+  /** Unlocks the email field so the user can edit it. */
+  readonly handleUnlockEmail: () => void;
+  /** Whether the email field is locked to the checkout email. */
+  readonly isEmailReadOnly: boolean;
   /** No solved reCAPTCHA yet: submit stays disabled (AC-KAN-25-08). */
   readonly isRecaptchaMissing: boolean;
   readonly isSubmitting: boolean;
