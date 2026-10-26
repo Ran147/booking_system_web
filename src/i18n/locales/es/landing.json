@@ -17,26 +17,21 @@
     },
     "backToHome": "Volver al inicio",
     "channels": {
-      "email": {
-        "description": "Escríbenos para consultas comerciales o soporte técnico.",
-        "label": "soporte@bookingsystem.com",
-        "title": "Correo electrónico"
-      },
-      "hours": {
-        "description": "Lunes a Viernes de 8:00 a 18:00 (UTC-6)",
-        "label": "Horario de atención",
-        "title": "Disponibilidad"
-      },
-      "phone": {
-        "description": "Llámanos directamente para asistencia inmediata.",
-        "label": "+506 2222-0000",
-        "title": "Línea telefónica"
-      },
+      "cardDescription": "Comunícate directamente con nuestro equipo a través de cualquiera de los siguientes medios oficiales.",
+      "cardTitle": "Canales de atención directa",
+      "emailAriaLabel": "Enviar correo electrónico a {{email}}",
+      "emailLabel": "Correo electrónico",
+      "fallbackNotice": "En este momento todos nuestros canales de atención se gestionan a través del formulario.",
+      "phoneAriaLabel": "Llamar al teléfono {{phone}}",
+      "phoneLabel": "Teléfono",
+      "sectionAriaLabel": "Medios de contacto directo",
       "social": {
-        "description": "Síguenos en nuestras redes oficiales para novedades.",
-        "title": "Redes sociales"
+        "facebook": "Facebook de Booking System (abre en una nueva pestaña)",
+        "instagram": "Instagram de Booking System (abre en una nueva pestaña)",
+        "linkedin": "LinkedIn de Booking System (abre en una nueva pestaña)",
+        "x": "X de Booking System (abre en una nueva pestaña)"
       },
-      "title": "Canales directos de contacto"
+      "socialTitle": "Redes sociales oficiales"
     },
     "faq": {
       "items": {

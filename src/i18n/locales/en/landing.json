@@ -17,26 +17,21 @@
     },
     "backToHome": "Back to home",
     "channels": {
-      "email": {
-        "description": "Write to us for business inquiries or technical support.",
-        "label": "soporte@bookingsystem.com",
-        "title": "Email"
-      },
-      "hours": {
-        "description": "Monday to Friday from 8:00 AM to 6:00 PM (UTC-6)",
-        "label": "Business hours",
-        "title": "Availability"
-      },
-      "phone": {
-        "description": "Call us directly for immediate assistance.",
-        "label": "+506 2222-0000",
-        "title": "Phone line"
-      },
+      "cardDescription": "Reach out directly to our team through any of the following official channels.",
+      "cardTitle": "Direct support channels",
+      "emailAriaLabel": "Send email to {{email}}",
+      "emailLabel": "Email address",
+      "fallbackNotice": "Currently, all support requests are handled through our contact form.",
+      "phoneAriaLabel": "Call phone number {{phone}}",
+      "phoneLabel": "Phone number",
+      "sectionAriaLabel": "Direct contact channels",
       "social": {
-        "description": "Follow us on our official social channels for updates.",
-        "title": "Social networks"
+        "facebook": "Booking System Facebook (opens in a new tab)",
+        "instagram": "Booking System Instagram (opens in a new tab)",
+        "linkedin": "Booking System LinkedIn (opens in a new tab)",
+        "x": "Booking System X (opens in a new tab)"
       },
-      "title": "Direct contact channels"
+      "socialTitle": "Official social networks"
     },
     "faq": {
       "items": {
