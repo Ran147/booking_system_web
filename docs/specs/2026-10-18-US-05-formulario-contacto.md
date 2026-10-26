@@ -16,7 +16,7 @@
 
 Proveer en la página de Contacto del portal público (`/contact`) un formulario accesible, validado y seguro contra ataques de spam y bots automatizados mediante Google reCAPTCHA. A través de este formulario (`ContactForm`), cualquier visitante o usuario interesado puede enviar dudas comerciales, solicitudes de demostración o consultas generales al equipo de soporte de Booking System sin necesidad de registrarse previamente.
 
-El formulario implementa el patrón MVVM (`useContactFormViewModel`), validación con Zod y React Hook Form (`forms-validation-standards`), consume componentes atómicos de `src/components/common/` (`Input`, `TextareaField`, `Button`, `RecaptchaField`), e incluye estados claros de carga (`isSubmitting`), éxito tras el envío con reseteo de campos, y recuperación ante fallos de red.
+El formulario implementa el patrón MVVM (`useContactFormViewModel`), validación con Zod y React Hook Form (`forms-validation-standards`), consume componentes atómicos de `src/components/common/` (`Input`, `TextareaField`, `Button`, `RecaptchaField`), e interactúa con la Cloud Function invocable `sendContactMessage` (`functions/src/notifications/sendContactMessage.ts`). La Cloud Function valida el esquema de entrada, comprueba el token reCAPTCHA mediante `assertRecaptcha` en el backend (`cloud-functions-standards` §2) y persiste el mensaje con marca de tiempo en la colección Firestore `contactMessages` de forma segura mediante el SDK Admin. Incluye estados claros de carga (`isSubmitting`), éxito tras el envío con reseteo de campos, y recuperación ante fallos de red.
 
 ---
 
