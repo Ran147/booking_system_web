@@ -205,6 +205,10 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
     return { isVerified: true } as Response;
   }
 
+  if (functionName === FUNCTION_NAME.SEND_CONTACT_MESSAGE) {
+    return { isSent: true } as Response;
+  }
+
   if (functionName === FUNCTION_NAME.REQUEST_PASSWORD_RESET) {
     return { isRequested: true } as Response;
   }

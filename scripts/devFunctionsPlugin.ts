@@ -100,6 +100,25 @@ export const devFunctionsPlugin = (): Plugin => ({
               return;
             }
 
+            if (functionName === FUNCTION_NAME.SEND_CONTACT_MESSAGE) {
+              const email = String(payload.email || "");
+              const message = String(payload.message || "");
+              const name = String(payload.name || "");
+              const subject = String(payload.subject || "");
+              await firestore.collection("contactMessages").add({
+                createdAt: Timestamp.now(),
+                email,
+                message,
+                name,
+                status: "unread",
+                subject,
+              });
+              response.statusCode = 200;
+              response.setHeader("Content-Type", "application/json");
+              response.end(JSON.stringify({ isSent: true }));
+              return;
+            }
+
             if (functionName === FUNCTION_NAME.REQUEST_PASSWORD_RESET) {
               response.statusCode = 200;
               response.setHeader("Content-Type", "application/json");

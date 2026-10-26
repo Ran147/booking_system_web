@@ -64,10 +64,31 @@
       "subtitle": "Clear answers to the most common questions about the platform.",
       "title": "Frequently asked questions"
     },
+    "form": {
+      "dismissAction": "Dismiss",
+      "dismissAlert": "Dismiss alert",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@email.com",
+      "messageLabel": "Message or inquiry",
+      "messagePlaceholder": "Write your detailed message here...",
+      "nameLabel": "Full name",
+      "namePlaceholder": "Your first and last name",
+      "recaptchaLabel": "Security check",
+      "serverError": "An error occurred while sending your message. Please try again.",
+      "submitButton": "Send message",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "How can we help you?",
+      "success": "Message sent successfully! Our team will get back to you shortly.",
+      "title": "Contact form"
+    },
     "help": {
       "action": "View plans",
       "description": "Need a tailored solution or have custom requirements? Our team is here to support you every step of the way.",
       "title": "Have additional questions?"
+    },
+    "page": {
+      "description": "Have questions about Booking System or need a personalized demo? Reach out to our team and we'll be happy to help.",
+      "title": "Contact us"
     },
     "subtitle": "Learn who we are, find answers, and reach out to our support team.",
     "title": "Contact and customer support"

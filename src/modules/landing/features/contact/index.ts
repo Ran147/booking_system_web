@@ -1,7 +1,7 @@
-export { ContactPage } from "./components/ContactPage";
-export { useContactViewModel } from "./hooks/useContactViewModel";
-export type {
-  ContactChannelItem,
-  ContactFaqItem,
-  ContactViewModel,
-} from "./models/contact.model";
+export { ContactPage } from "./ContactPage";
+export { ContactForm } from "./components/ContactForm";
+export type { ContactFormProps } from "./models/contactForm.model";
+export {
+  contactFormSchema,
+  type ContactFormData,
+} from "./models/contactForm.schema";

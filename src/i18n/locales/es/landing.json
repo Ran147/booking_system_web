@@ -64,10 +64,31 @@
       "subtitle": "Respuestas claras a las dudas más comunes sobre la plataforma.",
       "title": "Preguntas frecuentes"
     },
+    "form": {
+      "dismissAction": "Cerrar",
+      "dismissAlert": "Cerrar alerta",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@correo.com",
+      "messageLabel": "Mensaje o consulta",
+      "messagePlaceholder": "Escribe tu consulta detallada aquí...",
+      "nameLabel": "Nombre completo",
+      "namePlaceholder": "Tu nombre y apellido",
+      "recaptchaLabel": "Verificación de seguridad",
+      "serverError": "Ocurrió un error al enviar el mensaje. Inténtalo nuevamente.",
+      "submitButton": "Enviar mensaje",
+      "subjectLabel": "Asunto",
+      "subjectPlaceholder": "¿En qué podemos ayudarte?",
+      "success": "¡Mensaje enviado con éxito! Nos comunicaremos contigo lo más pronto posible.",
+      "title": "Formulario de contacto"
+    },
     "help": {
       "action": "Ir a los planes",
       "description": "¿Necesitas una solución personalizada o tienes requerimientos especiales? Nuestro equipo te acompaña en cada paso.",
       "title": "¿Tienes preguntas adicionales?"
+    },
+    "page": {
+      "description": "¿Tienes alguna pregunta sobre Booking System o deseas una demostración personalizada? Escríbenos y nuestro equipo te responderá.",
+      "title": "Contáctanos"
     },
     "subtitle": "Conoce quiénes somos, resuelve tus dudas y comunícate con nuestro equipo de atención.",
     "title": "Contacto y atención al cliente"
