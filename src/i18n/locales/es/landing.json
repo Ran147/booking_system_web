@@ -88,6 +88,63 @@
     "subtitle": "Conoce quiénes somos, resuelve tus dudas y comunícate con nuestro equipo de atención.",
     "title": "Contacto y atención al cliente"
   },
+  "faq": {
+    "cta": {
+      "action": "Ir al formulario de contacto",
+      "description": "¿No encuentras la respuesta que buscabas? Nuestro equipo está a tu disposición para ayudarte.",
+      "title": "¿Aún tienes preguntas?"
+    },
+    "empty": {
+      "action": "Contáctanos",
+      "description": "No se encontraron preguntas frecuentes en este momento.",
+      "title": "Sin preguntas frecuentes"
+    },
+    "groups": {
+      "accountAndSecurity": {
+        "items": {
+          "dataSecurity": {
+            "answer": "Utilizamos infraestructura segura en la nube con cifrado y aislamiento de datos por negocio (multi-tenant) para garantizar la confidencialidad de tu información.",
+            "question": "¿Mis datos y los de mis clientes están protegidos?"
+          },
+          "multiUser": {
+            "answer": "Sí, según tu plan puedes invitar a tus colaboradores y configurar permisos personalizados para que accedan únicamente a su agenda o a la gestión general.",
+            "question": "¿Puedo agregar a mi equipo de trabajo a la plataforma?"
+          }
+        },
+        "title": "Cuenta y seguridad"
+      },
+      "plansAndBilling": {
+        "items": {
+          "changePlan": {
+            "answer": "Puedes cambiar o mejorar tu plan en cualquier momento desde tu panel de suscripción, ajustando las capacidades a la evolución de tu negocio.",
+            "question": "¿Puedo cambiar de plan cuando lo necesite?"
+          },
+          "paymentMethods": {
+            "answer": "Aceptamos tarjetas de crédito y débito de las principales franquicias (Visa, Mastercard, American Express) procesadas mediante pasarelas seguras.",
+            "question": "¿Cuáles son los métodos de pago aceptados?"
+          }
+        },
+        "title": "Planes y facturación"
+      },
+      "servicesAndBookings": {
+        "items": {
+          "calendarSync": {
+            "answer": "El sistema actualiza la disponibilidad en tiempo real, bloqueando automáticamente los horarios ocupados para evitar citas duplicadas.",
+            "question": "¿Cómo se sincronizan las reservas con mi horario de atención?"
+          },
+          "clientBooking": {
+            "answer": "Tus clientes acceden a tu enlace exclusivo, eligen el servicio, el profesional y la hora disponible, recibiendo confirmación instantánea sin necesidad de registrarse obligatoriamente.",
+            "question": "¿Cómo reservan citas mis clientes?"
+          }
+        },
+        "title": "Servicios y reservaciones"
+      }
+    },
+    "page": {
+      "description": "Encuentra respuestas claras y rápidas a las dudas más comunes sobre la plataforma, reservas y planes de suscripción.",
+      "title": "Preguntas frecuentes"
+    }
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {

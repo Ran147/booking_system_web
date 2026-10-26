@@ -88,6 +88,63 @@
     "subtitle": "Learn who we are, find answers, and reach out to our support team.",
     "title": "Contact and customer support"
   },
+  "faq": {
+    "cta": {
+      "action": "Go to contact form",
+      "description": "Can't find the answer you're looking for? Our team is here to assist you.",
+      "title": "Still have questions?"
+    },
+    "empty": {
+      "action": "Contact us",
+      "description": "No frequently asked questions were found at this time.",
+      "title": "No FAQ items found"
+    },
+    "groups": {
+      "accountAndSecurity": {
+        "items": {
+          "dataSecurity": {
+            "answer": "We use secure cloud infrastructure with data encryption and per-business isolation (multi-tenant) to ensure the confidentiality of your information.",
+            "question": "Is my data and my customers' data secure?"
+          },
+          "multiUser": {
+            "answer": "Yes, depending on your plan, you can invite collaborators and set custom permissions so they only access their agenda or overall management.",
+            "question": "Can I add my team members to the platform?"
+          }
+        },
+        "title": "Account & Security"
+      },
+      "plansAndBilling": {
+        "items": {
+          "changePlan": {
+            "answer": "You can change or upgrade your plan anytime from your subscription dashboard to match your business growth.",
+            "question": "Can I change my plan whenever I need to?"
+          },
+          "paymentMethods": {
+            "answer": "We accept major credit and debit cards (Visa, Mastercard, American Express) processed through secure payment gateways.",
+            "question": "What payment methods are accepted?"
+          }
+        },
+        "title": "Plans & Billing"
+      },
+      "servicesAndBookings": {
+        "items": {
+          "calendarSync": {
+            "answer": "The system updates schedule availability in real time, automatically blocking busy slots to prevent double bookings.",
+            "question": "How do bookings synchronize with my business hours?"
+          },
+          "clientBooking": {
+            "answer": "Your clients access your custom link, select the service, staff member, and available time, receiving instant confirmation without requiring mandatory sign up.",
+            "question": "How do my clients book appointments?"
+          }
+        },
+        "title": "Services & Bookings"
+      }
+    },
+    "page": {
+      "description": "Find clear and fast answers to common questions about the platform, bookings, and subscription plans.",
+      "title": "Frequently Asked Questions"
+    }
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
@@ -121,43 +178,43 @@
   "help": {
     "page": {
       "contactPrompt": "Have another question?",
-      "description": "Find step-by-step guidance on how Booking System works and access available support channels.",
-      "faqAction": "Frequently asked questions",
+      "description": "Find step-by-step guidance on how Booking System works and available support channels.",
+      "faqAction": "Frequently Asked Questions",
       "faqPrompt": "Looking for quick answers?",
-      "title": "Help & Support Center"
+      "title": "Help Center & Support"
     },
     "publicSupport": {
-      "action": "Contact us",
-      "description": "If you have general inquiries or need a personalized demo, our team is ready to help.",
-      "title": "Need personalized assistance?"
+      "action": "Write to us",
+      "description": "For general inquiries or to request a demo, our team is ready to assist you.",
+      "title": "Need dedicated assistance?"
     },
     "subscriberSupport": {
       "action": "Go to support tickets",
       "badge": "Subscribers only",
-      "description": "As a subscriber you can submit and track technical support tickets directly from your business dashboard.",
-      "title": "Priority technical support"
+      "description": "As a subscriber, you can create and track technical support tickets directly from your dashboard.",
+      "title": "Priority Technical Support"
     },
     "topics": {
       "gettingStarted": {
-        "description": "Learn the basics to set up your account and start using the platform.",
-        "step1": "Sign up as a subscriber and choose the right plan for your business.",
-        "step2": "Configure your business profile, logo, and contact links.",
-        "step3": "Share your catalog link with your customers to start receiving bookings.",
-        "title": "Getting started"
+        "description": "Learn the basics to set up your account and get started with the platform.",
+        "step1": "Sign up as a subscriber and pick the ideal plan for your business.",
+        "step2": "Set up your business profile, logo, and contact links.",
+        "step3": "Share your catalog link with clients to start receiving bookings.",
+        "title": "Getting Started"
       },
       "managingSchedule": {
-        "description": "Manage business hours, collaborator availability, and offered services.",
-        "step1": "Define your working days and available service hours.",
-        "step2": "Add services along with their respective durations and prices.",
-        "step3": "Assign collaborators to services for individual booking control.",
-        "title": "Schedule & booking management"
+        "description": "Manage working hours, staff availability, and offered services.",
+        "step1": "Define your working days and daily availability time slots.",
+        "step2": "Add services along with durations and prices.",
+        "step3": "Assign collaborators to services for individual booking management.",
+        "title": "Schedule & Appointment Management"
       },
       "subscriptionsAndPlans": {
-        "description": "Understand how subscriptions, renewals, and payment methods work.",
+        "description": "Understand subscriptions, renewal cycles, and payment methods.",
         "step1": "Review your active plan details from your dashboard.",
-        "step2": "Upgrade or switch your plan anytime based on your business needs.",
-        "step3": "Access your payment receipts securely.",
-        "title": "Plans & subscription"
+        "step2": "Upgrade or adjust your plan whenever your business needs evolve.",
+        "step3": "Access payment receipts and invoices securely.",
+        "title": "Plans & Subscriptions"
       }
     }
   },
