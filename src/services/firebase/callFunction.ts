@@ -32,24 +32,29 @@ export const callFunction = async <Payload, Response>(
       }
 
       if (serverResponse.status >= HTTP_STATUS.BAD_REQUEST) {
+        let errorJson: CallFunctionErrorPayload | null = null;
         try {
-          const errorJson =
-            (await serverResponse.json()) as CallFunctionErrorPayload;
+          errorJson = (await serverResponse.json()) as CallFunctionErrorPayload;
+        } catch {
+          // Response is not JSON (e.g. 404 HTML on static host), fall through to callable
+        }
+
+        if (errorJson) {
           const rawCode = (
             errorJson.code ||
             errorJson.error ||
             "internal"
           ).replace("functions/", "") as FunctionsErrorCodeCore;
-          const errorMessage = errorJson.message || "Function call failed";
+          const errorMessage =
+            errorJson.message || errorJson.error || "Function call failed";
           throw new FunctionsError(rawCode, errorMessage, errorJson.details);
-        } catch (jsonError) {
-          if (jsonError instanceof FunctionsError) {
-            throw jsonError;
-          }
         }
       }
     } catch (apiError) {
-      if (apiError instanceof FirebaseError) {
+      if (
+        apiError instanceof FunctionsError ||
+        apiError instanceof FirebaseError
+      ) {
         throw apiError;
       }
     }

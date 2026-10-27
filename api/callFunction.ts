@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
-import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth, type Auth } from "firebase-admin/auth";
 import {
   getFirestore,
@@ -39,6 +39,115 @@ const findLocalServiceAccountPath = (): Nullable<string> => {
   return keyFileName ? path.join(rootDirectory, keyFileName) : null;
 };
 
+const getServiceAccountCredentials = (): Nullable<Record<string, unknown>> => {
+  const serviceAccountRaw =
+    process.env.FIREBASE_SERVICE_ACCOUNT ||
+    process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
+    process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT ||
+    process.env.FIREBASE_CREDENTIALS ||
+    process.env.SERVICE_ACCOUNT ||
+    process.env.SERVICE_ACCOUNT_KEY ||
+    process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+
+  if (serviceAccountRaw) {
+    let rawString = serviceAccountRaw.trim();
+    if (
+      (rawString.startsWith('"') && rawString.endsWith('"')) ||
+      (rawString.startsWith("'") && rawString.endsWith("'"))
+    ) {
+      rawString = rawString.slice(1, -1).trim();
+    }
+
+    let parsedObject: Nullable<Record<string, unknown>> = null;
+    try {
+      let parsed = JSON.parse(rawString) as unknown;
+      if (typeof parsed === "string") {
+        parsed = JSON.parse(parsed) as unknown;
+      }
+      if (typeof parsed === "object" && parsed !== null) {
+        parsedObject = parsed as Record<string, unknown>;
+      }
+    } catch {
+      try {
+        const decodedString = Buffer.from(rawString, "base64").toString(
+          "utf-8",
+        );
+        let parsed = JSON.parse(decodedString) as unknown;
+        if (typeof parsed === "string") {
+          parsed = JSON.parse(parsed) as unknown;
+        }
+        if (typeof parsed === "object" && parsed !== null) {
+          parsedObject = parsed as Record<string, unknown>;
+        }
+      } catch {
+        parsedObject = null;
+      }
+    }
+
+    if (parsedObject) {
+      if (
+        typeof parsedObject.private_key === "string" &&
+        parsedObject.private_key.includes("\\n")
+      ) {
+        parsedObject.private_key = parsedObject.private_key.replace(
+          /\\n/g,
+          "\n",
+        );
+      }
+      if (
+        typeof parsedObject.privateKey === "string" &&
+        parsedObject.privateKey.includes("\\n")
+      ) {
+        parsedObject.privateKey = parsedObject.privateKey.replace(/\\n/g, "\n");
+      }
+      return parsedObject;
+    }
+  }
+
+  const clientEmail =
+    process.env.FIREBASE_CLIENT_EMAIL || process.env.CLIENT_EMAIL;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY || process.env.PRIVATE_KEY;
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID ||
+    process.env.VITE_FIREBASE_PROJECT_ID ||
+    process.env.GCP_PROJECT ||
+    process.env.GCLOUD_PROJECT;
+
+  if (clientEmail && privateKey && projectId) {
+    privateKey = privateKey.trim();
+    if (
+      (privateKey.startsWith('"') && privateKey.endsWith('"')) ||
+      (privateKey.startsWith("'") && privateKey.endsWith("'"))
+    ) {
+      privateKey = privateKey.slice(1, -1);
+    }
+    privateKey = privateKey.replace(/\\n/g, "\n");
+
+    return {
+      clientEmail,
+      client_email: clientEmail,
+      privateKey,
+      private_key: privateKey,
+      projectId,
+      project_id: projectId,
+    };
+  }
+
+  const localKeyPath = findLocalServiceAccountPath();
+  if (localKeyPath) {
+    try {
+      return JSON.parse(fs.readFileSync(localKeyPath, "utf-8")) as Record<
+        string,
+        unknown
+      >;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+};
+
 const getAdminServices = (): {
   auth: Auth;
   firestore: Firestore;
@@ -52,61 +161,16 @@ const getAdminServices = (): {
     };
   }
 
-  let adminApp: App;
-
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    let serviceAccountJson: Record<string, unknown>;
-    try {
-      serviceAccountJson = JSON.parse(
-        process.env.FIREBASE_SERVICE_ACCOUNT,
-      ) as Record<string, unknown>;
-    } catch {
-      try {
-        const decodedString = Buffer.from(
-          process.env.FIREBASE_SERVICE_ACCOUNT,
-          "base64",
-        ).toString("utf-8");
-        serviceAccountJson = JSON.parse(decodedString) as Record<
-          string,
-          unknown
-        >;
-      } catch {
-        throw new Error(
-          "FIREBASE_SERVICE_ACCOUNT is neither valid JSON nor valid base64 JSON string.",
-        );
-      }
-    }
-
-    adminApp = initializeApp({
-      credential: cert(serviceAccountJson),
-    });
-  } else if (
-    process.env.FIREBASE_PROJECT_ID &&
-    process.env.FIREBASE_CLIENT_EMAIL &&
-    process.env.FIREBASE_PRIVATE_KEY
-  ) {
-    adminApp = initializeApp({
-      credential: cert({
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-        projectId: process.env.FIREBASE_PROJECT_ID,
-      }),
-    });
-  } else {
-    const localKeyPath = findLocalServiceAccountPath();
-    if (localKeyPath) {
-      const serviceAccountJson = JSON.parse(
-        fs.readFileSync(localKeyPath, "utf-8"),
-      ) as Record<string, unknown>;
-      adminApp = initializeApp({
-        credential: cert(serviceAccountJson),
-      });
-    } else {
-      throw new Error(
-        "Firebase credentials not found. Configure FIREBASE_SERVICE_ACCOUNT in your environment variables.",
-      );
-    }
+  const serviceAccount = getServiceAccountCredentials();
+  if (!serviceAccount) {
+    throw new Error(
+      "Firebase credentials not found. Configure FIREBASE_SERVICE_ACCOUNT in your environment variables.",
+    );
   }
+
+  const adminApp = initializeApp({
+    credential: cert(serviceAccount),
+  });
 
   return {
     auth: getAuth(adminApp),
@@ -723,8 +787,10 @@ export default async function handler(
       error: `Function ${functionName} not implemented in server handler`,
     });
   } catch (error) {
+    console.error("Error in api/callFunction:", error);
     sendJsonResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {
       error: error instanceof Error ? error.message : "Internal server error",
+      message: error instanceof Error ? error.message : "Internal server error",
     });
   }
 }
