@@ -6,6 +6,7 @@ import { USER_ROLE, type UserRole } from "@/domain";
 // P-1: a customer goes to the landing until "my bookings" (KAN-150) exists.
 export const PORTAL_HOME_BY_ROLE = Object.freeze({
   [USER_ROLE.BUSINESS_OWNER]: ROUTE_PATH.BUSINESS.ROOT,
+  [USER_ROLE.CLIENT]: ROUTE_PATH.LANDING.HOME,
   [USER_ROLE.COLLABORATOR]: ROUTE_PATH.BUSINESS.ROOT,
   [USER_ROLE.CUSTOMER]: ROUTE_PATH.LANDING.HOME,
   [USER_ROLE.SUBSCRIBER]: ROUTE_PATH.BUSINESS.ROOT,

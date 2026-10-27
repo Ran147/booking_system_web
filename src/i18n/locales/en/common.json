@@ -1,7 +1,4 @@
 {
-  "actions": {
-    "retry": "Retry"
-  },
   "auth": {
     "idle": {
       "signOutAction": "Sign out",
@@ -56,9 +53,15 @@
     },
     "signIn": {
       "accountDisabled": "Your account is disabled. If you think this is a mistake, contact whoever gave you access.",
+      "backToHome": "Back to home",
       "emailLabel": "Email",
+      "explorePlansAction": "Explore our plans and sign up",
       "forgotPassword": "Forgot your password?",
+      "googleSignInAction": "Continue with Google",
       "invalidCredentials": "The email or password is incorrect.",
+      "noAccountPrompt": "Don't have an account yet?",
+      "noRoleAssigned": "This Google account has no business or role assigned. Choose a plan to sign up or request access.",
+      "orDivider": "or",
       "passwordLabel": "Password",
       "recaptchaLabel": "Security check",
       "recoverPasswordAction": "Recover password",

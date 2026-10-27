@@ -69,20 +69,20 @@ export const SEED_USER = {
 } as const;
 
 export const SEED_BUSINESS = {
-  CURRENCY: "MXN",
+  CURRENCY: "CRC",
   NAME: "Barbería Centro",
   SLUG: "barberia-centro",
-  TIME_ZONE: "America/Mexico_City",
+  TIME_ZONE: "America/Costa_Rica",
 } as const;
 
 // A second business that paid and signed up but is still waiting for the
 // super admin's approval (business status pending, Q2 + Q3). It has no
 // Subscription yet: the subscription period starts at approval.
 export const SEED_PENDING_BUSINESS = {
-  CURRENCY: "MXN",
+  CURRENCY: "CRC",
   NAME: "Estética Luna",
   SLUG: "estetica-luna",
-  TIME_ZONE: "America/Mexico_City",
+  TIME_ZONE: "America/Costa_Rica",
 } as const;
 
 // Provisional values: Payment and PlanCheckout field names are proposals in

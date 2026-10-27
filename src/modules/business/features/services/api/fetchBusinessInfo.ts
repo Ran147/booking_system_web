@@ -1,6 +1,6 @@
 import { doc, getDoc } from "firebase/firestore";
 import { z } from "zod";
-import { FIRESTORE_COLLECTION } from "@/constants";
+import { CURRENCY_CODE, FIRESTORE_COLLECTION } from "@/constants";
 import { BUSINESS_STATUS, type BusinessStatus } from "@/domain";
 import { firestore } from "@/services/firebase";
 import { DEFAULT_SERVICE_LIST_CURRENCY } from "../constants/ServiceList.constants";
@@ -48,8 +48,14 @@ export const fetchBusinessInfo = async (
     documentSnapshot.data() ?? {},
   );
 
+  const rawCurrency = documentData.currency;
+  const normalizedCurrency =
+    rawCurrency === CURRENCY_CODE.MXN
+      ? DEFAULT_SERVICE_LIST_CURRENCY
+      : rawCurrency;
+
   return {
-    currency: documentData.currency,
+    currency: normalizedCurrency,
     status: documentData.status,
     timeZone: documentData.timeZone,
   };

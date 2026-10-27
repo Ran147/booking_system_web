@@ -3,6 +3,7 @@
 // subscriber grants (KAN-86, CollaboratorPermission.constants.ts).
 export const USER_ROLE = {
   BUSINESS_OWNER: "business_owner",
+  CLIENT: "client",
   COLLABORATOR: "collaborator",
   CUSTOMER: "customer",
   SUBSCRIBER: "subscriber",

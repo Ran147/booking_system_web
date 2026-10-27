@@ -20,7 +20,7 @@ export const assertCanManageServices = async (
   }
 
   const role = auth.token?.role;
-  const callerBusinessId = auth.token?.businessId;
+  const callerBusinessId = auth.token?.businessId ?? auth.token?.business_id;
 
   if (callerBusinessId !== businessId) {
     throw new HttpsError(

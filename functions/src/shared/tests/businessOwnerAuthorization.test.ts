@@ -26,6 +26,21 @@ describe("business owner authorization", () => {
     ).toThrowError(expect.objectContaining({ code: "permission-denied" }));
   });
 
+  it("KAN-199: accepts the Sprint_1 business_id claim alias", () => {
+    expect(() =>
+      assertSubscriberOf(
+        {
+          token: {
+            business_id: BUSINESS_ID,
+            role: USER_ROLE.BUSINESS_OWNER,
+          },
+          uid: "business-owner-a",
+        },
+        BUSINESS_ID,
+      ),
+    ).not.toThrow();
+  });
+
   it("KAN-199: accepts a business owner managing services in their exact business", async () => {
     await expect(
       assertCanManageServices(BUSINESS_OWNER_AUTH, BUSINESS_ID),

@@ -26,6 +26,7 @@ export const BusinessPublicProfileDocumentSchema = z.object({
   socialLinks: z
     .array(SocialLinkDocumentSchema)
     .max(BUSINESS_PROFILE.SOCIAL_LINK_MAX_COUNT)
-    .default([]),
+    .nullish()
+    .transform((links) => links ?? []),
   status: z.enum(BUSINESS_STATUS),
 });

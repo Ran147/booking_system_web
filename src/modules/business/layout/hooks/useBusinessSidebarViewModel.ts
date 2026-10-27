@@ -20,6 +20,7 @@ import {
   useSession,
   useSignOut,
 } from "@/modules/auth";
+import { canManageBusinessProfile } from "@/modules/business/businessProfileAccess";
 import type { Nullable } from "@/types";
 import {
   businessLayoutQueryKeys,
@@ -62,7 +63,7 @@ export const useBusinessSidebarViewModel = (
     session.role === USER_ROLE.COLLABORATOR;
   const isSubscriber =
     session.status === SESSION_STATUS.SIGNED_IN &&
-    session.role === USER_ROLE.SUBSCRIBER;
+    canManageBusinessProfile(session.role);
 
   const collaboratorId =
     isCollaborator && session.collaboratorId ? session.collaboratorId : null;

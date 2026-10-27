@@ -9,7 +9,7 @@ export interface ServiceFormViewModel {
   readonly form: UseFormReturn<ServiceFormValues>;
   readonly handleAddFeature: () => void;
   readonly handleFeatureChange: (index: number, value: string) => void;
-  readonly handleFileSelect: (file: Nullable<File>) => void;
+  readonly handleFileSelect: (file: Nullable<File>) => void | Promise<void>;
   readonly handleMoveFeatureDown: (index: number) => void;
   readonly handleMoveFeatureUp: (index: number) => void;
   readonly handleRemoveFeature: (index: number) => void;

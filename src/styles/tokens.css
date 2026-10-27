@@ -32,6 +32,10 @@
   --chart-2: var(--color-secondary-700);
   --chart-3: var(--color-tertiary-600);
   --radius: 0.5rem;
+  --google-blue: #4285f4;
+  --google-green: #34a853;
+  --google-yellow: #fbbc05;
+  --google-red: #ea4335;
 }
 
 .dark {
@@ -96,6 +100,11 @@
   --font-sans: var(--font-body);
   --font-body: var(--font-body);
   --font-label: var(--font-label);
+
+  --color-google-blue: var(--google-blue);
+  --color-google-green: var(--google-green);
+  --color-google-yellow: var(--google-yellow);
+  --color-google-red: var(--google-red);
 }
 
 @layer base {

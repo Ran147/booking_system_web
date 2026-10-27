@@ -6,6 +6,7 @@ import { BUSINESS_STATUS } from "@/domain";
 import { fetchBusinessStatus } from "@/modules/business/features/home";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
 import {
+  BUSINESS_OWNER_SESSION,
   COLLABORATOR_SESSION,
   SUBSCRIBER_SESSION,
 } from "@/shared/test-utils/sessionFixtures";
@@ -198,6 +199,33 @@ describe("BusinessSidebar (KAN-29, KAN-39, KAN-42)", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("KAN-199: gives a business owner settings on desktop and mobile without duplicating profile", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: BUSINESS_OWNER_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    expect(await page.findSettingsItem()).toBeInTheDocument();
+    expect(page.queryProfileItem()).not.toBeInTheDocument();
+
+    await page.clickOpenMenuButton();
+    await page.clickMobileSettingsItem();
+
+    expect(await screen.findByText("Settings Page Outlet")).toBeInTheDocument();
+  });
+
+  it("KAN-199: keeps legacy subscriber settings without duplicating profile", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    expect(await page.findSettingsItem()).toBeInTheDocument();
+    expect(page.queryProfileItem()).not.toBeInTheDocument();
+  });
+
   it("KAN-29: AC-KAN-29-05 adapts navigation items for collaborator role by omitting subscriber-only tools", async () => {
     renderRoutesWithProviders(testRoutes, {
       initialPath: ROUTE_PATH.BUSINESS.ROOT,
@@ -214,6 +242,7 @@ describe("BusinessSidebar (KAN-29, KAN-39, KAN-42)", () => {
 
     expect(page.queryCollaboratorsItem()).not.toBeInTheDocument();
     expect(await page.findSettingsItem()).toBeInTheDocument();
+    expect(page.queryProfileItem()).not.toBeInTheDocument();
     expect(page.querySubscriptionItem()).not.toBeInTheDocument();
   });
 

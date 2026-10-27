@@ -76,6 +76,24 @@ describe("storage.rules: business logo", () => {
     await assertSucceeds(uploadLogo(businessOwnerContext(), "image/png"));
   });
 
+  it("KAN-199: accepts Sprint_1 claim and owner field aliases", async () => {
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc("businesses/business-a")
+        .set({ owner_id: "business-owner-a", status: "active" });
+    });
+    const businessOwner = testEnvironment.authenticatedContext(
+      "business-owner-a",
+      {
+        business_id: "business-a",
+        role: "business_owner",
+      },
+    );
+
+    await assertSucceeds(uploadLogo(businessOwner, "image/png"));
+  });
+
   it("KAN-199: denies a forged business owner uploading the logo", async () => {
     const forgedBusinessOwner = testEnvironment.authenticatedContext(
       "attacker",

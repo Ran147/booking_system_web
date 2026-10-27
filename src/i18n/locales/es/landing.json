@@ -1,4 +1,255 @@
 {
+  "about": {
+    "hero": {
+      "badge": "Nuestra Trayectoria y Solución",
+      "description": "Transformamos la manera en que los negocios y profesionales gestionan sus agendas, ofreciendo una solución intuitiva, escalable y moderna.",
+      "title": "Impulsamos la digitalización de tus citas y servicios"
+    },
+    "history": {
+      "description": "Booking System nació de la necesidad real de simplificar la coordinación de citas entre negocios independientes y sus clientes. Lo que comenzó como una herramienta básica de reservas evolucionó hasta convertirse en una plataforma multi-inquilino robusta que conecta a negocios, profesionales y clientes en un ecosistema sincronizado en tiempo real.",
+      "milestones": {
+        "m1": {
+          "description": "Conceptualización de la arquitectura modular y lanzamiento del primer prototipo de gestión de citas.",
+          "title": "Nacimiento y Primeros Pasos",
+          "year": "2024"
+        },
+        "m2": {
+          "description": "Implementación del modelo multi-inquilino con portales independientes para suscriptores y clientes.",
+          "title": "Expansión Multi-Tenant",
+          "year": "2025"
+        },
+        "m3": {
+          "description": "Integración de pagos en línea, analítica avanzada, recordatorios automáticos y roles de colaboradores.",
+          "title": "Consolidación de la Plataforma",
+          "year": "2026"
+        }
+      },
+      "title": "Nuestra Historia y Trayectoria"
+    },
+    "mission": {
+      "description": "Democratizar y simplificar la gestión de reservas para profesionales y empresas de servicios, proporcionando herramientas tecnológicas intuitivas, robustas y de alto rendimiento que automaticen sus operaciones diarias y potencien su crecimiento sostenible.",
+      "sectionAriaLabel": "Misión y visión de la empresa",
+      "title": "Nuestra Misión"
+    },
+    "offerings": {
+      "items": {
+        "analytics": {
+          "description": "Reportes en tiempo real sobre ingresos, ocupación y servicios más solicitados para tomar decisiones informadas.",
+          "title": "Analítica y Métricas Clave"
+        },
+        "booking": {
+          "description": "Permite que tus clientes agenden citas las 24 horas del día, los 7 días de la semana, desde cualquier dispositivo móvil o de escritorio.",
+          "title": "Reservas Online 24/7"
+        },
+        "collaboration": {
+          "description": "Asigna citas a colaboradores específicos, controla permisos y gestiona horarios de trabajo individuales.",
+          "title": "Gestión de Equipo y Horarios"
+        },
+        "reminders": {
+          "description": "Notificaciones automáticas para reducir ausencias y mantener a tus clientes siempre informados.",
+          "title": "Recordatorios y Notificaciones"
+        }
+      },
+      "subtitle": "Una suite completa diseñada para potenciar negocios de servicios de cualquier tamaño.",
+      "title": "Lo Que Ofrecemos"
+    },
+    "page": {
+      "ariaLabel": "Página de información sobre la empresa",
+      "description": "Conoce más sobre la historia, el equipo y la tecnología detrás de Booking System.",
+      "title": "Sobre Nosotros"
+    },
+    "stats": {
+      "bookings": {
+        "label": "Citas y reservas gestionadas",
+        "value": "+10,000"
+      },
+      "businesses": {
+        "label": "Negocios activos en la plataforma",
+        "value": "+500"
+      },
+      "support": {
+        "label": "Disponibilidad del servicio de soporte",
+        "value": "24/7"
+      },
+      "title": "Impacto y Cifras Clave",
+      "uptime": {
+        "label": "Tiempo de actividad garantizado",
+        "value": "99.9%"
+      }
+    },
+    "values": {
+      "items": {
+        "innovation": {
+          "description": "Evolucionamos continuamente nuestra plataforma adoptando las mejores prácticas y tecnologías modernas.",
+          "title": "Innovación Constante"
+        },
+        "reliability": {
+          "description": "Garantizamos disponibilidad, seguridad de datos y consistencia operativa en cada cita reservada.",
+          "title": "Confiabilidad y Seguridad"
+        },
+        "transparency": {
+          "description": "Fomentamos relaciones claras y honestas, sin costos ocultos y con términos comprensibles para todos.",
+          "title": "Transparencia Absoluta"
+        },
+        "userFocus": {
+          "description": "Diseñamos cada funcionalidad pensando en simplificar la experiencia tanto de los negocios como de sus clientes.",
+          "title": "Enfoque en el Usuario"
+        }
+      },
+      "subtitle": "Los principios fundamentales que guían cada decisión técnica y humana en nuestra plataforma.",
+      "title": "Nuestros Valores"
+    },
+    "vision": {
+      "description": "Ser la plataforma líder y referente en gestión de reservas y citas en la región, reconocida por su excelencia técnica, accesibilidad universal y capacidad de conectar a millones de clientes con los mejores prestadores de servicios.",
+      "title": "Nuestra Visión"
+    }
+  },
+  "contact": {
+    "about": {
+      "company": {
+        "description": "Nacimos de la necesidad real de negocios de servicios que perdían tiempo valioso coordinando citas manualmente. Creamos Booking System para transformar esa complejidad en una experiencia ágil, confiable y moderna.",
+        "plansAction": "Explorar planes de suscripción",
+        "title": "Nuestra historia y compromiso"
+      },
+      "mission": {
+        "description": "Empoderar a profesionales y negocios de servicios con tecnología intuitiva que automatice sus citas y fortalezca la relación con sus clientes.",
+        "title": "Misión"
+      },
+      "vision": {
+        "description": "Ser la plataforma líder en digitalización y agendamiento inteligente para negocios de servicios en toda la región.",
+        "title": "Visión"
+      }
+    },
+    "backToHome": "Volver al inicio",
+    "channels": {
+      "cardDescription": "Comunícate directamente con nuestro equipo a través de cualquiera de los siguientes medios oficiales.",
+      "cardTitle": "Canales de atención directa",
+      "emailAriaLabel": "Enviar correo electrónico a {{email}}",
+      "emailLabel": "Correo electrónico",
+      "fallbackNotice": "En este momento todos nuestros canales de atención se gestionan a través del formulario.",
+      "phoneAriaLabel": "Llamar al teléfono {{phone}}",
+      "phoneLabel": "Teléfono",
+      "sectionAriaLabel": "Medios de contacto directo",
+      "social": {
+        "facebook": "Facebook de Booking System (abre en una nueva pestaña)",
+        "instagram": "Instagram de Booking System (abre en una nueva pestaña)",
+        "linkedin": "LinkedIn de Booking System (abre en una nueva pestaña)",
+        "x": "X de Booking System (abre en una nueva pestaña)"
+      },
+      "socialTitle": "Redes sociales oficiales"
+    },
+    "faq": {
+      "items": {
+        "item1": {
+          "answer": "Elige el plan ideal para tu negocio en nuestro catálogo, completa el pago simulado y configura tus horarios y servicios en minutos.",
+          "question": "¿Cómo comienzo a usar Booking System?"
+        },
+        "item2": {
+          "answer": "No. Tus clientes pueden reservar directamente desde cualquier navegador web en su teléfono o computadora mediante tu enlace personalizado.",
+          "question": "¿Mis clientes necesitan instalar alguna aplicación?"
+        },
+        "item3": {
+          "answer": "Sí, nuestros planes avanzados permiten invitar colaboradores, asignarles horarios específicos y definir qué servicios realiza cada uno.",
+          "question": "¿Puedo registrar a mi equipo de trabajo?"
+        },
+        "item4": {
+          "answer": "Aceptamos tarjetas de crédito y débito Visa, Mastercard y transferencias según tu país mediante nuestra pasarela de pagos.",
+          "question": "¿Qué métodos de pago aceptan para las suscripciones?"
+        },
+        "item5": {
+          "answer": "No hay contratos forzosos. Puedes actualizar, cambiar o cancelar tu plan en cualquier momento desde tu panel de negocio.",
+          "question": "¿Puedo cancelar o cambiar mi suscripción?"
+        }
+      },
+      "subtitle": "Respuestas claras a las dudas más comunes sobre la plataforma.",
+      "title": "Preguntas frecuentes"
+    },
+    "form": {
+      "dismissAction": "Cerrar",
+      "dismissAlert": "Cerrar alerta",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@correo.com",
+      "messageLabel": "Mensaje o consulta",
+      "messagePlaceholder": "Escribe tu consulta detallada aquí...",
+      "nameLabel": "Nombre completo",
+      "namePlaceholder": "Tu nombre y apellido",
+      "recaptchaLabel": "Verificación de seguridad",
+      "serverError": "Ocurrió un error al enviar el mensaje. Inténtalo nuevamente.",
+      "submitButton": "Enviar mensaje",
+      "subjectLabel": "Asunto",
+      "subjectPlaceholder": "¿En qué podemos ayudarte?",
+      "success": "¡Mensaje enviado con éxito! Nos comunicaremos contigo lo más pronto posible.",
+      "title": "Formulario de contacto"
+    },
+    "help": {
+      "action": "Ir a los planes",
+      "description": "¿Necesitas una solución personalizada o tienes requerimientos especiales? Nuestro equipo te acompaña en cada paso.",
+      "title": "¿Tienes preguntas adicionales?"
+    },
+    "page": {
+      "description": "¿Tienes alguna pregunta sobre Booking System o deseas una demostración personalizada? Escríbenos y nuestro equipo te responderá.",
+      "title": "Contáctanos"
+    },
+    "subtitle": "Conoce quiénes somos, resuelve tus dudas y comunícate con nuestro equipo de atención.",
+    "title": "Contacto y atención al cliente"
+  },
+  "faq": {
+    "cta": {
+      "action": "Ir al formulario de contacto",
+      "description": "¿No encuentras la respuesta que buscabas? Nuestro equipo está a tu disposición para ayudarte.",
+      "title": "¿Aún tienes preguntas?"
+    },
+    "empty": {
+      "action": "Contáctanos",
+      "description": "No se encontraron preguntas frecuentes en este momento.",
+      "title": "Sin preguntas frecuentes"
+    },
+    "groups": {
+      "accountAndSecurity": {
+        "items": {
+          "dataSecurity": {
+            "answer": "Utilizamos infraestructura segura en la nube con cifrado y aislamiento de datos por negocio (multi-tenant) para garantizar la confidencialidad de tu información.",
+            "question": "¿Mis datos y los de mis clientes están protegidos?"
+          },
+          "multiUser": {
+            "answer": "Sí, según tu plan puedes invitar a tus colaboradores y configurar permisos personalizados para que accedan únicamente a su agenda o a la gestión general.",
+            "question": "¿Puedo agregar a mi equipo de trabajo a la plataforma?"
+          }
+        },
+        "title": "Cuenta y seguridad"
+      },
+      "plansAndBilling": {
+        "items": {
+          "changePlan": {
+            "answer": "Puedes cambiar o mejorar tu plan en cualquier momento desde tu panel de suscripción, ajustando las capacidades a la evolución de tu negocio.",
+            "question": "¿Puedo cambiar de plan cuando lo necesite?"
+          },
+          "paymentMethods": {
+            "answer": "Aceptamos tarjetas de crédito y débito de las principales franquicias (Visa, Mastercard, American Express) procesadas mediante pasarelas seguras.",
+            "question": "¿Cuáles son los métodos de pago aceptados?"
+          }
+        },
+        "title": "Planes y facturación"
+      },
+      "servicesAndBookings": {
+        "items": {
+          "calendarSync": {
+            "answer": "El sistema actualiza la disponibilidad en tiempo real, bloqueando automáticamente los horarios ocupados para evitar citas duplicadas.",
+            "question": "¿Cómo se sincronizan las reservas con mi horario de atención?"
+          },
+          "clientBooking": {
+            "answer": "Tus clientes acceden a tu enlace exclusivo, eligen el servicio, el profesional y la hora disponible, recibiendo confirmación instantánea sin necesidad de registrarse obligatoriamente.",
+            "question": "¿Cómo reservan citas mis clientes?"
+          }
+        },
+        "title": "Servicios y reservaciones"
+      }
+    },
+    "page": {
+      "description": "Encuentra respuestas claras y rápidas a las dudas más comunes sobre la plataforma, reservas y planes de suscripción.",
+      "title": "Preguntas frecuentes"
+    }
+  },
   "footer": {
     "brandName": "Booking System",
     "branding": {
@@ -27,6 +278,49 @@
       "linkedin": "LinkedIn de Booking System (abre en una nueva pestaña)",
       "title": "Redes sociales",
       "x": "X de Booking System (abre en una nueva pestaña)"
+    }
+  },
+  "help": {
+    "page": {
+      "contactPrompt": "¿Tienes otra duda?",
+      "description": "Encuentra orientación paso a paso sobre el funcionamiento de Booking System y los canales de soporte disponibles.",
+      "faqAction": "Preguntas frecuentes",
+      "faqPrompt": "¿Buscas respuestas rápidas?",
+      "title": "Centro de ayuda y soporte"
+    },
+    "publicSupport": {
+      "action": "Escríbenos",
+      "description": "Si tienes consultas generales o necesitas demostración, nuestro equipo está listo para ayudarte.",
+      "title": "¿Necesitas atención personalizada?"
+    },
+    "subscriberSupport": {
+      "action": "Ir a tickets de soporte",
+      "badge": "Exclusivo suscriptores",
+      "description": "Como suscriptor puedes registrar y dar seguimiento a incidencias técnicas desde tu panel de negocio.",
+      "title": "Soporte técnico prioritario"
+    },
+    "topics": {
+      "gettingStarted": {
+        "description": "Aprende los conceptos básicos para configurar tu cuenta y comenzar a utilizar la plataforma.",
+        "step1": "Regístrate como suscriptor y elige el plan ideal para tu negocio.",
+        "step2": "Configura el perfil de tu empresa, logotipo y enlaces de contacto.",
+        "step3": "Comparte el enlace de tu catálogo con tus clientes para recibir reservas.",
+        "title": "Primeros pasos"
+      },
+      "managingSchedule": {
+        "description": "Gestiona horarios, disponibilidad de colaboradores y servicios ofrecidos.",
+        "step1": "Define tus días laborales y franjas horarias de atención.",
+        "step2": "Agrega servicios con sus duraciones y precios respectivos.",
+        "step3": "Asigna colaboradores a los servicios para control individual de citas.",
+        "title": "Gestión de agenda y citas"
+      },
+      "subscriptionsAndPlans": {
+        "description": "Conoce cómo funcionan las suscripciones, renovaciones y métodos de pago.",
+        "step1": "Revisa los detalles de tu plan activo desde tu panel.",
+        "step2": "Mejora o cambia tu plan en cualquier momento según tus necesidades.",
+        "step3": "Accede a tus comprobantes de pago de forma segura.",
+        "title": "Planes y suscripción"
+      }
     }
   },
   "home": {
@@ -62,7 +356,9 @@
       "menuClose": "Cerrar menú de navegación",
       "menuOpen": "Abrir menú de navegación",
       "mobileNavLabel": "Navegación móvil",
-      "signIn": "Iniciar sesión"
+      "signIn": "Iniciar sesión",
+      "signOut": "Cerrar sesión",
+      "signUp": "Registrarse"
     },
     "plans": {
       "billingPeriod": {
@@ -110,6 +406,40 @@
     "title": "Bienvenido a Booking System"
   },
   "planCheckout": {
+    "checkout": {
+      "backToDetail": "Volver al detalle del plan",
+      "cardCvcHint": "3 o 4 dígitos de seguridad",
+      "cardCvcLabel": "CVC / CVV",
+      "cardExpiryHint": "MM/AA",
+      "cardExpiryLabel": "Fecha de expiración",
+      "cardNumberHint": "Usa 4000 0000 0000 0001 para aprobar, o terminada en 2 para rechazar",
+      "cardNumberLabel": "Número de tarjeta",
+      "cardholderNameHint": "Como aparece en la tarjeta",
+      "cardholderNameLabel": "Nombre del titular",
+      "contactEmailLabel": "Correo de contacto:",
+      "declinedError": "El pago fue rechazado por la pasarela simulada. Revisa los datos o usa otra tarjeta.",
+      "emailHint": "Usa el correo con el que deseas crear la cuenta y administrar tu negocio.",
+      "emailLabel": "Correo electrónico de contacto",
+      "paidAmountLabel": "Monto pagado:",
+      "payAction": "Pagar y continuar al registro",
+      "paying": "Procesando pago simulado…",
+      "planSummaryTitle": "Resumen del plan",
+      "recaptchaLabel": "Verificación de seguridad",
+      "selectedPlanLabel": "Plan seleccionado:",
+      "simulationNotice": "Entorno de prueba: este pago es simulado para demostración y evaluación.",
+      "statusApproved": "Aprobado (Simulación)",
+      "stepTitle": "Contratación de suscripción",
+      "subscriptionBadge": "Suscripción",
+      "subtitle": "Estás a un paso de comenzar a gestionar tu negocio con Booking System.",
+      "successAction": "Completar registro de tu negocio",
+      "successDescription": "Hemos confirmado tu pago para el plan {{planName}}. Ahora completa los datos de tu negocio para activar tu panel.",
+      "successTitle": "¡Pago procesado con éxito!",
+      "termsAcceptance": "He leído y acepto los",
+      "termsLink": "Términos y condiciones del servicio",
+      "termsRequired": "Debes aceptar los términos y condiciones para continuar",
+      "title": "Finalizar contratación del plan",
+      "transactionStatusLabel": "Estado de transacción:"
+    },
     "detail": {
       "backToPlans": "← Volver a los planes",
       "billingPeriod": {
@@ -145,6 +475,7 @@
       "businessSlugLabel": "Dirección del negocio",
       "businessTitle": "Tu negocio",
       "cannotCreateAccount": "No pudimos crear la cuenta con este correo. Si ya tienes una, inicia sesión o recupera tu contraseña.",
+      "changeEmail": "Cambiar",
       "emailHint": "Es el correo con el que pagaste el plan.",
       "emailLabel": "Correo electrónico",
       "firstNameLabel": "Nombre",

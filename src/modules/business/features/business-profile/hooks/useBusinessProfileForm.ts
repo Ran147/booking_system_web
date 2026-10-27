@@ -9,7 +9,7 @@ import {
   type SocialNetwork,
 } from "@/domain";
 import { mapFirebaseError } from "@/services";
-import type { Nullable } from "@/types";
+import type { Nullable, NullableUndefined } from "@/types";
 import { useSaveBusinessPublicProfileMutation } from "../api/useSaveBusinessPublicProfileMutation";
 import type {
   BusinessProfileFormValues,
@@ -19,9 +19,9 @@ import type {
 import { BusinessProfileFormSchema } from "../schemas/BusinessProfileForm.schema";
 
 const readSocialUrl = (
-  socialLinks: SocialLink[],
+  socialLinks: NullableUndefined<readonly SocialLink[]>,
   network: SocialNetwork,
-): string => socialLinks.find((link) => link.network === network)?.url ?? "";
+): string => socialLinks?.find((link) => link.network === network)?.url ?? "";
 
 const toNullable = (value: string): Nullable<string> => value || null;
 
@@ -33,7 +33,7 @@ const buildDefaultValues = (
   description: profile.description ?? "",
   facebookUrl: readSocialUrl(profile.socialLinks, SOCIAL_NETWORK.FACEBOOK),
   instagramUrl: readSocialUrl(profile.socialLinks, SOCIAL_NETWORK.INSTAGRAM),
-  name: profile.name,
+  name: profile.name ?? "",
   tiktokUrl: readSocialUrl(profile.socialLinks, SOCIAL_NETWORK.TIKTOK),
   websiteUrl: readSocialUrl(profile.socialLinks, SOCIAL_NETWORK.WEBSITE),
   whatsappUrl: readSocialUrl(profile.socialLinks, SOCIAL_NETWORK.WHATSAPP),
