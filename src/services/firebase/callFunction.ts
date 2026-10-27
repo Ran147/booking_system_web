@@ -5,6 +5,7 @@ import {
   type FunctionsErrorCodeCore,
 } from "firebase/functions";
 import { HTTP_STATUS, type FunctionName } from "@/constants";
+import type { Nullable } from "@/types";
 import { executeClientFunctionsFallback } from "./clientFunctionsFallback";
 import { functions } from "./firebaseApp";
 
@@ -32,7 +33,7 @@ export const callFunction = async <Payload, Response>(
       }
 
       if (serverResponse.status >= HTTP_STATUS.BAD_REQUEST) {
-        let errorJson: CallFunctionErrorPayload | null = null;
+        let errorJson: Nullable<CallFunctionErrorPayload> = null;
         try {
           errorJson = (await serverResponse.json()) as CallFunctionErrorPayload;
         } catch {
@@ -48,6 +49,13 @@ export const callFunction = async <Payload, Response>(
           const errorMessage =
             errorJson.message || errorJson.error || "Function call failed";
           throw new FunctionsError(rawCode, errorMessage, errorJson.details);
+        }
+
+        if (serverResponse.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {
+          throw new FunctionsError(
+            "internal",
+            `El servidor respondió con un error (${serverResponse.status}).`,
+          );
         }
       }
     } catch (apiError) {

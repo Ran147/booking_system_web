@@ -8,17 +8,86 @@ import {
   Timestamp,
   type Firestore,
 } from "firebase-admin/firestore";
-import { HTTP_METHOD } from "../src/constants/common/HttpMethod.constants";
-import { HTTP_STATUS } from "../src/constants/common/HttpStatus.constants";
-import { FUNCTION_NAME } from "../src/constants/firebase/FunctionName.constants";
-import { MONEY } from "../src/constants/numbers/Money.constants";
-import { TIME_MS } from "../src/constants/numbers/Time.constants";
-import { BOOKING_STATUS } from "../src/domain/booking/BookingStatus.constants";
-import { BUSINESS_STATUS } from "../src/domain/business/BusinessStatus.constants";
-import { SERVICE_STATUS } from "../src/domain/service/ServiceStatus.constants";
-import { CHECKOUT_SIMULATION } from "../src/modules/landing/features/plan-checkout/constants/PlanCheckout.constants";
 import type { Nullable } from "../src/types/Nullable";
-import { normalizeSearchTerm } from "../src/utils/normalizeSearchTerm";
+
+const HTTP_METHOD = Object.freeze({
+  DELETE: "DELETE",
+  GET: "GET",
+  HEAD: "HEAD",
+  OPTIONS: "OPTIONS",
+  PATCH: "PATCH",
+  POST: "POST",
+  PUT: "PUT",
+} as const);
+
+const HTTP_STATUS = Object.freeze({
+  BAD_REQUEST: 400,
+  INTERNAL_SERVER_ERROR: 500,
+  METHOD_NOT_ALLOWED: 405,
+  NOT_FOUND: 404,
+  OK: 200,
+  PRECONDITION_FAILED: 412,
+} as const);
+
+const FUNCTION_NAME = Object.freeze({
+  CANCEL_BOOKING: "cancelBooking",
+  CHECK_BUSINESS_SLUG: "checkBusinessSlug",
+  COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
+  CREATE_BOOKING: "createBooking",
+  CREATE_SERVICE: "createService",
+  DELETE_SERVICE: "deleteService",
+  EXPORT_COLLECTION: "exportCollection",
+  PAY_PLAN_CHECKOUT: "payPlanCheckout",
+  REQUEST_PASSWORD_RESET: "requestPasswordReset",
+  UPDATE_SERVICE: "updateService",
+  UPDATE_SERVICE_COLLABORATORS: "updateServiceCollaborators",
+  VALIDATE_SIGN_UP_LINK: "validateSignUpLink",
+  VERIFY_RECAPTCHA: "verifyRecaptcha",
+} as const);
+
+const MONEY = Object.freeze({
+  CENTS_PER_UNIT: 100,
+} as const);
+
+const TIME_MS = Object.freeze({
+  THIRTY_DAYS: 2_592_000_000,
+} as const);
+
+const BOOKING_STATUS = Object.freeze({
+  CANCELLED: "cancelled",
+  COMPLETED: "completed",
+  CONFIRMED: "confirmed",
+  NO_SHOW: "no_show",
+  PENDING: "pending",
+} as const);
+
+const BUSINESS_STATUS = Object.freeze({
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+  PENDING: "pending",
+  REJECTED: "rejected",
+  SUSPENDED: "suspended",
+} as const);
+
+const SERVICE_STATUS = Object.freeze({
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+} as const);
+
+const CHECKOUT_SIMULATION = Object.freeze({
+  DECLINED_CARD_NUMBER: "4000000000000002",
+  DECLINED_CARD_SUFFIX: "0002",
+  PROCESSING_DELAY_MS: 600,
+} as const);
+
+const DIACRITIC_PATTERN = /\p{Diacritic}/gu;
+
+const normalizeSearchTerm = (searchTerm: string): string =>
+  searchTerm
+    .normalize("NFD")
+    .replace(DIACRITIC_PATTERN, "")
+    .trim()
+    .toLowerCase();
 
 interface CallFunctionRequestBody {
   readonly functionName?: string;
@@ -227,6 +296,19 @@ export default async function handler(
   request: IncomingMessage,
   response: ServerResponse,
 ): Promise<void> {
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  response.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization",
+  );
+
+  if (request.method === HTTP_METHOD.OPTIONS) {
+    response.statusCode = HTTP_STATUS.OK;
+    response.end();
+    return;
+  }
+
   if (request.method !== HTTP_METHOD.POST) {
     sendJsonResponse(response, HTTP_STATUS.METHOD_NOT_ALLOWED, {
       error: "Method not allowed",
@@ -787,7 +869,6 @@ export default async function handler(
       error: `Function ${functionName} not implemented in server handler`,
     });
   } catch (error) {
-    console.error("Error in api/callFunction:", error);
     sendJsonResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {
       error: error instanceof Error ? error.message : "Internal server error",
       message: error instanceof Error ? error.message : "Internal server error",
