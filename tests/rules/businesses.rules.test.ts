@@ -21,6 +21,13 @@ const subscriberOf = (
   role: "subscriber",
 });
 
+const businessOwnerOf = (
+  businessId: string,
+): { businessId: string; role: string } => ({
+  businessId,
+  role: "business_owner",
+});
+
 describe("firestore.rules: tenant isolation", () => {
   beforeAll(async () => {
     testEnvironment = await initializeTestEnvironment({
@@ -131,6 +138,131 @@ describe("firestore.rules: tenant isolation", () => {
         name: "Updated business",
         socialLinks: [],
       }),
+    );
+  });
+
+  it("KAN-199: lets a subscriber read their business profile", async () => {
+    const subscriber = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriber.firestore().doc("businesses/business-a").get(),
+    );
+  });
+
+  it("KAN-199: lets a business owner read their business profile", async () => {
+    const businessOwner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      businessOwnerOf("business-a"),
+    );
+
+    await assertSucceeds(
+      businessOwner.firestore().doc("businesses/business-a").get(),
+    );
+  });
+
+  it("KAN-199: lets a business owner update their public profile fields", async () => {
+    const businessOwner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      businessOwnerOf("business-a"),
+    );
+
+    await assertSucceeds(
+      businessOwner.firestore().doc("businesses/business-a").update({
+        contactEmail: "owner@example.com",
+        description: "Updated by the recorded business owner",
+        name: "Business A",
+      }),
+    );
+  });
+
+  it.each(["ownerUserId", "status"])(
+    "KAN-199: denies a business owner changing the administrative field %s",
+    async (field) => {
+      const businessOwner = testEnvironment.authenticatedContext(
+        "subscriber-a",
+        businessOwnerOf("business-a"),
+      );
+
+      await assertFails(
+        businessOwner
+          .firestore()
+          .doc("businesses/business-a")
+          .update({ [field]: "forbidden-value" }),
+      );
+    },
+  );
+
+  it("KAN-199: denies a business owner updating another business", async () => {
+    const otherBusinessOwner = testEnvironment.authenticatedContext(
+      "business-owner-b",
+      businessOwnerOf("business-b"),
+    );
+
+    await assertFails(
+      otherBusinessOwner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Stolen business" }),
+    );
+  });
+
+  it("KAN-199: denies a forged owner claim without the ownership record", async () => {
+    const forgedBusinessOwner = testEnvironment.authenticatedContext(
+      "attacker",
+      businessOwnerOf("business-a"),
+    );
+
+    await assertFails(
+      forgedBusinessOwner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Stolen business" }),
+    );
+  });
+
+  it("KAN-199: denies a business owner claim without a businessId", async () => {
+    const incompleteBusinessOwner = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      { role: "business_owner" },
+    );
+
+    await assertFails(
+      incompleteBusinessOwner
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Incomplete claim" }),
+    );
+  });
+
+  it("KAN-199: does not grant owner profile writes to a collaborator", async () => {
+    const collaborator = testEnvironment.authenticatedContext(
+      "collaborator-1",
+      {
+        businessId: "business-a",
+        collaboratorId: "collaborator-1",
+        role: "collaborator",
+      },
+    );
+
+    await assertFails(
+      collaborator
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Collaborator business" }),
+    );
+  });
+
+  it("KAN-199: does not grant business profile writes to a visitor", async () => {
+    const visitor = testEnvironment.unauthenticatedContext();
+
+    await assertFails(
+      visitor
+        .firestore()
+        .doc("businesses/business-a")
+        .update({ name: "Anonymous business" }),
     );
   });
 

@@ -46,6 +46,10 @@ describe("firestore.rules: users", () => {
         language: "es",
         theme: "system",
       });
+      await adminFirestore.doc("businesses/business-a").set({
+        ownerUserId: "subscriber-a",
+        status: "active",
+      });
       await adminFirestore.doc("businesses/business-inactive").set({
         ownerUserId: "subscriber-a",
         status: "inactive",
@@ -103,6 +107,48 @@ describe("firestore.rules: users", () => {
 
     await assertSucceeds(
       subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-199: lets the recorded business owner update their own language", async () => {
+    const businessOwner = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "business_owner",
+    });
+
+    await assertSucceeds(
+      businessOwner
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-199: denies owner preferences when the tenant claim does not match", async () => {
+    const businessOwner = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-b",
+      role: "business_owner",
+    });
+
+    await assertFails(
+      businessOwner
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ language: "en" }),
+    );
+  });
+
+  it("KAN-199: denies owner preferences with an invalid role claim", async () => {
+    const invalidOwner = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "owner",
+    });
+
+    await assertFails(
+      invalidOwner
         .firestore()
         .doc(SUBSCRIBER_PROFILE_PATH)
         .update({ language: "en" }),
@@ -215,6 +261,20 @@ describe("firestore.rules: users", () => {
 
     await assertSucceeds(
       subscriber
+        .firestore()
+        .doc(SUBSCRIBER_PROFILE_PATH)
+        .update({ theme: "dark" }),
+    );
+  });
+
+  it("KAN-199: lets the recorded business owner update their own theme", async () => {
+    const businessOwner = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "business_owner",
+    });
+
+    await assertSucceeds(
+      businessOwner
         .firestore()
         .doc(SUBSCRIBER_PROFILE_PATH)
         .update({ theme: "dark" }),

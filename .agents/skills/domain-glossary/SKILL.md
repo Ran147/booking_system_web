@@ -30,7 +30,7 @@ If another skill's example uses a name that contradicts this glossary, the gloss
 | Backlog (ES) | Code (EN) | Auth role (`custom claim role`) | Portal |
 | --- | --- | --- | --- |
 | Super administrador | super admin | `super_admin` | `admin` |
-| Suscriptor (dueño del negocio) | subscriber | `subscriber` | `business` (everything of their own business) |
+| Suscriptor / dueño del negocio | business owner | `business_owner` for new accounts; legacy `subscriber` remains supported | `business` (everything of their own business, only when the tenant claim and owner record match) |
 | Cliente (con cuenta) | customer | `customer` | `customer` |
 | Visitante (sin cuenta) | visitor | — (unauthenticated, not a role) | `landing`, `customer` (read-only). Cannot book: signs in or signs up as a customer first (Q6) |
 | Colaborador (empleado del negocio que atiende clientes, por ejemplo un barbero) | collaborator | `collaborator` (claims `businessId`, `collaboratorId`) | `business`, limited to the permissions the subscriber enables (`CollaboratorPermission`, KAN-86). Q1, 2026-09-28 |

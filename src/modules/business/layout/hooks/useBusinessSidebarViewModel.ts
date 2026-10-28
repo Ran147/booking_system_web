@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Scissors,
   Settings,
-  Store,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -21,6 +20,7 @@ import {
   useSession,
   useSignOut,
 } from "@/modules/auth";
+import { canManageBusinessProfile } from "@/modules/business/businessProfileAccess";
 import type { Nullable } from "@/types";
 import {
   businessLayoutQueryKeys,
@@ -63,8 +63,7 @@ export const useBusinessSidebarViewModel = (
     session.role === USER_ROLE.COLLABORATOR;
   const isSubscriber =
     session.status === SESSION_STATUS.SIGNED_IN &&
-    (session.role === USER_ROLE.SUBSCRIBER ||
-      session.role === USER_ROLE.BUSINESS_OWNER);
+    canManageBusinessProfile(session.role);
 
   const collaboratorId =
     isCollaborator && session.collaboratorId ? session.collaboratorId : null;
@@ -259,24 +258,18 @@ export const useBusinessSidebarViewModel = (
             isSubscriberOnly: true,
             label: t("business:layout.sidebar.collaborators"),
           },
-          {
-            description: t("business:layout.sidebar.profileDescription"),
-            href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
-            icon: Store,
-            id: "profile",
-            isAvailable: true,
-            isSubscriberOnly: true,
-            label: t("business:layout.sidebar.profile"),
-          },
-          {
-            description: t("business:layout.sidebar.settingsDescription"),
-            href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
-            icon: Settings,
-            id: "settings",
-            isAvailable: true,
-            isSubscriberOnly: true,
-            label: t("business:layout.sidebar.settings"),
-          },
+        ]
+      : []),
+    {
+      description: t("business:layout.sidebar.settingsDescription"),
+      href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS}`,
+      icon: Settings,
+      id: "settings",
+      isAvailable: true,
+      label: t("business:layout.sidebar.settings"),
+    },
+    ...(isSubscriber
+      ? [
           {
             description: t("business:layout.sidebar.subscriptionDescription"),
             icon: CreditCard,

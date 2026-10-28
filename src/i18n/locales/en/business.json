@@ -350,11 +350,13 @@
       "title": "Language"
     },
     "password": {
+      "backAction": "Back to Settings",
       "confirmationMismatch": "The confirmation does not match the new password.",
       "confirmPasswordLabel": "Confirm new password",
       "currentPasswordInvalid": "The current password is incorrect.",
       "currentPasswordLabel": "Current password",
       "description": "Update the password you use to access your account.",
+      "formTitle": "Change password",
       "newPasswordLabel": "New password",
       "sameAsCurrent": "The new password must be different from the current password.",
       "sessionExpired": "Your session is no longer valid. Sign in again before changing your password.",
@@ -364,6 +366,18 @@
       "successMessage": "Password updated successfully.",
       "title": "Change password",
       "tooManyAttempts": "Too many attempts were made. Wait a moment before trying again."
+    },
+    "navigation": {
+      "businessProfile": {
+        "action": "Open Business profile",
+        "description": "Manage business information",
+        "title": "Business profile"
+      },
+      "password": {
+        "action": "Open Password settings",
+        "description": "Change password",
+        "title": "Password"
+      }
     },
     "theme": {
       "description": "Choose how the business portal interface is displayed.",
