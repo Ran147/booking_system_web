@@ -362,6 +362,7 @@ export default tseslint.config(
       "functions/*.config.{js,ts}",
       // Playwright reads the setup function from the default export.
       "e2e/globalSetup.ts",
+      "api/**/*.ts",
     ],
     rules: {
       "import-x/no-default-export": "off",

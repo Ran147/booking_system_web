@@ -3,8 +3,19 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, Timestamp, writeBatch } from "firebase/firestore";
-import { FUNCTION_NAME, TIME_MS, type FunctionName } from "@/constants";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  writeBatch,
+} from "firebase/firestore";
+import { FUNCTION_NAME, MONEY, TIME_MS, type FunctionName } from "@/constants";
+import type { Nullable } from "@/types";
 import { auth, firestore } from "./firebaseApp";
 
 interface GenericPayload {
@@ -214,8 +225,97 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
   }
 
   if (functionName === FUNCTION_NAME.DELETE_SERVICE) {
+    const businessId = String(genericPayload.businessId ?? "");
     const serviceId = String(genericPayload.serviceId ?? "");
+
+    if (!businessId || !serviceId) {
+      throw new Error("Missing businessId or serviceId for deleteService");
+    }
+
+    const serviceDocumentReference = doc(
+      firestore,
+      "businesses",
+      businessId,
+      "services",
+      serviceId,
+    );
+
+    await deleteDoc(serviceDocumentReference);
     return { deletedServiceId: serviceId } as Response;
+  }
+
+  if (functionName === FUNCTION_NAME.CREATE_SERVICE) {
+    const businessId = String(genericPayload.businessId ?? "");
+    const formValues = (genericPayload.formValues ?? {}) as {
+      description?: string;
+      durationMinutes?: number;
+      features?: string[];
+      imageUrl?: Nullable<string>;
+      name?: string;
+      price?: number;
+    };
+    const sanitizedFeatures = (formValues.features ?? [])
+      .map((feature) => feature.trim())
+      .filter((feature) => feature.length > 0);
+    const priceInCents = Math.round(
+      Number(formValues.price || 0) * MONEY.CENTS_PER_UNIT,
+    );
+    const servicesCollectionReference = collection(
+      firestore,
+      "businesses",
+      businessId,
+      "services",
+    );
+    const documentReference = await addDoc(servicesCollectionReference, {
+      createdAt: Timestamp.now(),
+      description: (formValues.description || "").trim(),
+      durationMinutes: Number(formValues.durationMinutes ?? 0),
+      features: sanitizedFeatures,
+      imageUrl: formValues.imageUrl ?? null,
+      name: (formValues.name || "").trim(),
+      priceInCents,
+      searchName: (formValues.name || "").trim().toLowerCase(),
+      status: "active",
+      updatedAt: Timestamp.now(),
+    });
+    return { serviceId: documentReference.id } as Response;
+  }
+
+  if (functionName === FUNCTION_NAME.UPDATE_SERVICE) {
+    const businessId = String(genericPayload.businessId ?? "");
+    const serviceId = String(genericPayload.serviceId ?? "");
+    const formValues = (genericPayload.formValues ?? {}) as {
+      description?: string;
+      durationMinutes?: number;
+      features?: string[];
+      imageUrl?: Nullable<string>;
+      name?: string;
+      price?: number;
+    };
+    const sanitizedFeatures = (formValues.features ?? [])
+      .map((feature) => feature.trim())
+      .filter((feature) => feature.length > 0);
+    const priceInCents = Math.round(
+      Number(formValues.price || 0) * MONEY.CENTS_PER_UNIT,
+    );
+    const serviceDocumentReference = doc(
+      firestore,
+      "businesses",
+      businessId,
+      "services",
+      serviceId,
+    );
+    await updateDoc(serviceDocumentReference, {
+      description: (formValues.description || "").trim(),
+      durationMinutes: Number(formValues.durationMinutes ?? 0),
+      features: sanitizedFeatures,
+      imageUrl: formValues.imageUrl ?? null,
+      name: (formValues.name || "").trim(),
+      priceInCents,
+      searchName: (formValues.name || "").trim().toLowerCase(),
+      updatedAt: Timestamp.now(),
+    });
+    return { serviceId } as Response;
   }
 
   throw new Error(`Cloud function "${functionName}" is not available.`);
