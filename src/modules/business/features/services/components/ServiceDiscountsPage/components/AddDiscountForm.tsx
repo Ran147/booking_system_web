@@ -12,15 +12,19 @@ import {
   InputField,
   SelectField,
 } from "@/components/common";
-import { I18N_NAMESPACE } from "@/constants";
+import { I18N_NAMESPACE, MONEY } from "@/constants";
 import {
+  calculateDiscountedPrice,
+  DISCOUNT_LIMIT,
   DISCOUNT_TYPE,
   type DiscountFormState,
   type DiscountType,
 } from "@/modules/business/features/services";
 import type { Nullable } from "@/types";
+import { formatPrice } from "@/utils";
 
 export interface AddDiscountFormProps {
+  readonly currency?: string;
   readonly formError: Nullable<string>;
   readonly formState: DiscountFormState;
   readonly isPending: boolean;
@@ -30,17 +34,53 @@ export interface AddDiscountFormProps {
     value: DiscountFormState[Key],
   ) => void;
   readonly onSubmit: () => Promise<void>;
+  readonly servicePriceInCents?: number;
 }
 
 export const AddDiscountForm = ({
+  currency,
   formError,
   formState,
   isPending,
   isReadOnly,
   onFormChange,
   onSubmit,
+  servicePriceInCents,
 }: AddDiscountFormProps): ReactElement => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+  const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+
+  const numericValue = Number(formState.value);
+  const isValidNumber = !Number.isNaN(numericValue) && numericValue > 0;
+  let previewDiscountedPriceInCents: Nullable<number> = null;
+
+  if (servicePriceInCents !== undefined && isValidNumber) {
+    if (formState.type === DISCOUNT_TYPE.PERCENTAGE) {
+      if (numericValue <= DISCOUNT_LIMIT.MAX_PERCENTAGE) {
+        previewDiscountedPriceInCents = calculateDiscountedPrice(
+          servicePriceInCents,
+          {
+            endsAt: new Date(),
+            startsAt: new Date(),
+            type: DISCOUNT_TYPE.PERCENTAGE,
+            value: numericValue,
+          },
+        );
+      }
+    } else {
+      const amountInCents = Math.round(numericValue * MONEY.CENTS_PER_UNIT);
+      if (amountInCents < servicePriceInCents) {
+        previewDiscountedPriceInCents = calculateDiscountedPrice(
+          servicePriceInCents,
+          {
+            endsAt: new Date(),
+            startsAt: new Date(),
+            type: DISCOUNT_TYPE.FIXED_AMOUNT,
+            value: amountInCents,
+          },
+        );
+      }
+    }
+  }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -135,6 +175,20 @@ export const AddDiscountForm = ({
               value={formState.endsAt}
             />
           </div>
+
+          {previewDiscountedPriceInCents !== null && currency && (
+            <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+              <span className="font-medium text-foreground">
+                {t("services.discounts.previewPrice", {
+                  price: formatPrice(
+                    previewDiscountedPriceInCents,
+                    currency,
+                    i18n.language,
+                  ),
+                })}
+              </span>
+            </div>
+          )}
 
           <div className="flex justify-end pt-2">
             <Button

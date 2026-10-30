@@ -24,9 +24,7 @@ export const CLOSED_BOOKING_STATUSES: readonly BookingStatus[] = [
 
 export const DATE_FILTER_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-// Used for the price of a business that has no currency saved. Where the
-// currency of a business comes from is still to be defined by the team.
-export const DEFAULT_BUSINESS_CURRENCY = "MXN";
+export const DEFAULT_BUSINESS_CURRENCY = "CRC";
 
 export const MY_BOOKINGS_QUERY_PARAM = {
   BUSINESS: "business",

@@ -44,10 +44,16 @@ export const LandingNavbar = ({
           isMobileMenuOpen={viewModel.isMobileMenuOpen}
           isSignedIn={viewModel.isSignedIn}
           onNavigate={viewModel.handleNavigate}
+          onSignOut={(): void => {
+            void viewModel.handleSignOut();
+          }}
           onToggleMobileMenu={viewModel.toggleMobileMenu}
           openMenuLabel={t("home.navbar.menuOpen")}
           portalActionLabel={viewModel.portalActionLabel}
           portalActionPath={viewModel.portalActionPath}
+          signOutActionLabel={viewModel.signOutActionLabel}
+          signUpActionLabel={viewModel.signUpActionLabel}
+          signUpActionPath={viewModel.signUpActionPath}
         />
       </div>
 
@@ -57,8 +63,14 @@ export const LandingNavbar = ({
         mobileNavLabel={t("home.navbar.mobileNavLabel")}
         navLinks={viewModel.navLinks}
         onNavigate={viewModel.handleNavigate}
+        onSignOut={(): void => {
+          void viewModel.handleSignOut();
+        }}
         portalActionLabel={viewModel.portalActionLabel}
         portalActionPath={viewModel.portalActionPath}
+        signOutActionLabel={viewModel.signOutActionLabel}
+        signUpActionLabel={viewModel.signUpActionLabel}
+        signUpActionPath={viewModel.signUpActionPath}
       />
     </header>
   );

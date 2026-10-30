@@ -2,17 +2,20 @@
 // segments win over that dynamic segment in React Router, so a business can
 // never take one of them as its slug (domain-glossary §3). A new static
 // top-level route adds its segment here in the same PR.
-export const RESERVED_BUSINESS_SLUG = {
+export const RESERVED_BUSINESS_SLUG = Object.freeze({
+  ABOUT: "about",
   ADMIN: "admin",
   BUSINESS: "business",
   CONTACT: "contact",
+  FAQ: "faq",
+  HELP: "help",
   PASSWORD_RECOVERY: "password-recovery",
   PASSWORD_RESET: "password-reset",
   PLANS: "plans",
   SIGN_IN: "sign-in",
   SIGN_UP: "sign-up",
   TERMS: "terms",
-} as const;
+} as const);
 
 export type ReservedBusinessSlug =
   (typeof RESERVED_BUSINESS_SLUG)[keyof typeof RESERVED_BUSINESS_SLUG];

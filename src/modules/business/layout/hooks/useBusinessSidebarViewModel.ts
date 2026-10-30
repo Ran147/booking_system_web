@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Scissors,
   Settings,
+  Store,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -62,7 +63,8 @@ export const useBusinessSidebarViewModel = (
     session.role === USER_ROLE.COLLABORATOR;
   const isSubscriber =
     session.status === SESSION_STATUS.SIGNED_IN &&
-    session.role === USER_ROLE.SUBSCRIBER;
+    (session.role === USER_ROLE.SUBSCRIBER ||
+      session.role === USER_ROLE.BUSINESS_OWNER);
 
   const collaboratorId =
     isCollaborator && session.collaboratorId ? session.collaboratorId : null;
@@ -256,6 +258,15 @@ export const useBusinessSidebarViewModel = (
             isAvailable: false,
             isSubscriberOnly: true,
             label: t("business:layout.sidebar.collaborators"),
+          },
+          {
+            description: t("business:layout.sidebar.profileDescription"),
+            href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+            icon: Store,
+            id: "profile",
+            isAvailable: true,
+            isSubscriberOnly: true,
+            label: t("business:layout.sidebar.profile"),
           },
           {
             description: t("business:layout.sidebar.settingsDescription"),

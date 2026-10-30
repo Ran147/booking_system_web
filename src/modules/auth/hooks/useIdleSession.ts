@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BROWSER_EVENT } from "@/constants";
-import type { NullableRef } from "@/types";
+import { BROWSER_EVENT, STORAGE_KEY } from "@/constants";
+import { auth } from "@/services/firebase";
+import type { Nullable, NullableRef } from "@/types";
 import { IDLE_SESSION } from "../constants/IdleSession.constants";
 import type {
   IdleSession,
@@ -14,10 +15,57 @@ const ACTIVITY_EVENTS = [
   BROWSER_EVENT.TOUCH_START,
 ] as const;
 
+const getStoredActivityTime = (): Nullable<number> => {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return null;
+  }
+  try {
+    const storedValue = window.localStorage.getItem(
+      STORAGE_KEY.LAST_ACTIVITY_AT,
+    );
+    if (!storedValue) return null;
+    const parsedTimestamp = Number(storedValue);
+    return Number.isFinite(parsedTimestamp) && parsedTimestamp > 0
+      ? parsedTimestamp
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+const getInitialActivityTime = (): number => {
+  const currentTime = Date.now();
+  const storedTimestamp = getStoredActivityTime();
+  const lastSignInTimestamp = auth.currentUser?.metadata?.lastSignInTime
+    ? new Date(auth.currentUser.metadata.lastSignInTime).getTime()
+    : null;
+
+  const validStoredTimestamp =
+    typeof storedTimestamp === "number" &&
+    Number.isFinite(storedTimestamp) &&
+    storedTimestamp <= currentTime
+      ? storedTimestamp
+      : null;
+
+  const validLastSignInTimestamp =
+    typeof lastSignInTimestamp === "number" &&
+    Number.isFinite(lastSignInTimestamp) &&
+    lastSignInTimestamp <= currentTime
+      ? lastSignInTimestamp
+      : null;
+
+  if (validStoredTimestamp !== null && validLastSignInTimestamp !== null) {
+    return Math.max(validStoredTimestamp, validLastSignInTimestamp);
+  }
+  if (validStoredTimestamp !== null) return validStoredTimestamp;
+  if (validLastSignInTimestamp !== null) return validLastSignInTimestamp;
+  return currentTime;
+};
+
 /**
  * Reloj de inactividad por marcas de tiempo (US-38, D-2): compara la hora
- * actual con la última actividad, así un equipo dormido o una pestaña en
- * segundo plano no se descuadran (AC-KAN-38-08).
+ * actual con la última actividad persistida, así un equipo dormido, una pestaña
+ * en segundo plano o una sesión reabierta tras horas no se descuadran (AC-KAN-38-08).
  * @param {UseIdleSessionParameters} parameters
  * @returns {IdleSession}
  */
@@ -26,8 +74,8 @@ export const useIdleSession = ({
   onExpire,
   onLocalActivity,
 }: UseIdleSessionParameters): IdleSession => {
-  const [mountedAt] = useState(() => Date.now());
-  const lastActivityAtReference = useRef(mountedAt);
+  const [initialActivityTime] = useState(getInitialActivityTime);
+  const lastActivityAtReference = useRef(initialActivityTime);
   const lastLocalActivityAtReference = useRef(0);
   const isWarningShownReference = useRef(false);
   const onExpireReference = useRef(onExpire);
@@ -72,10 +120,38 @@ export const useIdleSession = ({
         lastActivityAtReference.current,
         activityAt,
       );
+      if (typeof window !== "undefined" && window.localStorage) {
+        try {
+          window.localStorage.setItem(
+            STORAGE_KEY.LAST_ACTIVITY_AT,
+            String(lastActivityAtReference.current),
+          );
+        } catch {
+          // Local storage write failures ignored
+        }
+      }
       checkIdleTime();
     },
     [checkIdleTime],
   );
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        const existingStored = window.localStorage.getItem(
+          STORAGE_KEY.LAST_ACTIVITY_AT,
+        );
+        if (!existingStored) {
+          window.localStorage.setItem(
+            STORAGE_KEY.LAST_ACTIVITY_AT,
+            String(lastActivityAtReference.current),
+          );
+        }
+      } catch {
+        // Local storage write failures ignored
+      }
+    }
+  }, []);
 
   useEffect(() => {
     checkIdleTime();
@@ -92,6 +168,31 @@ export const useIdleSession = ({
         BROWSER_EVENT.VISIBILITY_CHANGE,
         checkIdleTime,
       );
+    };
+  }, [checkIdleTime]);
+
+  useEffect(() => {
+    const handleStorageChange = (storageEvent: StorageEvent): void => {
+      if (storageEvent.key === STORAGE_KEY.LAST_ACTIVITY_AT) {
+        if (!storageEvent.newValue) return;
+        const remoteActivityAt = Number(storageEvent.newValue);
+        if (
+          Number.isFinite(remoteActivityAt) &&
+          remoteActivityAt > 0 &&
+          remoteActivityAt <= Date.now()
+        ) {
+          lastActivityAtReference.current = Math.max(
+            lastActivityAtReference.current,
+            remoteActivityAt,
+          );
+          checkIdleTime();
+        }
+      }
+    };
+
+    window.addEventListener(BROWSER_EVENT.STORAGE, handleStorageChange);
+    return (): void => {
+      window.removeEventListener(BROWSER_EVENT.STORAGE, handleStorageChange);
     };
   }, [checkIdleTime]);
 

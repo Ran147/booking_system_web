@@ -49,6 +49,11 @@
   "home": {
     "closeModal": "Entendido",
     "configs": {
+      "profile": {
+        "action": "Editar perfil",
+        "description": "Nombre, logo, teléfono, dirección y redes sociales visibles para clientes.",
+        "title": "Perfil público del negocio"
+      },
       "settings": {
         "action": "Configurar",
         "description": "Zona horaria, moneda, notificaciones y apariencia.",
@@ -145,6 +150,8 @@
       "openMenu": "Abrir menú de navegación",
       "reports": "Reportes",
       "reportsDescription": "Ocupación y métricas operativas",
+      "profile": "Perfil público",
+      "profileDescription": "Información y presencia pública del negocio",
       "schedule": "Agenda",
       "scheduleDescription": "Turnos, reservas y bloqueos de horario",
       "services": "Servicios",
@@ -222,12 +229,15 @@
       "activeBadge": "Vigente",
       "addDiscountAction": "Agregar descuento",
       "adding": "Guardando…",
+      "basePriceLabel": "Precio base: {{price}}",
+      "discountedPriceLabel": "Precio con descuento",
       "emptyDescription": "Agrega un descuento para incentivar a tus clientes.",
       "emptyTitle": "No hay promociones configuradas",
       "endDateLabel": "Fecha de fin",
       "expiredBadge": "Expirado",
       "invalidDateRangeError": "La fecha de fin debe ser posterior o igual a la fecha de inicio.",
       "overlapError": "El rango de fechas se superpone con otro descuento existente.",
+      "previewPrice": "Precio resultante: {{price}}",
       "readOnlyNotice": "Tu negocio se encuentra inactivo o suspendido. La gestión de promociones está deshabilitada.",
       "removeAction": "Eliminar",
       "removeConfirmDescription": "¿Estás seguro de que deseas eliminar este descuento?",

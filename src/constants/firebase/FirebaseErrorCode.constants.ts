@@ -15,6 +15,7 @@ export const FIREBASE_ERROR_CODE = {
   NETWORK_REQUEST_FAILED: "auth/network-request-failed",
   NOT_FOUND: "functions/not-found",
   PERMISSION_DENIED: "permission-denied",
+  POPUP_CLOSED_BY_USER: "auth/popup-closed-by-user",
   REQUIRES_RECENT_LOGIN: "auth/requires-recent-login",
   TOO_MANY_REQUESTS: "auth/too-many-requests",
   UNAVAILABLE: "unavailable",

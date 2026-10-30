@@ -12,6 +12,8 @@ export {
   BookingStatusLabel,
   type BookingStatusLabelProps,
 } from "./booking-status-label/BookingStatusLabel";
+export { CheckboxField } from "./checkbox-field";
+export type { CheckboxFieldProps } from "./checkbox-field/models/checkboxField.model";
 export { CursorPagination } from "./cursor-pagination/CursorPagination";
 export type { CursorPaginationProps } from "./cursor-pagination/CursorPaginationProps.interface";
 export { Button } from "./button";

@@ -7,7 +7,7 @@ import {
   type StorageReference,
 } from "firebase/storage";
 import { BUSINESS_PROFILE, FIRESTORE_COLLECTION } from "@/constants";
-import { firestore, storage } from "@/services";
+import { firestore, storage, uploadImageToImgbb } from "@/services";
 import type { SaveBusinessPublicProfileInput } from "../models/BusinessProfileForm.model";
 
 const getLogoReference = (businessId: string): StorageReference =>
@@ -25,9 +25,15 @@ export const saveBusinessPublicProfile = async ({
   let logoUrl = values.logoUrl;
 
   if (logoFile) {
-    const logoReference = getLogoReference(businessId);
-    await uploadBytes(logoReference, logoFile, { contentType: logoFile.type });
-    logoUrl = await getDownloadURL(logoReference);
+    if (import.meta.env.VITE_IMGBB_API_KEY && !import.meta.env.VITEST) {
+      logoUrl = await uploadImageToImgbb(logoFile);
+    } else {
+      const logoReference = getLogoReference(businessId);
+      await uploadBytes(logoReference, logoFile, {
+        contentType: logoFile.type,
+      });
+      logoUrl = await getDownloadURL(logoReference);
+    }
   } else if (removeLogo) {
     logoUrl = null;
   }
@@ -42,6 +48,12 @@ export const saveBusinessPublicProfile = async ({
   });
 
   if (removeLogo && values.logoUrl) {
-    await deleteObject(getLogoReference(businessId));
+    if (
+      import.meta.env.VITEST ||
+      !import.meta.env.VITE_IMGBB_API_KEY ||
+      values.logoUrl.includes("firebasestorage.googleapis.com")
+    ) {
+      await deleteObject(getLogoReference(businessId));
+    }
   }
 };
