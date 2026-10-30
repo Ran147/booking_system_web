@@ -81,10 +81,7 @@ export const useBusinessHomeViewModel = (
       helperText: t("business:home.metrics.businessStatus.helper"),
       id: "business-status",
       label: t("business:home.metrics.businessStatus.label"),
-      value:
-        businessStatus === BUSINESS_STATUS.ACTIVE
-          ? t("business:home.metrics.businessStatus.value")
-          : businessStatus,
+      value: t(`business:businessStatus.${businessStatus}`),
     },
     {
       helperText: t("business:home.metrics.todayBookings.helper"),

@@ -16,6 +16,21 @@ import { createAppRoutesPage } from "./AppRoutes.page";
 
 const BUSINESS_PAGE_PATH = "/barberia-centro";
 
+// The business portal reads the business status before it opens
+// (BusinessStatusGate, US-33); these tests only check routing.
+vi.mock("@/modules/business/layout/api/fetchBusinessGate", async () => {
+  const { BUSINESS_STATUS } = await import("@/domain");
+  return {
+    fetchBusinessGate: vi.fn().mockResolvedValue({
+      name: "Barbería Centro",
+      rejectionReason: null,
+      signedUpAt: null,
+      status: BUSINESS_STATUS.ACTIVE,
+      timeZone: null,
+    }),
+  };
+});
+
 vi.mock("@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug");
 
 beforeEach(() => {
