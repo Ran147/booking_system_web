@@ -1,17 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  BarChart3,
-  Calendar,
-  CreditCard,
-  Scissors,
-  Settings,
-  UserCheck,
-  Users,
-} from "lucide-react";
+import { Calendar, Scissors } from "lucide-react";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { BADGE_VARIANT } from "@/components/common/badge/constants/badge.constants";
 import { FIRESTORE_COLLECTION, I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import {
   BUSINESS_STATUS,
@@ -48,7 +39,8 @@ export const useBusinessHomeViewModel = (
   const role: UserRole =
     isSessionSignedIn && session.role ? session.role : USER_ROLE.SUBSCRIBER;
 
-  const isSubscriber = role === USER_ROLE.SUBSCRIBER;
+  const isSubscriber =
+    role === USER_ROLE.SUBSCRIBER || role === USER_ROLE.BUSINESS_OWNER;
   const isCollaborator = role === USER_ROLE.COLLABORATOR;
 
   const businessStatusQuery = useQuery<BusinessStatus>({
@@ -73,91 +65,9 @@ export const useBusinessHomeViewModel = (
     }
   };
 
-  const quickAccessItems = [
-    {
-      actionLabel: t("business:home.tools.services.action"),
-      badgeLabel: t("business:home.status.available"),
-      badgeVariant: BADGE_VARIANT.DEFAULT,
-      description: t("business:home.tools.services.description"),
-      href: `/business/${ROUTE_PATH.BUSINESS.SERVICE_NEW}`,
-      icon: Scissors,
-      id: "services",
-      isAvailable: true,
-      onClick: handleNavigateToServiceCreate,
-      title: t("business:home.tools.services.title"),
-    },
-    {
-      actionLabel: t("business:home.status.comingSoon"),
-      badgeLabel: t("business:home.status.comingSoon"),
-      badgeVariant: BADGE_VARIANT.MUTED,
-      description: t("business:home.tools.schedule.description"),
-      icon: Calendar,
-      id: "schedule",
-      isAvailable: false,
-      title: t("business:home.tools.schedule.title"),
-    },
-    {
-      actionLabel: t("business:home.status.comingSoon"),
-      badgeLabel: t("business:home.status.comingSoon"),
-      badgeVariant: BADGE_VARIANT.MUTED,
-      description: t("business:home.tools.customers.description"),
-      icon: Users,
-      id: "customers",
-      isAvailable: false,
-      title: t("business:home.tools.customers.title"),
-    },
-    {
-      actionLabel: t("business:home.status.comingSoon"),
-      badgeLabel: t("business:home.status.comingSoon"),
-      badgeVariant: BADGE_VARIANT.MUTED,
-      description: t("business:home.tools.reports.description"),
-      icon: BarChart3,
-      id: "reports",
-      isAvailable: false,
-      title: t("business:home.tools.reports.title"),
-    },
-    ...(isSubscriber
-      ? [
-          {
-            actionLabel: t("business:home.status.comingSoon"),
-            badgeLabel: t("business:home.status.comingSoon"),
-            badgeVariant: BADGE_VARIANT.MUTED,
-            description: t("business:home.tools.collaborators.description"),
-            icon: UserCheck,
-            id: "collaborators",
-            isAvailable: false,
-            title: t("business:home.tools.collaborators.title"),
-          },
-        ]
-      : []),
-  ];
+  const quickAccessItems = [] as const;
 
-  const configurationItems = [
-    {
-      actionLabel: t("business:home.configs.settings.action"),
-      badgeLabel: t("business:home.status.comingSoon"),
-      badgeVariant: BADGE_VARIANT.MUTED,
-      description: t("business:home.configs.settings.description"),
-      icon: Settings,
-      id: "settings",
-      isAvailable: false,
-      title: t("business:home.configs.settings.title"),
-    },
-    ...(isSubscriber
-      ? [
-          {
-            actionLabel: t("business:home.configs.subscription.action"),
-            badgeLabel: t("business:home.status.comingSoon"),
-            badgeVariant: BADGE_VARIANT.MUTED,
-            description: t("business:home.configs.subscription.description"),
-            icon: CreditCard,
-            id: "subscription",
-            isAvailable: false,
-            title: t("business:home.configs.subscription.title"),
-          },
-        ]
-      : []),
-  ];
+  const configurationItems = [] as const;
 
   const metrics = [
     {

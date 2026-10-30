@@ -4,6 +4,7 @@ export const SIGN_IN_ERROR_KEY = Object.freeze({
   ACCOUNT_DISABLED: "common:auth.signIn.accountDisabled",
   INVALID_CREDENTIALS: "common:auth.signIn.invalidCredentials",
   NETWORK: "common:errors.network",
+  NO_ROLE_ASSIGNED: "common:auth.signIn.noRoleAssigned",
   RECAPTCHA_REJECTED: "validation:recaptchaRequired",
   TOO_MANY_ATTEMPTS: "common:auth.signIn.tooManyAttempts",
   UNKNOWN: "common:errors.unknown",

@@ -56,6 +56,11 @@
   "home": {
     "closeModal": "Got it",
     "configs": {
+      "profile": {
+        "action": "Edit profile",
+        "description": "Name, logo, phone, address and social links visible to clients.",
+        "title": "Public business profile"
+      },
       "settings": {
         "action": "Configure",
         "description": "Time zone, currency, notifications and appearance.",
@@ -151,6 +156,8 @@
       "openMenu": "Open navigation menu",
       "reports": "Reports",
       "reportsDescription": "Occupancy and operational metrics",
+      "profile": "Public profile",
+      "profileDescription": "Business public information and presence",
       "schedule": "Schedule",
       "scheduleDescription": "Appointments, bookings and schedule blocks",
       "services": "Services",
@@ -235,12 +242,15 @@
       "activeBadge": "Active",
       "addDiscountAction": "Add discount",
       "adding": "Saving…",
+      "basePriceLabel": "Base price: {{price}}",
+      "discountedPriceLabel": "Discounted price",
       "emptyDescription": "Add a discount to incentivize your customers.",
       "emptyTitle": "No promotions configured",
       "endDateLabel": "End date",
       "expiredBadge": "Expired",
       "invalidDateRangeError": "The end date must be on or after the start date.",
       "overlapError": "The date range overlaps with an existing discount.",
+      "previewPrice": "Resulting price: {{price}}",
       "readOnlyNotice": "Your business is inactive or suspended. Promotion management is disabled.",
       "removeAction": "Remove",
       "removeConfirmDescription": "Are you sure you want to remove this discount?",

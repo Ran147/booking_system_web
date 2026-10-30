@@ -1,3 +1,5 @@
+import { BUSINESS_STATUS } from "@/domain";
+import { fetchBusinessPublicProfileBySlug } from "@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug";
 import { ROUTE_PATH } from "@/shared/constants";
 import { RESERVED_BUSINESS_SLUG } from "@/shared/domain";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
@@ -27,6 +29,22 @@ vi.mock("@/modules/business/layout/api/fetchBusinessGate", async () => {
       timeZone: null,
     }),
   };
+});
+
+vi.mock("@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug");
+
+beforeEach(() => {
+  vi.mocked(fetchBusinessPublicProfileBySlug).mockResolvedValue({
+    contactEmail: null,
+    contactPhone: null,
+    description: null,
+    id: "business-id",
+    logoUrl: null,
+    name: "Barbería Centro",
+    slug: "barberia-centro",
+    socialLinks: [],
+    status: BUSINESS_STATUS.ACTIVE,
+  });
 });
 
 describe("app routes", () => {

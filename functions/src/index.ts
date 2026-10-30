@@ -9,4 +9,5 @@ export { createBooking } from "./bookings/createBooking.js";
 export { deleteService } from "./services/deleteService.js";
 export { updateServiceCollaborators } from "./services/updateServiceCollaborators.js";
 export { payPlanCheckout } from "./billing/payPlanCheckout.js";
+export { sendContactMessage } from "./notifications/sendContactMessage.js";
 export { validateSignUpLink } from "./billing/validateSignUpLink.js";
