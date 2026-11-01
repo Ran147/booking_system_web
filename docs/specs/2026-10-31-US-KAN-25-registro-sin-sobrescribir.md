@@ -38,8 +38,8 @@ Este PR hace que la acción **solo cree** y nunca reescriba, siguiendo la misma 
    - Si Firebase responde `auth/email-already-exists` → `409`, `error: "already-exists"`, `details.reason: "accountExists"`. No se toca la cuenta existente (AC-KAN-25-09, AS-5: mensaje neutro).
 2. **Reservar el `slug`** con `businessSlugs/<slug>.create(...)`. `create` falla si el documento ya existe, así que dos registros a la vez nunca obtienen el mismo `slug`.
    - Si ya existe → se borra la cuenta del paso 1 y se responde `409`, `error: "already-exists"`, `details.reason: "slugTaken"` (AC-KAN-25-18).
-3. **Crear el negocio** con `businesses/business-<slug>.create(...)` en vez de `set(..., { merge: true })`. Si un negocio con ese id ya existiera sin su `businessSlugs` (dato viejo), falla en vez de reescribirlo y se trata igual que el paso 2.
-4. Claims, `users/<uid>`, suscripción, colaborador dueño y servicio por defecto: igual que hoy.
+3. Claims y `users/<uid>`: igual que hoy.
+4. **Crear el negocio** con `businesses/business-<slug>.create(...)` en vez de `set(..., { merge: true })`. Si un negocio con ese id ya existiera sin su `businessSlugs` (dato viejo), falla en vez de reescribirlo y se trata igual que el paso 2. Después, suscripción, colaborador dueño y servicio por defecto: igual que hoy.
 5. **Deshacer si algo falla después del paso 1** (`cloud-functions-standards`, rollback de Auth + Firestore): se borran lo que este registro haya creado (`businesses/<id>` con sus subcolecciones, `users/<uid>`, `businessSlugs/<slug>`) y la cuenta de Auth, y se responde el error. Así el visitante puede reintentar con el mismo correo. Solo se borra lo creado en esta llamada.
 
 ### 3.2 Formato de error
@@ -53,12 +53,13 @@ El mismo que ya usa el archivo (por ejemplo `paymentDeclined` en `payPlanCheckou
 ### 3.3 Constantes (al inicio de `api/callFunction.ts`, orden A → Z)
 
 - `HTTP_STATUS.CONFLICT: 409`.
+- `FIREBASE_ADMIN_ERROR_CODE` (`EMAIL_ALREADY_EXISTS: "auth/email-already-exists"`, `FIRESTORE_ALREADY_EXISTS: 6`, el código gRPC con que falla `create`) y el helper `hasErrorCode`, igual al de `functions/src/shared/hasErrorCode.ts`.
 - `SIGN_UP_ERROR_REASON` (`ACCOUNT_EXISTS: "accountExists"`, `SLUG_TAKEN: "slugTaken"`), con la línea `// Mirror of … — keep in sync.` hacia `functions/src/billing/constants/SubscriberSignUp.constants.ts`.
 - Los mensajes para desarrolladores, en inglés como el resto del archivo; nunca se muestran al usuario.
 
 ## 4. Tests
 
-Hoy `api/` no tiene tests. Se agrega `tests/api/completeSubscriberSignUp.test.ts` (fuera de `api/`, para que Vercel no lo publique como endpoint), con entorno `node` y `firebase-admin` simulado en memoria (`vi.mock`). `vitest.config.ts` incluye `tests/api/**/*.test.ts` en `npm run test:run`. No usa la base real ni el emulador.
+Hoy `api/` no tiene tests. Se agrega `tests/api/completeSubscriberSignUp.test.ts` (fuera de `api/`, para que Vercel no lo publique como endpoint), con entorno `node` y `firebase-admin` simulado en memoria (`vi.mock`). `vitest.config.ts` incluye `tests/api/**/*.test.ts` en `npm run test:run`, y `eslint.config.js` permite que esos tests importen `api/` por ruta relativa (el alias `@/` solo llega a `src/`, igual que la excepción que ya existe para `functions/`). No usa la base real ni el emulador.
 
 | Test | Cubre |
 | --- | --- |
