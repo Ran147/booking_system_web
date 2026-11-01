@@ -49,6 +49,8 @@ Igual que en `functions/`, no se crea ninguna cuenta, negocio ni pago (AC-KAN-22
 
 Espejos con `// Mirror of … — keep in sync.` de `functions/src/billing/constants/PlanCheckout.constants.ts` y `functions/src/shared/constants/`: `PLAN_CHECKOUT_ERROR_REASON`, `PLAN_CHECKOUT_FIELD_LIMIT`, `PLAN_CHECKOUT_PATTERN`, `CARD_EXPIRY`, `SIMULATED_GATEWAY`, `TERMS_VERSION`, `RECAPTCHA_VERIFICATION`, `LANGUAGE` y `PLAN_STATUS.ACTIVE`. `HTTP_STATUS.SERVICE_UNAVAILABLE: 503`. `CHECKOUT_SIMULATION` (del stub) se reemplaza por `SIMULATED_GATEWAY`.
 
+Propias de `api/`: `RECAPTCHA_RESULT` (`verified`, `rejected`, `unavailable`), lo que responde `verifyRecaptchaToken`; y `CHECKOUT_REJECTION_NAME`, que marca el error de una regla del pago para que el handler lo responda como `412` con su `reason`, como `HttpsError` en `functions/`.
+
 ## 5. Tests
 
 `tests/api/payPlanCheckout.test.ts`, con el simulador de `firebase-admin` de #64 (al que se le agrega `runTransaction`, que corre las transacciones una por una como hace Firestore ante dos escrituras del mismo documento) y `fetch` simulado para Google. Los mismos casos que `functions/src/billing/tests/payPlanCheckout.test.ts`:
