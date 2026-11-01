@@ -22,6 +22,7 @@ const HTTP_METHOD = Object.freeze({
 
 const HTTP_STATUS = Object.freeze({
   BAD_REQUEST: 400,
+  CONFLICT: 409,
   INTERNAL_SERVER_ERROR: 500,
   METHOD_NOT_ALLOWED: 405,
   NOT_FOUND: 404,
@@ -81,6 +82,19 @@ const CHECKOUT_SIMULATION = Object.freeze({
   PROCESSING_DELAY_MS: 600,
 } as const);
 
+// Error codes the Admin SDK reports: Auth as text, Firestore as a gRPC status.
+const FIREBASE_ADMIN_ERROR_CODE = Object.freeze({
+  EMAIL_ALREADY_EXISTS: "auth/email-already-exists",
+  FIRESTORE_ALREADY_EXISTS: 6,
+} as const);
+
+// Mirror of SIGN_UP_ERROR_REASON in
+// functions/src/billing/constants/SubscriberSignUp.constants.ts — keep in sync.
+const SIGN_UP_ERROR_REASON = Object.freeze({
+  ACCOUNT_EXISTS: "accountExists",
+  SLUG_TAKEN: "slugTaken",
+} as const);
+
 const DIACRITIC_PATTERN = /\p{Diacritic}/gu;
 
 const normalizeSearchTerm = (searchTerm: string): string =>
@@ -89,6 +103,12 @@ const normalizeSearchTerm = (searchTerm: string): string =>
     .replace(DIACRITIC_PATTERN, "")
     .trim()
     .toLowerCase();
+
+const hasErrorCode = (error: unknown, errorCode: number | string): boolean =>
+  typeof error === "object" &&
+  error !== null &&
+  "code" in error &&
+  error.code === errorCode;
 
 interface CallFunctionRequestBody {
   readonly functionName?: string;
@@ -562,16 +582,10 @@ export default async function handler(
       const phone = payload.phone ? String(payload.phone) : null;
       const businessId = `business-${businessSlug}`;
 
+      // A sign-up only creates: an email that already has an account is
+      // rejected and that account is left as it is (AC-KAN-25-09, AS-5).
       let userId: string;
       try {
-        const existingUser = await auth.getUserByEmail(email);
-        userId = existingUser.uid;
-        await auth.updateUser(userId, {
-          displayName: fullName,
-          emailVerified: true,
-          password,
-        });
-      } catch {
         const newUser = await auth.createUser({
           displayName: fullName,
           email,
@@ -579,38 +593,66 @@ export default async function handler(
           password,
         });
         userId = newUser.uid;
+      } catch (error) {
+        if (
+          hasErrorCode(error, FIREBASE_ADMIN_ERROR_CODE.EMAIL_ALREADY_EXISTS)
+        ) {
+          sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
+            details: { reason: SIGN_UP_ERROR_REASON.ACCOUNT_EXISTS },
+            error: "already-exists",
+            message: "An account already exists for the checkout email",
+          });
+          return;
+        }
+        throw error;
       }
 
-      await auth.setCustomUserClaims(userId, {
-        businessId,
-        business_id: businessId,
-        role: "business_owner",
-      });
-
-      await firestore.collection("users").doc(userId).set(
-        {
-          business_id: businessId,
-          businessId,
-          email,
-          fullName,
-          language: "en",
-          phone,
-          role: "business_owner",
-          theme: "system",
-          uid: userId,
-        },
-        { merge: true },
-      );
-
-      const currentPeriodEndsAt = Timestamp.fromMillis(
-        Date.now() + TIME_MS.THIRTY_DAYS,
-      );
-
+      const slugReference = firestore
+        .collection("businessSlugs")
+        .doc(businessSlug);
+      const userReference = firestore.collection("users").doc(userId);
       const businessReference = firestore
         .collection("businesses")
         .doc(businessId);
-      await businessReference.set(
-        {
+      let isSlugReserved = false;
+      let isBusinessCreated = false;
+
+      try {
+        // create() fails when the document exists, so two sign-ups never get
+        // the same slug and an existing business is never rewritten
+        // (AC-KAN-25-18).
+        await slugReference.create({
+          businessId,
+          createdAt: Timestamp.now(),
+        });
+        isSlugReserved = true;
+
+        await auth.setCustomUserClaims(userId, {
+          businessId,
+          business_id: businessId,
+          role: "business_owner",
+        });
+
+        await userReference.set(
+          {
+            business_id: businessId,
+            businessId,
+            email,
+            fullName,
+            language: "en",
+            phone,
+            role: "business_owner",
+            theme: "system",
+            uid: userId,
+          },
+          { merge: true },
+        );
+
+        const currentPeriodEndsAt = Timestamp.fromMillis(
+          Date.now() + TIME_MS.THIRTY_DAYS,
+        );
+
+        await businessReference.create({
           businessHours: {
             friday: [{ closesAt: "19:00", opensAt: "09:00" }],
             monday: [{ closesAt: "19:00", opensAt: "09:00" }],
@@ -641,53 +683,74 @@ export default async function handler(
             status: "active",
           },
           timeZone: "America/Costa_Rica",
-        },
-        { merge: true },
-      );
+        });
+        isBusinessCreated = true;
 
-      await businessReference.collection("subscription").doc("current").set({
-        cancelAtPeriodEnd: false,
-        currentPeriodEndsAt,
-        planId: "plan-pro",
-        status: "active",
-      });
-
-      await businessReference
-        .collection("collaborators")
-        .doc(userId)
-        .set({
-          email,
-          fullName,
-          is_owner: true,
-          permissions: {
-            manage_bookings: true,
-            manage_customers: true,
-            manage_schedule_blocks: true,
-            manage_services: true,
-            view_reports: true,
-          },
-          phone,
-          service_ids: ["service-default"],
+        await businessReference.collection("subscription").doc("current").set({
+          cancelAtPeriodEnd: false,
+          currentPeriodEndsAt,
+          planId: "plan-pro",
           status: "active",
-          uid: userId,
         });
 
-      const serviceReference = businessReference
-        .collection("services")
-        .doc("service-default");
-      await serviceReference.set({
-        description: "Standard service",
-        discounts: [],
-        durationMinutes: 30,
-        name: "Standard Service",
-        priceInCents: 20000,
-        status: SERVICE_STATUS.ACTIVE,
-      });
+        await businessReference
+          .collection("collaborators")
+          .doc(userId)
+          .set({
+            email,
+            fullName,
+            is_owner: true,
+            permissions: {
+              manage_bookings: true,
+              manage_customers: true,
+              manage_schedule_blocks: true,
+              manage_services: true,
+              view_reports: true,
+            },
+            phone,
+            service_ids: ["service-default"],
+            status: "active",
+            uid: userId,
+          });
 
-      await firestore.collection("businessSlugs").doc(businessSlug).set({
-        businessId,
-        createdAt: Timestamp.now(),
-      });
+        const serviceReference = businessReference
+          .collection("services")
+          .doc("service-default");
+        await serviceReference.set({
+          description: "Standard service",
+          discounts: [],
+          durationMinutes: 30,
+          name: "Standard Service",
+          priceInCents: 20000,
+          status: SERVICE_STATUS.ACTIVE,
+        });
+      } catch (error) {
+        // Undo only what this call created, so the visitor can try again
+        // with the same email (cloud-functions-standards §6).
+        await Promise.allSettled([
+          ...(isBusinessCreated
+            ? [firestore.recursiveDelete(businessReference)]
+            : []),
+          ...(isSlugReserved ? [slugReference.delete()] : []),
+          userReference.delete(),
+          auth.deleteUser(userId),
+        ]);
+
+        if (
+          hasErrorCode(
+            error,
+            FIREBASE_ADMIN_ERROR_CODE.FIRESTORE_ALREADY_EXISTS,
+          )
+        ) {
+          sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
+            details: { reason: SIGN_UP_ERROR_REASON.SLUG_TAKEN },
+            error: "already-exists",
+            message: "The business slug is already taken",
+          });
+          return;
+        }
+        throw error;
+      }
 
       sendJsonResponse(response, HTTP_STATUS.OK, { email });
       return;

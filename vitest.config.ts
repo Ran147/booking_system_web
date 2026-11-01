@@ -22,7 +22,7 @@ export default mergeConfig(
       globals: true,
       include: isFirestoreEmulatorRunning
         ? ["tests/rules/**/*.test.ts"]
-        : ["src/**/*.test.{ts,tsx}"],
+        : ["src/**/*.test.{ts,tsx}", "tests/api/**/*.test.ts"],
       setupFiles: ["./src/test-utils/setupTests.ts"],
     },
   }),
