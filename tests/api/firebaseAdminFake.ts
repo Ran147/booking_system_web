@@ -229,6 +229,40 @@ const auth = {
   },
 };
 
+interface FakeTransaction {
+  readonly create: (
+    reference: FakeDocumentReference,
+    value: DocumentValue,
+  ) => void;
+  readonly get: (
+    reference: FakeDocumentReference,
+  ) => Promise<FakeDocumentSnapshot>;
+}
+
+// Firestore retries a transaction that raced another write of the same
+// document; the fake runs them one at a time, which ends the same way.
+let pendingTransaction: Promise<unknown> = Promise.resolve();
+
+const runTransaction = <Result>(
+  updateFunction: (transaction: FakeTransaction) => Promise<Result>,
+): Promise<Result> => {
+  const transactionResult = pendingTransaction.then(async () => {
+    const pendingCreates: (() => Promise<void>)[] = [];
+    const result = await updateFunction({
+      create: (reference, value): void => {
+        pendingCreates.push(() => reference.create(value));
+      },
+      get: (reference) => reference.get(),
+    });
+    for (const runCreate of pendingCreates) {
+      await runCreate();
+    }
+    return result;
+  });
+  pendingTransaction = transactionResult.catch(() => undefined);
+  return transactionResult;
+};
+
 const firestore = {
   batch: (): {
     commit: () => Promise<void>;
@@ -253,6 +287,7 @@ const firestore = {
       )
       .forEach((path) => documents.delete(path));
   },
+  runTransaction,
 };
 
 const createTimestamp = (milliseconds: number): FakeTimestamp => ({
@@ -274,6 +309,7 @@ const reset = (): void => {
   idTokens.clear();
   createdAccountCount = 0;
   createdDocumentCount = 0;
+  pendingTransaction = Promise.resolve();
 };
 
 export const firebaseAdminFake = {
