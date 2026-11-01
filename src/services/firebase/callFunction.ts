@@ -8,6 +8,7 @@ import { HTTP_STATUS, type FunctionName } from "@/constants";
 import type { Nullable } from "@/types";
 import { executeClientFunctionsFallback } from "./clientFunctionsFallback";
 import { functions } from "./firebaseApp";
+import { readAuthorizationHeader } from "./readAuthorizationHeader";
 
 interface CallFunctionErrorPayload {
   readonly code?: string;
@@ -24,7 +25,10 @@ export const callFunction = async <Payload, Response>(
     try {
       const serverResponse = await fetch("/api/callFunction", {
         body: JSON.stringify({ functionName, payload }),
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(await readAuthorizationHeader()),
+        },
         method: "POST",
       });
 

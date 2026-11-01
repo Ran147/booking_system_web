@@ -8,7 +8,7 @@ import {
   Timestamp,
   type Firestore,
 } from "firebase-admin/firestore";
-import type { Nullable } from "../src/types/Nullable";
+import type { Nullable, NullableUndefined } from "../src/types/Nullable";
 
 const HTTP_METHOD = Object.freeze({
   DELETE: "DELETE",
@@ -23,11 +23,13 @@ const HTTP_METHOD = Object.freeze({
 const HTTP_STATUS = Object.freeze({
   BAD_REQUEST: 400,
   CONFLICT: 409,
+  FORBIDDEN: 403,
   INTERNAL_SERVER_ERROR: 500,
   METHOD_NOT_ALLOWED: 405,
   NOT_FOUND: 404,
   OK: 200,
   PRECONDITION_FAILED: 412,
+  UNAUTHORIZED: 401,
 } as const);
 
 const FUNCTION_NAME = Object.freeze({
@@ -94,6 +96,47 @@ const SIGN_UP_ERROR_REASON = Object.freeze({
   ACCOUNT_EXISTS: "accountExists",
   SLUG_TAKEN: "slugTaken",
 } as const);
+
+// Mirror of src/domain/user/UserRole.constants.ts — keep in sync.
+const USER_ROLE = Object.freeze({
+  BUSINESS_OWNER: "business_owner",
+  CLIENT: "client",
+  COLLABORATOR: "collaborator",
+  CUSTOMER: "customer",
+  SUBSCRIBER: "subscriber",
+} as const);
+
+// Mirror of COLLABORATOR_PERMISSION and COLLABORATOR_STATUS in
+// functions/src/shared/constants/ — keep in sync.
+const COLLABORATOR_PERMISSION = Object.freeze({
+  MANAGE_SERVICES: "manage_services",
+} as const);
+
+const COLLABORATOR_STATUS = Object.freeze({
+  ACTIVE: "active",
+} as const);
+
+// Result of the access check that runs before every action (KAN-59 spec §4).
+const CALLER_ACCESS = Object.freeze({
+  ALLOWED: "allowed",
+  PERMISSION_DENIED: "permission-denied",
+  UNAUTHENTICATED: "unauthenticated",
+} as const);
+
+type CallerAccess = (typeof CALLER_ACCESS)[keyof typeof CALLER_ACCESS];
+
+// Actions visitors use before they have an account: no session needed.
+const PUBLIC_FUNCTION_NAMES: readonly string[] = Object.freeze([
+  FUNCTION_NAME.CHECK_BUSINESS_SLUG,
+  FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP,
+  FUNCTION_NAME.PAY_PLAN_CHECKOUT,
+  FUNCTION_NAME.REQUEST_PASSWORD_RESET,
+  FUNCTION_NAME.SEND_CONTACT_MESSAGE,
+  FUNCTION_NAME.VALIDATE_SIGN_UP_LINK,
+  FUNCTION_NAME.VERIFY_RECAPTCHA,
+]);
+
+const BEARER_PREFIX = "Bearer ";
 
 const DIACRITIC_PATTERN = /\p{Diacritic}/gu;
 
@@ -313,6 +356,135 @@ const sendJsonResponse = (
   response.end(JSON.stringify(responseContent));
 };
 
+interface Caller {
+  readonly claims: Record<string, unknown>;
+  readonly userId: string;
+}
+
+// Who is calling: the Firebase ID token the client sends as
+// "Authorization: Bearer <token>" (cloud-functions-standards §5).
+const readCaller = async (
+  request: IncomingMessage,
+  auth: Auth,
+): Promise<Nullable<Caller>> => {
+  const authorizationHeader = request.headers.authorization;
+  if (
+    typeof authorizationHeader !== "string" ||
+    !authorizationHeader.startsWith(BEARER_PREFIX)
+  ) {
+    return null;
+  }
+  try {
+    const decodedToken = await auth.verifyIdToken(
+      authorizationHeader.slice(BEARER_PREFIX.length),
+    );
+    return { claims: decodedToken, userId: decodedToken.uid };
+  } catch {
+    return null;
+  }
+};
+
+const readClaimBusinessId = (caller: Caller): unknown =>
+  caller.claims.businessId ?? caller.claims.business_id;
+
+// Same as ownsBusiness in firestore.rules: the businessId claim of a
+// subscriber, or the owner fields of the business for owners without claims.
+const ownsBusiness = async (
+  firestore: Firestore,
+  caller: Caller,
+  businessId: string,
+): Promise<boolean> => {
+  const role = caller.claims.role;
+  if (
+    (role === USER_ROLE.SUBSCRIBER || role === USER_ROLE.BUSINESS_OWNER) &&
+    readClaimBusinessId(caller) === businessId
+  ) {
+    return true;
+  }
+  const businessSnapshot = await firestore
+    .collection("businesses")
+    .doc(businessId)
+    .get();
+  const businessData = businessSnapshot.data();
+  return (
+    businessData?.ownerUserId === caller.userId ||
+    businessData?.owner_id === caller.userId
+  );
+};
+
+// Mirror of assertCanManageServices in functions/src/shared/: the owner, or
+// an active collaborator of the business with manage_services, read from the
+// Collaborator document, never from the payload (auth-and-roles §1).
+const canManageServices = async (
+  firestore: Firestore,
+  caller: Caller,
+  businessId: string,
+): Promise<boolean> => {
+  if (await ownsBusiness(firestore, caller, businessId)) {
+    return true;
+  }
+  const collaboratorId = caller.claims.collaboratorId;
+  if (
+    caller.claims.role !== USER_ROLE.COLLABORATOR ||
+    readClaimBusinessId(caller) !== businessId ||
+    typeof collaboratorId !== "string"
+  ) {
+    return false;
+  }
+  const collaboratorSnapshot = await firestore
+    .collection("businesses")
+    .doc(businessId)
+    .collection("collaborators")
+    .doc(collaboratorId)
+    .get();
+  const collaboratorData = collaboratorSnapshot.data();
+  return (
+    collaboratorData?.status === COLLABORATOR_STATUS.ACTIVE &&
+    Array.isArray(collaboratorData.permissions) &&
+    collaboratorData.permissions.includes(
+      COLLABORATOR_PERMISSION.MANAGE_SERVICES,
+    )
+  );
+};
+
+// Runs before any action: public actions are open, every other one needs a
+// caller with permission, and an action not listed here is denied (KAN-59
+// spec §4).
+const checkCallerAccess = async (
+  functionName: NullableUndefined<string>,
+  payload: Record<string, unknown>,
+  request: IncomingMessage,
+  auth: Auth,
+  firestore: Firestore,
+): Promise<CallerAccess> => {
+  if (functionName && PUBLIC_FUNCTION_NAMES.includes(functionName)) {
+    return CALLER_ACCESS.ALLOWED;
+  }
+  const caller = await readCaller(request, auth);
+  if (!caller) {
+    return CALLER_ACCESS.UNAUTHENTICATED;
+  }
+
+  const businessId = String(payload.businessId || "");
+  let isAllowed = false;
+  if (functionName === FUNCTION_NAME.DELETE_SERVICE) {
+    isAllowed = await ownsBusiness(firestore, caller, businessId);
+  } else if (
+    functionName === FUNCTION_NAME.CREATE_SERVICE ||
+    functionName === FUNCTION_NAME.UPDATE_SERVICE ||
+    functionName === FUNCTION_NAME.UPDATE_SERVICE_COLLABORATORS
+  ) {
+    isAllowed = await canManageServices(firestore, caller, businessId);
+  } else if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
+    const role = caller.claims.role;
+    isAllowed =
+      (role === USER_ROLE.CUSTOMER || role === USER_ROLE.CLIENT) &&
+      payload.customerId === caller.userId;
+  }
+
+  return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
+};
+
 export default async function handler(
   request: IncomingMessage,
   response: ServerResponse,
@@ -341,6 +513,28 @@ export default async function handler(
     const requestBody = await readJsonBody(request);
     const { functionName, payload = {} } = requestBody;
     const { auth, firestore } = getAdminServices();
+
+    const callerAccess = await checkCallerAccess(
+      functionName,
+      payload,
+      request,
+      auth,
+      firestore,
+    );
+    if (callerAccess !== CALLER_ACCESS.ALLOWED) {
+      const isUnauthenticated = callerAccess === CALLER_ACCESS.UNAUTHENTICATED;
+      sendJsonResponse(
+        response,
+        isUnauthenticated ? HTTP_STATUS.UNAUTHORIZED : HTTP_STATUS.FORBIDDEN,
+        {
+          error: callerAccess,
+          message: isUnauthenticated
+            ? "Unauthenticated request"
+            : "Caller does not have permission for this action",
+        },
+      );
+      return;
+    }
 
     if (functionName === FUNCTION_NAME.VERIFY_RECAPTCHA) {
       sendJsonResponse(response, HTTP_STATUS.OK, { isVerified: true });
