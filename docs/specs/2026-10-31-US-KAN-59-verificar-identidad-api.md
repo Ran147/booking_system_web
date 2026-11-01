@@ -32,6 +32,7 @@ Reglas que se cumplen: `auth-and-roles` ("Security is enforced on the server"), 
 
 - Nuevo `src/services/firebase/readAuthorizationHeader.ts`: si hay un usuario conectado (`auth.currentUser`), devuelve `{ Authorization: "Bearer <idToken>" }` con `getIdToken()`; si no, `{}`.
 - `callFunction.ts` agrega ese encabezado al `fetch("/api/callFunction")`. Un solo cambio, válido para todas las acciones.
+- El nombre del encabezado y el prefijo van en `HTTP_AUTHORIZATION` (`src/constants/common/HttpAuthorization.constants.ts`), como pide `constants-standards`.
 
 ## 4. Servidor: quién llama y qué puede
 
@@ -75,7 +76,7 @@ El cliente ya convierte esas respuestas en `FunctionsError` y la pantalla muestr
 
 ## 5. Tests
 
-`tests/api/callerAccess.test.ts`, con `firebase-admin` simulado en memoria como en el PR #63 (`verifyIdToken` del fake devuelve los claims de un token de prueba):
+`tests/api/callerAccess.test.ts`, con `firebase-admin` simulado en memoria como en el PR #63. El simulador pasa a un archivo compartido, `tests/api/firebaseAdminFake.ts` (con `add`, `update`, consultas, `batch` y `verifyIdToken`, que devuelve los claims de un token de prueba), y la llamada al handler a `tests/api/callApiFunction.ts`; el test del registro de #63 los usa sin cambiar lo que prueba.
 
 | Test | Cubre |
 | --- | --- |
