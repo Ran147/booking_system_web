@@ -120,7 +120,7 @@ const storePaidCheckout = async (
     signUpLinkExpiresAt: null,
     signUpTokenHash: null,
     termsAcceptedAt: paidAt,
-    termsVersion: TERMS_VERSION.PROVISIONAL,
+    termsVersion: TERMS_VERSION.CURRENT,
   };
   transaction.create(checkoutReference, planCheckout);
   return planCheckout.email;
