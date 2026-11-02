@@ -412,13 +412,13 @@
       "cardCvcLabel": "CVC / CVV",
       "cardExpiryHint": "MM/AA",
       "cardExpiryLabel": "Fecha de expiración",
-      "cardNumberHint": "Usa 4000 0000 0000 0001 para aprobar, o terminada en 2 para rechazar",
+      "cardNumberHint": "Usa 4000 0000 0000 0001 para aprobar o 4000 0000 0000 0002 para rechazar",
       "cardNumberLabel": "Número de tarjeta",
       "cardholderNameHint": "Como aparece en la tarjeta",
       "cardholderNameLabel": "Nombre del titular",
       "contactEmailLabel": "Correo de contacto:",
       "declinedError": "El pago fue rechazado por la pasarela simulada. Revisa los datos o usa otra tarjeta.",
-      "emailHint": "Usa el correo con el que deseas crear la cuenta y administrar tu negocio.",
+      "emailHint": "Usa un correo que todavía no tenga cuenta en la plataforma: será el correo de la cuenta de tu negocio.",
       "emailLabel": "Correo electrónico de contacto",
       "paidAmountLabel": "Monto pagado:",
       "payAction": "Pagar y continuar al registro",
@@ -431,8 +431,7 @@
       "stepTitle": "Contratación de suscripción",
       "subscriptionBadge": "Suscripción",
       "subtitle": "Estás a un paso de comenzar a gestionar tu negocio con Booking System.",
-      "successAction": "Completar registro de tu negocio",
-      "successDescription": "Hemos confirmado tu pago para el plan {{planName}}. Ahora completa los datos de tu negocio para activar tu panel.",
+      "successDescription": "Hemos confirmado tu pago para el plan {{planName}}.",
       "successTitle": "¡Pago procesado con éxito!",
       "termsAcceptance": "He leído y acepto los",
       "termsLink": "Términos y condiciones del servicio",
@@ -462,7 +461,12 @@
       "signedInNotice": "Un negocio nuevo se contrata sin sesión iniciada: cada cuenta tiene un solo negocio. Cierra sesión para continuar."
     },
     "payment": {
-      "planUnavailableError": "Este plan ya no está disponible. Elige otro plan."
+      "attemptReusedError": "Este pago ya se hizo con otros datos. Recarga la página para hacer un pago nuevo.",
+      "cardInvalid": "Revisa este dato de la tarjeta.",
+      "planUnavailableError": "Este plan ya no está disponible. Elige otro plan.",
+      "priceChangedError": "El precio de este plan cambió a {{price}}. Si estás de acuerdo, vuelve a pagar.",
+      "reviewNotice": "Cuando crees tu cuenta, revisaremos tu negocio antes de activarlo.",
+      "success": "Te enviaremos a {{email}} el enlace para crear tu cuenta y tu negocio. Revisa tu correo."
     }
   },
   "subscriberSignUp": {

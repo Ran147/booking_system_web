@@ -13,15 +13,16 @@ export const PlanCheckoutPage = (): ReactElement => {
     billingPeriodLabel,
     checkoutState,
     confirmedEmail,
-    errorMessage,
     fieldErrors,
     fields,
     formattedPrice,
     handleBackToDetail,
-    handleProceedToSignUp,
     handleSubmit,
+    isPayDisabled,
     isPlanLoading,
     plan,
+    recaptcha,
+    submitError,
   } = usePlanCheckoutViewModel();
 
   if (isPlanLoading) {
@@ -53,20 +54,21 @@ export const PlanCheckoutPage = (): ReactElement => {
         <PlanCheckoutSuccess
           confirmedEmail={confirmedEmail}
           formattedPrice={formattedPrice}
-          onProceedToSignUp={handleProceedToSignUp}
           plan={plan}
         />
       ) : (
         <PlanCheckoutForm
           billingPeriodLabel={billingPeriodLabel}
           checkoutState={checkoutState}
-          errorMessage={errorMessage}
           fieldErrors={fieldErrors}
           fields={fields}
           formattedPrice={formattedPrice}
+          isPayDisabled={isPayDisabled}
           onBackToDetail={handleBackToDetail}
           onSubmit={handleSubmit}
           plan={plan}
+          recaptcha={recaptcha}
+          submitError={submitError}
         />
       )}
     </div>
