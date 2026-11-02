@@ -9,3 +9,10 @@ export const CHECKOUT_SIMULATION = Object.freeze({
   DECLINED_CARD_SUFFIX: "0002",
   PROCESSING_DELAY_MS: 600,
 });
+
+// The terms open in another tab, so the checkout keeps its values
+// (AC-KAN-23-01).
+export const TERMS_LINK = Object.freeze({
+  RELATION: "noopener noreferrer",
+  TARGET: "_blank",
+} as const);

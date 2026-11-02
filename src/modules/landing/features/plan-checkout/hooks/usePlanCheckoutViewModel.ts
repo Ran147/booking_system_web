@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useForm, type UseFormRegisterReturn } from "react-hook-form";
+import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { generatePath, useNavigate, useParams } from "react-router";
 import { I18N_NAMESPACE, ROUTE_PATH, STRING } from "@/constants";
@@ -49,7 +49,12 @@ export interface PlanCheckoutViewModel {
   readonly handleBackToDetail: () => void;
   readonly handleProceedToSignUp: () => void;
   readonly handleSubmit: (event?: React.BaseSyntheticEvent) => Promise<void>;
+  readonly handleTermsOpened: () => void;
+  /** The terms were opened once; until then they cannot be accepted (AS-11). */
+  readonly hasOpenedTerms: boolean;
   readonly isPlanLoading: boolean;
+  /** Pay stays disabled until the terms are accepted (AC-KAN-23-03). */
+  readonly isTermsAccepted: boolean;
   readonly plan: Nullable<PlanDetail>;
 }
 
@@ -63,6 +68,7 @@ export const usePlanCheckoutViewModel = (): PlanCheckoutViewModel => {
   );
   const [errorMessage, setErrorMessage] = useState<Nullable<string>>(null);
   const [confirmedEmail, setConfirmedEmail] = useState<string>(STRING.EMPTY);
+  const [hasOpenedTerms, setHasOpenedTerms] = useState(false);
 
   const activePlans = activePlansQuery.data ?? [];
   const currentPlan = activePlans.find((plan) => plan.id === planId) ?? null;
@@ -126,6 +132,14 @@ export const usePlanCheckoutViewModel = (): PlanCheckoutViewModel => {
   const isPlanNotFound = !isPlanLoading && !currentPlan;
 
   const { errors } = form.formState;
+  const isTermsAccepted = useWatch({
+    control: form.control,
+    name: "termsAccepted",
+  });
+
+  const handleTermsOpened = (): void => {
+    setHasOpenedTerms(true);
+  };
 
   const fieldErrors: PlanCheckoutFieldErrors = {
     cardCvc: errors.cardCvc?.message,
@@ -160,7 +174,10 @@ export const usePlanCheckoutViewModel = (): PlanCheckoutViewModel => {
     handleBackToDetail,
     handleProceedToSignUp,
     handleSubmit,
+    handleTermsOpened,
+    hasOpenedTerms,
     isPlanLoading,
+    isTermsAccepted,
     plan: currentPlan,
   };
 };

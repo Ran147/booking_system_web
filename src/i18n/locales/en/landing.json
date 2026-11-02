@@ -463,6 +463,9 @@
     },
     "payment": {
       "planUnavailableError": "This plan is no longer available. Choose another plan."
+    },
+    "terms": {
+      "openFirst": "Open the terms and conditions to be able to accept them."
     }
   },
   "subscriberSignUp": {
