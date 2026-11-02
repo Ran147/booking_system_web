@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
@@ -7,7 +8,9 @@ import {
   getFirestore,
   Timestamp,
   type Firestore,
+  type Transaction,
 } from "firebase-admin/firestore";
+import { z } from "zod";
 import type { Nullable, NullableUndefined } from "../src/types/Nullable";
 
 const HTTP_METHOD = Object.freeze({
@@ -29,6 +32,7 @@ const HTTP_STATUS = Object.freeze({
   NOT_FOUND: 404,
   OK: 200,
   PRECONDITION_FAILED: 412,
+  SERVICE_UNAVAILABLE: 503,
   UNAUTHORIZED: 401,
 } as const);
 
@@ -78,11 +82,73 @@ const SERVICE_STATUS = Object.freeze({
   INACTIVE: "inactive",
 } as const);
 
-const CHECKOUT_SIMULATION = Object.freeze({
-  DECLINED_CARD_NUMBER: "4000000000000002",
-  DECLINED_CARD_SUFFIX: "0002",
-  PROCESSING_DELAY_MS: 600,
+// Mirror of functions/src/billing/constants/PlanCheckout.constants.ts and
+// functions/src/shared/constants/ — keep in sync (KAN-22 spec of 2026-10-17).
+const CARD_EXPIRY = Object.freeze({
+  CENTURY_START_YEAR: 2000,
+  MONTH_GROUP_INDEX: 1,
+  MONTHS_PER_YEAR: 12,
+  YEAR_GROUP_INDEX: 2,
 } as const);
+
+const LANGUAGE = Object.freeze({
+  EN: "en",
+  ES: "es",
+} as const);
+
+const PLAN_CHECKOUT_ERROR_REASON = Object.freeze({
+  ATTEMPT_REUSED: "attemptReused",
+  PAYMENT_DECLINED: "paymentDeclined",
+  PLAN_UNAVAILABLE: "planUnavailable",
+  PRICE_CHANGED: "priceChanged",
+} as const);
+
+const PLAN_CHECKOUT_FIELD_LIMIT = Object.freeze({
+  CARDHOLDER_NAME_MAX_LENGTH: 60,
+  CARDHOLDER_NAME_MIN_LENGTH: 2,
+  EMAIL_MAX_LENGTH: 254,
+} as const);
+
+const PLAN_CHECKOUT_PATTERN = Object.freeze({
+  CARD_CVC: /^\d{3,4}$/,
+  CARD_EXPIRY: /^(0[1-9]|1[0-2])\/(\d{2})$/,
+  CARD_NUMBER: /^\d{16}$/,
+  WHITESPACE: /\s/g,
+} as const);
+
+const PLAN_STATUS = Object.freeze({
+  ACTIVE: "active",
+} as const);
+
+const RECAPTCHA_RESULT = Object.freeze({
+  REJECTED: "rejected",
+  UNAVAILABLE: "unavailable",
+  VERIFIED: "verified",
+} as const);
+
+const RECAPTCHA_VERIFICATION = Object.freeze({
+  FORM_FIELD: Object.freeze({
+    RESPONSE: "response",
+    SECRET: "secret",
+  }),
+  SECRET_ENV_NAME: "RECAPTCHA_SECRET_KEY",
+  VERIFY_URL: "https://www.google.com/recaptcha/api/siteverify",
+} as const);
+
+// The gateway only fakes a success or a failure (Q5): one test card is
+// declined, every other valid card is approved.
+const SIMULATED_GATEWAY = Object.freeze({
+  DECLINED_CARD_NUMBER: "4000000000000002",
+  PAYMENT_REFERENCE_BYTE_LENGTH: 12,
+  PAYMENT_REFERENCE_ENCODING: "hex",
+  PAYMENT_REFERENCE_PREFIX: "sim_",
+} as const);
+
+const TERMS_VERSION = Object.freeze({
+  PROVISIONAL: "provisional-2026-10-17",
+} as const);
+
+const CHECKOUT_REJECTION_NAME = "CheckoutRejection";
 
 // Error codes the Admin SDK reports: Auth as text, Firestore as a gRPC status.
 const FIREBASE_ADMIN_ERROR_CODE = Object.freeze({
@@ -483,6 +549,222 @@ const checkCallerAccess = async (
   }
 
   return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
+};
+
+// Mirror of functions/src/billing/models/PayPlanCheckout.schema.ts — keep in
+// sync. The same field rules as the checkout form, checked again on the
+// server (cloud-functions-standards §3).
+const readMonthIndex = (year: number, month: number): number =>
+  year * CARD_EXPIRY.MONTHS_PER_YEAR + month;
+
+// "MM/AA" is still valid during its own month.
+const isCardExpiryInFuture = (cardExpiry: string): boolean => {
+  const expiryMatch = PLAN_CHECKOUT_PATTERN.CARD_EXPIRY.exec(cardExpiry);
+  if (!expiryMatch) return false;
+  const expiryMonth = Number(expiryMatch[CARD_EXPIRY.MONTH_GROUP_INDEX]);
+  const expiryYear =
+    CARD_EXPIRY.CENTURY_START_YEAR +
+    Number(expiryMatch[CARD_EXPIRY.YEAR_GROUP_INDEX]);
+  const today = new Date();
+  return (
+    readMonthIndex(expiryYear, expiryMonth) >=
+    readMonthIndex(today.getUTCFullYear(), today.getUTCMonth() + 1)
+  );
+};
+
+const payPlanCheckoutPayloadSchema = z.object({
+  attemptId: z.uuid(),
+  cardCvc: z.string().trim().regex(PLAN_CHECKOUT_PATTERN.CARD_CVC),
+  cardExpiry: z.string().trim().refine(isCardExpiryInFuture),
+  // The form may group the digits with spaces.
+  cardNumber: z
+    .string()
+    .transform((cardNumber) =>
+      cardNumber.replace(PLAN_CHECKOUT_PATTERN.WHITESPACE, ""),
+    )
+    .pipe(z.string().regex(PLAN_CHECKOUT_PATTERN.CARD_NUMBER)),
+  cardholderName: z
+    .string()
+    .trim()
+    .min(PLAN_CHECKOUT_FIELD_LIMIT.CARDHOLDER_NAME_MIN_LENGTH)
+    .max(PLAN_CHECKOUT_FIELD_LIMIT.CARDHOLDER_NAME_MAX_LENGTH),
+  // Stored trimmed and in lower case: it becomes the account email
+  // (AC-KAN-22-11).
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(PLAN_CHECKOUT_FIELD_LIMIT.EMAIL_MAX_LENGTH)
+    .pipe(z.email()),
+  expectedPriceInCents: z.number().int().nonnegative(),
+  language: z.enum(Object.values(LANGUAGE)),
+  planId: z.string().trim().min(1),
+  recaptchaToken: z.string().min(1),
+  // A payment without accepted terms is rejected (AC-KAN-23-03).
+  termsAccepted: z.literal(true),
+});
+
+type PayPlanCheckoutPayload = z.infer<typeof payPlanCheckoutPayloadSchema>;
+
+// The fields of plans/{planId} that the payment reads. A plan that does not
+// match is treated as unavailable, never as a changed price.
+const payablePlanDocumentSchema = z.object({
+  priceInCents: z.number().int().nonnegative(),
+  status: z.string(),
+});
+
+type RecaptchaResult = (typeof RECAPTCHA_RESULT)[keyof typeof RECAPTCHA_RESULT];
+
+const isSuccessfulVerification = (verificationResult: unknown): boolean =>
+  typeof verificationResult === "object" &&
+  verificationResult !== null &&
+  "success" in verificationResult &&
+  verificationResult.success === true;
+
+// Verifies the reCAPTCHA token inside the action it protects, so a script
+// cannot skip it (cloud-functions-standards §5). Without the secret key the
+// payment stays closed, never open (KAN-22 spec of 2026-10-31, D3).
+const verifyRecaptchaToken = async (
+  recaptchaToken: string,
+): Promise<RecaptchaResult> => {
+  const secretKey = process.env[RECAPTCHA_VERIFICATION.SECRET_ENV_NAME];
+  if (!secretKey) {
+    return RECAPTCHA_RESULT.UNAVAILABLE;
+  }
+  try {
+    const verificationResponse = await fetch(
+      RECAPTCHA_VERIFICATION.VERIFY_URL,
+      {
+        body: new URLSearchParams({
+          [RECAPTCHA_VERIFICATION.FORM_FIELD.RESPONSE]: recaptchaToken,
+          [RECAPTCHA_VERIFICATION.FORM_FIELD.SECRET]: secretKey,
+        }),
+        method: HTTP_METHOD.POST,
+      },
+    );
+    if (!verificationResponse.ok) {
+      return RECAPTCHA_RESULT.UNAVAILABLE;
+    }
+    return isSuccessfulVerification(await verificationResponse.json())
+      ? RECAPTCHA_RESULT.VERIFIED
+      : RECAPTCHA_RESULT.REJECTED;
+  } catch {
+    // Network failure or a body that is not JSON.
+    return RECAPTCHA_RESULT.UNAVAILABLE;
+  }
+};
+
+// A payment rule that failed; the handler answers it as failed-precondition
+// with its reason, as HttpsError does in functions/.
+interface CheckoutRejection extends Error {
+  readonly details: Record<string, unknown>;
+}
+
+const createCheckoutRejection = (
+  message: string,
+  details: Record<string, unknown>,
+): CheckoutRejection =>
+  Object.assign(new Error(message), {
+    details,
+    name: CHECKOUT_REJECTION_NAME,
+  });
+
+const isCheckoutRejection = (error: unknown): error is CheckoutRejection =>
+  error instanceof Error && error.name === CHECKOUT_REJECTION_NAME;
+
+// The simulated gateway (SPEC AS-9, Q5): it returns only a reference; the
+// card data never leaves this action.
+const chargeSimulatedCard = (cardNumber: string): string => {
+  if (cardNumber === SIMULATED_GATEWAY.DECLINED_CARD_NUMBER) {
+    throw createCheckoutRejection("The simulated gateway declined the card", {
+      reason: PLAN_CHECKOUT_ERROR_REASON.PAYMENT_DECLINED,
+    });
+  }
+  return (
+    SIMULATED_GATEWAY.PAYMENT_REFERENCE_PREFIX +
+    randomBytes(SIMULATED_GATEWAY.PAYMENT_REFERENCE_BYTE_LENGTH).toString(
+      SIMULATED_GATEWAY.PAYMENT_REFERENCE_ENCODING,
+    )
+  );
+};
+
+// The plan must still be active and cost what the visitor saw
+// (AC-KAN-22-07, AC-KAN-22-08).
+const readPayablePlanPrice = async (
+  firestore: Firestore,
+  transaction: Transaction,
+  checkoutPayload: PayPlanCheckoutPayload,
+): Promise<number> => {
+  const planSnapshot = await transaction.get(
+    firestore.collection("plans").doc(checkoutPayload.planId),
+  );
+  const planParsed = payablePlanDocumentSchema.safeParse(planSnapshot.data());
+
+  if (!planParsed.success || planParsed.data.status !== PLAN_STATUS.ACTIVE) {
+    throw createCheckoutRejection("The plan does not exist or is not active", {
+      reason: PLAN_CHECKOUT_ERROR_REASON.PLAN_UNAVAILABLE,
+    });
+  }
+  const { priceInCents } = planParsed.data;
+  if (priceInCents !== checkoutPayload.expectedPriceInCents) {
+    throw createCheckoutRejection(
+      "The plan price changed after the checkout opened",
+      {
+        currentPriceInCents: priceInCents,
+        reason: PLAN_CHECKOUT_ERROR_REASON.PRICE_CHANGED,
+      },
+    );
+  }
+  return priceInCents;
+};
+
+// One PlanCheckout per attempt, stored under the attemptId: a retry of a paid
+// attempt answers the stored checkout and charges nothing (AC-KAN-22-09); the
+// same attemptId with another plan or email is not a retry and is rejected.
+const storePaidCheckout = async (
+  firestore: Firestore,
+  transaction: Transaction,
+  checkoutPayload: PayPlanCheckoutPayload,
+): Promise<string> => {
+  const checkoutReference = firestore
+    .collection("planCheckouts")
+    .doc(checkoutPayload.attemptId);
+  const checkoutSnapshot = await transaction.get(checkoutReference);
+  if (checkoutSnapshot.exists) {
+    const paidCheckout = checkoutSnapshot.data() ?? {};
+    if (
+      paidCheckout.planId !== checkoutPayload.planId ||
+      paidCheckout.email !== checkoutPayload.email
+    ) {
+      throw createCheckoutRejection(
+        "The attemptId was already paid with another plan or email",
+        { reason: PLAN_CHECKOUT_ERROR_REASON.ATTEMPT_REUSED },
+      );
+    }
+    return checkoutPayload.email;
+  }
+
+  const amountInCents = await readPayablePlanPrice(
+    firestore,
+    transaction,
+    checkoutPayload,
+  );
+  const paymentReference = chargeSimulatedCard(checkoutPayload.cardNumber);
+  const paidAt = Timestamp.now();
+  transaction.create(checkoutReference, {
+    amountInCents,
+    email: checkoutPayload.email,
+    language: checkoutPayload.language,
+    paidAt,
+    paymentReference,
+    planId: checkoutPayload.planId,
+    signUpCompletedAt: null,
+    signUpLinkExpiresAt: null,
+    signUpTokenHash: null,
+    termsAcceptedAt: paidAt,
+    termsVersion: TERMS_VERSION.PROVISIONAL,
+  });
+  return checkoutPayload.email;
 };
 
 export default async function handler(
@@ -950,39 +1232,56 @@ export default async function handler(
       return;
     }
 
+    // Pays a plan through the simulated gateway and stores the PlanCheckout
+    // that the KAN-24 email and the KAN-25 sign-up start from. Public: the
+    // visitor has no account yet, and no User, Business or Payment is created
+    // here (KAN-22 spec of 2026-10-17 §3).
     if (functionName === FUNCTION_NAME.PAY_PLAN_CHECKOUT) {
-      const cardNumber = String(payload.cardNumber || "");
-      if (cardNumber === CHECKOUT_SIMULATION.DECLINED_CARD_NUMBER) {
-        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
-          details: { reason: "paymentDeclined" },
-          error: "failed-precondition",
-          message: "The simulated gateway declined the card",
+      const payloadParsed = payPlanCheckoutPayloadSchema.safeParse(payload);
+      if (!payloadParsed.success) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-argument",
+          message:
+            "The checkout payload is missing fields or breaks the field rules",
+        });
+        return;
+      }
+      const checkoutPayload = payloadParsed.data;
+
+      // Before anything is read or charged (AC-KAN-22-06).
+      const recaptchaResult = await verifyRecaptchaToken(
+        checkoutPayload.recaptchaToken,
+      );
+      if (recaptchaResult === RECAPTCHA_RESULT.REJECTED) {
+        sendJsonResponse(response, HTTP_STATUS.FORBIDDEN, {
+          error: "permission-denied",
+          message: "The reCAPTCHA token was rejected",
+        });
+        return;
+      }
+      if (recaptchaResult === RECAPTCHA_RESULT.UNAVAILABLE) {
+        sendJsonResponse(response, HTTP_STATUS.SERVICE_UNAVAILABLE, {
+          error: "unavailable",
+          message: "The reCAPTCHA verification could not be completed",
         });
         return;
       }
 
-      const attemptId = String(payload.attemptId || `attempt-${Date.now()}`);
-      const email = String(payload.email || "checkout@demo.com");
-      const planId = String(payload.planId || "plan-pro");
-      const checkoutReference = firestore
-        .collection("planCheckouts")
-        .doc(attemptId);
-
-      await checkoutReference.set({
-        amountInCents: Number(payload.expectedPriceInCents || 2900),
-        email,
-        language: String(payload.language || "es"),
-        paidAt: Timestamp.now(),
-        paymentReference: `sim_${Date.now().toString(16)}`,
-        planId,
-        signUpCompletedAt: null,
-        signUpLinkExpiresAt: null,
-        signUpTokenHash: null,
-        termsAcceptedAt: Timestamp.now(),
-        termsVersion: "provisional-2026-10-17",
-      });
-
-      sendJsonResponse(response, HTTP_STATUS.OK, { email });
+      try {
+        const email = await firestore.runTransaction((transaction) =>
+          storePaidCheckout(firestore, transaction, checkoutPayload),
+        );
+        sendJsonResponse(response, HTTP_STATUS.OK, { email });
+      } catch (error) {
+        if (!isCheckoutRejection(error)) {
+          throw error;
+        }
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: error.details,
+          error: "failed-precondition",
+          message: error.message,
+        });
+      }
       return;
     }
 
