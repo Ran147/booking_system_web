@@ -20,7 +20,10 @@ export const PlanCheckoutPage = (): ReactElement => {
     handleBackToDetail,
     handleProceedToSignUp,
     handleSubmit,
+    handleTermsOpened,
+    hasOpenedTerms,
     isPlanLoading,
+    isTermsAccepted,
     plan,
   } = usePlanCheckoutViewModel();
 
@@ -64,8 +67,11 @@ export const PlanCheckoutPage = (): ReactElement => {
           fieldErrors={fieldErrors}
           fields={fields}
           formattedPrice={formattedPrice}
+          hasOpenedTerms={hasOpenedTerms}
+          isTermsAccepted={isTermsAccepted}
           onBackToDetail={handleBackToDetail}
           onSubmit={handleSubmit}
+          onTermsOpened={handleTermsOpened}
           plan={plan}
         />
       )}

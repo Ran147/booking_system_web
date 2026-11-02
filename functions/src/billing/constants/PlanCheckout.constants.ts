@@ -56,8 +56,8 @@ export const SIMULATED_GATEWAY = Object.freeze({
   PAYMENT_REFERENCE_PREFIX: "sim_",
 } as const);
 
-// Provisional until the KAN-9 terms page exists (SPEC AS-10, spec D4): then
-// the version is the last-updated date shown on that page.
+// The last-updated date of the KAN-9 terms page (SPEC AS-10). When the terms
+// change, update it together with landing:terms.lastUpdated (KAN-23 spec D4).
 export const TERMS_VERSION = Object.freeze({
-  PROVISIONAL: "provisional-2026-10-17",
+  CURRENT: "2026-10-12",
 } as const);
