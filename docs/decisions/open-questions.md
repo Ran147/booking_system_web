@@ -4,7 +4,7 @@ While a question is open, nobody implements or invents anything for it. Specs th
 
 When the team decides, write the answer here with the date, update `domain-glossary` §5 and the affected specs **in the same PR**. A partial decision records what was decided; the rest stays BLOCKED.
 
-All seven questions were decided by the team on 2026-09-28 (confirmed by Lorenzo). No question is open; the table is kept as a decision log. A new question gets the next id (Q8) and status "Open".
+Q1–Q7 were decided by the team on 2026-09-28 (confirmed by Lorenzo), and Q8 on 2026-10-24. **Q9 is open.** The table is kept as a decision log. A new question gets the next id (Q10) and status "Open". A decision too long for one row has its own record in `docs/decisions/` and is linked from the row.
 
 | Id | Question | Stories | Status | Decision |
 | --- | --- | --- | --- | --- |
@@ -15,6 +15,8 @@ All seven questions were decided by the team on 2026-09-28 (confirmed by Lorenzo
 | Q5 | What does the simulated gateway do for automatic renewals? | KAN-48 (duplicate: KAN-50) | Decided | 2026-09-28: the simulated gateway only fakes a successful or a failed payment. Automatic renewal retries (KAN-48, duplicate KAN-50) are deferred until the project is further along (out of MVP). `past_due` stays in the subscription machine, but nothing in the MVP drives retries. |
 | Q6 | Can a visitor book without an account? | KAN-116 | Decided | 2026-09-28: no, a customer account is mandatory. The customer gives full name and phone number, plus the email and password of the account. A visitor who starts a booking signs in or signs up and returns to the booking flow at the same service. `Booking` has no guest fields. |
 | Q7 | Does the MVP include plan checkout with the gateway, or start with a business created by hand? | KAN-20 epic (KAN-21 to KAN-24), KAN-2, KAN-7, KAN-25, KAN-27, KAN-33, KAN-176 | Decided | 2026-09-28: the MVP includes plan checkout from the landing with the simulated gateway (which only fakes a success or a failure, Q5). The visitor chooses a plan, accepts the terms and pays (KAN-22, KAN-23); the confirmation email (KAN-24) links to the subscriber sign-up (KAN-25), where the business name and `slug` are set; the new business is `pending` until the super admin approves it (Q2). |
+| Q8 | The project cannot pay for Cloud Functions (Firebase Blaze). Where does the server code run? | Every callable in `functions/src` (KAN-22, KAN-24, KAN-25, KAN-33, KAN-36, KAN-57 to KAN-62, KAN-145), `firestore.rules` | Decided | 2026-10-24: on Vercel. One Vercel Function (`api/call.ts`) verifies the Firebase ID token and dispatches to the existing callables with `firebase-admin`; `functions/src` stays the only source of server logic, and Firebase stays on Spark. The client simulation (`clientFunctionsFallback.ts`) is deleted and the rules go back to strict. "Cloud Function" in the docs now means a callable run by that dispatcher. Full record: [`2026-10-24-Q8-server-functions-on-vercel.md`](2026-10-24-Q8-server-functions-on-vercel.md). |
+| Q9 | Without Cloud Functions, how do scheduled jobs (reminders) and the emails that react to bookings and payments run? | KAN-24, KAN-163 to KAN-166 | Open | The Vercel Hobby cron runs at most once per day (±59 min), which is not enough for reminders "N hours before". Spark has no app email service and no provider has been chosen. **BLOCKED** while open: email sending and reminder scheduling. Not blocked: the reminder settings screens (KAN-99 to KAN-101), which only store preferences. |
 
 ## Proposals for missing stories
 
