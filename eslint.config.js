@@ -354,6 +354,13 @@ export default tseslint.config(
     rules: { "no-restricted-imports": "off" },
   },
 
+  // api/ (Vercel functions) lives outside src/, so the @/ alias cannot reach
+  // it: its tests import it by relative path.
+  {
+    files: ["tests/api/**/*.ts"],
+    rules: { "no-restricted-imports": "off" },
+  },
+
   // Tool config files must use export default; typescript-eslint documents
   // its default import (`tseslint.configs`), which import-x warns about
   {
@@ -362,6 +369,7 @@ export default tseslint.config(
       "functions/*.config.{js,ts}",
       // Playwright reads the setup function from the default export.
       "e2e/globalSetup.ts",
+      "api/**/*.ts",
     ],
     rules: {
       "import-x/no-default-export": "off",
