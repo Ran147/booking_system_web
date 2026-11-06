@@ -265,7 +265,10 @@
     "description": "Comprehensive booking and appointment management platform for service businesses.",
     "landmarkLabel": "Booking System footer",
     "links": {
+      "about": "About Us",
       "contact": "Contact",
+      "faq": "FAQ",
+      "help": "Help",
       "home": "Home",
       "plans": "Plans",
       "terms": "Terms & Conditions",
@@ -347,7 +350,10 @@
       "goToPortal": "Go to my dashboard",
       "landmarkLabel": "Main navigation",
       "links": {
+        "about": "About Us",
         "contact": "Contact",
+        "faq": "FAQ",
+        "help": "Help",
         "home": "Home",
         "plans": "Plans"
       },

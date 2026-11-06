@@ -29,13 +29,22 @@ describe("LandingFooter (KAN-8)", () => {
     expect(page.getBrandDescription()).toBeInTheDocument();
 
     const navLinks = page.getAllNavigationLinks();
-    expect(navLinks).toHaveLength(4);
+    expect(navLinks).toHaveLength(7);
     expect(
       page.getNavigationLink(testI18n.t("landing:footer.links.home")),
     ).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
     expect(
+      page.getNavigationLink(testI18n.t("landing:footer.links.about")),
+    ).toHaveAttribute("href", ROUTE_PATH.LANDING.ABOUT);
+    expect(
       page.getNavigationLink(testI18n.t("landing:footer.links.plans")),
     ).toHaveAttribute("href", `${ROUTE_PATH.LANDING.HOME}#plans-section`);
+    expect(
+      page.getNavigationLink(testI18n.t("landing:footer.links.faq")),
+    ).toHaveAttribute("href", ROUTE_PATH.LANDING.FAQ);
+    expect(
+      page.getNavigationLink(testI18n.t("landing:footer.links.help")),
+    ).toHaveAttribute("href", ROUTE_PATH.LANDING.HELP);
     expect(
       page.getNavigationLink(testI18n.t("landing:footer.links.contact")),
     ).toHaveAttribute("href", ROUTE_PATH.LANDING.CONTACT);
@@ -128,7 +137,7 @@ describe("LandingFooter (KAN-8)", () => {
     expect(page.querySocialHeading()).toBeNull();
 
     expect(page.getBrandName()).toBeInTheDocument();
-    expect(page.getAllNavigationLinks()).toHaveLength(4);
+    expect(page.getAllNavigationLinks()).toHaveLength(7);
     expect(page.getCopyright()).toBeInTheDocument();
   });
 

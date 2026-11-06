@@ -7,9 +7,24 @@ export const DEFAULT_NAVBAR_LINKS = Object.freeze([
     LABEL_KEY: "home.navbar.links.home",
   }),
   Object.freeze({
+    HREF: ROUTE_PATH.LANDING.ABOUT,
+    ID: "about",
+    LABEL_KEY: "home.navbar.links.about",
+  }),
+  Object.freeze({
     HREF: `${ROUTE_PATH.LANDING.HOME}#plans-section`,
     ID: "plans",
     LABEL_KEY: "home.navbar.links.plans",
+  }),
+  Object.freeze({
+    HREF: ROUTE_PATH.LANDING.FAQ,
+    ID: "faq",
+    LABEL_KEY: "home.navbar.links.faq",
+  }),
+  Object.freeze({
+    HREF: ROUTE_PATH.LANDING.HELP,
+    ID: "help",
+    LABEL_KEY: "home.navbar.links.help",
   }),
   Object.freeze({
     HREF: ROUTE_PATH.LANDING.CONTACT,
