@@ -45,7 +45,7 @@ describe("useLandingNavbarViewModel", () => {
     expect(result.current.portalActionLabel).toBe(
       testI18n.t("landing:home.navbar.signIn"),
     );
-    expect(result.current.navLinks).toHaveLength(3);
+    expect(result.current.navLinks).toHaveLength(6);
   });
 
   it("toggles mobile menu and closes it correctly", () => {

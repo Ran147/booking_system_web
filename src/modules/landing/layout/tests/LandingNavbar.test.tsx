@@ -54,13 +54,22 @@ describe("LandingNavbar (KAN-3, KAN-12)", () => {
     expect(page.getBrandName()).toBeInTheDocument();
 
     const navLinks = page.getAllNavigationLinks();
-    expect(navLinks).toHaveLength(3);
+    expect(navLinks).toHaveLength(6);
     expect(
       page.getNavigationLink(testI18n.t("landing:home.navbar.links.home")),
     ).toHaveAttribute("href", ROUTE_PATH.LANDING.HOME);
     expect(
+      page.getNavigationLink(testI18n.t("landing:home.navbar.links.about")),
+    ).toHaveAttribute("href", ROUTE_PATH.LANDING.ABOUT);
+    expect(
       page.getNavigationLink(testI18n.t("landing:home.navbar.links.plans")),
     ).toHaveAttribute("href", `${ROUTE_PATH.LANDING.HOME}#plans-section`);
+    expect(
+      page.getNavigationLink(testI18n.t("landing:home.navbar.links.faq")),
+    ).toHaveAttribute("href", ROUTE_PATH.LANDING.FAQ);
+    expect(
+      page.getNavigationLink(testI18n.t("landing:home.navbar.links.help")),
+    ).toHaveAttribute("href", ROUTE_PATH.LANDING.HELP);
     expect(
       page.getNavigationLink(testI18n.t("landing:home.navbar.links.contact")),
     ).toHaveAttribute("href", ROUTE_PATH.LANDING.CONTACT);
