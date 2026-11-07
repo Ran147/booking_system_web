@@ -1,5 +1,8 @@
 {
   "layout": {
+    "business": {
+      "unavailable": "Este negocio no estÃ¡ disponible para nuevas reservaciones en este momento."
+    },
     "businessNotFound": "No encontramos el negocio solicitado.",
     "footer": {
       "contact": {
@@ -25,6 +28,11 @@
         "text": "Términos y condiciones"
       }
     },
+    "navbar": {
+      "businessHomeLabel": "Ir al inicio de {{businessName}}",
+      "landmarkLabel": "NavegaciÃ³n del negocio"
+    },
+    "retryAction": "Reintentar",
     "title": "Portal del cliente"
   },
   "myBookings": {
