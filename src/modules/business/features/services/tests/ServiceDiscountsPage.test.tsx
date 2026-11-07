@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BUSINESS_STATUS, SERVICE_STATUS, USER_ROLE } from "@/domain";
 import { renderWithProviders } from "@/test-utils/renderWithProviders";
 import { SUBSCRIBER_SESSION } from "@/test-utils/sessionFixtures";
+import { createServiceDiscountsPage } from "./ServiceDiscountsPage.page";
 import * as fetchBusinessInfoModule from "../api/fetchBusinessInfo";
 import * as fetchServiceDetailModule from "../api/fetchServiceDetail";
 import * as updateServiceDiscountsModule from "../api/updateServiceDiscounts";
 import { ServiceDiscountsPage } from "../components/ServiceDiscountsPage";
 import { DISCOUNT_TYPE } from "../constants/ServiceDiscount.constants";
 import type { ServiceDetail } from "../models";
-import { createServiceDiscountsPage } from "./ServiceDiscountsPage.page";
 
 const MOCK_SERVICE: ServiceDetail = {
   description: "Corte de cabello profesional",

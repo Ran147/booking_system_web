@@ -51,7 +51,7 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 - [x] **AC-KAN-39-04** · edge · Given a business name longer than the sidebar width, when it is shown, then it is truncated with an ellipsis and the full name is available as accessible text and on hover. [KAN-39]
 - [x] **AC-KAN-39-05** · edge · Given the sidebar is collapsed or the screen is narrow, when it is shown, then only the logo (or initials) is visible and the business name stays available to screen readers. See AS-2. [KAN-39]
 - [x] **AC-KAN-39-06** · happy · Given a signed-in `active` collaborator, when any business-portal screen is shown, then the sidebar shows the name and logo of their business (from the session `businessId`) and their own full name. [KAN-39, KAN-86]
-- [ ] **AC-KAN-39-07** · edge · Given a subscriber whose business is `pending` or `rejected`, when they open any business-portal URL, then the sidebar is not shown; the status screen of AC-KAN-33-09 or AC-KAN-33-11 is shown instead. Deferred to PR #41 (BusinessStatusGate). [KAN-39, KAN-33]
+- [x] **AC-KAN-39-07** · edge · Given a subscriber whose business is `pending` or `rejected`, when they open any business-portal URL, then the sidebar is not shown; the status screen of AC-KAN-33-09 or AC-KAN-33-11 is shown instead. [KAN-39, KAN-33]
 
 ### KAN-40 — Subscription banner
 - [x] **AC-KAN-40-01** · happy · Given a subscriber with an `active` subscription, when the sidebar is shown, then a banner shows the plan name, a status badge `active` and the renewal date (`currentPeriodEndsAt`) formatted in the business `timeZone`, with a link to the subscription page (KAN-43). See AS-11. [KAN-40]
@@ -121,7 +121,8 @@ Every screen of the business portal shows a sidebar that tells the subscriber wh
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-39 | AC-KAN-39-01 … AC-KAN-39-07 | `tests/BusinessSidebar.test.tsx` |
+| KAN-39 | AC-KAN-39-01 … AC-KAN-39-06 | `tests/BusinessSidebar.test.tsx` |
+| KAN-39 | AC-KAN-39-07 | `tests/BusinessStatusGate.test.tsx` |
 | KAN-40 | AC-KAN-40-01 … AC-KAN-40-08 | `tests/SubscriptionBanner.test.tsx` |
 | KAN-41 | AC-KAN-41-01, AC-KAN-41-03 … AC-KAN-41-08 (AC-KAN-41-02 replaced) | `tests/ExpiryWarningBanner.test.tsx` |
 | KAN-42 | AC-KAN-42-01 … AC-KAN-42-08 | `tests/BusinessSidebar.test.tsx`, `tests/useBusinessSidebarViewModel.test.tsx` |

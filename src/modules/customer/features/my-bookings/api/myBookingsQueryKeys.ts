@@ -17,6 +17,11 @@ export const myBookingsQueryKeys = {
       BUSINESS_FIELD.SLUG,
       businessSlug,
     ] as const,
+  businessIds: (customerUserId: string): QueryKey =>
+    [
+      ...myBookingsQueryKeys.all(customerUserId),
+      FIRESTORE_COLLECTION.BUSINESSES,
+    ] as const,
   detail: (
     customerUserId: string,
     businessId: string,
@@ -29,13 +34,17 @@ export const myBookingsQueryKeys = {
     ] as const,
   list: ({
     customerUserId,
+    filters,
     pageCursor,
     pageSize,
     tab,
+    timeZone,
   }: MyBookingsQueryParams): QueryKey =>
     [
       ...myBookingsQueryKeys.all(customerUserId),
       tab,
+      filters,
+      timeZone,
       pageCursor?.ref.path ?? null,
       pageSize,
     ] as const,

@@ -11,6 +11,7 @@ import {
 import { testI18n } from "@/shared/test-utils/testI18n";
 import { createMyBookingsPage } from "./MyBookingsPage.page";
 import * as fetchBookingBusinessModule from "../api/fetchBookingBusiness";
+import * as fetchCustomerBusinessIdsModule from "../api/fetchCustomerBusinessIds";
 import * as fetchMyBookingsPageModule from "../api/fetchMyBookingsPage";
 import { MyBookingsPage } from "../components/MyBookingsPage";
 import { MY_BOOKINGS_TAB } from "../constants";
@@ -67,6 +68,10 @@ const renderMyBookings = (initialPath = MY_BOOKINGS_PATH): void => {
 describe("MyBookingsPage (KAN-151, KAN-153)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.spyOn(
+      fetchCustomerBusinessIdsModule,
+      "fetchCustomerBusinessIds",
+    ).mockResolvedValue([MEXICO_BUSINESS.id, SPAIN_BUSINESS.id]);
     vi.spyOn(
       fetchBookingBusinessModule,
       "fetchBookingBusiness",
@@ -163,6 +168,60 @@ describe("MyBookingsPage (KAN-151, KAN-153)", () => {
     );
     expect(fetchSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ pageCursor: cursor }),
+    );
+  });
+
+  it("AC-KAN-153-02: the history pages come from the server with cursors and show the total count", async () => {
+    const cursor = {
+      ref: { path: "businesses/business-a/bookings/booking-20" },
+    } as QueryDocumentSnapshot;
+    const fetchSpy = vi
+      .spyOn(fetchMyBookingsPageModule, "fetchMyBookingsPage")
+      .mockImplementation(({ pageCursor, tab }) => {
+        if (tab !== MY_BOOKINGS_TAB.HISTORY) {
+          return Promise.resolve(buildPage([buildBooking()]));
+        }
+        return Promise.resolve(
+          pageCursor
+            ? buildPage(
+                [
+                  buildBooking({
+                    id: "booking-21",
+                    status: BOOKING_STATUS.COMPLETED,
+                  }),
+                ],
+                { totalCount: 25 },
+              )
+            : buildPage(
+                [
+                  buildBooking({
+                    id: "booking-1",
+                    status: BOOKING_STATUS.COMPLETED,
+                  }),
+                ],
+                { nextCursor: cursor, totalCount: 25 },
+              ),
+        );
+      });
+    renderMyBookings();
+    const page = createMyBookingsPage();
+    await page.findRows();
+
+    await page.clickHistoryTab();
+
+    expect(await page.findPaginationSummary()).toHaveTextContent(
+      "Página 1 · 25 resultados",
+    );
+    await page.clickNextPage();
+
+    expect(await page.findPaginationSummary()).toHaveTextContent(
+      "Página 2 · 25 resultados",
+    );
+    expect(fetchSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        pageCursor: cursor,
+        tab: MY_BOOKINGS_TAB.HISTORY,
+      }),
     );
   });
 
