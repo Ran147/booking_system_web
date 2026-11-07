@@ -101,6 +101,14 @@
         { "fieldPath": "searchName", "order": "ASCENDING" }
       ],
       "queryScope": "COLLECTION"
+    },
+    {
+      "collectionGroup": "auditLog",
+      "fields": [
+        { "fieldPath": "actionType", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ],
+      "queryScope": "COLLECTION"
     }
   ],
   "fieldOverrides": []
