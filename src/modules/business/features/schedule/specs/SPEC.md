@@ -16,7 +16,7 @@ The subscriber controls when their business can be booked and manages every book
 | --- | --- |
 | subscriber (own business only) | Everything in this spec for their own business while it is `active`. While the business is `inactive` or `suspended` (KAN-49), only view the agenda, lists and history. "Como usuario" in KAN-69 and KAN-71 means the subscriber. |
 | customer | Books, reschedules and cancels from the customer portal (KAN-145, KAN-155 epics); sees only free time slots, never other customers' bookings. Not part of this spec. |
-| system (Cloud Functions) | Creates, reschedules and changes the status of bookings in a transaction; writes the service snapshot (KAN-62). |
+| system (Vercel Functions) | Creates, reschedules, cancels and changes the status of bookings in an atomic Firestore transaction via `/api/callFunction`; writes the service snapshot (KAN-62) and guarantees double-booking and slot collision prevention. |
 | collaborator (own business, while `active`) | Sees their own bookings in the agenda (read-only). With `manage_bookings` (KAN-86): everything the subscriber can do with bookings (KAN-67 to KAN-76) for every collaborator. With `manage_schedule_blocks`: create and remove schedule blocks (KAN-65, KAN-66). Never business hours (KAN-64) or the confirmation mode (KAN-70). |
 
 ## In scope
@@ -205,7 +205,7 @@ None. Q1 was decided on 2026-09-28: collaborator absences (AC-KAN-66-07 … AC-K
 - i18n keys (new prefixes): `business:schedule.hours.*`, `business:schedule.blocks.*`, `business:schedule.agenda.*`, `business:schedule.bookings.*`, `business:schedule.confirmation.*`, `business:schedule.bookingList.*`, `business:schedule.history.*`. Reused: `validation:required`, `validation:tooLong`, `common:errors.network`, `business:errors.readOnly`. Status labels come from `common` status labels.
 - Realtime: the agenda (KAN-67, KAN-68) listens live to bookings and blocks of the visible period; everything else uses regular queries (`api-query-standards` §9).
 - Pagination: booking list and history use cursor pagination with `PAGINATION.DEFAULT_PAGE_SIZE`, server-side total count, filters in the URL, reset to page one when filters change. Each filter combination adds its Firestore index.
-- Booking creation, rescheduling, cancellation and status changes run through callable functions in a transaction, so double bookings and invalid transitions are rejected on the server; transitions follow `domain-glossary` §4.1 (`completed` and `no_show` only after `startsAt`).
+- Server-side critical logic: Booking creation, rescheduling, cancellation, and status transitions (completed, no_show, confirmed) are strictly handled via Vercel Serverless Functions (`api/callFunction.ts` using Firebase Admin SDK) inside Firestore transactions — with zero Cloud Functions dependency. This enforces atomic slot collision checks, service snapshot creation, valid status transitions (`domain-glossary` §4.1, `completed` and `no_show` only after `startsAt`), cancellation metadata, and reschedule history recording.
 - Times in the business `timeZone` (never the browser's); money from the snapshot `priceInCents` in the business currency.
 - Tenant isolation: every query and write uses the session `businessId`; customers only receive free time slots, never other bookings.
 - Idle logout (KAN-38) applies; no reCAPTCHA (authenticated screens). No export in this epic.
@@ -214,22 +214,22 @@ None. Q1 was decided on 2026-09-28: collaborator absences (AC-KAN-66-07 … AC-K
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-64 | AC-KAN-64-01 … AC-KAN-64-07 | `tests/BusinessHoursPage.test.tsx` |
-| KAN-65 | AC-KAN-65-01 … AC-KAN-65-07 | `tests/ScheduleBlockForm.test.tsx` |
-| KAN-66 | AC-KAN-66-01 … AC-KAN-66-09 | `tests/ScheduleBlockForm.test.tsx` |
-| KAN-67 | AC-KAN-67-01 … AC-KAN-67-12 | `tests/SchedulePage.test.tsx` |
-| KAN-68 | AC-KAN-68-01 … AC-KAN-68-06 | `tests/SchedulePage.test.tsx` |
-| KAN-69 | AC-KAN-69-01, AC-KAN-69-02, AC-KAN-69-04, AC-KAN-69-05, AC-KAN-69-06, AC-KAN-69-07, AC-KAN-69-09, AC-KAN-69-10 | `tests/BookingForm.test.tsx` |
-| KAN-69 | AC-KAN-69-01, AC-KAN-69-03, AC-KAN-69-04, AC-KAN-69-06, AC-KAN-69-08, AC-KAN-69-09, AC-KAN-69-11, AC-KAN-69-12 | `functions/src/bookings/tests/createBooking.test.ts` |
-| KAN-70 | AC-KAN-70-01 … AC-KAN-70-08 | `tests/BookingConfirmationSettings.test.tsx` |
-| KAN-70 | AC-KAN-70-01, AC-KAN-70-02, AC-KAN-70-05 | `functions/src/bookings/tests/updateBookingStatus.test.ts` |
-| KAN-71 | AC-KAN-71-01 … AC-KAN-71-07 | `tests/RescheduleBookingDialog.test.tsx` |
-| KAN-71 | AC-KAN-71-02, AC-KAN-71-03, AC-KAN-71-06 | `functions/src/bookings/tests/rescheduleBooking.test.ts` |
-| KAN-72 | AC-KAN-72-01 … AC-KAN-72-08 | `tests/CancelBookingDialog.test.tsx` |
-| KAN-72 | AC-KAN-72-01, AC-KAN-72-04, AC-KAN-72-07 | `functions/src/bookings/tests/cancelBooking.test.ts` |
-| KAN-73 | AC-KAN-73-01 … AC-KAN-73-06 | `tests/BookingDetailPage.test.tsx` |
-| KAN-73 | AC-KAN-73-02, AC-KAN-73-03 | `functions/src/bookings/tests/updateBookingStatus.test.ts` |
-| KAN-74 | AC-KAN-74-01 … AC-KAN-74-06 | `tests/BookingDetailPage.test.tsx` |
-| KAN-74 | AC-KAN-74-02, AC-KAN-74-03 | `functions/src/bookings/tests/updateBookingStatus.test.ts` |
-| KAN-75 | AC-KAN-75-01 … AC-KAN-75-05 | `tests/BookingListPage.test.tsx` |
-| KAN-76 | AC-KAN-76-01 … AC-KAN-76-07 | `tests/BookingHistoryPage.test.tsx` |
+| KAN-64 | AC-KAN-64-01 … AC-KAN-64-07 | `src/modules/business/features/schedule/tests/BusinessHoursPage.test.tsx` |
+| KAN-65 | AC-KAN-65-01 … AC-KAN-65-07 | `src/modules/business/features/schedule/tests/ScheduleBlockForm.test.tsx` |
+| KAN-66 | AC-KAN-66-01 … AC-KAN-66-09 | `src/modules/business/features/schedule/tests/ScheduleBlockForm.test.tsx` |
+| KAN-67 | AC-KAN-67-01 … AC-KAN-67-12 | `src/modules/business/features/schedule/tests/SchedulePage.test.tsx` |
+| KAN-68 | AC-KAN-68-01 … AC-KAN-68-06 | `src/modules/business/features/schedule/tests/SchedulePage.test.tsx` |
+| KAN-69 | AC-KAN-69-01, AC-KAN-69-02, AC-KAN-69-04, AC-KAN-69-05, AC-KAN-69-06, AC-KAN-69-07, AC-KAN-69-09, AC-KAN-69-10 | `src/modules/business/features/schedule/tests/BookingForm.test.tsx` |
+| KAN-69 | AC-KAN-69-01, AC-KAN-69-03, AC-KAN-69-04, AC-KAN-69-06, AC-KAN-69-08, AC-KAN-69-09, AC-KAN-69-11, AC-KAN-69-12 | `tests/api/createBooking.test.ts` |
+| KAN-70 | AC-KAN-70-01 … AC-KAN-70-08 | `src/modules/business/features/schedule/tests/BookingConfirmationSettings.test.tsx` |
+| KAN-70 | AC-KAN-70-01, AC-KAN-70-02, AC-KAN-70-05 | `tests/api/updateBookingStatus.test.ts` |
+| KAN-71 | AC-KAN-71-01 … AC-KAN-71-07 | `src/modules/business/features/schedule/tests/RescheduleBookingDialog.test.tsx` |
+| KAN-71 | AC-KAN-71-02, AC-KAN-71-03, AC-KAN-71-06 | `tests/api/rescheduleBooking.test.ts` |
+| KAN-72 | AC-KAN-72-01 … AC-KAN-72-08 | `src/modules/business/features/schedule/tests/CancelBookingDialog.test.tsx` |
+| KAN-72 | AC-KAN-72-01, AC-KAN-72-04, AC-KAN-72-07 | `tests/api/cancelBooking.test.ts` |
+| KAN-73 | AC-KAN-73-01 … AC-KAN-73-06 | `src/modules/business/features/schedule/tests/BookingDetailPage.test.tsx` |
+| KAN-73 | AC-KAN-73-02, AC-KAN-73-03 | `tests/api/updateBookingStatus.test.ts` |
+| KAN-74 | AC-KAN-74-01 … AC-KAN-74-06 | `src/modules/business/features/schedule/tests/BookingDetailPage.test.tsx` |
+| KAN-74 | AC-KAN-74-02, AC-KAN-74-03 | `tests/api/updateBookingStatus.test.ts` |
+| KAN-75 | AC-KAN-75-01 … AC-KAN-75-05 | `src/modules/business/features/schedule/tests/BookingListPage.test.tsx` |
+| KAN-76 | AC-KAN-76-01 … AC-KAN-76-07 | `src/modules/business/features/schedule/tests/BookingHistoryPage.test.tsx` |
