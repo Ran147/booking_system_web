@@ -134,6 +134,46 @@ describe("firestore.rules: tenant isolation", () => {
     );
   });
 
+  it("KAN-64, KAN-70: allows updating business hours and booking confirmation mode", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a")
+        .update({
+          bookingConfirmationMode: "manual",
+          businessHours: {
+            monday: [{ closesAt: "18:00", opensAt: "09:00" }],
+          },
+        }),
+    );
+  });
+
+  it("KAN-65, KAN-66: allows subscriber to create and read schedule blocks", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriberA
+        .firestore()
+        .collection("businesses/business-a/scheduleBlocks")
+        .add({
+          businessId: "business-a",
+          collaboratorId: null,
+          endsAt: new Date(),
+          isFullDay: true,
+          reason: "Feriado",
+          startsAt: new Date(),
+        }),
+    );
+  });
+
   it("KAN-199: denies changing protected business fields", async () => {
     const subscriberA = testEnvironment.authenticatedContext(
       "subscriber-a",
