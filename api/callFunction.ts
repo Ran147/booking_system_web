@@ -40,7 +40,9 @@ const FUNCTION_NAME = Object.freeze({
   EXPORT_COLLECTION: "exportCollection",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
+  RESCHEDULE_BOOKING: "rescheduleBooking",
   SEND_CONTACT_MESSAGE: "sendContactMessage",
+  UPDATE_BOOKING_STATUS: "updateBookingStatus",
   UPDATE_SERVICE: "updateService",
   UPDATE_SERVICE_COLLABORATORS: "updateServiceCollaborators",
   VALIDATE_SIGN_UP_LINK: "validateSignUpLink",
@@ -53,6 +55,11 @@ const MONEY = Object.freeze({
 
 const TIME_MS = Object.freeze({
   THIRTY_DAYS: 2_592_000_000,
+} as const);
+
+const BOOKING_CONFIRMATION_MODE = Object.freeze({
+  AUTOMATIC: "automatic",
+  MANUAL: "manual",
 } as const);
 
 const BOOKING_STATUS = Object.freeze({
@@ -69,6 +76,11 @@ const BUSINESS_STATUS = Object.freeze({
   PENDING: "pending",
   REJECTED: "rejected",
   SUSPENDED: "suspended",
+} as const);
+
+const CUSTOMER_STATUS = Object.freeze({
+  ACTIVE: "active",
+  BLOCKED: "blocked",
 } as const);
 
 const SERVICE_STATUS = Object.freeze({
@@ -834,6 +846,24 @@ export default async function handler(
         return;
       }
 
+      if (customerId) {
+        const customerSnapshot = await businessReference
+          .collection("customers")
+          .doc(customerId)
+          .get();
+        if (
+          customerSnapshot.exists &&
+          customerSnapshot.data()?.status === CUSTOMER_STATUS.BLOCKED
+        ) {
+          sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+            details: { reason: "customer_blocked" },
+            error: "failed-precondition",
+            message: "customer_blocked",
+          });
+          return;
+        }
+      }
+
       let collaboratorName: Nullable<string> = null;
       if (collaboratorId) {
         const collaboratorSnapshot = await businessReference
@@ -861,12 +891,88 @@ export default async function handler(
         ? new Date(endsAt)
         : new Date(startsAtDate.getTime() + durationMilliseconds);
 
+      const existingBookingsSnapshot = await businessReference
+        .collection("bookings")
+        .where("status", "in", [
+          BOOKING_STATUS.PENDING,
+          BOOKING_STATUS.CONFIRMED,
+        ])
+        .get();
+
+      const hasBookingCollision = existingBookingsSnapshot.docs.some((doc) => {
+        const bookingItem = doc.data();
+        if (
+          collaboratorId &&
+          bookingItem.collaboratorId &&
+          bookingItem.collaboratorId !== collaboratorId
+        ) {
+          return false;
+        }
+        const existingStart = bookingItem.startsAt?.toDate
+          ? bookingItem.startsAt.toDate()
+          : new Date(bookingItem.startsAt);
+        const existingEnd = bookingItem.endsAt?.toDate
+          ? bookingItem.endsAt.toDate()
+          : new Date(bookingItem.endsAt);
+        return startsAtDate < existingEnd && endsAtDate > existingStart;
+      });
+
+      if (hasBookingCollision) {
+        sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
+          details: { reason: "slot_taken" },
+          error: "conflict",
+          message: "slot_taken",
+        });
+        return;
+      }
+
+      const blocksSnapshot = await businessReference
+        .collection("scheduleBlocks")
+        .get();
+
+      const hasBlockCollision = blocksSnapshot.docs.some((doc) => {
+        const blockItem = doc.data();
+        if (
+          collaboratorId &&
+          blockItem.collaboratorId &&
+          blockItem.collaboratorId !== collaboratorId
+        ) {
+          return false;
+        }
+        const blockStart = blockItem.startsAt?.toDate
+          ? blockItem.startsAt.toDate()
+          : new Date(blockItem.startsAt);
+        const blockEnd = blockItem.endsAt?.toDate
+          ? blockItem.endsAt.toDate()
+          : new Date(blockItem.endsAt);
+        return startsAtDate < blockEnd && endsAtDate > blockStart;
+      });
+
+      if (hasBlockCollision) {
+        sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
+          details: { reason: "slot_taken" },
+          error: "conflict",
+          message: "slot_taken",
+        });
+        return;
+      }
+
+      const businessData = businessSnapshot.data() || {};
+      const confirmationMode =
+        businessData.bookingConfirmationMode ||
+        BOOKING_CONFIRMATION_MODE.AUTOMATIC;
+      const initialStatus =
+        confirmationMode === BOOKING_CONFIRMATION_MODE.MANUAL
+          ? BOOKING_STATUS.PENDING
+          : BOOKING_STATUS.CONFIRMED;
+
       const bookingReference = businessReference.collection("bookings").doc();
       await bookingReference.set({
         businessId,
         cancellation: null,
         collaboratorId,
         collaboratorName,
+        createdAt: Timestamp.now(),
         customerId,
         customerUserId: customerId,
         endsAt: endsAtDate,
@@ -875,12 +981,310 @@ export default async function handler(
         serviceId,
         serviceSnapshot: serviceSnapshotData,
         startsAt: startsAtDate,
-        status: "confirmed",
+        status: initialStatus,
+        updatedAt: Timestamp.now(),
       });
 
       sendJsonResponse(response, HTTP_STATUS.OK, {
         bookingId: bookingReference.id,
         serviceSnapshot: serviceSnapshotData,
+        status: initialStatus,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.CANCEL_BOOKING) {
+      const businessId = String(payload.businessId || "");
+      const bookingId = String(payload.bookingId || "");
+      const note = String(payload.note || "").trim();
+      const isPenalized = Boolean(payload.isPenalized);
+      const cancelledBy = String(payload.cancelledBy || "business");
+
+      if (!businessId || !bookingId) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "missing-parameters",
+        });
+        return;
+      }
+
+      if (!note) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          details: { field: "note", reason: "required" },
+          error: "validation-error",
+          message: "note is required",
+        });
+        return;
+      }
+
+      if (note.length > 500) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          details: { field: "note", reason: "too_long" },
+          error: "validation-error",
+          message: "note cannot exceed 500 characters",
+        });
+        return;
+      }
+
+      const bookingReference = firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("bookings")
+        .doc(bookingId);
+
+      const bookingSnapshot = await bookingReference.get();
+      if (!bookingSnapshot.exists) {
+        sendJsonResponse(response, HTTP_STATUS.NOT_FOUND, {
+          error: "not-found",
+        });
+        return;
+      }
+
+      const bookingData = bookingSnapshot.data() || {};
+      if (
+        bookingData.status !== BOOKING_STATUS.PENDING &&
+        bookingData.status !== BOOKING_STATUS.CONFIRMED
+      ) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: {
+            currentStatus: bookingData.status,
+            reason: "invalid_transition",
+          },
+          error: "failed-precondition",
+          message: "invalid_transition",
+        });
+        return;
+      }
+
+      await bookingReference.update({
+        cancellation: {
+          cancelledAt: Timestamp.now(),
+          cancelledBy,
+          isPenalized,
+          note,
+        },
+        status: BOOKING_STATUS.CANCELLED,
+        updatedAt: Timestamp.now(),
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        bookingId,
+        status: BOOKING_STATUS.CANCELLED,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.RESCHEDULE_BOOKING) {
+      const businessId = String(payload.businessId || "");
+      const bookingId = String(payload.bookingId || "");
+      const newStartsAt = String(payload.newStartsAt || "");
+
+      if (!businessId || !bookingId || !newStartsAt) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "missing-parameters",
+        });
+        return;
+      }
+
+      const bookingReference = firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("bookings")
+        .doc(bookingId);
+
+      const bookingSnapshot = await bookingReference.get();
+      if (!bookingSnapshot.exists) {
+        sendJsonResponse(response, HTTP_STATUS.NOT_FOUND, {
+          error: "not-found",
+        });
+        return;
+      }
+
+      const bookingData = bookingSnapshot.data() || {};
+      if (
+        bookingData.status !== BOOKING_STATUS.PENDING &&
+        bookingData.status !== BOOKING_STATUS.CONFIRMED
+      ) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: { reason: "cannot_reschedule" },
+          error: "failed-precondition",
+          message: "cannot_reschedule",
+        });
+        return;
+      }
+
+      const currentStartsAtDate = bookingData.startsAt?.toDate
+        ? bookingData.startsAt.toDate()
+        : new Date(bookingData.startsAt);
+
+      if (currentStartsAtDate.getTime() <= Date.now()) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: { reason: "cannot_reschedule_past" },
+          error: "failed-precondition",
+          message: "cannot_reschedule_past",
+        });
+        return;
+      }
+
+      const durationMinutes = Number(
+        bookingData.serviceSnapshot?.durationMinutes || 30,
+      );
+      const newStartsAtDate = new Date(newStartsAt);
+      if (newStartsAtDate.getTime() <= Date.now()) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          details: { reason: "slot_in_past" },
+          error: "invalid-argument",
+          message: "slot_in_past",
+        });
+        return;
+      }
+      const newEndsAtDate = new Date(
+        newStartsAtDate.getTime() + durationMinutes * 60 * 1000,
+      );
+
+      const businessReference = firestore
+        .collection("businesses")
+        .doc(businessId);
+      const existingBookingsSnapshot = await businessReference
+        .collection("bookings")
+        .where("status", "in", [
+          BOOKING_STATUS.PENDING,
+          BOOKING_STATUS.CONFIRMED,
+        ])
+        .get();
+
+      const hasCollision = existingBookingsSnapshot.docs.some((doc) => {
+        if (doc.id === bookingId) {
+          return false;
+        }
+        const candidateBooking = doc.data();
+        if (
+          bookingData.collaboratorId &&
+          candidateBooking.collaboratorId &&
+          candidateBooking.collaboratorId !== bookingData.collaboratorId
+        ) {
+          return false;
+        }
+        const start = candidateBooking.startsAt?.toDate
+          ? candidateBooking.startsAt.toDate()
+          : new Date(candidateBooking.startsAt);
+        const end = candidateBooking.endsAt?.toDate
+          ? candidateBooking.endsAt.toDate()
+          : new Date(candidateBooking.endsAt);
+        return newStartsAtDate < end && newEndsAtDate > start;
+      });
+
+      if (hasCollision) {
+        sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
+          details: { reason: "slot_taken" },
+          error: "conflict",
+          message: "slot_taken",
+        });
+        return;
+      }
+
+      const rescheduleHistory = Array.isArray(bookingData.rescheduleHistory)
+        ? [...bookingData.rescheduleHistory]
+        : [];
+
+      rescheduleHistory.push({
+        changedAt: Timestamp.now(),
+        previousEndsAt: bookingData.endsAt,
+        previousStartsAt: bookingData.startsAt,
+      });
+
+      await bookingReference.update({
+        endsAt: newEndsAtDate,
+        rescheduleHistory,
+        startsAt: newStartsAtDate,
+        updatedAt: Timestamp.now(),
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        bookingId,
+        endsAt: newEndsAtDate.toISOString(),
+        startsAt: newStartsAtDate.toISOString(),
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.UPDATE_BOOKING_STATUS) {
+      const businessId = String(payload.businessId || "");
+      const bookingId = String(payload.bookingId || "");
+      const targetStatus = String(payload.targetStatus || "");
+
+      if (!businessId || !bookingId || !targetStatus) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "missing-parameters",
+        });
+        return;
+      }
+
+      const bookingReference = firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("bookings")
+        .doc(bookingId);
+
+      const bookingSnapshot = await bookingReference.get();
+      if (!bookingSnapshot.exists) {
+        sendJsonResponse(response, HTTP_STATUS.NOT_FOUND, {
+          error: "not-found",
+        });
+        return;
+      }
+
+      const bookingData = bookingSnapshot.data() || {};
+      const currentStatus = bookingData.status;
+      const startsAtDate = bookingData.startsAt?.toDate
+        ? bookingData.startsAt.toDate()
+        : new Date(bookingData.startsAt);
+
+      if (targetStatus === BOOKING_STATUS.CONFIRMED) {
+        if (currentStatus !== BOOKING_STATUS.PENDING) {
+          sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+            details: { currentStatus, reason: "invalid_transition" },
+            error: "failed-precondition",
+            message: "invalid_transition",
+          });
+          return;
+        }
+      } else if (
+        targetStatus === BOOKING_STATUS.COMPLETED ||
+        targetStatus === BOOKING_STATUS.NO_SHOW
+      ) {
+        if (currentStatus !== BOOKING_STATUS.CONFIRMED) {
+          sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+            details: { currentStatus, reason: "invalid_transition" },
+            error: "failed-precondition",
+            message: "invalid_transition",
+          });
+          return;
+        }
+        if (startsAtDate.getTime() > Date.now()) {
+          sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+            details: { reason: "not_started" },
+            error: "failed-precondition",
+            message: "not_started",
+          });
+          return;
+        }
+      } else {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: { reason: "unsupported_status" },
+          error: "failed-precondition",
+          message: "unsupported_status",
+        });
+        return;
+      }
+
+      await bookingReference.update({
+        status: targetStatus,
+        updatedAt: Timestamp.now(),
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        bookingId,
+        status: targetStatus,
       });
       return;
     }
