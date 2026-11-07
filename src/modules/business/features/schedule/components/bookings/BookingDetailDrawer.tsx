@@ -31,6 +31,7 @@ interface BookingDetailDrawerProps {
   readonly onClose: () => void;
   readonly onRescheduleClick: () => void;
   readonly onSuccess?: () => void;
+  readonly timeZone?: string;
 }
 
 export const BookingDetailDrawer = ({
@@ -41,6 +42,7 @@ export const BookingDetailDrawer = ({
   onClose,
   onRescheduleClick,
   onSuccess,
+  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
 }: BookingDetailDrawerProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const { businessId } = useCurrentBusiness();
@@ -80,7 +82,11 @@ export const BookingDetailDrawer = ({
     i18n.language,
   );
 
-  const formattedDate = formatDateTime(booking.startsAt, "UTC", i18n.language);
+  const formattedDate = formatDateTime(
+    booking.startsAt,
+    timeZone,
+    i18n.language,
+  );
 
   return (
     <Modal
@@ -153,7 +159,7 @@ export const BookingDetailDrawer = ({
                   {t("schedule.bookings.rescheduledFrom")}{" "}
                   {formatDateTime(
                     historyItem.previousStartsAt,
-                    "UTC",
+                    timeZone,
                     i18n.language,
                   )}
                 </div>

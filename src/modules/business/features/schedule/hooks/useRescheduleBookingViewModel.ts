@@ -23,7 +23,45 @@ interface UseRescheduleBookingViewModelOptions {
   readonly onSuccess?: () => void;
 }
 
-const getTodayIso = (): string => new Date().toISOString().split("T")[0] ?? "";
+const TWO_DIGIT_PAD = 2;
+const DEFAULT_RESCHEDULE_HOUR = 10;
+
+const formatLocalDate = (targetDate: Date): string => {
+  const year = targetDate.getFullYear();
+  const month = String(targetDate.getMonth() + 1).padStart(TWO_DIGIT_PAD, "0");
+  const day = String(targetDate.getDate()).padStart(TWO_DIGIT_PAD, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const formatLocalTime = (targetDate: Date): string => {
+  const hours = String(targetDate.getHours()).padStart(TWO_DIGIT_PAD, "0");
+  const minutes = String(targetDate.getMinutes()).padStart(TWO_DIGIT_PAD, "0");
+  return `${hours}:${minutes}`;
+};
+
+const getTomorrowAtTen = (): Date => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(DEFAULT_RESCHEDULE_HOUR, 0, 0, 0);
+  return tomorrow;
+};
+
+const resolveInitialDateTime = (
+  booking: Nullable<Booking>,
+): { readonly date: string; readonly time: string } => {
+  if (booking && booking.startsAt.getTime() > Date.now()) {
+    return {
+      date: formatLocalDate(booking.startsAt),
+      time: formatLocalTime(booking.startsAt),
+    };
+  }
+
+  const tomorrow = getTomorrowAtTen();
+  return {
+    date: formatLocalDate(tomorrow),
+    time: formatLocalTime(tomorrow),
+  };
+};
 
 export const useRescheduleBookingViewModel = ({
   booking,
@@ -38,11 +76,26 @@ export const useRescheduleBookingViewModel = ({
   const { businessId } = useCurrentBusiness();
   const rescheduleMutation = useRescheduleBookingMutation();
 
-  const [date, setDate] = useState<string>(getTodayIso());
-  const [time, setTime] = useState<string>("11:00");
+  const [prevBookingId, setPrevBookingId] = useState<Nullable<string>>(
+    booking?.id ?? null,
+  );
+  const initialDateTime = resolveInitialDateTime(booking);
+  const [date, setDate] = useState<string>(initialDateTime.date);
+  const [time, setTime] = useState<string>(initialDateTime.time);
   const [errorMessage, setErrorMessage] = useState<Nullable<string>>(null);
 
+  if (booking && booking.id !== prevBookingId) {
+    setPrevBookingId(booking.id);
+    const nextDateTime = resolveInitialDateTime(booking);
+    setDate(nextDateTime.date);
+    setTime(nextDateTime.time);
+    setErrorMessage(null);
+  }
+
   const closeForm = (): void => {
+    const nextDateTime = resolveInitialDateTime(booking);
+    setDate(nextDateTime.date);
+    setTime(nextDateTime.time);
     setErrorMessage(null);
     onClose();
   };
@@ -61,7 +114,13 @@ export const useRescheduleBookingViewModel = ({
       return false;
     }
 
-    const newStartsAtIso = `${date}T${time}:00`;
+    const localTargetDate = new Date(`${date}T${time}:00`);
+    if (localTargetDate.getTime() <= Date.now()) {
+      setErrorMessage(t("schedule.bookings.slotUnavailableError"));
+      return false;
+    }
+
+    const newStartsAtIso = localTargetDate.toISOString();
 
     try {
       await rescheduleMutation.mutateAsync({
@@ -76,13 +135,23 @@ export const useRescheduleBookingViewModel = ({
       }
       return true;
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "message" in error &&
-        String(error.message).includes("slot_taken")
-      ) {
+      const errorMessageText =
+        error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : "";
+
+      if (errorMessageText.includes("slot_taken")) {
         setErrorMessage(t("schedule.bookings.slotTakenError"));
+      } else if (
+        errorMessageText.includes("cannot_reschedule_past") ||
+        errorMessageText.includes("slot_in_past")
+      ) {
+        setErrorMessage(t("schedule.bookings.cannotReschedulePastError"));
+      } else if (
+        errorMessageText.includes("cannot_reschedule") ||
+        errorMessageText.includes("invalid_transition")
+      ) {
+        setErrorMessage(t("schedule.bookings.cannotRescheduleError"));
       } else {
         setErrorMessage(
           t("errors.common.network", { defaultValue: "Error de red" }),

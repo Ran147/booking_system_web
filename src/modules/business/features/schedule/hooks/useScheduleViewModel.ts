@@ -171,7 +171,11 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     setCalendarViewMode,
     setIsNewBookingOpen,
     setSelectedDate,
-    timeZone: businessHoursQuery.data?.timeZone || "UTC",
+    timeZone:
+      businessHoursQuery.data?.timeZone &&
+      businessHoursQuery.data.timeZone !== SCHEDULE_CONSTANTS.UTC_TIME_ZONE
+        ? businessHoursQuery.data.timeZone
+        : Intl.DateTimeFormat().resolvedOptions().timeZone,
     totalHistoryCount: bookingHistoryQuery.data?.totalCount ?? 0,
     totalUpcomingCount: bookingListQuery.data?.totalCount ?? 0,
   };

@@ -82,6 +82,7 @@ export const SchedulePage = (): ReactElement => {
           <BookingListTable
             bookings={viewModel.bookingList}
             isLoading={viewModel.isLoading}
+            timeZone={viewModel.timeZone}
             onSelectBooking={viewModel.handleSelectBooking}
           />
         )}
@@ -97,6 +98,7 @@ export const SchedulePage = (): ReactElement => {
             <BookingHistoryTable
               bookings={viewModel.bookingHistory}
               isLoading={viewModel.isLoading}
+              timeZone={viewModel.timeZone}
               onSelectBooking={viewModel.handleSelectBooking}
             />
           </div>
@@ -109,6 +111,7 @@ export const SchedulePage = (): ReactElement => {
           booking={viewModel.selectedBooking}
           hasStarted={viewModel.selectedBookingHasStarted}
           isOpen={viewModel.isDetailOpen}
+          timeZone={viewModel.timeZone}
           onCancelClick={viewModel.handleOpenCancel}
           onClose={viewModel.handleCloseDetail}
           onRescheduleClick={viewModel.handleOpenReschedule}

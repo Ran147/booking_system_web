@@ -17,7 +17,7 @@ import {
   type ScheduleBlock,
   type ScheduleViewMode,
 } from "@/modules/business/features/schedule";
-import { formatDateTime } from "@/utils";
+import { formatDateTime, formatTime } from "@/utils";
 
 interface AgendaCalendarViewProps {
   readonly blocks: readonly ScheduleBlock[];
@@ -185,9 +185,18 @@ export const AgendaCalendarView = ({
                       <Clock className="size-4" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-foreground">
-                        {booking.serviceSnapshot.name}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-foreground">
+                          {booking.serviceSnapshot.name}
+                        </span>
+                        <span className="text-xs font-semibold text-primary">
+                          {formatTime(
+                            booking.startsAt,
+                            timeZone,
+                            i18n.language,
+                          )}
+                        </span>
+                      </div>
                       <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                         <User className="size-3" />
                         {booking.customerId}

@@ -11,6 +11,7 @@ export interface BookingFormViewModelResult {
   readonly errorMessage: Nullable<string>;
   readonly formData: CreateBookingFormData;
   readonly isCreating: boolean;
+  readonly resetForm: () => void;
   readonly serviceOptions: readonly { label: string; value: string }[];
   readonly submitForm: () => Promise<boolean>;
   readonly updateField: <Key extends keyof CreateBookingFormData>(
@@ -26,6 +27,15 @@ interface UseBookingFormViewModelOptions {
 
 const getTodayIso = (): string => new Date().toISOString().split("T")[0] ?? "";
 
+const createInitialFormData = (): CreateBookingFormData => ({
+  collaboratorId: null,
+  customerId: "",
+  date: getTodayIso(),
+  notes: "",
+  serviceId: "",
+  time: "10:00",
+});
+
 export const useBookingFormViewModel = ({
   onClose,
   onSuccess,
@@ -40,14 +50,9 @@ export const useBookingFormViewModel = ({
   const servicesQuery = useActiveServicesQuery(businessId);
   const createBookingMutation = useCreateBookingMutation();
 
-  const [formData, setFormData] = useState<CreateBookingFormData>({
-    collaboratorId: null,
-    customerId: "",
-    date: getTodayIso(),
-    notes: "",
-    serviceId: "",
-    time: "10:00",
-  });
+  const [formData, setFormData] = useState<CreateBookingFormData>(
+    createInitialFormData(),
+  );
   const [errorMessage, setErrorMessage] = useState<Nullable<string>>(null);
 
   const updateField = <Key extends keyof CreateBookingFormData>(
@@ -57,8 +62,13 @@ export const useBookingFormViewModel = ({
     setFormData((previous) => ({ ...previous, [field]: value }));
   };
 
-  const closeForm = (): void => {
+  const resetForm = (): void => {
+    setFormData(createInitialFormData());
     setErrorMessage(null);
+  };
+
+  const closeForm = (): void => {
+    resetForm();
     onClose();
   };
 
@@ -84,7 +94,8 @@ export const useBookingFormViewModel = ({
       return false;
     }
 
-    const startsAtIso = `${formData.date}T${formData.time}:00`;
+    const localDate = new Date(`${formData.date}T${formData.time}:00`);
+    const startsAtIso = localDate.toISOString();
 
     try {
       await createBookingMutation.mutateAsync({
@@ -96,19 +107,28 @@ export const useBookingFormViewModel = ({
         startsAt: startsAtIso,
       });
 
-      closeForm();
+      resetForm();
+      onClose();
       if (onSuccess) {
         onSuccess();
       }
       return true;
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "message" in error &&
-        String(error.message).includes("customer_blocked")
-      ) {
+      const errorMessageText =
+        error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : "";
+
+      if (errorMessageText.includes("customer_blocked")) {
         setErrorMessage(t("schedule.bookings.customerBlockedError"));
+      } else if (errorMessageText.includes("slot_taken")) {
+        setErrorMessage(t("schedule.bookings.slotTakenError"));
+      } else if (
+        errorMessageText.includes("service_unavailable") ||
+        errorMessageText.includes("business_unavailable") ||
+        errorMessageText.includes("slot_in_past")
+      ) {
+        setErrorMessage(t("schedule.bookings.slotUnavailableError"));
       } else {
         setErrorMessage(
           t("errors.common.network", { defaultValue: "Error de red" }),
@@ -130,6 +150,7 @@ export const useBookingFormViewModel = ({
     errorMessage,
     formData,
     isCreating: createBookingMutation.isPending,
+    resetForm,
     serviceOptions,
     submitForm,
     updateField,

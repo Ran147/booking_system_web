@@ -23,12 +23,14 @@ interface BookingListTableProps {
   readonly bookings: readonly Booking[];
   readonly isLoading?: boolean;
   readonly onSelectBooking: (booking: Booking) => void;
+  readonly timeZone?: string;
 }
 
 export const BookingListTable = ({
   bookings,
   isLoading = false,
   onSelectBooking,
+  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
 }: BookingListTableProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
 
@@ -56,7 +58,7 @@ export const BookingListTable = ({
             <TableRow key={booking.id}>
               <TableCell className="font-medium">
                 <span className="text-sm">
-                  {formatDateTime(booking.startsAt, "UTC", i18n.language)}
+                  {formatDateTime(booking.startsAt, timeZone, i18n.language)}
                 </span>
               </TableCell>
               <TableCell>{booking.customerId}</TableCell>
