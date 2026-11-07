@@ -1,13 +1,4 @@
-import {
-  collection,
-  getCountFromServer,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  where,
-  type QueryConstraint,
-} from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import type { Booking } from "@/domain";
 import { firestore } from "@/services/firebase";
 import { SCHEDULE_CONSTANTS } from "../constants";
@@ -36,41 +27,42 @@ export const fetchBookingHistory = async (
     "bookings",
   );
 
-  const constraints: QueryConstraint[] = [
-    where("startsAt", "<", now),
+  const historyQuery = query(
+    bookingsCollection,
     orderBy("startsAt", "desc"),
-  ];
+    limit(SCHEDULE_CONSTANTS.MAX_HISTORY_FETCH_LIMIT),
+  );
+
+  const snapshot = await getDocs(historyQuery);
+  let results = snapshot.docs.map(mapBookingDocument);
+
+  // Filter in-memory to prevent missing Firestore composite index errors
+  results = results.filter((booking) => booking.startsAt < now);
 
   if (
     filters.status &&
     filters.status !== SCHEDULE_CONSTANTS.ALL_FILTER_VALUE
   ) {
-    constraints.unshift(where("status", "==", filters.status));
+    results = results.filter((booking) => booking.status === filters.status);
   }
 
   if (filters.serviceId) {
-    constraints.unshift(where("serviceId", "==", filters.serviceId));
+    results = results.filter(
+      (booking) => booking.serviceId === filters.serviceId,
+    );
   }
 
   if (filters.collaboratorId) {
-    constraints.unshift(where("collaboratorId", "==", filters.collaboratorId));
+    results = results.filter(
+      (booking) => booking.collaboratorId === filters.collaboratorId,
+    );
   }
 
-  const baseQuery = query(bookingsCollection, ...constraints);
-  const pageQuery = query(baseQuery, limit(pageSize));
-
-  const [snapshot, countSnapshot] = await Promise.all([
-    getDocs(pageQuery),
-    getCountFromServer(baseQuery),
-  ]);
-
-  let results = snapshot.docs.map(mapBookingDocument);
-
-  // In-memory date range filter if provided to accommodate timezone boundaries without complex compound index variations
   if (filters.startDate) {
     const startDate = new Date(filters.startDate);
     results = results.filter((booking) => booking.startsAt >= startDate);
   }
+
   if (filters.endDate) {
     const endDate = new Date(filters.endDate);
     endDate.setHours(
@@ -83,7 +75,7 @@ export const fetchBookingHistory = async (
   }
 
   return {
-    bookings: results,
-    totalCount: countSnapshot.data().count,
+    bookings: results.slice(0, pageSize),
+    totalCount: results.length,
   };
 };
