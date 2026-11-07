@@ -9,7 +9,11 @@ import {
 } from "@/components/common";
 import { ERROR_MESSAGE_KEY } from "@/constants/i18n/ErrorMessageKey.constants";
 import { I18N_NAMESPACE } from "@/shared/constants";
-import { AuditLogDetailModal, AuditLogTable } from "./components";
+import {
+  AuditLogDetailModal,
+  AuditLogFilterBar,
+  AuditLogTable,
+} from "./components";
 import { useAuditLogViewModel } from "./hooks";
 
 export const AuditLogPage = (): ReactElement => {
@@ -18,11 +22,17 @@ export const AuditLogPage = (): ReactElement => {
     activeEntry,
     closeModal,
     entries,
+    filters,
+    handleClearFilters,
+    handleFilterChange,
+    hasActiveFilters,
     hasNextPage,
     hasPreviousPage,
+    isDateRangeInvalid,
     isError,
     isLoading,
     isModalOpen,
+    isUnknownActionTypeInUrl,
     nextPage,
     openModal,
     pageNumber,
@@ -42,6 +52,15 @@ export const AuditLogPage = (): ReactElement => {
         </p>
       </div>
 
+      <AuditLogFilterBar
+        filters={filters}
+        hasActiveFilters={hasActiveFilters}
+        isDateRangeInvalid={isDateRangeInvalid}
+        isUnknownActionTypeInUrl={isUnknownActionTypeInUrl}
+        onClearFilters={handleClearFilters}
+        onFilterChange={handleFilterChange}
+      />
+
       {isLoading && <Spinner />}
 
       {isError && (
@@ -56,7 +75,22 @@ export const AuditLogPage = (): ReactElement => {
       )}
 
       {!isLoading && !isError && entries.length === 0 && (
-        <EmptyState message={t("auditLog.list.empty")} />
+        <div className="space-y-4">
+          <EmptyState
+            message={
+              hasActiveFilters
+                ? t("auditLog.list.emptyFiltered")
+                : t("auditLog.list.empty")
+            }
+          />
+          {hasActiveFilters && (
+            <div className="flex justify-center">
+              <Button onClick={handleClearFilters} variant="outline">
+                {t("auditLog.filters.clear")}
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       {!isLoading && !isError && entries.length > 0 && (

@@ -26,10 +26,21 @@
       "targetType": "Item type",
       "title": "Audit Event Details"
     },
+    "filters": {
+      "actionType": "Action type",
+      "allActionTypes": "All actions",
+      "clear": "Clear filters",
+      "from": "From",
+      "invalidActionType": "The action type specified in the link is invalid.",
+      "invalidDateRange": "The start date cannot be after the end date.",
+      "title": "Audit filters",
+      "to": "To"
+    },
     "list": {
       "description": "Immutable log of critical actions performed by super administrators.",
       "empty": "No audit events recorded.",
       "emptyDescription": "When critical actions are performed on businesses, plans, or settings, they will appear here.",
+      "emptyFiltered": "No audit events found for the applied filters.",
       "retryAction": "Retry",
       "title": "Audit Log",
       "unknownAction": "Unknown action ({{action}})"

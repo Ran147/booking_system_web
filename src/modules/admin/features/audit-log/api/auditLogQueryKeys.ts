@@ -10,5 +10,9 @@ export const auditLogQueryKeys = Object.freeze({
       "list",
       params.pageCursor?.id ?? null,
       params.pageSize ?? null,
+      params.filters?.actionType ?? null,
+      params.filters?.from ?? null,
+      params.filters?.to ?? null,
+      params.timeZone ?? null,
     ] as const,
 });

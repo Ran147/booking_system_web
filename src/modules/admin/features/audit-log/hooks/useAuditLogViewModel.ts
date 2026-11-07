@@ -1,14 +1,33 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 import type { AuditLogEntry } from "@/domain";
 import { useCursorPagination } from "@/hooks";
 import type { Nullable } from "@/types";
 import { useAuditLogEntriesQuery } from "../api";
 import { AUDIT_LOG_DEFAULT_PAGE_SIZE } from "../constants";
-import type { AuditLogViewModel } from "../models";
+import type { AuditLogFilters, AuditLogViewModel } from "../models";
+import {
+  buildAuditLogSearchParams,
+  EMPTY_AUDIT_LOG_FILTERS,
+  hasActiveAuditLogFilters,
+  isAuditLogDateRangeInvalid,
+  readAuditLogFilters,
+} from "../utils";
+
+const DEFAULT_TIME_ZONE = "UTC";
 
 export const useAuditLogViewModel = (): AuditLogViewModel => {
   const [activeEntry, setActiveEntry] = useState<Nullable<AuditLogEntry>>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchParameters, setSearchParameters] = useSearchParams();
+
+  const { filters, isUnknownActionTypeInUrl } =
+    readAuditLogFilters(searchParameters);
+  const isDateRangeInvalid = isAuditLogDateRangeInvalid(
+    filters.from,
+    filters.to,
+  );
+  const hasActiveFilters = hasActiveAuditLogFilters(filters);
 
   const {
     currentCursor,
@@ -16,12 +35,22 @@ export const useAuditLogViewModel = (): AuditLogViewModel => {
     goToPreviousPage,
     hasPreviousPage,
     pageNumber,
-  } = useCursorPagination([]);
+  } = useCursorPagination([filters.actionType, filters.from, filters.to]);
 
-  const queryResult = useAuditLogEntriesQuery({
-    pageCursor: currentCursor,
-    pageSize: AUDIT_LOG_DEFAULT_PAGE_SIZE,
-  });
+  const timeZone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIME_ZONE;
+
+  const queryResult = useAuditLogEntriesQuery(
+    {
+      filters,
+      pageCursor: currentCursor,
+      pageSize: AUDIT_LOG_DEFAULT_PAGE_SIZE,
+      timeZone,
+    },
+    {
+      enabled: !isDateRangeInvalid,
+    },
+  );
 
   const openModal = (entry: AuditLogEntry): void => {
     setActiveEntry(entry);
@@ -43,15 +72,33 @@ export const useAuditLogViewModel = (): AuditLogViewModel => {
     goToPreviousPage();
   };
 
+  const handleFilterChange = (newFilters: Partial<AuditLogFilters>): void => {
+    const updatedFilters: AuditLogFilters = {
+      ...filters,
+      ...newFilters,
+    };
+    setSearchParameters(buildAuditLogSearchParams(updatedFilters));
+  };
+
+  const handleClearFilters = (): void => {
+    setSearchParameters(buildAuditLogSearchParams(EMPTY_AUDIT_LOG_FILTERS));
+  };
+
   return {
     activeEntry,
     closeModal,
-    entries: queryResult.data?.items ?? [],
+    entries: isDateRangeInvalid ? [] : (queryResult.data?.items ?? []),
+    filters,
+    handleClearFilters,
+    handleFilterChange,
+    hasActiveFilters,
     hasNextPage: Boolean(queryResult.data?.nextCursor),
     hasPreviousPage,
+    isDateRangeInvalid,
     isError: queryResult.isError,
-    isLoading: queryResult.isLoading,
+    isLoading: isDateRangeInvalid ? false : queryResult.isLoading,
     isModalOpen,
+    isUnknownActionTypeInUrl,
     nextPage,
     openModal,
     pageNumber,
@@ -59,6 +106,6 @@ export const useAuditLogViewModel = (): AuditLogViewModel => {
     refetch: (): void => {
       void queryResult.refetch();
     },
-    totalCount: queryResult.data?.totalCount ?? 0,
+    totalCount: isDateRangeInvalid ? 0 : (queryResult.data?.totalCount ?? 0),
   };
 };
