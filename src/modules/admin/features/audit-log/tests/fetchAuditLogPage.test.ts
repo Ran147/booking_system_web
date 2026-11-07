@@ -18,6 +18,7 @@ vi.mock("firebase/firestore", async () => {
     orderBy: vi.fn(),
     query: vi.fn(),
     startAfter: vi.fn(),
+    where: vi.fn(),
   };
 });
 
@@ -83,5 +84,61 @@ describe("fetchAuditLogPage", () => {
     expect(result.items).toHaveLength(1);
     expect(result.totalCount).toBe(1);
     expect(result.nextCursor).toBeNull();
+  });
+
+  it("returns empty result without querying Firestore when date range is invalid (AC-KAN-195-04)", async () => {
+    const getDocsSpy = vi.mocked(firestoreModule.getDocs);
+    getDocsSpy.mockClear();
+
+    const result = await fetchAuditLogPage({
+      filters: {
+        actionType: null,
+        from: "2026-11-10",
+        to: "2026-11-01",
+      },
+    });
+
+    expect(result.items).toHaveLength(0);
+    expect(result.totalCount).toBe(0);
+    expect(result.nextCursor).toBeNull();
+    expect(getDocsSpy).not.toHaveBeenCalled();
+  });
+
+  it("applies actionType and date range where constraints (AC-KAN-195-01, AC-KAN-195-08, AC-KAN-195-09)", async () => {
+    const whereSpy = vi.mocked(firestoreModule.where);
+    whereSpy.mockClear();
+
+    vi.mocked(firestoreModule.getDocs).mockResolvedValueOnce({
+      docs: [createDocSnapshot("doc-1")],
+    } as never);
+
+    vi.mocked(firestoreModule.getCountFromServer).mockResolvedValueOnce({
+      [DOCUMENT_DATA_KEY]: () => ({ count: 1 }),
+    } as never);
+
+    await fetchAuditLogPage({
+      filters: {
+        actionType: AUDIT_LOG_ACTION_TYPE.PLAN_PRICE_CHANGED,
+        from: "2026-11-01",
+        to: "2026-11-07",
+      },
+      timeZone: "UTC",
+    });
+
+    expect(whereSpy).toHaveBeenCalledWith(
+      "actionType",
+      "==",
+      AUDIT_LOG_ACTION_TYPE.PLAN_PRICE_CHANGED,
+    );
+    expect(whereSpy).toHaveBeenCalledWith(
+      "createdAt",
+      ">=",
+      new Date("2026-11-01T00:00:00.000Z"),
+    );
+    expect(whereSpy).toHaveBeenCalledWith(
+      "createdAt",
+      "<=",
+      new Date("2026-11-07T23:59:59.999Z"),
+    );
   });
 });

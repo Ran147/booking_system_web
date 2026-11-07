@@ -272,6 +272,238 @@ describe("AuditLogPage (KAN-194)", () => {
   });
 });
 
+describe("AuditLogPage Filters (KAN-195)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("AC-KAN-195-01: sets a from / to date range, requesting entries within that range and restarting pagination", async () => {
+    const fetchSpy = vi
+      .spyOn(fetchAuditLogPageModule, "fetchAuditLogPage")
+      .mockResolvedValue(buildPage([]));
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: AUDIT_LOG_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    await page.enterFromDate("2026-11-01");
+    await page.enterToDate("2026-11-07");
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            actionType: null,
+            from: "2026-11-01",
+            to: "2026-11-07",
+          }),
+        }),
+      );
+    });
+  });
+
+  it("AC-KAN-195-02: reads applied date range from URL and shows it in the input controls", async () => {
+    const entry = buildAuditLogEntry({
+      createdAt: new Date("2026-11-03T10:00:00.000Z"),
+      id: "log-ranged-1",
+    });
+
+    const fetchSpy = vi
+      .spyOn(fetchAuditLogPageModule, "fetchAuditLogPage")
+      .mockResolvedValue(buildPage([entry]));
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: `${AUDIT_LOG_PATH}?from=2026-11-01&to=2026-11-05`,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    const rows = await page.findRows();
+
+    expect(rows).toHaveLength(1);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: expect.objectContaining({
+          from: "2026-11-01",
+          to: "2026-11-05",
+        }),
+      }),
+    );
+
+    const fromInput = screen.getByLabelText(
+      testI18n.t("admin:auditLog.filters.from"),
+    ) as HTMLInputElement;
+    const toInput = screen.getByLabelText(
+      testI18n.t("admin:auditLog.filters.to"),
+    ) as HTMLInputElement;
+
+    expect(fromInput.value).toBe("2026-11-01");
+    expect(toInput.value).toBe("2026-11-05");
+  });
+
+  it("AC-KAN-195-03: clearing applied filters resets URL and reloads all entries from page 1", async () => {
+    const fetchSpy = vi
+      .spyOn(fetchAuditLogPageModule, "fetchAuditLogPage")
+      .mockResolvedValue(buildPage([]));
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: `${AUDIT_LOG_PATH}?from=2026-11-01&to=2026-11-05`,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    await page.clickClearFilters();
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            actionType: null,
+            from: null,
+            to: null,
+          }),
+        }),
+      );
+    });
+  });
+
+  it("AC-KAN-195-04: shows invalidDateRange error when from is after to", async () => {
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: `${AUDIT_LOG_PATH}?from=2026-11-10&to=2026-11-01`,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    expect(await page.findInvalidDateRangeError()).toBeInTheDocument();
+  });
+
+  it("AC-KAN-195-06: shows emptyFiltered message and action to clear when filters match no entries", async () => {
+    vi.spyOn(fetchAuditLogPageModule, "fetchAuditLogPage").mockResolvedValue(
+      buildPage([], { totalCount: 0 }),
+    );
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: `${AUDIT_LOG_PATH}?from=2026-11-01&to=2026-11-05`,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    expect(await page.findFilteredEmptyMessage()).toBeInTheDocument();
+  });
+
+  it("AC-KAN-195-07 & AC-KAN-195-11: keeps applied filters when network error occurs and permits retry", async () => {
+    const fetchSpy = vi
+      .spyOn(fetchAuditLogPageModule, "fetchAuditLogPage")
+      .mockRejectedValueOnce(new Error("Network failed"))
+      .mockResolvedValueOnce(buildPage([]));
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: `${AUDIT_LOG_PATH}?from=2026-11-01&to=2026-11-05&actionType=${AUDIT_LOG_ACTION_TYPE.PLAN_CREATED}`,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    expect(await page.findErrorAlert()).toBeInTheDocument();
+
+    await page.clickRetry();
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(fetchSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            actionType: AUDIT_LOG_ACTION_TYPE.PLAN_CREATED,
+            from: "2026-11-01",
+            to: "2026-11-05",
+          }),
+        }),
+      );
+    });
+  });
+
+  it("AC-KAN-195-08: filters entries by actionType and preserves selection in URL", async () => {
+    const fetchSpy = vi
+      .spyOn(fetchAuditLogPageModule, "fetchAuditLogPage")
+      .mockResolvedValue(buildPage([]));
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: AUDIT_LOG_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    await page.selectActionType(
+      testI18n.t("admin:auditLog.actionType.business_suspended"),
+    );
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            actionType: AUDIT_LOG_ACTION_TYPE.BUSINESS_SUSPENDED,
+          }),
+        }),
+      );
+    });
+  });
+
+  it("AC-KAN-195-09: applies both date range and action type filters simultaneously", async () => {
+    const fetchSpy = vi
+      .spyOn(fetchAuditLogPageModule, "fetchAuditLogPage")
+      .mockResolvedValue(buildPage([]));
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: `${AUDIT_LOG_PATH}?from=2026-11-01&to=2026-11-05&actionType=${AUDIT_LOG_ACTION_TYPE.BUSINESS_APPROVED}`,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            actionType: AUDIT_LOG_ACTION_TYPE.BUSINESS_APPROVED,
+            from: "2026-11-01",
+            to: "2026-11-05",
+          }),
+        }),
+      );
+    });
+  });
+
+  it("AC-KAN-195-10: ignores unknown action type in URL, resets selection and shows warning", async () => {
+    const fetchSpy = vi
+      .spyOn(fetchAuditLogPageModule, "fetchAuditLogPage")
+      .mockResolvedValue(buildPage([]));
+
+    renderWithProviders(<AuditLogPage />, {
+      initialPath: `${AUDIT_LOG_PATH}?actionType=non_existent_action_type`,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createAuditLogPage();
+    expect(await page.findInvalidActionTypeWarning()).toBeInTheDocument();
+
+    const select = screen.getByLabelText(
+      testI18n.t("admin:auditLog.filters.actionType"),
+    ) as HTMLSelectElement;
+    expect(select.value).toBe("");
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: expect.objectContaining({
+          actionType: null,
+        }),
+      }),
+    );
+  });
+});
+
 describe("AuditLog Route Guard (AC-KAN-194-07)", () => {
   const routes: RouteObject[] = [
     ...adminRoutes,

@@ -1,20 +1,27 @@
-import { screen, within } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { testI18n } from "@/shared/test-utils/testI18n";
 import type { Nullable } from "@/types";
 
 export interface AuditLogPageObject {
+  readonly clickClearFilters: () => Promise<void>;
   readonly clickCloseModal: () => Promise<void>;
   readonly clickNextPage: () => Promise<void>;
   readonly clickPreviousPage: () => Promise<void>;
   readonly clickRetry: () => Promise<void>;
   readonly clickViewDetail: (rowIndex?: number) => Promise<void>;
+  readonly enterFromDate: (dateText: string) => Promise<void>;
+  readonly enterToDate: (dateText: string) => Promise<void>;
   readonly findDetailModal: () => Promise<HTMLElement>;
   readonly findEmptyMessage: () => Promise<HTMLElement>;
   readonly findErrorAlert: () => Promise<HTMLElement>;
+  readonly findFilteredEmptyMessage: () => Promise<HTMLElement>;
+  readonly findInvalidActionTypeWarning: () => Promise<HTMLElement>;
+  readonly findInvalidDateRangeError: () => Promise<HTMLElement>;
   readonly findPaginationSummary: () => Promise<HTMLElement>;
   readonly findRows: () => Promise<HTMLElement[]>;
   readonly queryDetailModal: () => Nullable<HTMLElement>;
+  readonly selectActionType: (label: string) => Promise<void>;
 }
 
 export const createAuditLogPage = (): AuditLogPageObject => {
@@ -30,6 +37,8 @@ export const createAuditLogPage = (): AuditLogPageObject => {
   };
 
   return {
+    clickClearFilters: (): Promise<void> =>
+      clickButton(testI18n.t("admin:auditLog.filters.clear")),
     clickCloseModal: (): Promise<void> =>
       clickButton(testI18n.t("admin:auditLog.detail.close")),
     clickNextPage: (): Promise<void> =>
@@ -49,6 +58,18 @@ export const createAuditLogPage = (): AuditLogPageObject => {
       });
       await user.click(button);
     },
+    enterFromDate: async (dateText: string): Promise<void> => {
+      const input = await screen.findByLabelText(
+        testI18n.t("admin:auditLog.filters.from"),
+      );
+      fireEvent.change(input, { target: { value: dateText } });
+    },
+    enterToDate: async (dateText: string): Promise<void> => {
+      const input = await screen.findByLabelText(
+        testI18n.t("admin:auditLog.filters.to"),
+      );
+      fireEvent.change(input, { target: { value: dateText } });
+    },
     findDetailModal: (): Promise<HTMLElement> =>
       screen.findByRole("dialog", {
         name: testI18n.t("admin:auditLog.detail.title"),
@@ -56,6 +77,12 @@ export const createAuditLogPage = (): AuditLogPageObject => {
     findEmptyMessage: (): Promise<HTMLElement> =>
       screen.findByText(testI18n.t("admin:auditLog.list.empty")),
     findErrorAlert: (): Promise<HTMLElement> => screen.findByRole("alert"),
+    findFilteredEmptyMessage: (): Promise<HTMLElement> =>
+      screen.findByText(testI18n.t("admin:auditLog.list.emptyFiltered")),
+    findInvalidActionTypeWarning: (): Promise<HTMLElement> =>
+      screen.findByText(testI18n.t("admin:auditLog.filters.invalidActionType")),
+    findInvalidDateRangeError: (): Promise<HTMLElement> =>
+      screen.findByText(testI18n.t("admin:auditLog.filters.invalidDateRange")),
     findPaginationSummary: (): Promise<HTMLElement> =>
       screen.findByText(/Página \d+/i),
     findRows,
@@ -63,5 +90,11 @@ export const createAuditLogPage = (): AuditLogPageObject => {
       screen.queryByRole("dialog", {
         name: testI18n.t("admin:auditLog.detail.title"),
       }),
+    selectActionType: async (label: string): Promise<void> => {
+      const select = await screen.findByLabelText(
+        testI18n.t("admin:auditLog.filters.actionType"),
+      );
+      await user.selectOptions(select, label);
+    },
   };
 };
