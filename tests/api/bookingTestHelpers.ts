@@ -9,11 +9,14 @@ export interface FunctionResult {
 export const callServerFunction = async (
   functionName: string,
   payload: Record<string, unknown>,
+  idToken?: string,
 ): Promise<FunctionResult> => {
   let statusCode = 0;
   let responseContent = "";
+  const token = idToken === undefined ? "test-subscriber-token" : idToken;
   const request = {
     body: { functionName, payload },
+    headers: token ? { authorization: `Bearer ${token}` } : {},
     method: "POST",
   } as unknown as IncomingMessage;
 

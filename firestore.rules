@@ -165,9 +165,12 @@ service cloud.firestore {
           || (isCollaboratorOf(businessId)
               && resource.data.collaboratorId == request.auth.token.collaboratorId)
           || collaboratorCan(businessId, 'manage_bookings');
-        allow create, update: if (ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_bookings'))
-          && businessIsWritable(businessId);
-        allow delete: if false; // via cancellation or booking functions
+        allow write: if false; // only via booking functions
+
+        match /internalNotes/{noteId} {
+          allow read: if ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_bookings');
+          allow write: if false; // only via server functions
+        }
       }
 
       match /customers/{customerId} {

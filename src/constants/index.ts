@@ -2,6 +2,7 @@ export { ARIA_ROLE } from "./accessibility/AriaRole.constants";
 export { BUSINESS_PROFILE } from "./business/BusinessProfile.constants";
 export { CURRENCY_CODE, type CurrencyCode } from "./common/Currency.constants";
 export { ENV_FLAG } from "./common/EnvFlag.constants";
+export { HTTP_AUTHORIZATION } from "./common/HttpAuthorization.constants";
 export { HTTP_METHOD, type HttpMethod } from "./common/HttpMethod.constants";
 export { HTTP_STATUS, type HttpStatus } from "./common/HttpStatus.constants";
 export { STRING } from "./common/String.constants";

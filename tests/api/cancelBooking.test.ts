@@ -106,6 +106,12 @@ describe("Vercel Serverless Function: cancelBooking (KAN-72)", () => {
     expect((saved?.cancellation as { isPenalized: boolean })?.isPenalized).toBe(
       true,
     );
+    expect((saved?.cancellation as { note?: string })?.note).toBeUndefined();
+
+    const internalNote = adminFake.documents.get(
+      `businesses/${businessId}/bookings/${bookingId}/internalNotes/cancellation`,
+    );
+    expect(internalNote?.note).toBe("Cliente solicitó cancelar por viaje");
   });
 
   it("rejects cancellation without note", async (): Promise<void> => {
@@ -143,5 +149,20 @@ describe("Vercel Serverless Function: cancelBooking (KAN-72)", () => {
     });
 
     expect(result.statusCode).toBe(412);
+  });
+
+  it("rejects unauthenticated caller with 401", async (): Promise<void> => {
+    const result = await callServerFunction(
+      "cancelBooking",
+      {
+        bookingId,
+        businessId,
+        isPenalized: false,
+        note: "Sin token",
+      },
+      "",
+    );
+
+    expect(result.statusCode).toBe(401);
   });
 });

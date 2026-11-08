@@ -111,11 +111,8 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
   );
 
   const timeZone =
-    businessHoursQuery.data?.timeZone &&
-    businessHoursQuery.data.timeZone !== SCHEDULE_CONSTANTS.UTC_TIME_ZONE &&
-    !businessHoursQuery.data.timeZone.includes("Mexico")
-      ? businessHoursQuery.data.timeZone
-      : SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE;
+    businessHoursQuery.data?.timeZone ||
+    SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE;
 
   const bookingHistoryQuery = useBookingHistoryQuery(
     businessId,

@@ -232,11 +232,7 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
     setConfirmationMode: setEditedConfirmationMode,
     successMessage,
     timeZone:
-      hoursQuery.data?.timeZone &&
-      hoursQuery.data.timeZone !== SCHEDULE_CONSTANTS.UTC_TIME_ZONE &&
-      !hoursQuery.data.timeZone.includes("Mexico")
-        ? hoursQuery.data.timeZone
-        : SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+      hoursQuery.data?.timeZone || SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
     toggleDayOpen,
     updateRange,
   };

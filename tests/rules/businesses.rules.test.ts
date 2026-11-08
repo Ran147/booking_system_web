@@ -33,9 +33,11 @@ describe("firestore.rules: tenant isolation", () => {
     await testEnvironment.clearFirestore();
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       const adminFirestore = context.firestore();
-      await adminFirestore
-        .doc("businesses/business-a")
-        .set({ ownerUserId: "subscriber-a", status: "active" });
+      await adminFirestore.doc("businesses/business-a").set({
+        name: "Business A",
+        ownerUserId: "subscriber-a",
+        status: "active",
+      });
       await adminFirestore
         .doc(BUSINESS_A_BOOKING_PATH)
         .set({ customerUserId: "customer-1", status: "confirmed" });

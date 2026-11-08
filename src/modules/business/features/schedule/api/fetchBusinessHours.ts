@@ -31,12 +31,7 @@ export const fetchBusinessHours = async (
   const businessDocData = businessSnapshot.data();
   const businessHours = mapBusinessHours(businessDocData.businessHours);
   const rawTimeZone = (businessDocData.timeZone as string) || "";
-  const timeZone =
-    !rawTimeZone ||
-    rawTimeZone === SCHEDULE_CONSTANTS.UTC_TIME_ZONE ||
-    rawTimeZone.includes("Mexico")
-      ? SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE
-      : rawTimeZone;
+  const timeZone = rawTimeZone || SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE;
   const confirmationMode =
     businessDocData.bookingConfirmationMode === BOOKING_CONFIRMATION_MODE.MANUAL
       ? BOOKING_CONFIRMATION_MODE.MANUAL

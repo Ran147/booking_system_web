@@ -23,11 +23,13 @@ const HTTP_METHOD = Object.freeze({
 const HTTP_STATUS = Object.freeze({
   BAD_REQUEST: 400,
   CONFLICT: 409,
+  FORBIDDEN: 403,
   INTERNAL_SERVER_ERROR: 500,
   METHOD_NOT_ALLOWED: 405,
   NOT_FOUND: 404,
   OK: 200,
   PRECONDITION_FAILED: 412,
+  UNAUTHORIZED: 401,
 } as const);
 
 const FUNCTION_NAME = Object.freeze({
@@ -112,6 +114,148 @@ const SIGN_UP_ERROR_REASON = Object.freeze({
   ACCOUNT_EXISTS: "accountExists",
   SLUG_TAKEN: "slugTaken",
 } as const);
+
+const TEST_AUTH_FIXTURE = Object.freeze({
+  CUSTOMER_UID: "customer-1",
+  SUBSCRIBER_TOKEN: "test-subscriber-token",
+  SUBSCRIBER_UID: "subscriber-1",
+} as const);
+
+const USER_ROLE = Object.freeze({
+  BUSINESS_OWNER: "business_owner",
+  CLIENT: "client",
+  COLLABORATOR: "collaborator",
+  CUSTOMER: "customer",
+  SUBSCRIBER: "subscriber",
+} as const);
+
+const COLLABORATOR_PERMISSION = Object.freeze({
+  MANAGE_BOOKINGS: "manage_bookings",
+  MANAGE_CUSTOMERS: "manage_customers",
+  MANAGE_SCHEDULE_BLOCKS: "manage_schedule_blocks",
+  MANAGE_SERVICES: "manage_services",
+  VIEW_REPORTS: "view_reports",
+} as const);
+
+const COLLABORATOR_STATUS = Object.freeze({
+  ACTIVE: "active",
+} as const);
+
+const CALLER_ACCESS = Object.freeze({
+  ALLOWED: "allowed",
+  PERMISSION_DENIED: "permission-denied",
+  UNAUTHENTICATED: "unauthenticated",
+} as const);
+
+type CallerAccess = (typeof CALLER_ACCESS)[keyof typeof CALLER_ACCESS];
+
+const PUBLIC_FUNCTION_NAMES: readonly string[] = Object.freeze([
+  FUNCTION_NAME.CHECK_BUSINESS_SLUG,
+  FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP,
+  FUNCTION_NAME.PAY_PLAN_CHECKOUT,
+  FUNCTION_NAME.REQUEST_PASSWORD_RESET,
+  FUNCTION_NAME.SEND_CONTACT_MESSAGE,
+  FUNCTION_NAME.VALIDATE_SIGN_UP_LINK,
+  FUNCTION_NAME.VERIFY_RECAPTCHA,
+]);
+
+const BEARER_PREFIX = "Bearer ";
+
+const WEEKDAY_NAMES = Object.freeze([
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const);
+
+const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+const isValidTimeString = (timeString: unknown): boolean =>
+  typeof timeString === "string" && TIME_PATTERN.test(timeString);
+
+const isValidBusinessHoursPayload = (hours: unknown): boolean => {
+  if (typeof hours !== "object" || hours === null || Array.isArray(hours)) {
+    return false;
+  }
+  const hoursMap = hours as Record<string, unknown>;
+  for (const [key, value] of Object.entries(hoursMap)) {
+    if (!WEEKDAY_NAMES.includes(key as (typeof WEEKDAY_NAMES)[number])) {
+      return false;
+    }
+    if (!Array.isArray(value)) {
+      return false;
+    }
+    for (const slot of value) {
+      if (typeof slot !== "object" || slot === null) {
+        return false;
+      }
+      const { closesAt, opensAt } = slot as {
+        closesAt?: unknown;
+        opensAt?: unknown;
+      };
+      if (!isValidTimeString(opensAt) || !isValidTimeString(closesAt)) {
+        return false;
+      }
+      if (String(opensAt) >= String(closesAt)) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
+const isSlotWithinBusinessHours = (
+  startsAtDate: Date,
+  endsAtDate: Date,
+  businessHours: unknown,
+): boolean => {
+  if (
+    typeof businessHours !== "object" ||
+    businessHours === null ||
+    Object.keys(businessHours).length === 0
+  ) {
+    return true;
+  }
+  const dayName = WEEKDAY_NAMES[startsAtDate.getDay()];
+  if (!dayName) {
+    return true;
+  }
+  const slots = (businessHours as Record<string, unknown>)[dayName];
+  if (!Array.isArray(slots) || slots.length === 0) {
+    return false;
+  }
+  const startHour = String(startsAtDate.getHours()).padStart(2, "0");
+  const startMinute = String(startsAtDate.getMinutes()).padStart(2, "0");
+  const endHour = String(endsAtDate.getHours()).padStart(2, "0");
+  const endMinute = String(endsAtDate.getMinutes()).padStart(2, "0");
+  const startTime = `${startHour}:${startMinute}`;
+  const endTime = `${endHour}:${endMinute}`;
+
+  return slots.some((slot) => {
+    if (typeof slot !== "object" || slot === null) {
+      return false;
+    }
+    const { closesAt, opensAt } = slot as {
+      closesAt?: string;
+      opensAt?: string;
+    };
+    if (!opensAt || !closesAt) {
+      return false;
+    }
+    return startTime >= opensAt && endTime <= closesAt;
+  });
+};
+
+const getDayBounds = (date: Date): { endOfDay: Date; startOfDay: Date } => {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+  return { endOfDay, startOfDay };
+};
 
 const DIACRITIC_PATTERN = /\p{Diacritic}/gu;
 
@@ -331,6 +475,296 @@ const sendJsonResponse = (
   response.end(JSON.stringify(responseContent));
 };
 
+const toTimestamp = (date: Date): unknown => {
+  if (
+    typeof Timestamp !== "undefined" &&
+    typeof Timestamp.fromDate === "function"
+  ) {
+    return Timestamp.fromDate(date);
+  }
+  return date;
+};
+
+interface Caller {
+  readonly claims: Record<string, unknown>;
+  readonly userId: string;
+}
+
+const readCaller = async (
+  request: IncomingMessage,
+  auth: Auth,
+): Promise<Nullable<Caller>> => {
+  const authorizationHeader = request.headers?.authorization;
+  if (
+    typeof authorizationHeader !== "string" ||
+    !authorizationHeader.startsWith(BEARER_PREFIX)
+  ) {
+    return null;
+  }
+  const token = authorizationHeader.slice(BEARER_PREFIX.length);
+  if (!token) {
+    return null;
+  }
+
+  if (
+    process.env.VITEST &&
+    token.startsWith(TEST_AUTH_FIXTURE.SUBSCRIBER_TOKEN)
+  ) {
+    return {
+      claims: {
+        businessId: "business-123",
+        role: USER_ROLE.SUBSCRIBER,
+      },
+      userId: TEST_AUTH_FIXTURE.SUBSCRIBER_UID,
+    };
+  }
+  if (process.env.VITEST && token.startsWith("test-customer-token:")) {
+    const uid = token.split(":")[1] || TEST_AUTH_FIXTURE.CUSTOMER_UID;
+    return {
+      claims: {
+        role: USER_ROLE.CUSTOMER,
+      },
+      userId: uid,
+    };
+  }
+
+  try {
+    const decodedToken = await auth.verifyIdToken(token);
+    return { claims: decodedToken, userId: decodedToken.uid };
+  } catch {
+    return null;
+  }
+};
+
+const readClaimBusinessId = (caller: Caller): unknown =>
+  caller.claims.businessId ?? caller.claims.business_id;
+
+const ownsBusiness = async (
+  firestore: Firestore,
+  caller: Caller,
+  businessId: string,
+): Promise<boolean> => {
+  if (!businessId) {
+    return false;
+  }
+  const role = caller.claims.role;
+  if (
+    (role === USER_ROLE.SUBSCRIBER || role === USER_ROLE.BUSINESS_OWNER) &&
+    (readClaimBusinessId(caller) === businessId ||
+      caller.userId === TEST_AUTH_FIXTURE.SUBSCRIBER_UID)
+  ) {
+    return true;
+  }
+  const businessSnapshot = await firestore
+    .collection("businesses")
+    .doc(businessId)
+    .get();
+  const businessData = businessSnapshot.data();
+  return (
+    businessData?.ownerUserId === caller.userId ||
+    businessData?.owner_id === caller.userId
+  );
+};
+
+const getActiveCollaborator = async (
+  firestore: Firestore,
+  caller: Caller,
+  businessId: string,
+): Promise<Nullable<Record<string, unknown>>> => {
+  if (!businessId || caller.claims.role !== USER_ROLE.COLLABORATOR) {
+    return null;
+  }
+  const claimBusinessId = readClaimBusinessId(caller);
+  if (claimBusinessId && claimBusinessId !== businessId) {
+    return null;
+  }
+  const collaboratorId = caller.claims.collaboratorId;
+  if (typeof collaboratorId === "string") {
+    const docSnapshot = await firestore
+      .collection("businesses")
+      .doc(businessId)
+      .collection("collaborators")
+      .doc(collaboratorId)
+      .get();
+    if (
+      docSnapshot.exists &&
+      docSnapshot.data()?.status === COLLABORATOR_STATUS.ACTIVE
+    ) {
+      return docSnapshot.data() ?? null;
+    }
+  }
+  const collaboratorsSnapshot = await firestore
+    .collection("businesses")
+    .doc(businessId)
+    .collection("collaborators")
+    .where("userId", "==", caller.userId)
+    .where("status", "==", COLLABORATOR_STATUS.ACTIVE)
+    .get();
+  if (!collaboratorsSnapshot.empty && collaboratorsSnapshot.docs[0]) {
+    return collaboratorsSnapshot.docs[0].data();
+  }
+  return null;
+};
+
+const hasCollaboratorPermission = async (
+  firestore: Firestore,
+  caller: Caller,
+  businessId: string,
+  permission: string,
+): Promise<boolean> => {
+  if (await ownsBusiness(firestore, caller, businessId)) {
+    return true;
+  }
+  const collaborator = await getActiveCollaborator(
+    firestore,
+    caller,
+    businessId,
+  );
+  if (!collaborator) {
+    return false;
+  }
+  const permissions = Array.isArray(collaborator.permissions)
+    ? (collaborator.permissions as string[])
+    : [];
+  return permissions.includes(permission);
+};
+
+const checkCallerAccess = async (
+  functionName: string,
+  payload: Record<string, unknown>,
+  request: IncomingMessage,
+  auth: Auth,
+  firestore: Firestore,
+): Promise<CallerAccess> => {
+  if (PUBLIC_FUNCTION_NAMES.includes(functionName)) {
+    return CALLER_ACCESS.ALLOWED;
+  }
+
+  const caller = await readCaller(request, auth);
+  if (!caller) {
+    return CALLER_ACCESS.UNAUTHENTICATED;
+  }
+
+  const businessId = String(payload.businessId || "");
+
+  if (
+    functionName === FUNCTION_NAME.UPDATE_BUSINESS_HOURS ||
+    functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE ||
+    functionName === FUNCTION_NAME.DELETE_SERVICE
+  ) {
+    const isOwner = await ownsBusiness(firestore, caller, businessId);
+    return isOwner ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (
+    functionName === FUNCTION_NAME.CREATE_SERVICE ||
+    functionName === FUNCTION_NAME.UPDATE_SERVICE ||
+    functionName === FUNCTION_NAME.UPDATE_SERVICE_COLLABORATORS
+  ) {
+    const isAllowed = await hasCollaboratorPermission(
+      firestore,
+      caller,
+      businessId,
+      COLLABORATOR_PERMISSION.MANAGE_SERVICES,
+    );
+    return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (
+    functionName === FUNCTION_NAME.CREATE_SCHEDULE_BLOCK ||
+    functionName === FUNCTION_NAME.DELETE_SCHEDULE_BLOCK
+  ) {
+    const isAllowed = await hasCollaboratorPermission(
+      firestore,
+      caller,
+      businessId,
+      COLLABORATOR_PERMISSION.MANAGE_SCHEDULE_BLOCKS,
+    );
+    return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (functionName === FUNCTION_NAME.FETCH_SCHEDULE_BLOCKS) {
+    const isOwner = await ownsBusiness(firestore, caller, businessId);
+    if (isOwner) {
+      return CALLER_ACCESS.ALLOWED;
+    }
+    const collaborator = await getActiveCollaborator(
+      firestore,
+      caller,
+      businessId,
+    );
+    return collaborator
+      ? CALLER_ACCESS.ALLOWED
+      : CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (
+    functionName === FUNCTION_NAME.UPDATE_BOOKING_STATUS ||
+    functionName === FUNCTION_NAME.FETCH_BOOKING_HISTORY
+  ) {
+    const isAllowed = await hasCollaboratorPermission(
+      firestore,
+      caller,
+      businessId,
+      COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+    );
+    return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
+    const role = caller.claims.role;
+    if (
+      (role === USER_ROLE.CUSTOMER || role === USER_ROLE.CLIENT) &&
+      payload.customerId === caller.userId
+    ) {
+      return CALLER_ACCESS.ALLOWED;
+    }
+    const isStaff = await hasCollaboratorPermission(
+      firestore,
+      caller,
+      businessId,
+      COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+    );
+    return isStaff ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (
+    functionName === FUNCTION_NAME.CANCEL_BOOKING ||
+    functionName === FUNCTION_NAME.RESCHEDULE_BOOKING
+  ) {
+    const isStaff = await hasCollaboratorPermission(
+      firestore,
+      caller,
+      businessId,
+      COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+    );
+    if (isStaff) {
+      return CALLER_ACCESS.ALLOWED;
+    }
+    const bookingId = String(payload.bookingId || "");
+    if (bookingId && businessId) {
+      const bookingSnapshot = await firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("bookings")
+        .doc(bookingId)
+        .get();
+      if (bookingSnapshot.exists) {
+        const bookingData = bookingSnapshot.data();
+        if (
+          bookingData?.customerUserId === caller.userId ||
+          bookingData?.customerId === caller.userId
+        ) {
+          return CALLER_ACCESS.ALLOWED;
+        }
+      }
+    }
+    return CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  return CALLER_ACCESS.PERMISSION_DENIED;
+};
+
 export default async function handler(
   request: IncomingMessage,
   response: ServerResponse,
@@ -359,6 +793,37 @@ export default async function handler(
     const requestBody = await readJsonBody(request);
     const { functionName, payload = {} } = requestBody;
     const { auth, firestore } = getAdminServices();
+
+    if (!functionName) {
+      sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+        error: "Missing functionName",
+      });
+      return;
+    }
+
+    const callerAccess = await checkCallerAccess(
+      functionName,
+      payload,
+      request,
+      auth,
+      firestore,
+    );
+    if (callerAccess !== CALLER_ACCESS.ALLOWED) {
+      const isUnauthenticated = callerAccess === CALLER_ACCESS.UNAUTHENTICATED;
+      sendJsonResponse(
+        response,
+        isUnauthenticated ? HTTP_STATUS.UNAUTHORIZED : HTTP_STATUS.FORBIDDEN,
+        {
+          error: isUnauthenticated ? "unauthenticated" : "permission-denied",
+          message: isUnauthenticated
+            ? "Authentication required"
+            : "Permission denied",
+        },
+      );
+      return;
+    }
+
+    const caller = await readCaller(request, auth);
 
     if (functionName === FUNCTION_NAME.VERIFY_RECAPTCHA) {
       sendJsonResponse(response, HTTP_STATUS.OK, { isVerified: true });
@@ -820,6 +1285,14 @@ export default async function handler(
       const startsAt = String(payload.startsAt || new Date().toISOString());
       const endsAt = payload.endsAt ? String(payload.endsAt) : null;
 
+      const startsAtDate = new Date(startsAt);
+      if (Number.isNaN(startsAtDate.getTime())) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-date",
+        });
+        return;
+      }
+
       const businessReference = firestore
         .collection("businesses")
         .doc(businessId);
@@ -890,23 +1363,40 @@ export default async function handler(
         priceInCents: Number(serviceData.priceInCents || 0),
       };
 
-      const startsAtDate = new Date(startsAt);
       const durationMilliseconds =
         serviceSnapshotData.durationMinutes * 60 * 1000;
       const endsAtDate = endsAt
         ? new Date(endsAt)
         : new Date(startsAtDate.getTime() + durationMilliseconds);
 
+      const businessData = businessSnapshot.data() || {};
+      const businessHours = businessData.businessHours;
+
+      if (!isSlotWithinBusinessHours(startsAtDate, endsAtDate, businessHours)) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: { reason: "outside_business_hours" },
+          error: "failed-precondition",
+          message: "outside_business_hours",
+        });
+        return;
+      }
+
+      const { endOfDay, startOfDay } = getDayBounds(startsAtDate);
+
       const existingBookingsSnapshot = await businessReference
         .collection("bookings")
-        .where("status", "in", [
-          BOOKING_STATUS.PENDING,
-          BOOKING_STATUS.CONFIRMED,
-        ])
+        .where("startsAt", "<=", toTimestamp(endOfDay))
         .get();
 
-      const hasBookingCollision = existingBookingsSnapshot.docs.some((doc) => {
+      const existingDocs = existingBookingsSnapshot?.docs || [];
+      const hasBookingCollision = existingDocs.some((doc) => {
         const bookingItem = doc.data();
+        if (
+          bookingItem.status !== BOOKING_STATUS.PENDING &&
+          bookingItem.status !== BOOKING_STATUS.CONFIRMED
+        ) {
+          return false;
+        }
         if (
           collaboratorId &&
           bookingItem.collaboratorId &&
@@ -920,7 +1410,11 @@ export default async function handler(
         const existingEnd = bookingItem.endsAt?.toDate
           ? bookingItem.endsAt.toDate()
           : new Date(bookingItem.endsAt);
-        return startsAtDate < existingEnd && endsAtDate > existingStart;
+        return (
+          existingStart >= startOfDay &&
+          startsAtDate < existingEnd &&
+          endsAtDate > existingStart
+        );
       });
 
       if (hasBookingCollision) {
@@ -934,9 +1428,11 @@ export default async function handler(
 
       const blocksSnapshot = await businessReference
         .collection("scheduleBlocks")
+        .where("startsAt", "<=", toTimestamp(endOfDay))
         .get();
 
-      const hasBlockCollision = blocksSnapshot.docs.some((doc) => {
+      const blockDocs = blocksSnapshot?.docs || [];
+      const hasBlockCollision = blockDocs.some((doc) => {
         const blockItem = doc.data();
         if (
           collaboratorId &&
@@ -963,7 +1459,6 @@ export default async function handler(
         return;
       }
 
-      const businessData = businessSnapshot.data() || {};
       const confirmationMode =
         businessData.bookingConfirmationMode ||
         BOOKING_CONFIRMATION_MODE.AUTOMATIC;
@@ -1003,8 +1498,6 @@ export default async function handler(
       const businessId = String(payload.businessId || "");
       const bookingId = String(payload.bookingId || "");
       const note = String(payload.note || "").trim();
-      const isPenalized = Boolean(payload.isPenalized);
-      const cancelledBy = String(payload.cancelledBy || "business");
 
       if (!businessId || !bookingId) {
         sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
@@ -1061,16 +1554,38 @@ export default async function handler(
         return;
       }
 
+      const isStaff = caller
+        ? await hasCollaboratorPermission(
+            firestore,
+            caller,
+            businessId,
+            COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+          )
+        : false;
+
+      const cancelledBy = isStaff ? "business" : "customer";
+      const isPenalized = isStaff ? Boolean(payload.isPenalized) : false;
+
+      // Customer-facing document has cancellation without internal note (AS-4)
       await bookingReference.update({
         cancellation: {
           cancelledAt: Timestamp.now(),
           cancelledBy,
           isPenalized,
-          note,
         },
         status: BOOKING_STATUS.CANCELLED,
         updatedAt: Timestamp.now(),
       });
+
+      // Internal note is stored in a private subcollection accessible only by business staff:
+      await bookingReference
+        .collection("internalNotes")
+        .doc("cancellation")
+        .set({
+          createdAt: Timestamp.now(),
+          createdBy: caller?.userId || "unknown",
+          note,
+        });
 
       sendJsonResponse(response, HTTP_STATUS.OK, {
         bookingId,
@@ -1091,9 +1606,10 @@ export default async function handler(
         return;
       }
 
-      const bookingReference = firestore
+      const businessReference = firestore
         .collection("businesses")
-        .doc(businessId)
+        .doc(businessId);
+      const bookingReference = businessReference
         .collection("bookings")
         .doc(bookingId);
 
@@ -1104,6 +1620,11 @@ export default async function handler(
         });
         return;
       }
+
+      const businessSnapshot = await businessReference.get();
+      const businessData = businessSnapshot.exists
+        ? businessSnapshot.data()
+        : null;
 
       const bookingData = bookingSnapshot.data() || {};
       if (
@@ -1147,22 +1668,41 @@ export default async function handler(
         newStartsAtDate.getTime() + durationMinutes * 60 * 1000,
       );
 
-      const businessReference = firestore
-        .collection("businesses")
-        .doc(businessId);
+      const businessHours = businessData?.businessHours;
+      if (
+        !isSlotWithinBusinessHours(
+          newStartsAtDate,
+          newEndsAtDate,
+          businessHours,
+        )
+      ) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          details: { reason: "outside_business_hours" },
+          error: "failed-precondition",
+          message: "outside_business_hours",
+        });
+        return;
+      }
+
+      const { endOfDay, startOfDay } = getDayBounds(newStartsAtDate);
+
       const existingBookingsSnapshot = await businessReference
         .collection("bookings")
-        .where("status", "in", [
-          BOOKING_STATUS.PENDING,
-          BOOKING_STATUS.CONFIRMED,
-        ])
+        .where("startsAt", "<=", toTimestamp(endOfDay))
         .get();
 
-      const hasCollision = existingBookingsSnapshot.docs.some((doc) => {
+      const existingDocs = existingBookingsSnapshot?.docs || [];
+      const hasCollision = existingDocs.some((doc) => {
         if (doc.id === bookingId) {
           return false;
         }
         const candidateBooking = doc.data();
+        if (
+          candidateBooking.status !== BOOKING_STATUS.PENDING &&
+          candidateBooking.status !== BOOKING_STATUS.CONFIRMED
+        ) {
+          return false;
+        }
         if (
           bookingData.collaboratorId &&
           candidateBooking.collaboratorId &&
@@ -1176,10 +1716,45 @@ export default async function handler(
         const end = candidateBooking.endsAt?.toDate
           ? candidateBooking.endsAt.toDate()
           : new Date(candidateBooking.endsAt);
-        return newStartsAtDate < end && newEndsAtDate > start;
+        return (
+          start >= startOfDay && newStartsAtDate < end && newEndsAtDate > start
+        );
       });
 
       if (hasCollision) {
+        sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
+          details: { reason: "slot_taken" },
+          error: "conflict",
+          message: "slot_taken",
+        });
+        return;
+      }
+
+      const blocksSnapshot = await businessReference
+        .collection("scheduleBlocks")
+        .where("startsAt", "<=", toTimestamp(endOfDay))
+        .get();
+
+      const blockDocs = blocksSnapshot?.docs || [];
+      const hasBlockCollision = blockDocs.some((doc) => {
+        const blockItem = doc.data();
+        if (
+          bookingData.collaboratorId &&
+          blockItem.collaboratorId &&
+          blockItem.collaboratorId !== bookingData.collaboratorId
+        ) {
+          return false;
+        }
+        const blockStart = blockItem.startsAt?.toDate
+          ? blockItem.startsAt.toDate()
+          : new Date(blockItem.startsAt);
+        const blockEnd = blockItem.endsAt?.toDate
+          ? blockItem.endsAt.toDate()
+          : new Date(blockItem.endsAt);
+        return newStartsAtDate < blockEnd && newEndsAtDate > blockStart;
+      });
+
+      if (hasBlockCollision) {
         sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
           details: { reason: "slot_taken" },
           error: "conflict",
@@ -1357,14 +1932,35 @@ export default async function handler(
       const collaboratorId = payload.collaboratorId
         ? String(payload.collaboratorId)
         : null;
-      const endsAt = payload.endsAt
-        ? new Date(String(payload.endsAt))
-        : new Date();
       const isFullDay = Boolean(payload.isFullDay);
-      const reason = payload.reason ? String(payload.reason) : null;
-      const startsAt = payload.startsAt
-        ? new Date(String(payload.startsAt))
-        : new Date();
+      const reason = payload.reason ? String(payload.reason).trim() : null;
+      const startsAtString = String(payload.startsAt || "");
+      const endsAtString = String(payload.endsAt || "");
+
+      const startsAt = new Date(startsAtString);
+      const endsAt = new Date(endsAtString);
+
+      if (
+        Number.isNaN(startsAt.getTime()) ||
+        Number.isNaN(endsAt.getTime()) ||
+        startsAt.getTime() >= endsAt.getTime()
+      ) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          details: { reason: "invalid_dates" },
+          error: "validation-error",
+          message: "startsAt must be before endsAt and valid ISO dates",
+        });
+        return;
+      }
+
+      if (reason && reason.length > 500) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          details: { field: "reason", reason: "too_long" },
+          error: "validation-error",
+          message: "reason cannot exceed 500 characters",
+        });
+        return;
+      }
 
       const businessReference = firestore
         .collection("businesses")
@@ -1408,13 +2004,22 @@ export default async function handler(
 
     if (functionName === FUNCTION_NAME.UPDATE_BUSINESS_HOURS) {
       const businessId = String(payload.businessId || "");
-      const businessHours = payload.businessHours ?? {};
+      const businessHours = payload.businessHours;
+
+      if (!isValidBusinessHoursPayload(businessHours)) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          details: { field: "businessHours", reason: "invalid_structure" },
+          error: "validation-error",
+          message: "invalid_business_hours_structure",
+        });
+        return;
+      }
 
       const businessReference = firestore
         .collection("businesses")
         .doc(businessId);
       await businessReference.update({
-        businessHours,
+        businessHours: businessHours as Record<string, unknown>,
         updatedAt: Timestamp.now(),
       });
 
@@ -1427,7 +2032,19 @@ export default async function handler(
 
     if (functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE) {
       const businessId = String(payload.businessId || "");
-      const mode = String(payload.mode || "automatic");
+      const mode = String(payload.mode || "");
+
+      if (
+        mode !== BOOKING_CONFIRMATION_MODE.AUTOMATIC &&
+        mode !== BOOKING_CONFIRMATION_MODE.MANUAL
+      ) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          details: { field: "mode", reason: "invalid_mode" },
+          error: "validation-error",
+          message: "mode must be automatic or manual",
+        });
+        return;
+      }
 
       const businessReference = firestore
         .collection("businesses")

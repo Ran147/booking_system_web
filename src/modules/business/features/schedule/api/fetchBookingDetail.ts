@@ -24,5 +24,32 @@ export const fetchBookingDetail = async (
     throw new Error("business:schedule.bookings.notFound");
   }
 
-  return mapBookingDocument(bookingSnapshot);
+  const booking = mapBookingDocument(bookingSnapshot);
+
+  if (booking.cancellation) {
+    try {
+      const internalNoteSnapshot = await getDoc(
+        doc(
+          firestore,
+          "businesses",
+          businessId,
+          "bookings",
+          bookingId,
+          "internalNotes",
+          "cancellation",
+        ),
+      );
+      if (internalNoteSnapshot.exists()) {
+        const noteData = internalNoteSnapshot.data();
+        booking.cancellation = {
+          ...booking.cancellation,
+          note: (noteData?.note as string) || booking.cancellation.note,
+        };
+      }
+    } catch {
+      // Internal note not present or unreadable
+    }
+  }
+
+  return booking;
 };
