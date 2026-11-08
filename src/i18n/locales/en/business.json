@@ -293,6 +293,8 @@
     "blocks": {
       "allBusiness": "Whole business",
       "allDay": "Full day",
+      "allDayBlockedNotice": "Day blocked for bookings",
+      "blockedSlot": "Blocked schedule",
       "collaborator": "Specific collaborator",
       "createSuccess": "Schedule block created.",
       "deleteAction": "Delete block",
@@ -330,6 +332,7 @@
       "applyFilters": "Filter",
       "clearFilters": "Clear filters",
       "collaboratorFilter": "Collaborator",
+      "dateFilter": "Date",
       "dateFrom": "From",
       "dateRange": "Date range",
       "dateTo": "To",

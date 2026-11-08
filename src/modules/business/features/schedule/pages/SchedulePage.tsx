@@ -73,6 +73,7 @@ export const SchedulePage = (): ReactElement => {
             timeZone={viewModel.timeZone}
             viewMode={viewModel.calendarViewMode}
             onDateChange={viewModel.setSelectedDate}
+            onDeleteBlock={viewModel.blockViewModel.handleDeleteBlock}
             onSelectBooking={viewModel.handleSelectBooking}
             onViewModeChange={viewModel.setCalendarViewMode}
           />
@@ -91,7 +92,6 @@ export const SchedulePage = (): ReactElement => {
           <div className="flex flex-col gap-4">
             <BookingHistoryFilters
               filters={viewModel.historyFilters}
-              services={viewModel.services}
               onClear={viewModel.handleClearFilters}
               onFilterChange={viewModel.handleFilterChange}
             />

@@ -293,6 +293,8 @@
     "blocks": {
       "allBusiness": "Todo el negocio",
       "allDay": "Día completo",
+      "allDayBlockedNotice": "Día bloqueado para reservas",
+      "blockedSlot": "Horario bloqueado",
       "collaborator": "Colaborador específico",
       "createSuccess": "Bloqueo de agenda creado.",
       "deleteAction": "Eliminar bloqueo",
@@ -330,6 +332,7 @@
       "applyFilters": "Filtrar",
       "clearFilters": "Limpiar filtros",
       "collaboratorFilter": "Colaborador",
+      "dateFilter": "Fecha",
       "dateFrom": "Desde",
       "dateRange": "Rango de fechas",
       "dateTo": "Hasta",

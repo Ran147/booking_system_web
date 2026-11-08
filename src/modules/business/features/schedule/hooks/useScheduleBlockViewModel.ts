@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import { I18N_NAMESPACE } from "@/constants";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
+import { zonedDayBounds } from "@/utils/date";
 import { useScheduleBlockMutations, useScheduleBlocksQuery } from "../api";
+import { SCHEDULE_CONSTANTS } from "../constants";
 import type { ScheduleBlock, ScheduleBlockFormData } from "../models";
 
 export interface ScheduleBlockViewModelResult {
@@ -25,7 +27,13 @@ export interface ScheduleBlockViewModelResult {
   ) => void;
 }
 
-const getTodayIso = (): string => new Date().toISOString().split("T")[0] ?? "";
+const getTodayIso = (): string =>
+  new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+    year: "numeric",
+  }).format(new Date());
 
 export const useScheduleBlockViewModel = (): ScheduleBlockViewModelResult => {
   const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
@@ -106,8 +114,16 @@ export const useScheduleBlockViewModel = (): ScheduleBlockViewModelResult => {
     let endsAt: Date;
 
     if (formData.isFullDay) {
-      startsAt = new Date(`${formData.startDate}T00:00:00`);
-      endsAt = new Date(`${formData.endDate}T23:59:59.999`);
+      const { start } = zonedDayBounds(
+        formData.startDate,
+        SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+      );
+      const { end } = zonedDayBounds(
+        formData.endDate,
+        SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+      );
+      startsAt = start;
+      endsAt = end;
     } else {
       startsAt = new Date(`${formData.startDate}T${formData.startTime}:00`);
       endsAt = new Date(`${formData.endDate}T${formData.endTime}:00`);

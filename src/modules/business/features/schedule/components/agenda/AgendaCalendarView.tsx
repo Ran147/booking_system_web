@@ -1,4 +1,11 @@
-import { Ban, ChevronLeft, ChevronRight, Clock, User } from "lucide-react";
+import {
+  Ban,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Trash2,
+  User,
+} from "lucide-react";
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -24,17 +31,27 @@ interface AgendaCalendarViewProps {
   readonly bookings: readonly Booking[];
   readonly currentDate: Date;
   readonly onDateChange: (date: Date) => void;
+  readonly onDeleteBlock?: (block: ScheduleBlock) => void;
   readonly onSelectBooking: (booking: Booking) => void;
   readonly onViewModeChange: (mode: ScheduleViewMode) => void;
   readonly timeZone?: string;
   readonly viewMode: ScheduleViewMode;
 }
 
+const getZonedDateString = (date: Date, tz: string): string =>
+  new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: tz,
+    year: "numeric",
+  }).format(date);
+
 export const AgendaCalendarView = ({
   blocks,
   bookings,
   currentDate,
   onDateChange,
+  onDeleteBlock,
   onSelectBooking,
   onViewModeChange,
   timeZone = SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
@@ -62,27 +79,21 @@ export const AgendaCalendarView = ({
     onDateChange(new Date());
   };
 
-  const isSameDay = (first: Date, second: Date): boolean => {
-    return (
-      first.getFullYear() === second.getFullYear() &&
-      first.getMonth() === second.getMonth() &&
-      first.getDate() === second.getDate()
-    );
-  };
+  const currentDateStr = getZonedDateString(currentDate, timeZone);
 
-  const currentDayBookings = bookings.filter((booking) =>
-    isSameDay(booking.startsAt, currentDate),
+  const currentDayBookings = bookings.filter(
+    (booking) =>
+      getZonedDateString(booking.startsAt, timeZone) === currentDateStr,
   );
 
   const currentDayBlocks = blocks.filter((block) => {
-    if (block.isFullDay) {
-      return (
-        currentDate >= new Date(block.startsAt) &&
-        currentDate <= new Date(block.endsAt)
-      );
-    }
-    return isSameDay(block.startsAt, currentDate);
+    const blockStartStr = getZonedDateString(block.startsAt, timeZone);
+    const blockEndStr = getZonedDateString(block.endsAt, timeZone);
+    return currentDateStr >= blockStartStr && currentDateStr <= blockEndStr;
   });
+
+  const fullDayBlock = currentDayBlocks.find((block) => block.isFullDay);
+  const timedBlocks = currentDayBlocks.filter((block) => !block.isFullDay);
 
   const formattedCurrentDate = formatDateTime(
     currentDate,
@@ -153,6 +164,45 @@ export const AgendaCalendarView = ({
         </div>
       </Card>
 
+      {fullDayBlock && (
+        <div
+          className="p-4 rounded-xl border border-destructive/40 bg-destructive/10 flex items-center justify-between gap-3 text-destructive shadow-xs"
+          role="status"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-destructive/20 text-destructive">
+              <Ban className="size-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">
+                {t("schedule.blocks.allDayBlockedNotice", {
+                  defaultValue: "Día bloqueado para reservas",
+                })}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {fullDayBlock.reason ||
+                  (fullDayBlock.collaboratorId
+                    ? t("schedule.blocks.collaborator")
+                    : t("schedule.blocks.allBusiness"))}
+              </span>
+            </div>
+          </div>
+          {onDeleteBlock && (
+            <Button
+              className="text-destructive hover:bg-destructive/15 border-destructive/30"
+              size={BUTTON_SIZE.SM}
+              variant={BUTTON_VARIANT.OUTLINE}
+              onClick={() => onDeleteBlock(fullDayBlock)}
+            >
+              <Trash2 className="size-3.5 mr-1" />
+              {t("schedule.blocks.deleteAction", {
+                defaultValue: "Eliminar bloqueo",
+              })}
+            </Button>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -167,12 +217,58 @@ export const AgendaCalendarView = ({
             </span>
           </div>
 
-          {currentDayBookings.length === 0 ? (
+          {currentDayBookings.length === 0 && timedBlocks.length === 0 ? (
             <Card className="p-8 text-center text-muted-foreground text-sm border-dashed">
               {t("schedule.agenda.noBookings")}
             </Card>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
+              {timedBlocks.map((block) => (
+                <div
+                  className="p-3.5 rounded-xl border border-destructive/40 bg-destructive/5 flex items-center justify-between gap-3 text-left w-full shadow-xs"
+                  key={block.id}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-destructive/15 text-destructive">
+                      <Ban className="size-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-destructive">
+                          {t("schedule.blocks.blockedSlot", {
+                            defaultValue: "Horario bloqueado",
+                          })}
+                        </span>
+                        <span className="text-xs font-semibold text-destructive/90 bg-destructive/10 px-2 py-0.5 rounded">
+                          {formatTime(block.startsAt, timeZone, i18n.language)}{" "}
+                          - {formatTime(block.endsAt, timeZone, i18n.language)}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                        {block.reason ||
+                          (block.collaboratorId
+                            ? t("schedule.blocks.collaborator")
+                            : t("schedule.blocks.allBusiness"))}
+                      </span>
+                    </div>
+                  </div>
+
+                  {onDeleteBlock && (
+                    <Button
+                      ariaLabel={t("schedule.blocks.deleteAction", {
+                        defaultValue: "Eliminar",
+                      })}
+                      className="text-destructive hover:bg-destructive/15"
+                      size={BUTTON_SIZE.ICON}
+                      variant={BUTTON_VARIANT.GHOST}
+                      onClick={() => onDeleteBlock(block)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+
               {currentDayBookings.map((booking) => (
                 <Card
                   className="p-3.5 flex items-center justify-between cursor-pointer w-full text-left"
@@ -234,29 +330,41 @@ export const AgendaCalendarView = ({
             <div className="flex flex-col gap-2">
               {currentDayBlocks.map((block) => (
                 <div
-                  className="p-3 rounded-lg border border-destructive/20 bg-destructive/5 flex flex-col gap-1 text-xs"
+                  className="p-3.5 rounded-lg border border-destructive/30 bg-destructive/10 flex flex-col gap-2 text-xs shadow-xs"
                   key={block.id}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-foreground">
+                    <span className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Clock className="size-3.5 text-destructive" />
                       {block.isFullDay
                         ? t("schedule.blocks.allDay")
-                        : formatDateTime(
-                            block.startsAt,
-                            timeZone,
-                            i18n.language,
-                          )}
+                        : `${formatTime(block.startsAt, timeZone, i18n.language)} - ${formatTime(block.endsAt, timeZone, i18n.language)}`}
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="px-2 py-0.5 rounded-md bg-destructive/15 text-destructive font-medium text-[11px]">
                       {block.collaboratorId
                         ? t("schedule.blocks.collaborator")
                         : t("schedule.blocks.allBusiness")}
                     </span>
                   </div>
                   {block.reason && (
-                    <span className="text-muted-foreground italic">
+                    <span className="text-foreground/80 font-medium">
                       {block.reason}
                     </span>
+                  )}
+                  {onDeleteBlock && (
+                    <div className="flex justify-end pt-1">
+                      <Button
+                        className="text-destructive hover:bg-destructive/15 h-7 text-xs"
+                        size={BUTTON_SIZE.SM}
+                        variant={BUTTON_VARIANT.GHOST}
+                        onClick={() => onDeleteBlock(block)}
+                      >
+                        <Trash2 className="size-3 mr-1" />
+                        {t("schedule.blocks.deleteAction", {
+                          defaultValue: "Eliminar",
+                        })}
+                      </Button>
+                    </div>
                   )}
                 </div>
               ))}

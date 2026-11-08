@@ -4,6 +4,7 @@ import { I18N_NAMESPACE } from "@/constants";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
 import { useActiveServicesQuery, useCreateBookingMutation } from "../api";
+import { SCHEDULE_CONSTANTS } from "../constants";
 import type { ActiveServiceOption, CreateBookingFormData } from "../models";
 
 export interface BookingFormViewModelResult {
@@ -25,7 +26,13 @@ interface UseBookingFormViewModelOptions {
   readonly onSuccess?: () => void;
 }
 
-const getTodayIso = (): string => new Date().toISOString().split("T")[0] ?? "";
+const getTodayIso = (): string =>
+  new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+    year: "numeric",
+  }).format(new Date());
 
 const createInitialFormData = (): CreateBookingFormData => ({
   collaboratorId: null,
