@@ -701,5 +701,92 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
     } as Response;
   }
 
+  if (functionName === FUNCTION_NAME.CREATE_SCHEDULE_BLOCK) {
+    const businessId = String(genericPayload.businessId ?? "");
+    const collaboratorId = genericPayload.collaboratorId
+      ? String(genericPayload.collaboratorId)
+      : null;
+    const endsAt = genericPayload.endsAt
+      ? new Date(String(genericPayload.endsAt))
+      : new Date();
+    const isFullDay = Boolean(genericPayload.isFullDay);
+    const reason = genericPayload.reason ? String(genericPayload.reason) : null;
+    const startsAt = genericPayload.startsAt
+      ? new Date(String(genericPayload.startsAt))
+      : new Date();
+
+    const blocksCollectionReference = collection(
+      firestore,
+      "businesses",
+      businessId,
+      "scheduleBlocks",
+    );
+    const documentReference = await addDoc(blocksCollectionReference, {
+      businessId,
+      collaboratorId,
+      createdAt: Timestamp.now(),
+      endsAt: Timestamp.fromDate(endsAt),
+      isFullDay,
+      reason,
+      startsAt: Timestamp.fromDate(startsAt),
+      updatedAt: Timestamp.now(),
+    });
+
+    return {
+      blockId: documentReference.id,
+    } as Response;
+  }
+
+  if (functionName === FUNCTION_NAME.DELETE_SCHEDULE_BLOCK) {
+    const businessId = String(genericPayload.businessId ?? "");
+    const blockId = String(genericPayload.blockId ?? "");
+
+    const blockDocumentReference = doc(
+      firestore,
+      "businesses",
+      businessId,
+      "scheduleBlocks",
+      blockId,
+    );
+    await deleteDoc(blockDocumentReference);
+
+    return {
+      blockId,
+      success: true,
+    } as Response;
+  }
+
+  if (functionName === FUNCTION_NAME.UPDATE_BUSINESS_HOURS) {
+    const businessId = String(genericPayload.businessId ?? "");
+    const businessHours = genericPayload.businessHours ?? {};
+
+    const businessDocumentReference = doc(firestore, "businesses", businessId);
+    await updateDoc(businessDocumentReference, {
+      businessHours,
+      updatedAt: Timestamp.now(),
+    });
+
+    return {
+      businessId,
+      success: true,
+    } as Response;
+  }
+
+  if (functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE) {
+    const businessId = String(genericPayload.businessId ?? "");
+    const mode = String(genericPayload.mode ?? "automatic");
+
+    const businessDocumentReference = doc(firestore, "businesses", businessId);
+    await updateDoc(businessDocumentReference, {
+      bookingConfirmationMode: mode,
+      updatedAt: Timestamp.now(),
+    });
+
+    return {
+      businessId,
+      mode,
+    } as Response;
+  }
+
   throw new Error(`Cloud function "${functionName}" is not available.`);
 };

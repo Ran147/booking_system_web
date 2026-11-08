@@ -1,12 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  Timestamp,
-} from "firebase/firestore";
-import { firestore } from "@/services/firebase";
+import { FUNCTION_NAME } from "@/constants";
+import { callFunction } from "@/services/firebase";
 import type { Nullable } from "@/types";
 import { scheduleQueryKeys } from "./scheduleQueryKeys";
 
@@ -31,30 +25,40 @@ export interface ScheduleBlockMutationsResult {
   readonly isDeleting: boolean;
 }
 
+interface CreateBlockResponse {
+  readonly blockId: string;
+}
+
+interface DeleteBlockResponse {
+  readonly blockId: string;
+  readonly success: boolean;
+}
+
 export const useScheduleBlockMutations = (): ScheduleBlockMutationsResult => {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
     mutationFn: async (input: CreateScheduleBlockInput): Promise<string> => {
-      const blocksCollection = collection(
-        firestore,
-        "businesses",
-        input.businessId,
-        "scheduleBlocks",
-      );
-
-      const documentReference = await addDoc(blocksCollection, {
+      const response = await callFunction<
+        {
+          readonly businessId: string;
+          readonly collaboratorId?: Nullable<string>;
+          readonly endsAt: string;
+          readonly isFullDay: boolean;
+          readonly reason?: Nullable<string>;
+          readonly startsAt: string;
+        },
+        CreateBlockResponse
+      >(FUNCTION_NAME.CREATE_SCHEDULE_BLOCK, {
         businessId: input.businessId,
         collaboratorId: input.collaboratorId ?? null,
-        createdAt: Timestamp.now(),
-        endsAt: Timestamp.fromDate(input.endsAt),
+        endsAt: input.endsAt.toISOString(),
         isFullDay: input.isFullDay,
         reason: input.reason ?? null,
-        startsAt: Timestamp.fromDate(input.startsAt),
-        updatedAt: Timestamp.now(),
+        startsAt: input.startsAt.toISOString(),
       });
 
-      return documentReference.id;
+      return response.blockId;
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
@@ -71,14 +75,13 @@ export const useScheduleBlockMutations = (): ScheduleBlockMutationsResult => {
       blockId,
       businessId,
     }: DeleteScheduleBlockInput): Promise<void> => {
-      const blockReference = doc(
-        firestore,
-        "businesses",
-        businessId,
-        "scheduleBlocks",
-        blockId,
+      await callFunction<DeleteScheduleBlockInput, DeleteBlockResponse>(
+        FUNCTION_NAME.DELETE_SCHEDULE_BLOCK,
+        {
+          blockId,
+          businessId,
+        },
       );
-      await deleteDoc(blockReference);
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({

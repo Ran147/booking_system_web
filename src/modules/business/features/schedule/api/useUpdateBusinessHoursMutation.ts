@@ -3,14 +3,19 @@ import {
   useQueryClient,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import { doc, updateDoc } from "firebase/firestore";
-import { firestore } from "@/services/firebase";
+import { FUNCTION_NAME } from "@/constants";
+import { callFunction } from "@/services/firebase";
 import type { BusinessHours } from "../models";
 import { scheduleQueryKeys } from "./scheduleQueryKeys";
 
 export interface UpdateBusinessHoursInput {
   readonly businessHours: BusinessHours;
   readonly businessId: string;
+}
+
+interface UpdateBusinessHoursResponse {
+  readonly businessId: string;
+  readonly success: boolean;
 }
 
 export const useUpdateBusinessHoursMutation = (): UseMutationResult<
@@ -25,14 +30,20 @@ export const useUpdateBusinessHoursMutation = (): UseMutationResult<
       businessHours,
       businessId,
     }: UpdateBusinessHoursInput): Promise<void> => {
-      const businessReference = doc(firestore, "businesses", businessId);
-      await updateDoc(businessReference, {
-        businessHours,
-      });
+      await callFunction<UpdateBusinessHoursInput, UpdateBusinessHoursResponse>(
+        FUNCTION_NAME.UPDATE_BUSINESS_HOURS,
+        {
+          businessHours,
+          businessId,
+        },
+      );
     },
     onSuccess: (_, { businessId }) => {
       void queryClient.invalidateQueries({
         queryKey: scheduleQueryKeys.hours(businessId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: scheduleQueryKeys.all,
       });
     },
   });

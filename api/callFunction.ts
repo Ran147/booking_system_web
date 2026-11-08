@@ -35,7 +35,9 @@ const FUNCTION_NAME = Object.freeze({
   CHECK_BUSINESS_SLUG: "checkBusinessSlug",
   COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
   CREATE_BOOKING: "createBooking",
+  CREATE_SCHEDULE_BLOCK: "createScheduleBlock",
   CREATE_SERVICE: "createService",
+  DELETE_SCHEDULE_BLOCK: "deleteScheduleBlock",
   DELETE_SERVICE: "deleteService",
   EXPORT_COLLECTION: "exportCollection",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
@@ -43,6 +45,8 @@ const FUNCTION_NAME = Object.freeze({
   RESCHEDULE_BOOKING: "rescheduleBooking",
   SEND_CONTACT_MESSAGE: "sendContactMessage",
   UPDATE_BOOKING_STATUS: "updateBookingStatus",
+  UPDATE_BUSINESS_HOURS: "updateBusinessHours",
+  UPDATE_CONFIRMATION_MODE: "updateConfirmationMode",
   UPDATE_SERVICE: "updateService",
   UPDATE_SERVICE_COLLABORATORS: "updateServiceCollaborators",
   VALIDATE_SIGN_UP_LINK: "validateSignUpLink",
@@ -1342,6 +1346,98 @@ export default async function handler(
       await batch.commit();
       sendJsonResponse(response, HTTP_STATUS.OK, {
         updatedServiceId: serviceId,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.CREATE_SCHEDULE_BLOCK) {
+      const businessId = String(payload.businessId || "");
+      const collaboratorId = payload.collaboratorId
+        ? String(payload.collaboratorId)
+        : null;
+      const endsAt = payload.endsAt
+        ? new Date(String(payload.endsAt))
+        : new Date();
+      const isFullDay = Boolean(payload.isFullDay);
+      const reason = payload.reason ? String(payload.reason) : null;
+      const startsAt = payload.startsAt
+        ? new Date(String(payload.startsAt))
+        : new Date();
+
+      const businessReference = firestore
+        .collection("businesses")
+        .doc(businessId);
+      const blockReference = await businessReference
+        .collection("scheduleBlocks")
+        .add({
+          businessId,
+          collaboratorId,
+          createdAt: Timestamp.now(),
+          endsAt: Timestamp.fromDate(endsAt),
+          isFullDay,
+          reason,
+          startsAt: Timestamp.fromDate(startsAt),
+          updatedAt: Timestamp.now(),
+        });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        blockId: blockReference.id,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.DELETE_SCHEDULE_BLOCK) {
+      const businessId = String(payload.businessId || "");
+      const blockId = String(payload.blockId || "");
+
+      const blockReference = firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("scheduleBlocks")
+        .doc(blockId);
+      await blockReference.delete();
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        blockId,
+        success: true,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.UPDATE_BUSINESS_HOURS) {
+      const businessId = String(payload.businessId || "");
+      const businessHours = payload.businessHours ?? {};
+
+      const businessReference = firestore
+        .collection("businesses")
+        .doc(businessId);
+      await businessReference.update({
+        businessHours,
+        updatedAt: Timestamp.now(),
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        businessId,
+        success: true,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE) {
+      const businessId = String(payload.businessId || "");
+      const mode = String(payload.mode || "automatic");
+
+      const businessReference = firestore
+        .collection("businesses")
+        .doc(businessId);
+      await businessReference.update({
+        bookingConfirmationMode: mode,
+        updatedAt: Timestamp.now(),
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        businessId,
+        mode,
       });
       return;
     }
