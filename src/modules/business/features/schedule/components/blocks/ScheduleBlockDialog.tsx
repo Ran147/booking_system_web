@@ -109,7 +109,7 @@ export const ScheduleBlockDialog = ({
 
         <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-border">
           <Button variant={BUTTON_VARIANT.OUTLINE} onClick={closeDialog}>
-            {t("common:actions.cancel", { defaultValue: "Cancelar" })}
+            {t("common:actions.cancel", { defaultValue: "Cancel" })}
           </Button>
           <Button
             disabled={isCreating}

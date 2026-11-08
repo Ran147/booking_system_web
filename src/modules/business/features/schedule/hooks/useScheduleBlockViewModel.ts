@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { I18N_NAMESPACE } from "@/constants";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
-import { zonedDayBounds } from "@/utils/date";
+import { parseZonedDateTime, zonedDayBounds } from "@/utils/date";
 import { useScheduleBlockMutations, useScheduleBlocksQuery } from "../api";
 import { SCHEDULE_CONSTANTS } from "../constants";
 import type { ScheduleBlock, ScheduleBlockFormData } from "../models";
@@ -35,7 +35,9 @@ const getTodayIso = (): string =>
     year: "numeric",
   }).format(new Date());
 
-export const useScheduleBlockViewModel = (): ScheduleBlockViewModelResult => {
+export const useScheduleBlockViewModel = (
+  onBlockCreated?: (startsAt: Date) => void,
+): ScheduleBlockViewModelResult => {
   const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const { businessId } = useCurrentBusiness();
 
@@ -125,8 +127,16 @@ export const useScheduleBlockViewModel = (): ScheduleBlockViewModelResult => {
       startsAt = start;
       endsAt = end;
     } else {
-      startsAt = new Date(`${formData.startDate}T${formData.startTime}:00`);
-      endsAt = new Date(`${formData.endDate}T${formData.endTime}:00`);
+      startsAt = parseZonedDateTime(
+        formData.startDate,
+        formData.startTime || "09:00",
+        SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+      );
+      endsAt = parseZonedDateTime(
+        formData.endDate,
+        formData.endTime || "10:00",
+        SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+      );
     }
 
     try {
@@ -138,6 +148,10 @@ export const useScheduleBlockViewModel = (): ScheduleBlockViewModelResult => {
         reason: formData.reason || null,
         startsAt,
       });
+
+      if (onBlockCreated) {
+        onBlockCreated(startsAt);
+      }
 
       closeDialog();
       return true;

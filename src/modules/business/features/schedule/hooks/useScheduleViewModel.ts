@@ -109,7 +109,9 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
   );
   const activeServicesQuery = useActiveServicesQuery(businessId);
 
-  const blockViewModel = useScheduleBlockViewModel();
+  const blockViewModel = useScheduleBlockViewModel((createdDate) => {
+    setSelectedDate(createdDate);
+  });
 
   const handleSelectBooking = (booking: Booking): void => {
     setSelectedBooking(booking);

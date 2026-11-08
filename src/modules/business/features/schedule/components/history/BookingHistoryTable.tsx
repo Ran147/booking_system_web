@@ -78,7 +78,7 @@ export const BookingHistoryTable = ({
             <TableCell className="text-right">
               <Button
                 ariaLabel={t("schedule.bookingList.viewDetail", {
-                  defaultValue: "Ver detalle",
+                  defaultValue: "View detail",
                 })}
                 size={BUTTON_SIZE.ICON}
                 variant={BUTTON_VARIANT.GHOST}
