@@ -17,6 +17,7 @@ import {
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
 import { BOOKING_STATUS_TONE, type Booking } from "@/domain";
+import { SCHEDULE_CONSTANTS } from "@/modules/business/features/schedule";
 import { formatDateTime, formatPrice } from "@/utils";
 
 interface BookingListTableProps {
@@ -30,7 +31,7 @@ export const BookingListTable = ({
   bookings,
   isLoading = false,
   onSelectBooking,
-  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
+  timeZone = SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
 }: BookingListTableProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
 

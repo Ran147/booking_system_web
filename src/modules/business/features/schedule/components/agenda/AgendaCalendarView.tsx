@@ -37,7 +37,7 @@ export const AgendaCalendarView = ({
   onDateChange,
   onSelectBooking,
   onViewModeChange,
-  timeZone = "UTC",
+  timeZone = SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
   viewMode,
 }: AgendaCalendarViewProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);

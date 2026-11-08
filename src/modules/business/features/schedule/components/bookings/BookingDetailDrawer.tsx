@@ -19,7 +19,10 @@ import {
 import { I18N_NAMESPACE } from "@/constants";
 import { BOOKING_STATUS, BOOKING_STATUS_TONE, type Booking } from "@/domain";
 import { useCurrentBusiness } from "@/modules/auth";
-import { useUpdateBookingStatusMutation } from "@/modules/business/features/schedule";
+import {
+  SCHEDULE_CONSTANTS,
+  useUpdateBookingStatusMutation,
+} from "@/modules/business/features/schedule";
 import type { Nullable } from "@/types";
 import { formatDateTime, formatPrice } from "@/utils";
 
@@ -42,7 +45,7 @@ export const BookingDetailDrawer = ({
   onClose,
   onRescheduleClick,
   onSuccess,
-  timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone,
+  timeZone = SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
 }: BookingDetailDrawerProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
   const { businessId } = useCurrentBusiness();

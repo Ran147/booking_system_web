@@ -8,4 +8,3 @@ export const formatTime = (
     minute: "2-digit",
     timeZone,
   }).format(dateTime);
-

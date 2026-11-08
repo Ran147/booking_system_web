@@ -2,6 +2,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "@/services/firebase";
 import {
   BOOKING_CONFIRMATION_MODE,
+  SCHEDULE_CONSTANTS,
   type BookingConfirmationMode,
 } from "../constants";
 import type { BusinessHours } from "../models";
@@ -29,7 +30,13 @@ export const fetchBusinessHours = async (
 
   const businessDocData = businessSnapshot.data();
   const businessHours = mapBusinessHours(businessDocData.businessHours);
-  const timeZone = (businessDocData.timeZone as string) || "UTC";
+  const rawTimeZone = (businessDocData.timeZone as string) || "";
+  const timeZone =
+    !rawTimeZone ||
+    rawTimeZone === SCHEDULE_CONSTANTS.UTC_TIME_ZONE ||
+    rawTimeZone.includes("Mexico")
+      ? SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE
+      : rawTimeZone;
   const confirmationMode =
     businessDocData.bookingConfirmationMode === BOOKING_CONFIRMATION_MODE.MANUAL
       ? BOOKING_CONFIRMATION_MODE.MANUAL

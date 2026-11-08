@@ -193,6 +193,7 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
         businessId,
       });
       setSuccessMessage(t("schedule.hours.saveSuccess"));
+      setEditedFormState(null);
     } catch {
       setErrorMessage(
         t("errors.common.network", { defaultValue: "Error de red" }),
@@ -210,6 +211,7 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
         mode: confirmationMode,
       });
       setSuccessMessage(t("schedule.confirmation.saveSuccess"));
+      setEditedConfirmationMode(null);
     } catch {
       setErrorMessage(
         t("errors.common.network", { defaultValue: "Error de red" }),
@@ -229,7 +231,12 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
     saveHours,
     setConfirmationMode: setEditedConfirmationMode,
     successMessage,
-    timeZone: hoursQuery.data?.timeZone || "UTC",
+    timeZone:
+      hoursQuery.data?.timeZone &&
+      hoursQuery.data.timeZone !== SCHEDULE_CONSTANTS.UTC_TIME_ZONE &&
+      !hoursQuery.data.timeZone.includes("Mexico")
+        ? hoursQuery.data.timeZone
+        : SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
     toggleDayOpen,
     updateRange,
   };
