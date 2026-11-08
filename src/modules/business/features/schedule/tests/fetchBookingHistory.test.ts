@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BOOKING_STATUS } from "@/domain";
 import { fetchBookingHistory } from "../api/fetchBookingHistory";
 
 const mockDocs: Array<{ ["data"]: () => Record<string, unknown>; id: string }> =
@@ -98,6 +99,37 @@ describe("fetchBookingHistory (KAN-76)", () => {
 
     expect(result.totalCount).toBe(1);
     expect(result.bookings[0]?.id).toBe("booking-2");
+  });
+
+  it("AC-KAN-76-02: filters by confirmed status and returns confirmed bookings including future", async () => {
+    mockDocs.push({
+      ["data"]: () => ({
+        businessId,
+        collaboratorId: "collab-1",
+        customerId: "cust-4",
+        endsAt: new Date(Date.now() + 86_400_000 + 3_600_000),
+        serviceId: "service-haircut",
+        serviceSnapshot: {
+          durationMinutes: 30,
+          name: "Corte",
+          priceInCents: 1000,
+        },
+        startsAt: new Date(Date.now() + 86_400_000),
+        status: "confirmed",
+      }),
+      id: "booking-4",
+    });
+
+    const result = await fetchBookingHistory(businessId, {
+      status: "confirmed",
+    });
+
+    expect(result.totalCount).toBe(2);
+    expect(
+      result.bookings.every(
+        (booking) => booking.status === BOOKING_STATUS.CONFIRMED,
+      ),
+    ).toBe(true);
   });
 
   it("AC-KAN-76-02: filters by serviceId correctly", async () => {

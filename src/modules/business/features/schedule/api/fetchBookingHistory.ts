@@ -1,6 +1,8 @@
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
+import { FUNCTION_NAME } from "@/constants";
 import { BOOKING_STATUS, type Booking } from "@/domain";
-import { firestore } from "@/services/firebase";
+import { callFunction, firestore } from "@/services/firebase";
+import type { Nullable } from "@/types";
 import { zonedDayBounds } from "@/utils/date";
 import { SCHEDULE_CONSTANTS } from "../constants";
 import type { BookingHistoryFilterValues } from "../models";
@@ -9,6 +11,26 @@ import { mapBookingDocument } from "./bookingDocument.schema";
 export interface BookingHistoryResult {
   readonly bookings: Booking[];
   readonly totalCount: number;
+}
+
+interface FetchBookingHistoryResponse {
+  readonly bookings: Array<{
+    readonly businessId: string;
+    readonly cancellation?: Booking["cancellation"];
+    readonly collaboratorId: Nullable<string>;
+    readonly collaboratorName: Nullable<string>;
+    readonly createdAt: string;
+    readonly customerId: string;
+    readonly customerUserId: Nullable<string>;
+    readonly endsAt: string;
+    readonly id: string;
+    readonly rescheduleHistory?: Booking["rescheduleHistory"];
+    readonly serviceId: string;
+    readonly serviceSnapshot: Booking["serviceSnapshot"];
+    readonly startsAt: string;
+    readonly status: Booking["status"];
+    readonly updatedAt: string;
+  }>;
 }
 
 export const fetchBookingHistory = async (
@@ -22,36 +44,69 @@ export const fetchBookingHistory = async (
   }
 
   const now = new Date();
-  const bookingsCollection = collection(
-    firestore,
-    "businesses",
-    businessId,
-    "bookings",
-  );
+  let results: Booking[] = [];
 
-  const historyQuery = query(
-    bookingsCollection,
-    orderBy("startsAt", "desc"),
-    limit(SCHEDULE_CONSTANTS.MAX_HISTORY_FETCH_LIMIT),
-  );
+  try {
+    const bookingsCollection = collection(
+      firestore,
+      "businesses",
+      businessId,
+      "bookings",
+    );
 
-  const snapshot = await getDocs(historyQuery);
-  let results = snapshot.docs.map(mapBookingDocument);
+    const historyQuery = query(
+      bookingsCollection,
+      orderBy("startsAt", "desc"),
+      limit(SCHEDULE_CONSTANTS.MAX_HISTORY_FETCH_LIMIT),
+    );
 
-  // History includes past bookings and terminal/historical statuses
-  results = results.filter(
-    (booking) =>
-      booking.startsAt < now ||
-      booking.status === BOOKING_STATUS.CANCELLED ||
-      booking.status === BOOKING_STATUS.COMPLETED ||
-      booking.status === BOOKING_STATUS.NO_SHOW,
-  );
+    const snapshot = await getDocs(historyQuery);
+    results = snapshot.docs.map(mapBookingDocument);
+  } catch {
+    // If client query fails, fallback to serverless function
+    try {
+      const response = await callFunction<
+        { readonly businessId: string },
+        FetchBookingHistoryResponse
+      >(FUNCTION_NAME.FETCH_BOOKING_HISTORY, { businessId });
 
+      results = (response.bookings ?? []).map((rawBooking) => ({
+        businessId: rawBooking.businessId,
+        cancellation: rawBooking.cancellation ?? null,
+        collaboratorId: rawBooking.collaboratorId ?? null,
+        collaboratorName: rawBooking.collaboratorName ?? null,
+        createdAt: new Date(rawBooking.createdAt),
+        customerId: rawBooking.customerId,
+        customerUserId: rawBooking.customerUserId ?? null,
+        endsAt: new Date(rawBooking.endsAt),
+        id: rawBooking.id,
+        rescheduleHistory: rawBooking.rescheduleHistory ?? [],
+        serviceId: rawBooking.serviceId,
+        serviceSnapshot: rawBooking.serviceSnapshot,
+        startsAt: new Date(rawBooking.startsAt),
+        status: rawBooking.status,
+        updatedAt: new Date(rawBooking.updatedAt),
+      }));
+    } catch {
+      return { bookings: [], totalCount: 0 };
+    }
+  }
+
+  // If a specific status filter is set, filter by status without excluding future bookings
   if (
     filters.status &&
     filters.status !== SCHEDULE_CONSTANTS.ALL_FILTER_VALUE
   ) {
     results = results.filter((booking) => booking.status === filters.status);
+  } else if (!filters.date && !filters.startDate) {
+    // Default history view without specific status or date filters: show past bookings or terminal status
+    results = results.filter(
+      (booking) =>
+        booking.startsAt < now ||
+        booking.status === BOOKING_STATUS.CANCELLED ||
+        booking.status === BOOKING_STATUS.COMPLETED ||
+        booking.status === BOOKING_STATUS.NO_SHOW,
+    );
   }
 
   if (filters.serviceId) {

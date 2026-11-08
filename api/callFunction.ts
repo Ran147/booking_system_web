@@ -40,6 +40,8 @@ const FUNCTION_NAME = Object.freeze({
   DELETE_SCHEDULE_BLOCK: "deleteScheduleBlock",
   DELETE_SERVICE: "deleteService",
   EXPORT_COLLECTION: "exportCollection",
+  FETCH_BOOKING_HISTORY: "fetchBookingHistory",
+  FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
@@ -1439,6 +1441,116 @@ export default async function handler(
         businessId,
         mode,
       });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.FETCH_SCHEDULE_BLOCKS) {
+      const businessId = String(payload.businessId || "");
+      if (!businessId) {
+        sendJsonResponse(response, HTTP_STATUS.OK, { blocks: [] });
+        return;
+      }
+      const blocksSnapshot = await firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("scheduleBlocks")
+        .get();
+
+      const blocks = blocksSnapshot.docs
+        .map((documentSnapshot) => {
+          const itemData = documentSnapshot.data();
+          const startsAt = itemData.startsAt?.toDate
+            ? itemData.startsAt.toDate()
+            : new Date(itemData.startsAt || Date.now());
+          const endsAt = itemData.endsAt?.toDate
+            ? itemData.endsAt.toDate()
+            : new Date(itemData.endsAt || Date.now());
+          const createdAt = itemData.createdAt?.toDate
+            ? itemData.createdAt.toDate()
+            : new Date(itemData.createdAt || Date.now());
+          const updatedAt = itemData.updatedAt?.toDate
+            ? itemData.updatedAt.toDate()
+            : new Date(itemData.updatedAt || Date.now());
+
+          return {
+            businessId: itemData.businessId || businessId,
+            collaboratorId: itemData.collaboratorId || null,
+            createdAt: createdAt.toISOString(),
+            endsAt: endsAt.toISOString(),
+            id: documentSnapshot.id,
+            isFullDay: Boolean(itemData.isFullDay),
+            reason: itemData.reason || null,
+            startsAt: startsAt.toISOString(),
+            updatedAt: updatedAt.toISOString(),
+          };
+        })
+        .sort(
+          (firstBlock, secondBlock) =>
+            new Date(firstBlock.startsAt).getTime() -
+            new Date(secondBlock.startsAt).getTime(),
+        );
+
+      sendJsonResponse(response, HTTP_STATUS.OK, { blocks });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.FETCH_BOOKING_HISTORY) {
+      const businessId = String(payload.businessId || "");
+      if (!businessId) {
+        sendJsonResponse(response, HTTP_STATUS.OK, { bookings: [] });
+        return;
+      }
+      const bookingsSnapshot = await firestore
+        .collection("businesses")
+        .doc(businessId)
+        .collection("bookings")
+        .get();
+
+      const bookings = bookingsSnapshot.docs
+        .map((documentSnapshot) => {
+          const itemData = documentSnapshot.data();
+          const startsAt = itemData.startsAt?.toDate
+            ? itemData.startsAt.toDate()
+            : new Date(itemData.startsAt || Date.now());
+          const endsAt = itemData.endsAt?.toDate
+            ? itemData.endsAt.toDate()
+            : new Date(itemData.endsAt || Date.now());
+          const createdAt = itemData.createdAt?.toDate
+            ? itemData.createdAt.toDate()
+            : new Date(itemData.createdAt || Date.now());
+          const updatedAt = itemData.updatedAt?.toDate
+            ? itemData.updatedAt.toDate()
+            : new Date(itemData.updatedAt || Date.now());
+
+          return {
+            businessId: itemData.businessId || businessId,
+            cancellation: itemData.cancellation || null,
+            collaboratorId: itemData.collaboratorId || null,
+            collaboratorName: itemData.collaboratorName || null,
+            createdAt: createdAt.toISOString(),
+            customerId: itemData.customerId || "",
+            customerUserId: itemData.customerUserId || null,
+            endsAt: endsAt.toISOString(),
+            id: documentSnapshot.id,
+            rescheduleHistory: itemData.rescheduleHistory || [],
+            serviceId: itemData.serviceId || "",
+            serviceSnapshot: itemData.serviceSnapshot || {
+              durationMinutes: 30,
+              name: "Servicio",
+              priceInCents: 0,
+            },
+            startsAt: startsAt.toISOString(),
+            status: itemData.status || "confirmed",
+            updatedAt: updatedAt.toISOString(),
+          };
+        })
+        .sort(
+          (firstBooking, secondBooking) =>
+            new Date(secondBooking.startsAt).getTime() -
+            new Date(firstBooking.startsAt).getTime(),
+        );
+
+      sendJsonResponse(response, HTTP_STATUS.OK, { bookings });
       return;
     }
 
