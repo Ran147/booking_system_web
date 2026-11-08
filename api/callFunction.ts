@@ -2018,10 +2018,21 @@ export default async function handler(
       const businessReference = firestore
         .collection("businesses")
         .doc(businessId);
-      await businessReference.update({
+      const businessSnapshot = await businessReference.get();
+      const currentBusinessTimeZone = String(
+        businessSnapshot.data()?.timeZone || "",
+      );
+      const updatePayload: Record<string, unknown> = {
         businessHours: businessHours as Record<string, unknown>,
         updatedAt: Timestamp.now(),
-      });
+      };
+      if (
+        !currentBusinessTimeZone ||
+        currentBusinessTimeZone.includes("Mexico")
+      ) {
+        updatePayload.timeZone = "America/Costa_Rica";
+      }
+      await businessReference.update(updatePayload);
 
       sendJsonResponse(response, HTTP_STATUS.OK, {
         businessId,

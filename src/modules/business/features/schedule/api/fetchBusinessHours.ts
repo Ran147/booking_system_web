@@ -1,4 +1,4 @@
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { firestore } from "@/services/firebase";
 import {
   BOOKING_CONFIRMATION_MODE,
@@ -31,7 +31,20 @@ export const fetchBusinessHours = async (
   const businessDocData = businessSnapshot.data();
   const businessHours = mapBusinessHours(businessDocData.businessHours);
   const rawTimeZone = (businessDocData.timeZone as string) || "";
-  const timeZone = rawTimeZone || SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE;
+  const isMexicoTimeZone = rawTimeZone.includes("Mexico");
+  const timeZone =
+    !rawTimeZone || isMexicoTimeZone
+      ? SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE
+      : rawTimeZone;
+
+  if (isMexicoTimeZone) {
+    updateDoc(businessReference, {
+      timeZone: SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+    }).catch(() => {
+      // Ignored if permissions are insufficient
+    });
+  }
+
   const confirmationMode =
     businessDocData.bookingConfirmationMode === BOOKING_CONFIRMATION_MODE.MANUAL
       ? BOOKING_CONFIRMATION_MODE.MANUAL

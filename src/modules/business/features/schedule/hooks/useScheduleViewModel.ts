@@ -110,9 +110,11 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     PAGINATION.DEFAULT_PAGE_SIZE,
   );
 
+  const rawTimeZone = businessHoursQuery.data?.timeZone;
   const timeZone =
-    businessHoursQuery.data?.timeZone ||
-    SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE;
+    !rawTimeZone || rawTimeZone.includes("Mexico")
+      ? SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE
+      : rawTimeZone;
 
   const bookingHistoryQuery = useBookingHistoryQuery(
     businessId,
