@@ -1,6 +1,6 @@
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { FUNCTION_NAME } from "@/constants";
-import { BOOKING_STATUS, type Booking } from "@/domain";
+import type { Booking } from "@/domain";
 import { callFunction, firestore } from "@/services/firebase";
 import type { Nullable } from "@/types";
 import { zonedDayBounds } from "@/utils/date";
@@ -43,7 +43,6 @@ export const fetchBookingHistory = async (
     return { bookings: [], totalCount: 0 };
   }
 
-  const now = new Date();
   let results: Booking[] = [];
 
   try {
@@ -92,21 +91,13 @@ export const fetchBookingHistory = async (
     }
   }
 
-  // If a specific status filter is set, filter by status without excluding future bookings
+  // If a specific status filter is set, filter by that status.
+  // When filters.status is "all" or omitted, return all statuses without exclusions.
   if (
     filters.status &&
     filters.status !== SCHEDULE_CONSTANTS.ALL_FILTER_VALUE
   ) {
     results = results.filter((booking) => booking.status === filters.status);
-  } else if (!filters.date && !filters.startDate) {
-    // Default history view without specific status or date filters: show past bookings or terminal status
-    results = results.filter(
-      (booking) =>
-        booking.startsAt < now ||
-        booking.status === BOOKING_STATUS.CANCELLED ||
-        booking.status === BOOKING_STATUS.COMPLETED ||
-        booking.status === BOOKING_STATUS.NO_SHOW,
-    );
   }
 
   if (filters.serviceId) {

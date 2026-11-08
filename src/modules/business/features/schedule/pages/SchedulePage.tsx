@@ -68,7 +68,7 @@ export const SchedulePage = (): ReactElement => {
         {viewModel.activeTab === SCHEDULE_TAB.AGENDA && (
           <AgendaCalendarView
             blocks={viewModel.scheduleBlocks}
-            bookings={[...viewModel.bookingList, ...viewModel.bookingHistory]}
+            bookings={viewModel.agendaBookings}
             currentDate={viewModel.selectedDate}
             timeZone={viewModel.timeZone}
             viewMode={viewModel.calendarViewMode}

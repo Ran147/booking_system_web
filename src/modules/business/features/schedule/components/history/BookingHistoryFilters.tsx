@@ -41,6 +41,14 @@ export const BookingHistoryFilters = ({
       value: SCHEDULE_CONSTANTS.ALL_FILTER_VALUE,
     },
     {
+      label: t("common:bookingStatus.pending"),
+      value: BOOKING_STATUS.PENDING,
+    },
+    {
+      label: t("common:bookingStatus.confirmed"),
+      value: BOOKING_STATUS.CONFIRMED,
+    },
+    {
       label: t("common:bookingStatus.completed"),
       value: BOOKING_STATUS.COMPLETED,
     },
@@ -51,10 +59,6 @@ export const BookingHistoryFilters = ({
     {
       label: t("common:bookingStatus.no_show"),
       value: BOOKING_STATUS.NO_SHOW,
-    },
-    {
-      label: t("common:bookingStatus.confirmed"),
-      value: BOOKING_STATUS.CONFIRMED,
     },
   ];
 

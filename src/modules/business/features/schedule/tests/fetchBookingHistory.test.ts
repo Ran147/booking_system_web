@@ -92,6 +92,52 @@ describe("fetchBookingHistory (KAN-76)", () => {
     expect(result.bookings).toHaveLength(3);
   });
 
+  it("AC-KAN-76-02: returns all bookings with all statuses when status is all", async () => {
+    mockDocs.push({
+      ["data"]: () => ({
+        businessId,
+        collaboratorId: "collab-1",
+        customerId: "cust-pending",
+        endsAt: new Date(Date.now() + 86_400_000 + 1_800_000),
+        serviceId: "service-haircut",
+        serviceSnapshot: {
+          durationMinutes: 30,
+          name: "Corte",
+          priceInCents: 1000,
+        },
+        startsAt: new Date(Date.now() + 86_400_000),
+        status: BOOKING_STATUS.PENDING,
+      }),
+      id: "booking-pending",
+    });
+
+    const result = await fetchBookingHistory(businessId, {
+      status: "all",
+    });
+
+    expect(result.totalCount).toBe(4);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.PENDING,
+      ),
+    ).toBe(true);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.COMPLETED,
+      ),
+    ).toBe(true);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.CANCELLED,
+      ),
+    ).toBe(true);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.CONFIRMED,
+      ),
+    ).toBe(true);
+  });
+
   it("AC-KAN-76-02: filters by status correctly", async () => {
     const result = await fetchBookingHistory(businessId, {
       status: "cancelled",

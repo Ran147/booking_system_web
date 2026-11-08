@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PAGINATION } from "@/constants";
-import type { Booking } from "@/domain";
+import { BOOKING_STATUS, type Booking } from "@/domain";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable, NullableUndefined } from "@/types";
 import {
@@ -30,6 +30,7 @@ import {
 
 export interface ScheduleViewModelResult {
   readonly activeTab: ScheduleTab;
+  readonly agendaBookings: readonly Booking[];
   readonly blockViewModel: ScheduleBlockViewModelResult;
   readonly bookingHistory: readonly Booking[];
   readonly bookingList: readonly Booking[];
@@ -152,8 +153,34 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     setHistoryFilters({ status: SCHEDULE_CONSTANTS.ALL_FILTER_VALUE });
   };
 
+  const agendaBookings = useMemo(() => {
+    const bookingsMap = new Map<string, Booking>();
+
+    // First insert list bookings
+    for (const booking of bookingListQuery.data?.bookings ?? []) {
+      bookingsMap.set(booking.id, booking);
+    }
+
+    // Then merge with history bookings (preferring terminal status updates like cancelled)
+    for (const booking of bookingHistoryQuery.data?.bookings ?? []) {
+      const existing = bookingsMap.get(booking.id);
+      if (!existing) {
+        bookingsMap.set(booking.id, booking);
+      } else if (
+        booking.status === BOOKING_STATUS.CANCELLED ||
+        booking.status === BOOKING_STATUS.COMPLETED ||
+        booking.status === BOOKING_STATUS.NO_SHOW
+      ) {
+        bookingsMap.set(booking.id, booking);
+      }
+    }
+
+    return Array.from(bookingsMap.values());
+  }, [bookingHistoryQuery.data?.bookings, bookingListQuery.data?.bookings]);
+
   return {
     activeTab,
+    agendaBookings,
     blockViewModel,
     bookingHistory: bookingHistoryQuery.data?.bookings ?? [],
     bookingList: bookingListQuery.data?.bookings ?? [],

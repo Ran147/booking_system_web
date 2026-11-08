@@ -72,6 +72,14 @@ const formatBlockTime = (
   return formatTime(dateObj, tz, lang);
 };
 
+const deduplicateBookings = (list: readonly Booking[]): Booking[] => {
+  const bookingsMap = new Map<string, Booking>();
+  for (const item of list) {
+    bookingsMap.set(item.id, item);
+  }
+  return Array.from(bookingsMap.values());
+};
+
 export const AgendaCalendarView = ({
   blocks,
   bookings,
@@ -107,7 +115,7 @@ export const AgendaCalendarView = ({
 
   const currentDateStr = getZonedDateString(currentDate, timeZone);
 
-  const currentDayBookings = bookings.filter(
+  const currentDayBookings = deduplicateBookings(bookings).filter(
     (booking) =>
       getZonedDateString(booking.startsAt, timeZone) === currentDateStr,
   );

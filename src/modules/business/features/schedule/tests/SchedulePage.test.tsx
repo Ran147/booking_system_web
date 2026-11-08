@@ -146,4 +146,25 @@ describe("SchedulePage (KAN-67, KAN-68, KAN-75, KAN-76)", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("AC-KAN-67-02: deduplicates bookings present in both bookingList and bookingHistory", async (): Promise<void> => {
+    vi.mocked(fetchBookingList).mockResolvedValue({
+      bookings: [mockBooking],
+      totalCount: 1,
+    });
+    vi.mocked(fetchBookingHistory).mockResolvedValue({
+      bookings: [{ ...mockBooking, status: BOOKING_STATUS.CANCELLED }],
+      totalCount: 1,
+    });
+
+    renderWithProviders(<SchedulePage />, {
+      initialPath: "/business/schedule",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    await waitFor((): void => {
+      const elements = screen.queryAllByText("Cliente Demo");
+      expect(elements.length).toBeLessThanOrEqual(1);
+    });
+  });
 });
