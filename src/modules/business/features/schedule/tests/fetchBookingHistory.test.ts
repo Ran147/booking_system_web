@@ -196,6 +196,7 @@ describe("fetchBookingHistory (KAN-76)", () => {
         startDate: "2026-11-04",
         status: "all",
       },
+      1,
       10,
       "America/Costa_Rica",
     );
@@ -211,6 +212,7 @@ describe("fetchBookingHistory (KAN-76)", () => {
         date: "2026-11-05",
         status: "all",
       },
+      1,
       10,
       "America/Costa_Rica",
     );
@@ -227,11 +229,35 @@ describe("fetchBookingHistory (KAN-76)", () => {
         startDate: "2026-11-10",
         status: "all",
       },
+      1,
       10,
       "America/Costa_Rica",
     );
 
     // Filter was skipped per AC-KAN-76-03
     expect(result.totalCount).toBe(3);
+  });
+
+  it("AC-KAN-76-04: paginates results correctly by page and pageSize", async () => {
+    const pageOne = await fetchBookingHistory(
+      businessId,
+      { status: "all" },
+      1,
+      2,
+    );
+    expect(pageOne.totalCount).toBe(3);
+    expect(pageOne.bookings).toHaveLength(2);
+    expect(pageOne.bookings[0]?.id).toBe("booking-1");
+    expect(pageOne.bookings[1]?.id).toBe("booking-2");
+
+    const pageTwo = await fetchBookingHistory(
+      businessId,
+      { status: "all" },
+      2,
+      2,
+    );
+    expect(pageTwo.totalCount).toBe(3);
+    expect(pageTwo.bookings).toHaveLength(1);
+    expect(pageTwo.bookings[0]?.id).toBe("booking-3");
   });
 });

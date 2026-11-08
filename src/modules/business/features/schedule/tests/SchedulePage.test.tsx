@@ -119,6 +119,44 @@ describe("SchedulePage (KAN-67, KAN-68, KAN-75, KAN-76)", () => {
     await waitFor((): void => {
       expect(screen.getByText("Cliente Demo")).toBeInTheDocument();
       expect(screen.getByText("Corte Clásico")).toBeInTheDocument();
+      expect(
+        screen.getByRole("navigation", { name: "Paginación" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Anterior" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Siguiente" })).toBeDisabled();
+    });
+  });
+
+  it("AC-KAN-75-02: allows navigating pages when totalCount exceeds pageSize in upcoming bookings", async (): Promise<void> => {
+    vi.mocked(fetchBookingList).mockResolvedValue({
+      bookings: [mockBooking],
+      totalCount: 25,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, {
+      initialPath: "/business/schedule",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    await waitFor((): void => {
+      expect(
+        screen.getByRole("tab", { name: "Próximas citas" }),
+      ).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("tab", { name: "Próximas citas" }));
+
+    await waitFor((): void => {
+      expect(
+        screen.getByRole("button", { name: "Siguiente" }),
+      ).not.toBeDisabled();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Siguiente" }));
+
+    await waitFor((): void => {
+      expect(fetchBookingList).toHaveBeenCalledWith("business-test", 2, 20);
     });
   });
 
@@ -144,6 +182,48 @@ describe("SchedulePage (KAN-67, KAN-68, KAN-75, KAN-76)", () => {
           "No se encontraron reservas con los filtros aplicados.",
         ),
       ).toBeInTheDocument();
+    });
+  });
+
+  it("AC-KAN-76-02: renders pagination in history tab when items exist and navigates", async (): Promise<void> => {
+    vi.mocked(fetchBookingHistory).mockResolvedValue({
+      bookings: [mockBooking],
+      totalCount: 25,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, {
+      initialPath: "/business/schedule",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    await waitFor((): void => {
+      expect(
+        screen.getByRole("tab", { name: "Historial" }),
+      ).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("tab", { name: "Historial" }));
+
+    await waitFor((): void => {
+      expect(
+        screen.getByRole("navigation", { name: "Paginación" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Siguiente" }),
+      ).not.toBeDisabled();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Siguiente" }));
+
+    await waitFor((): void => {
+      expect(fetchBookingHistory).toHaveBeenCalledWith(
+        "business-test",
+        { status: "all" },
+        2,
+        20,
+        "America/Costa_Rica",
+      );
     });
   });
 

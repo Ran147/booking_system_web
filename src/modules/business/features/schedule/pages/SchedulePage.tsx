@@ -5,6 +5,7 @@ import {
   Button,
   BUTTON_SIZE,
   BUTTON_VARIANT,
+  CursorPagination,
   PageTemplate,
   Tabs,
 } from "@/components/common";
@@ -80,12 +81,24 @@ export const SchedulePage = (): ReactElement => {
         )}
 
         {viewModel.activeTab === SCHEDULE_TAB.BOOKINGS && (
-          <BookingListTable
-            bookings={viewModel.bookingList}
-            isLoading={viewModel.isLoading}
-            timeZone={viewModel.timeZone}
-            onSelectBooking={viewModel.handleSelectBooking}
-          />
+          <div className="flex flex-col gap-4">
+            <BookingListTable
+              bookings={viewModel.bookingList}
+              isLoading={viewModel.isLoading}
+              timeZone={viewModel.timeZone}
+              onSelectBooking={viewModel.handleSelectBooking}
+            />
+            {viewModel.totalUpcomingCount > 0 && (
+              <CursorPagination
+                hasNextPage={viewModel.hasUpcomingNextPage}
+                hasPreviousPage={viewModel.hasUpcomingPreviousPage}
+                onNextPageClick={viewModel.handleUpcomingNextPage}
+                onPreviousPageClick={viewModel.handleUpcomingPreviousPage}
+                pageNumber={viewModel.upcomingPage}
+                totalCount={viewModel.totalUpcomingCount}
+              />
+            )}
+          </div>
         )}
 
         {viewModel.activeTab === SCHEDULE_TAB.HISTORY && (
@@ -101,6 +114,16 @@ export const SchedulePage = (): ReactElement => {
               timeZone={viewModel.timeZone}
               onSelectBooking={viewModel.handleSelectBooking}
             />
+            {viewModel.totalHistoryCount > 0 && (
+              <CursorPagination
+                hasNextPage={viewModel.hasHistoryNextPage}
+                hasPreviousPage={viewModel.hasHistoryPreviousPage}
+                onNextPageClick={viewModel.handleHistoryNextPage}
+                onPreviousPageClick={viewModel.handleHistoryPreviousPage}
+                pageNumber={viewModel.historyPage}
+                totalCount={viewModel.totalHistoryCount}
+              />
+            )}
           </div>
         )}
 

@@ -44,10 +44,19 @@ export interface ScheduleViewModelResult {
     key: Key,
     value: BookingHistoryFilterValues[Key],
   ) => void;
+  readonly handleHistoryNextPage: () => void;
+  readonly handleHistoryPreviousPage: () => void;
   readonly handleOpenCancel: () => void;
   readonly handleOpenReschedule: () => void;
   readonly handleSelectBooking: (booking: Booking) => void;
+  readonly handleUpcomingNextPage: () => void;
+  readonly handleUpcomingPreviousPage: () => void;
+  readonly hasHistoryNextPage: boolean;
+  readonly hasHistoryPreviousPage: boolean;
+  readonly hasUpcomingNextPage: boolean;
+  readonly hasUpcomingPreviousPage: boolean;
   readonly historyFilters: BookingHistoryFilterValues;
+  readonly historyPage: number;
   readonly isCancelOpen: boolean;
   readonly isDetailOpen: boolean;
   readonly isLoading: boolean;
@@ -65,6 +74,7 @@ export interface ScheduleViewModelResult {
   readonly timeZone: string;
   readonly totalHistoryCount: number;
   readonly totalUpcomingCount: number;
+  readonly upcomingPage: number;
 }
 
 export const useScheduleViewModel = (): ScheduleViewModelResult => {
@@ -84,6 +94,8 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     SCHEDULE_VIEW_MODE.DAY,
   );
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [upcomingPage, setUpcomingPage] = useState<number>(1);
+  const [historyPage, setHistoryPage] = useState<number>(1);
 
   const [historyFilters, setHistoryFilters] =
     useState<BookingHistoryFilterValues>({
@@ -92,7 +104,11 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
 
   const businessHoursQuery = useBusinessHoursQuery(businessId);
   const scheduleBlocksQuery = useScheduleBlocksQuery(businessId);
-  const bookingListQuery = useBookingListQuery(businessId);
+  const bookingListQuery = useBookingListQuery(
+    businessId,
+    upcomingPage,
+    PAGINATION.DEFAULT_PAGE_SIZE,
+  );
 
   const timeZone =
     businessHoursQuery.data?.timeZone &&
@@ -104,7 +120,7 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
   const bookingHistoryQuery = useBookingHistoryQuery(
     businessId,
     historyFilters,
-    1,
+    historyPage,
     PAGINATION.DEFAULT_PAGE_SIZE,
     timeZone,
   );
@@ -113,6 +129,40 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
   const blockViewModel = useScheduleBlockViewModel((createdDate) => {
     setSelectedDate(createdDate);
   });
+
+  const totalUpcomingCount = bookingListQuery.data?.totalCount ?? 0;
+  const hasUpcomingNextPage =
+    upcomingPage * PAGINATION.DEFAULT_PAGE_SIZE < totalUpcomingCount;
+  const hasUpcomingPreviousPage = upcomingPage > 1;
+
+  const handleUpcomingNextPage = (): void => {
+    if (hasUpcomingNextPage) {
+      setUpcomingPage((previousPage) => previousPage + 1);
+    }
+  };
+
+  const handleUpcomingPreviousPage = (): void => {
+    if (hasUpcomingPreviousPage) {
+      setUpcomingPage((previousPage) => Math.max(1, previousPage - 1));
+    }
+  };
+
+  const totalHistoryCount = bookingHistoryQuery.data?.totalCount ?? 0;
+  const hasHistoryNextPage =
+    historyPage * PAGINATION.DEFAULT_PAGE_SIZE < totalHistoryCount;
+  const hasHistoryPreviousPage = historyPage > 1;
+
+  const handleHistoryNextPage = (): void => {
+    if (hasHistoryNextPage) {
+      setHistoryPage((previousPage) => previousPage + 1);
+    }
+  };
+
+  const handleHistoryPreviousPage = (): void => {
+    if (hasHistoryPreviousPage) {
+      setHistoryPage((previousPage) => Math.max(1, previousPage - 1));
+    }
+  };
 
   const handleSelectBooking = (booking: Booking): void => {
     setSelectedBooking(booking);
@@ -147,10 +197,12 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     value: BookingHistoryFilterValues[Key],
   ): void => {
     setHistoryFilters((previous) => ({ ...previous, [key]: value }));
+    setHistoryPage(1);
   };
 
   const handleClearFilters = (): void => {
     setHistoryFilters({ status: SCHEDULE_CONSTANTS.ALL_FILTER_VALUE });
+    setHistoryPage(1);
   };
 
   const agendaBookings = useMemo(() => {
@@ -191,10 +243,19 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     handleCloseDetail,
     handleCloseReschedule,
     handleFilterChange,
+    handleHistoryNextPage,
+    handleHistoryPreviousPage,
     handleOpenCancel,
     handleOpenReschedule,
     handleSelectBooking,
+    handleUpcomingNextPage,
+    handleUpcomingPreviousPage,
+    hasHistoryNextPage,
+    hasHistoryPreviousPage,
+    hasUpcomingNextPage,
+    hasUpcomingPreviousPage,
     historyFilters,
+    historyPage,
     isCancelOpen,
     isDetailOpen,
     isLoading:
@@ -213,7 +274,8 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     setIsNewBookingOpen,
     setSelectedDate,
     timeZone,
-    totalHistoryCount: bookingHistoryQuery.data?.totalCount ?? 0,
-    totalUpcomingCount: bookingListQuery.data?.totalCount ?? 0,
+    totalHistoryCount,
+    totalUpcomingCount,
+    upcomingPage,
   };
 };

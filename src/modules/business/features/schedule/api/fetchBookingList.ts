@@ -7,6 +7,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { PAGINATION } from "@/constants";
 import type { Booking } from "@/domain";
 import { firestore } from "@/services/firebase";
 import { mapBookingDocument } from "./bookingDocument.schema";
@@ -18,7 +19,8 @@ export interface BookingListResult {
 
 export const fetchBookingList = async (
   businessId: string,
-  pageSize = 10,
+  page = 1,
+  pageSize: number = PAGINATION.DEFAULT_PAGE_SIZE,
 ): Promise<BookingListResult> => {
   if (!businessId) {
     return { bookings: [], totalCount: 0 };
@@ -38,15 +40,19 @@ export const fetchBookingList = async (
     orderBy("startsAt", "asc"),
   );
 
-  const pageQuery = query(baseQuery, limit(pageSize));
+  const pageQuery = query(baseQuery, limit(page * pageSize));
 
   const [snapshot, countSnapshot] = await Promise.all([
     getDocs(pageQuery),
     getCountFromServer(baseQuery),
   ]);
 
+  const allFetched = snapshot.docs.map(mapBookingDocument);
+  const startIndex = (page - 1) * pageSize;
+  const pageDocs = allFetched.slice(startIndex, startIndex + pageSize);
+
   return {
-    bookings: snapshot.docs.map(mapBookingDocument),
+    bookings: pageDocs,
     totalCount: countSnapshot.data().count,
   };
 };

@@ -1,5 +1,5 @@
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
-import { FUNCTION_NAME } from "@/constants";
+import { FUNCTION_NAME, PAGINATION } from "@/constants";
 import type { Booking } from "@/domain";
 import { callFunction, firestore } from "@/services/firebase";
 import type { Nullable } from "@/types";
@@ -36,7 +36,8 @@ interface FetchBookingHistoryResponse {
 export const fetchBookingHistory = async (
   businessId: string,
   filters: BookingHistoryFilterValues,
-  pageSize = 10,
+  page = 1,
+  pageSize: number = PAGINATION.DEFAULT_PAGE_SIZE,
   timeZone: string = SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
 ): Promise<BookingHistoryResult> => {
   if (!businessId) {
@@ -135,8 +136,11 @@ export const fetchBookingHistory = async (
     }
   }
 
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
   return {
-    bookings: results.slice(0, pageSize),
+    bookings: results.slice(startIndex, endIndex),
     totalCount: results.length,
   };
 };
