@@ -70,6 +70,7 @@ export const SchedulePage = (): ReactElement => {
           <AgendaCalendarView
             blocks={viewModel.scheduleBlocks}
             bookings={viewModel.agendaBookings}
+            businessHours={viewModel.businessHours}
             currentDate={viewModel.selectedDate}
             timeZone={viewModel.timeZone}
             viewMode={viewModel.calendarViewMode}
@@ -86,6 +87,7 @@ export const SchedulePage = (): ReactElement => {
               bookings={viewModel.bookingList}
               isLoading={viewModel.isLoading}
               timeZone={viewModel.timeZone}
+              onNewBooking={() => viewModel.setIsNewBookingOpen(true)}
               onSelectBooking={viewModel.handleSelectBooking}
             />
             {viewModel.totalUpcomingCount > 0 && (

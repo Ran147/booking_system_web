@@ -101,6 +101,29 @@ describe("SchedulePage (KAN-67, KAN-68, KAN-75, KAN-76)", () => {
     });
   });
 
+  it("AC-KAN-67-02: switches to week view in agenda and displays week days", async (): Promise<void> => {
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, {
+      initialPath: "/business/schedule",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    await waitFor((): void => {
+      expect(
+        screen.getByRole("button", { name: "Semana" }),
+      ).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Semana" }));
+
+    await waitFor((): void => {
+      expect(screen.getByRole("button", { name: "Día" })).toBeInTheDocument();
+      expect(
+        screen.getAllByText(/Cerrado|Libre|Turnos|Citas/i).length,
+      ).toBeGreaterThan(0);
+    });
+  });
+
   it("AC-KAN-75-01: switches to upcoming bookings tab and displays list", async (): Promise<void> => {
     const user = userEvent.setup();
     renderWithProviders(<SchedulePage />, {
@@ -157,6 +180,36 @@ describe("SchedulePage (KAN-67, KAN-68, KAN-75, KAN-76)", () => {
 
     await waitFor((): void => {
       expect(fetchBookingList).toHaveBeenCalledWith("business-test", 2, 20);
+    });
+  });
+
+  it("AC-KAN-75-04: shows empty state with action to create a booking in upcoming tab", async (): Promise<void> => {
+    vi.mocked(fetchBookingList).mockResolvedValue({
+      bookings: [],
+      totalCount: 0,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, {
+      initialPath: "/business/schedule",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    await waitFor((): void => {
+      expect(
+        screen.getByRole("tab", { name: "Próximas citas" }),
+      ).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("tab", { name: "Próximas citas" }));
+
+    await waitFor((): void => {
+      expect(
+        screen.getByText("No hay próximas reservas registradas."),
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByRole("button", { name: "Crear reserva" }).length,
+      ).toBeGreaterThanOrEqual(1);
     });
   });
 

@@ -6,7 +6,6 @@ import {
   Button,
   BUTTON_SIZE,
   BUTTON_VARIANT,
-  EmptyState,
   StatusBadge,
   Table,
   TableBody,
@@ -23,6 +22,7 @@ import { formatDateTime, formatPrice } from "@/utils";
 interface BookingListTableProps {
   readonly bookings: readonly Booking[];
   readonly isLoading?: boolean;
+  readonly onNewBooking?: () => void;
   readonly onSelectBooking: (booking: Booking) => void;
   readonly timeZone?: string;
 }
@@ -30,13 +30,27 @@ interface BookingListTableProps {
 export const BookingListTable = ({
   bookings,
   isLoading = false,
+  onNewBooking,
   onSelectBooking,
   timeZone = SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
 }: BookingListTableProps): ReactElement => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.BUSINESS);
 
   if (bookings.length === 0 && !isLoading) {
-    return <EmptyState message={t("schedule.bookingList.emptyDescription")} />;
+    return (
+      <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
+        <p>{t("schedule.bookingList.emptyDescription")}</p>
+        {onNewBooking && (
+          <Button
+            size={BUTTON_SIZE.SM}
+            variant={BUTTON_VARIANT.PRIMARY}
+            onClick={onNewBooking}
+          >
+            {t("schedule.bookingList.newBookingAction")}
+          </Button>
+        )}
+      </div>
+    );
   }
 
   return (
