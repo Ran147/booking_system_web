@@ -66,8 +66,12 @@ export const fetchBookingHistory = async (
     );
   }
 
-  // AC-KAN-76-03: If date range is invalid, do not apply date range filter
-  if (
+  if (filters.date) {
+    const { end, start } = zonedDayBounds(filters.date, timeZone);
+    results = results.filter(
+      (booking) => booking.startsAt >= start && booking.startsAt <= end,
+    );
+  } else if (
     filters.startDate &&
     filters.endDate &&
     filters.startDate > filters.endDate

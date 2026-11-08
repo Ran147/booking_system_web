@@ -126,6 +126,21 @@ describe("fetchBookingHistory (KAN-76)", () => {
     expect(result.bookings[0]?.id).toBe("booking-1");
   });
 
+  it("AC-KAN-76-02: filters by single date in Costa Rica time", async () => {
+    const result = await fetchBookingHistory(
+      businessId,
+      {
+        date: "2026-11-05",
+        status: "all",
+      },
+      10,
+      "America/Costa_Rica",
+    );
+
+    expect(result.totalCount).toBe(1);
+    expect(result.bookings[0]?.id).toBe("booking-1");
+  });
+
   it("AC-KAN-76-03: does not apply date filter when end date is before start date", async () => {
     const result = await fetchBookingHistory(
       businessId,

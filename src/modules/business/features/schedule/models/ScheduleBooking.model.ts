@@ -48,6 +48,7 @@ export interface ActiveServiceOption {
 
 export interface BookingHistoryFilterValues {
   readonly collaboratorId?: Nullable<string>;
+  readonly date?: string;
   readonly endDate?: string;
   readonly serviceId?: string;
   readonly startDate?: string;

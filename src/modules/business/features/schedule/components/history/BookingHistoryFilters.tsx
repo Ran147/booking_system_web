@@ -13,7 +13,6 @@ import { I18N_NAMESPACE } from "@/constants";
 import { BOOKING_STATUS, type BookingStatus } from "@/domain";
 import {
   SCHEDULE_CONSTANTS,
-  type ActiveServiceOption,
   type BookingHistoryFilterValues,
 } from "@/modules/business/features/schedule";
 
@@ -24,64 +23,54 @@ interface BookingHistoryFiltersProps {
     key: Key,
     value: BookingHistoryFilterValues[Key],
   ) => void;
-  readonly services?: readonly ActiveServiceOption[];
 }
 
 export const BookingHistoryFilters = ({
   filters,
   onClear,
   onFilterChange,
-  services = [],
 }: BookingHistoryFiltersProps): ReactElement => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+  const { t } = useTranslation([
+    I18N_NAMESPACE.BUSINESS,
+    I18N_NAMESPACE.COMMON,
+  ]);
 
   const statusOptions = [
     {
       label: t("schedule.history.allStatuses"),
       value: SCHEDULE_CONSTANTS.ALL_FILTER_VALUE,
     },
-    { label: "Completada", value: BOOKING_STATUS.COMPLETED },
-    { label: "Cancelada", value: BOOKING_STATUS.CANCELLED },
-    { label: "No se presentó", value: BOOKING_STATUS.NO_SHOW },
-    { label: "Confirmada", value: BOOKING_STATUS.CONFIRMED },
+    {
+      label: t("common:bookingStatus.completed"),
+      value: BOOKING_STATUS.COMPLETED,
+    },
+    {
+      label: t("common:bookingStatus.cancelled"),
+      value: BOOKING_STATUS.CANCELLED,
+    },
+    {
+      label: t("common:bookingStatus.no_show"),
+      value: BOOKING_STATUS.NO_SHOW,
+    },
+    {
+      label: t("common:bookingStatus.confirmed"),
+      value: BOOKING_STATUS.CONFIRMED,
+    },
   ];
-
-  const serviceOptions = [
-    { label: t("schedule.history.allServices"), value: "" },
-    ...services.map((service) => ({
-      label: service.name,
-      value: service.id,
-    })),
-  ];
-
-  const hasInvalidDateRange = Boolean(
-    filters.startDate && filters.endDate && filters.startDate > filters.endDate,
-  );
 
   return (
     <Card className="p-4 bg-card/60 border-border">
-      <div className="flex flex-col md:flex-row md:items-end gap-3">
-        <div className="w-full md:w-44">
+      <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+        <div className="w-full sm:w-56">
           <InputField
-            label={t("schedule.history.dateFrom")}
+            label={t("schedule.history.dateFilter", { defaultValue: "Date" })}
             type="date"
-            value={filters.startDate ?? ""}
-            onChange={(event) =>
-              onFilterChange("startDate", event.target.value)
-            }
+            value={filters.date ?? filters.startDate ?? ""}
+            onChange={(event) => onFilterChange("date", event.target.value)}
           />
         </div>
 
-        <div className="w-full md:w-44">
-          <InputField
-            label={t("schedule.history.dateTo")}
-            type="date"
-            value={filters.endDate ?? ""}
-            onChange={(event) => onFilterChange("endDate", event.target.value)}
-          />
-        </div>
-
-        <div className="w-full md:w-44">
+        <div className="w-full sm:w-56">
           <SelectField
             label={t("schedule.history.statusFilter")}
             options={statusOptions}
@@ -95,18 +84,7 @@ export const BookingHistoryFilters = ({
           />
         </div>
 
-        <div className="w-full md:w-48">
-          <SelectField
-            label={t("schedule.history.serviceFilter")}
-            options={serviceOptions}
-            value={filters.serviceId ?? ""}
-            onChange={(event) =>
-              onFilterChange("serviceId", event.target.value)
-            }
-          />
-        </div>
-
-        <div className="md:ml-auto">
+        <div className="sm:ml-auto">
           <Button
             leftIcon={RotateCcw}
             size={BUTTON_SIZE.SM}
@@ -117,12 +95,6 @@ export const BookingHistoryFilters = ({
           </Button>
         </div>
       </div>
-
-      {hasInvalidDateRange && (
-        <p className="text-xs text-destructive mt-3" role="alert">
-          {t("schedule.history.invalidDateRangeError")}
-        </p>
-      )}
     </Card>
   );
 };
