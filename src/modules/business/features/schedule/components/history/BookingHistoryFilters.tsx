@@ -54,6 +54,10 @@ export const BookingHistoryFilters = ({
     })),
   ];
 
+  const hasInvalidDateRange = Boolean(
+    filters.startDate && filters.endDate && filters.startDate > filters.endDate,
+  );
+
   return (
     <Card className="p-4 bg-card/60 border-border">
       <div className="flex flex-col md:flex-row md:items-end gap-3">
@@ -113,6 +117,12 @@ export const BookingHistoryFilters = ({
           </Button>
         </div>
       </div>
+
+      {hasInvalidDateRange && (
+        <p className="text-xs text-destructive mt-3" role="alert">
+          {t("schedule.history.invalidDateRangeError")}
+        </p>
+      )}
     </Card>
   );
 };

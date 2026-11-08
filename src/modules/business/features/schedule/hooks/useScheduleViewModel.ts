@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PAGINATION } from "@/constants";
 import type { Booking } from "@/domain";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable, NullableUndefined } from "@/types";
@@ -91,9 +92,20 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
   const businessHoursQuery = useBusinessHoursQuery(businessId);
   const scheduleBlocksQuery = useScheduleBlocksQuery(businessId);
   const bookingListQuery = useBookingListQuery(businessId);
+
+  const timeZone =
+    businessHoursQuery.data?.timeZone &&
+    businessHoursQuery.data.timeZone !== SCHEDULE_CONSTANTS.UTC_TIME_ZONE &&
+    !businessHoursQuery.data.timeZone.includes("Mexico")
+      ? businessHoursQuery.data.timeZone
+      : SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE;
+
   const bookingHistoryQuery = useBookingHistoryQuery(
     businessId,
     historyFilters,
+    1,
+    PAGINATION.DEFAULT_PAGE_SIZE,
+    timeZone,
   );
   const activeServicesQuery = useActiveServicesQuery(businessId);
 
@@ -171,11 +183,7 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     setCalendarViewMode,
     setIsNewBookingOpen,
     setSelectedDate,
-    timeZone:
-      businessHoursQuery.data?.timeZone &&
-      businessHoursQuery.data.timeZone !== SCHEDULE_CONSTANTS.UTC_TIME_ZONE
-        ? businessHoursQuery.data.timeZone
-        : Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone,
     totalHistoryCount: bookingHistoryQuery.data?.totalCount ?? 0,
     totalUpcomingCount: bookingListQuery.data?.totalCount ?? 0,
   };
