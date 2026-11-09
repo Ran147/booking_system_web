@@ -214,7 +214,11 @@ export const useSubscriberSignUpFormViewModel = ({
         activeLanguage: i18n.language,
         recaptchaToken,
         signUpToken,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timeZone: Intl.DateTimeFormat()
+          .resolvedOptions()
+          .timeZone.includes("Mexico")
+          ? "America/Costa_Rica"
+          : Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
       {
         onError: handleSignUpError,

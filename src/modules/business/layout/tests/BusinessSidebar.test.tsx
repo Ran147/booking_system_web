@@ -48,6 +48,10 @@ const testRoutes: RouteObject[] = [
         path: ROUTE_PATH.BUSINESS.SERVICES,
       },
       {
+        element: <div>Schedule Page Outlet</div>,
+        path: ROUTE_PATH.BUSINESS.SCHEDULE,
+      },
+      {
         element: <div>New Service Form Outlet</div>,
         path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
       },
@@ -151,12 +155,25 @@ describe("BusinessSidebar (KAN-29, KAN-39, KAN-42)", () => {
     });
     const page = createBusinessSidebarPage();
 
-    await page.clickScheduleItem();
+    await page.clickCustomersItem();
 
     expect(await page.findPlaceholderModalHeading()).toBeInTheDocument();
 
     await page.clickClosePlaceholderModal();
 
+    expect(page.queryPlaceholderModalHeading()).not.toBeInTheDocument();
+  });
+
+  it("KAN-67: navigates to schedule without opening the placeholder dialog", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    await page.clickScheduleItem();
+
+    expect(await screen.findByText("Schedule Page Outlet")).toBeInTheDocument();
     expect(page.queryPlaceholderModalHeading()).not.toBeInTheDocument();
   });
 

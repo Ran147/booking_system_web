@@ -12,13 +12,13 @@ import { testI18n } from "./testI18n";
 const setTestThemeMode = (): void => undefined;
 
 export interface RenderWithProvidersOptions {
-  initialPath: string;
+  initialPath?: string;
   session: Session;
 }
 
 export const renderWithProviders = (
   element: ReactElement,
-  { initialPath, session }: RenderWithProvidersOptions,
+  { initialPath = "/", session }: RenderWithProvidersOptions,
 ): RenderResult => {
   const testQueryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
