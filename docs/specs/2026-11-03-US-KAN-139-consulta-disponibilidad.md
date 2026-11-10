@@ -6,7 +6,7 @@
 | **Épica / Historias** | KAN-139 (KAN-140 fecha, KAN-141 solo horarios libres, KAN-142 por colaborador, KAN-143 bloqueos y descansos, KAN-144 revalidar al confirmar) |
 | **Portal** | Customer (interfaz) y servidor (`functions/src/bookings/`) |
 | **Fecha de Especificación** | 2026-11-03 |
-| **Estado** | Borrador para revisión: D-1 a D-6 pendientes de confirmar |
+| **Estado** | Decisiones D-1 a D-6 confirmadas por el equipo el 2026-11-09 (ver sección 5) |
 | **Spec funcional (criterios AC)** | `src/modules/customer/features/availability/specs/SPEC.md` (este documento **no** los repite, los implementa) |
 | **Preguntas abiertas** | Ninguna `BLOCKED`. Q1 y Q4 decididas el 2026-09-28. Q8 decidida el 2026-10-24 (dónde corre el servidor), con implementación pendiente |
 | **Épica que depende de esta** | KAN-145 (resumen, políticas y confirmación de la reserva) |
@@ -28,7 +28,8 @@ El cálculo vive **solo en el servidor** (el cliente no lee reservas ajenas) y s
   - `Business.timeZone` (zona IANA) y `Business.status`.
   - `Booking`: `startsAt`, `endsAt`, `status`, `collaboratorId` (`Nullable`), `serviceSnapshot.durationMinutes`.
   - `Collaborator` en `businesses/{id}/collaborators/{id}`, con `fullName`, `status` y `serviceIds`.
-- **Datos que no existen en código:** `ScheduleBlock` (solo la constante de colección; sin reglas ni tipos) y la pantalla de horario del negocio (KAN-64 a 66). El motor recibe los bloqueos como datos de entrada, así que se puede construir y probar sin ellos.
+- **Bloqueos y horario del negocio:** ya existen desde el PR #76 (KAN-63). `ScheduleBlock` tiene `startsAt`, `endsAt`, `isFullDay`, `reason` y `collaboratorId` (`Nullable`), y `businessHours` guarda rangos `{ opensAt, closesAt }` por día de la semana. El motor los recibe como datos de entrada, así que se puede probar sin Firestore.
+- **Colaboradores (KAN-77):** solo existe su spec, sin pantallas. El motor trata al negocio como único recurso cuando no hay colaboradores y suma recursos cuando existan.
 - **Librerías de fecha:** `functions/` no tiene ninguna (solo `firebase-admin`, `firebase-functions` y `zod`). El front resuelve zonas horarias con `Intl` en `zonedDayBounds`; el motor usa la misma técnica y **no puede importar de `src/`**, así que se copia a `functions/src/shared/`.
 - **`createBooking` hoy** (`functions/src/bookings/createBooking.ts`) cumple casi nada de KAN-144:
   - No revisa cruces con otras reservas, ni el horario del negocio, ni bloqueos, ni que el inicio esté en el futuro.
@@ -84,15 +85,15 @@ Cada PR es pequeño, con su spec primero y los criterios que cubre en la descrip
 | 4 | `getAvailability` | AC-KAN-140-01 a 03, 141-03, 143-02, 143-04, 143-07 |
 | 5 | Interfaz: selector de fecha y horarios | AC-KAN-140-01 a 10, 141-08, 142-03 a 05 |
 
-### 5. Decisiones y dudas por confirmar
-| Id | Duda | Propuesta |
+### 5. Decisiones (confirmadas el 2026-11-09)
+| Id | Tema | Decisión |
 |---|---|---|
-| D-1 | **Cómo se guardan los descansos.** La spec habla de "tiempos de descanso" y `businessHours` ya admite varios rangos por día. | Un descanso es un hueco entre rangos, o un bloqueo parcial. No hay campo nuevo. |
-| D-2 | **Forma de `ScheduleBlock`.** Nadie la ha definido en código; la spec de horario solo dice "inicio y fin". | El motor acepta `{ startsAt, endsAt, collaboratorId }` como instantes. Un bloqueo de día completo lo convierte quien lo lee (inicio y fin del día en la zona del negocio). Confirmar con quien construya KAN-64 a 66. |
+| D-1 | **Cómo se guardan los descansos.** | Un descanso es un hueco entre rangos del mismo día en `businessHours`, o un bloqueo parcial. No hay campo nuevo. |
+| D-2 | **Forma de `ScheduleBlock`.** | Resuelta por el PR #76: `startsAt`, `endsAt`, `isFullDay`, `reason`, `collaboratorId`. El motor recibe `{ startsAt, endsAt, collaboratorId }` como instantes; si `isFullDay`, quien lee el bloqueo ya trae el inicio y fin del día en la zona del negocio. |
 | D-3 | **Supuestos AS-1, AS-3 y AS-5.** | Ventana de 60 días, intervalo de 30 min, sin antelación mínima. Quedan en constantes, fáciles de cambiar. |
-| D-4 | **Los huecos de `createBooking`** (`endsAt` y `collaboratorId` del cliente, `customerId` libre). | Corregirlos en el PR 3, porque KAN-144 no se cumple sin ello. `customerId` necesita saber qué es ese documento antes de validarlo. |
-| D-5 | **Estado inicial de la reserva.** Hoy siempre es `confirmed`. KAN-70 (modo manual) no tiene campo definido. | Mantener `confirmed` y dejar KAN-70 para su propia historia. |
-| D-6 | **Dónde corre el servidor.** | El motor es independiente de dónde corra. El PR 4 espera al dispatcher de Q8, o usa el camino que acuerde el equipo con el PR de Marco (#64). |
+| D-4 | **Los huecos de `createBooking`** (`endsAt` y `collaboratorId` del cliente, `customerId` libre). | Se corrigen en el PR 3, porque KAN-144 no se cumple sin ello. `customerId` necesita saber qué es ese documento antes de validarlo. |
+| D-5 | **Estado inicial de la reserva.** | Se mantiene `confirmed`. El modo manual (KAN-70) ya existe como configuración del negocio (`bookingConfirmationMode`, PR #76); cómo afecta el estado inicial se decide en su propia historia. |
+| D-6 | **Dónde corre el servidor.** | El motor es independiente de dónde corra. El PR 4 usa el dispatcher de Vercel de Q8, coordinado con el PR #64. Tiene que cumplir la decisión Q8 y el plan gratuito. |
 
 ### 6. Pruebas
 - **Motor:** tests de Vitest con datos de ejemplo y sin Firebase. Cubren un día normal, cierre, descanso, bloqueo parcial que corta un servicio, día sin horario, hoy con horarios pasados, varios colaboradores, cambio de horario de verano en una zona con DST (por ejemplo `America/New_York`) y duración que no cabe.
