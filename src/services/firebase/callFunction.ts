@@ -8,6 +8,7 @@ import { HTTP_STATUS, type FunctionName } from "@/constants";
 import type { Nullable } from "@/types";
 import { executeClientFunctionsFallback } from "./clientFunctionsFallback";
 import { functions } from "./firebaseApp";
+import { readAuthorizationHeader } from "./readAuthorizationHeader";
 
 interface CallFunctionErrorPayload {
   readonly code?: string;
@@ -24,7 +25,10 @@ export const callFunction = async <Payload, Response>(
     try {
       const serverResponse = await fetch("/api/callFunction", {
         body: JSON.stringify({ functionName, payload }),
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(await readAuthorizationHeader()),
+        },
         method: "POST",
       });
 
@@ -41,14 +45,20 @@ export const callFunction = async <Payload, Response>(
         }
 
         if (errorJson) {
-          const rawCode = (
-            errorJson.code ||
-            errorJson.error ||
-            "internal"
-          ).replace("functions/", "") as FunctionsErrorCodeCore;
-          const errorMessage =
-            errorJson.message || errorJson.error || "Function call failed";
-          throw new FunctionsError(rawCode, errorMessage, errorJson.details);
+          const rawErrorMessage = errorJson.message || errorJson.error || "";
+          const isCredentialOrHandlerMissing =
+            rawErrorMessage.includes("Firebase credentials not found") ||
+            rawErrorMessage.includes("not implemented in server handler");
+
+          if (!isCredentialOrHandlerMissing) {
+            const rawCode = (
+              errorJson.code ||
+              errorJson.error ||
+              "internal"
+            ).replace("functions/", "") as FunctionsErrorCodeCore;
+            const errorMessage = rawErrorMessage || "Function call failed";
+            throw new FunctionsError(rawCode, errorMessage, errorJson.details);
+          }
         }
 
         if (serverResponse.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {

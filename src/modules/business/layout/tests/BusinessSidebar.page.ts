@@ -8,6 +8,7 @@ export interface BusinessSidebarPageObject {
   readonly clickClosePlaceholderModal: () => Promise<void>;
   readonly clickConfirmSignOut: () => Promise<void>;
   readonly clickCreateServiceItem: () => Promise<void>;
+  readonly clickCustomersItem: () => Promise<void>;
   readonly clickMobileSettingsItem: () => Promise<void>;
   readonly clickOpenMenuButton: () => Promise<void>;
   readonly clickSettingsItem: () => Promise<void>;
@@ -74,6 +75,13 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
 
   const clickCreateServiceItem = async (): Promise<void> => {
     const item = await findCreateServiceItem();
+    await user.click(item);
+  };
+
+  const clickCustomersItem = async (): Promise<void> => {
+    const item = await screen.findByRole("button", {
+      name: new RegExp(testI18n.t("business:layout.sidebar.customers"), "i"),
+    });
     await user.click(item);
   };
 
@@ -181,6 +189,7 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     clickClosePlaceholderModal,
     clickConfirmSignOut,
     clickCreateServiceItem,
+    clickCustomersItem,
     clickMobileSettingsItem,
     clickOpenMenuButton,
     clickSettingsItem,

@@ -230,9 +230,10 @@ export const useBusinessSidebarViewModel = (
     },
     {
       description: t("business:layout.sidebar.scheduleDescription"),
+      href: `/business/${ROUTE_PATH.BUSINESS.SCHEDULE}`,
       icon: Calendar,
       id: "schedule",
-      isAvailable: false,
+      isAvailable: true,
       label: t("business:layout.sidebar.schedule"),
     },
     {

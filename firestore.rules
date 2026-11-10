@@ -129,14 +129,27 @@ service cloud.firestore {
       allow update: if ownsBusiness(businessId)
         && businessIsWritable(businessId)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'bookingConfirmationMode',
+          'businessHours',
           'contactEmail',
           'contactPhone',
           'description',
           'logoUrl',
           'name',
-          'socialLinks'
+          'socialLinks',
+          'timeZone',
+          'updatedAt',
+          'updatedBy'
         ])
-        && hasValidPublicProfile(request.resource.data);
+        && hasValidPublicProfile(request.resource.data)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['bookingConfirmationMode'])
+          || request.resource.data.bookingConfirmationMode in ['automatic', 'manual']);
+
+      match /scheduleBlocks/{scheduleBlockId} {
+        allow read: if ownsBusiness(businessId) || isCollaboratorOf(businessId);
+        allow create, update, delete: if (ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_schedule_blocks'))
+          && businessIsWritable(businessId);
+      }
 
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
@@ -153,6 +166,11 @@ service cloud.firestore {
               && resource.data.collaboratorId == request.auth.token.collaboratorId)
           || collaboratorCan(businessId, 'manage_bookings');
         allow write: if false; // only via booking functions
+
+        match /internalNotes/{noteId} {
+          allow read: if ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_bookings');
+          allow write: if false; // only via server functions
+        }
       }
 
       match /customers/{customerId} {

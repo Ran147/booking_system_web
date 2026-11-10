@@ -1,18 +1,26 @@
-export const FUNCTION_NAME = {
+export const FUNCTION_NAME = Object.freeze({
   CANCEL_BOOKING: "cancelBooking",
   CHECK_BUSINESS_SLUG: "checkBusinessSlug",
   COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
   CREATE_BOOKING: "createBooking",
+  CREATE_SCHEDULE_BLOCK: "createScheduleBlock",
   CREATE_SERVICE: "createService",
+  DELETE_SCHEDULE_BLOCK: "deleteScheduleBlock",
   DELETE_SERVICE: "deleteService",
   EXPORT_COLLECTION: "exportCollection",
+  FETCH_BOOKING_HISTORY: "fetchBookingHistory",
+  FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
+  RESCHEDULE_BOOKING: "rescheduleBooking",
   SEND_CONTACT_MESSAGE: "sendContactMessage",
+  UPDATE_BOOKING_STATUS: "updateBookingStatus",
+  UPDATE_BUSINESS_HOURS: "updateBusinessHours",
+  UPDATE_CONFIRMATION_MODE: "updateConfirmationMode",
   UPDATE_SERVICE: "updateService",
   UPDATE_SERVICE_COLLABORATORS: "updateServiceCollaborators",
   VALIDATE_SIGN_UP_LINK: "validateSignUpLink",
   VERIFY_RECAPTCHA: "verifyRecaptcha",
-} as const;
+} as const);
 
 export type FunctionName = (typeof FUNCTION_NAME)[keyof typeof FUNCTION_NAME];
