@@ -2,8 +2,11 @@ import { screen, waitFor } from "@testing-library/react";
 import type { QueryDocumentSnapshot } from "firebase/firestore";
 import type { RouteObject } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "@/components/common";
+import { FUNCTION_NAME } from "@/constants";
 import { SUPPORT_TICKET_STATUS, type SupportTicket } from "@/domain";
 import { adminRoutes } from "@/modules/admin/admin.routes";
+import * as callFunctionModule from "@/services/firebase/callFunction";
 import { ROUTE_PATH } from "@/shared/constants";
 import {
   CUSTOMER_SESSION,
@@ -270,4 +273,164 @@ describe("SupportTickets Route Guard (AC-KAN-190-07)", () => {
       });
     },
   );
+});
+
+describe("SupportTickets Reply (KAN-191)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("AC-KAN-191-01 / AC-KAN-191-02 / AC-KAN-191-03: submits reply, calls replyToSupportTicket, updates ticket replies, transitions status and shows success toast", async () => {
+    const ticket = buildTicket({
+      id: "ticket-reply-1",
+      status: SUPPORT_TICKET_STATUS.OPEN,
+    });
+
+    vi.spyOn(
+      fetchSupportTicketsPageModule,
+      "fetchSupportTicketsPage",
+    ).mockResolvedValue(buildPage([ticket]));
+
+    const toastSuccessSpy = vi.spyOn(toast, "success");
+    const callFunctionSpy = vi
+      .spyOn(callFunctionModule, "callFunction")
+      .mockResolvedValueOnce({
+        reply: {
+          body: "Estamos revisando tu caso detalladamente.",
+          emailFailed: false,
+          id: "new-reply-123",
+          sentAt: new Date().toISOString(),
+          sentByEmail: "support@platform.com",
+          sentByUserId: "admin-sa-1",
+        },
+        status: SUPPORT_TICKET_STATUS.IN_PROGRESS,
+      });
+
+    renderWithProviders(<SupportTicketsPage />, {
+      initialPath: SUPPORT_TICKETS_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createSupportTicketsPage();
+    await page.clickViewDetail(0);
+
+    const modal = await page.findDetailModal();
+    expect(modal).toBeInTheDocument();
+
+    await page.fillReplyBody("Estamos revisando tu caso detalladamente.");
+    await page.clickSendReply();
+
+    await waitFor(() => {
+      expect(callFunctionSpy).toHaveBeenCalledWith(
+        FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET,
+        {
+          body: "Estamos revisando tu caso detalladamente.",
+          ticketId: "ticket-reply-1",
+        },
+      );
+    });
+
+    await waitFor(() => {
+      expect(toastSuccessSpy).toHaveBeenCalledWith(
+        testI18n.t("admin:supportTickets.reply.successToast"),
+      );
+    });
+
+    expect(
+      await screen.findByText("Estamos revisando tu caso detalladamente."),
+    ).toBeInTheDocument();
+  });
+
+  it("AC-KAN-191-04: keeps send reply button disabled when body is empty or whitespace", async () => {
+    const ticket = buildTicket({
+      id: "ticket-reply-2",
+      status: SUPPORT_TICKET_STATUS.OPEN,
+    });
+
+    vi.spyOn(
+      fetchSupportTicketsPageModule,
+      "fetchSupportTicketsPage",
+    ).mockResolvedValue(buildPage([ticket]));
+
+    renderWithProviders(<SupportTicketsPage />, {
+      initialPath: SUPPORT_TICKETS_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createSupportTicketsPage();
+    await page.clickViewDetail(0);
+
+    const submitButton = await page.findSubmitReplyButton();
+    expect(submitButton).toBeDisabled();
+
+    await page.fillReplyBody("     ");
+    expect(submitButton).toBeDisabled();
+  });
+
+  it("AC-KAN-191-06: displays warning notice on replies where email delivery failed", async () => {
+    const ticketWithFailedEmail = buildTicket({
+      id: "ticket-failed-email",
+      replies: [
+        {
+          body: "Respuesta con error de correo.",
+          emailFailed: true,
+          id: "r-failed-1",
+          sentAt: new Date("2026-11-10T12:00:00.000Z"),
+          sentByEmail: "support@platform.com",
+          sentByUserId: "admin-sa-1",
+        },
+      ],
+      status: SUPPORT_TICKET_STATUS.IN_PROGRESS,
+    });
+
+    vi.spyOn(
+      fetchSupportTicketsPageModule,
+      "fetchSupportTicketsPage",
+    ).mockResolvedValue(buildPage([ticketWithFailedEmail]));
+
+    renderWithProviders(<SupportTicketsPage />, {
+      initialPath: SUPPORT_TICKETS_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createSupportTicketsPage();
+    await page.clickViewDetail(0);
+
+    expect(
+      await screen.findByText(
+        testI18n.t("admin:supportTickets.reply.emailFailed"),
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("AC-KAN-191-08: renders resolved notice and disables reply form when ticket is resolved", async () => {
+    const resolvedTicket = buildTicket({
+      id: "ticket-resolved",
+      status: SUPPORT_TICKET_STATUS.RESOLVED,
+    });
+
+    vi.spyOn(
+      fetchSupportTicketsPageModule,
+      "fetchSupportTicketsPage",
+    ).mockResolvedValue(buildPage([resolvedTicket]));
+
+    renderWithProviders(<SupportTicketsPage />, {
+      initialPath: SUPPORT_TICKETS_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createSupportTicketsPage();
+    await page.clickViewDetail(0);
+
+    expect(await page.findResolvedNotice()).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: testI18n.t("admin:supportTickets.reply.submitButton"),
+      }),
+    ).toBeNull();
+  });
 });
