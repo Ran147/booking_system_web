@@ -1,15 +1,19 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, ALERT_VARIANT, Button, Modal } from "@/components/common";
+import { SUPPORT_TICKET_STATUS } from "@/domain";
 import { I18N_NAMESPACE } from "@/shared/constants";
 import type { Nullable } from "@/types";
 import { formatDateTime } from "@/utils/format/formatDateTime";
 import type { SupportTicketDetailDrawerProps } from "../models";
+import { SupportTicketReplyForm } from "./SupportTicketReplyForm";
 import { SupportTicketStatusBadge } from "./SupportTicketStatusBadge";
 
 export const SupportTicketDetailDrawer = ({
   isOpen,
+  isReplying = false,
   onClose,
+  onReply,
   ticket,
 }: SupportTicketDetailDrawerProps): Nullable<ReactElement> => {
   const { i18n, t } = useTranslation(I18N_NAMESPACE.ADMIN);
@@ -134,6 +138,14 @@ export const SupportTicketDetailDrawer = ({
             </div>
           )}
         </div>
+
+        {onReply && (
+          <SupportTicketReplyForm
+            isResolved={ticket.status === SUPPORT_TICKET_STATUS.RESOLVED}
+            isSubmitting={isReplying}
+            onSubmitReply={onReply}
+          />
+        )}
 
         <div className="flex justify-end pt-4">
           <Button onClick={onClose} variant="outline">

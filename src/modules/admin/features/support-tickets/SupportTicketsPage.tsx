@@ -23,11 +23,13 @@ export const SupportTicketsPage = (): ReactElement => {
     closeDrawer,
     filterStatus,
     handleFilterStatusChange,
+    handleReplyTicket,
     hasNextPage,
     hasPreviousPage,
     isDrawerOpen,
     isError,
     isLoading,
+    isReplying,
     nextPage,
     openDrawer,
     pageNumber,
@@ -86,7 +88,9 @@ export const SupportTicketsPage = (): ReactElement => {
 
       <SupportTicketDetailDrawer
         isOpen={isDrawerOpen}
+        isReplying={isReplying}
         onClose={closeDrawer}
+        onReply={handleReplyTicket}
         ticket={activeTicket}
       />
     </div>

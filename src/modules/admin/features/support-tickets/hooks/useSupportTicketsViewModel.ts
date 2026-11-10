@@ -3,11 +3,15 @@ import { useSearchParams } from "react-router";
 import {
   SUPPORT_TICKET_STATUS,
   type SupportTicket,
+  type SupportTicketReply,
   type SupportTicketStatus,
 } from "@/domain";
 import { useCursorPagination } from "@/hooks";
 import type { Nullable } from "@/types";
-import { useSupportTicketsQuery } from "../api";
+import {
+  useReplyToSupportTicketMutation,
+  useSupportTicketsQuery,
+} from "../api";
 import {
   SUPPORT_TICKET_DEFAULT_PAGE_SIZE,
   SUPPORT_TICKET_QUERY_PARAM,
@@ -21,6 +25,8 @@ export const useSupportTicketsViewModel = (): SupportTicketsViewModel => {
     useState<Nullable<SupportTicket>>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchParameters, setSearchParameters] = useSearchParams();
+
+  const replyMutation = useReplyToSupportTicketMutation();
 
   const rawStatus = searchParameters.get(SUPPORT_TICKET_QUERY_PARAM.STATUS);
   const filterStatus: Nullable<SupportTicketStatus> =
@@ -74,16 +80,50 @@ export const useSupportTicketsViewModel = (): SupportTicketsViewModel => {
     setSearchParameters(nextParameters);
   };
 
+  const handleReplyTicket = async (body: string): Promise<void> => {
+    if (!activeTicket) {
+      return;
+    }
+
+    const result = await replyMutation.mutateAsync({
+      body,
+      ticketId: activeTicket.id,
+    });
+
+    const newReplyItem: SupportTicketReply = {
+      body: result.reply.body,
+      emailFailed: result.reply.emailFailed,
+      id: result.reply.id,
+      sentAt: new Date(result.reply.sentAt),
+      sentByEmail: result.reply.sentByEmail,
+      sentByUserId: result.reply.sentByUserId,
+    };
+
+    setActiveTicket((previousTicket) => {
+      if (!previousTicket) {
+        return null;
+      }
+      return {
+        ...previousTicket,
+        replies: [...previousTicket.replies, newReplyItem],
+        status: result.status as SupportTicketStatus,
+        updatedAt: new Date(),
+      };
+    });
+  };
+
   return {
     activeTicket,
     closeDrawer,
     filterStatus,
     handleFilterStatusChange,
+    handleReplyTicket,
     hasNextPage: Boolean(queryResult.data?.nextCursor),
     hasPreviousPage,
     isDrawerOpen,
     isError: queryResult.isError,
     isLoading: queryResult.isLoading,
+    isReplying: replyMutation.isPending,
     nextPage,
     openDrawer,
     pageNumber,

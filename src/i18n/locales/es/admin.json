@@ -33,7 +33,17 @@
       "title": "Tickets de Soporte"
     },
     "reply": {
-      "emailFailed": "La respuesta se guardó pero falló el envío del correo electrónico."
+      "bodyLabel": "Respuesta",
+      "bodyPlaceholder": "Escribe una respuesta para el dueño del negocio...",
+      "bodyRequired": "La respuesta es requerida.",
+      "bodyTooLong": "La respuesta no puede exceder los 5000 caracteres.",
+      "emailFailed": "La respuesta se guardó pero falló el envío del correo electrónico.",
+      "errorToast": "No se pudo enviar la respuesta.",
+      "resolvedNotice": "Este ticket ya se encuentra resuelto y no admite más respuestas.",
+      "submitButton": "Enviar respuesta",
+      "submitting": "Enviando respuesta...",
+      "successToast": "Respuesta enviada con éxito al dueño del negocio.",
+      "title": "Responder al ticket"
     },
     "status": {
       "in_progress": "En proceso",

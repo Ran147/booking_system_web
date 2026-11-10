@@ -33,7 +33,17 @@
       "title": "Support Tickets"
     },
     "reply": {
-      "emailFailed": "The reply was saved but the email notification could not be delivered."
+      "bodyLabel": "Reply",
+      "bodyPlaceholder": "Write a reply for the business owner...",
+      "bodyRequired": "Reply is required.",
+      "bodyTooLong": "Reply cannot exceed 5000 characters.",
+      "emailFailed": "The reply was saved but the email notification could not be delivered.",
+      "errorToast": "Could not send the reply.",
+      "resolvedNotice": "This ticket is already resolved and cannot receive more replies.",
+      "submitButton": "Send reply",
+      "submitting": "Sending reply...",
+      "successToast": "Reply successfully sent to the business owner.",
+      "title": "Reply to ticket"
     },
     "status": {
       "in_progress": "In progress",
