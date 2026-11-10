@@ -20,17 +20,22 @@ export const SupportTicketsPage = (): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.ADMIN);
   const {
     activeTicket,
+    closeConfirmModal,
     closeDrawer,
     filterStatus,
     handleFilterStatusChange,
     handleReplyTicket,
+    handleResolveTicket,
     hasNextPage,
     hasPreviousPage,
+    isConfirmModalOpen,
     isDrawerOpen,
     isError,
     isLoading,
     isReplying,
+    isResolving,
     nextPage,
+    openConfirmModal,
     openDrawer,
     pageNumber,
     previousPage,
@@ -87,10 +92,15 @@ export const SupportTicketsPage = (): ReactElement => {
       )}
 
       <SupportTicketDetailDrawer
+        isConfirmModalOpen={isConfirmModalOpen}
         isOpen={isDrawerOpen}
         isReplying={isReplying}
+        isResolving={isResolving}
         onClose={closeDrawer}
+        onCloseConfirmModal={closeConfirmModal}
+        onOpenConfirmModal={openConfirmModal}
         onReply={handleReplyTicket}
+        onResolve={handleResolveTicket}
         ticket={activeTicket}
       />
     </div>

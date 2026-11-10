@@ -8,6 +8,7 @@ export { deleteService } from "./services/deleteService.js";
 export { payPlanCheckout } from "./billing/payPlanCheckout.js";
 export { replyToSupportTicket } from "./supportTickets/replyToSupportTicket.js";
 export { requestPasswordReset } from "./auth/requestPasswordReset.js";
+export { resolveSupportTicket } from "./supportTickets/resolveSupportTicket.js";
 export { sendContactMessage } from "./notifications/sendContactMessage.js";
 export { updateServiceCollaborators } from "./services/updateServiceCollaborators.js";
 export { validateSignUpLink } from "./billing/validateSignUpLink.js";

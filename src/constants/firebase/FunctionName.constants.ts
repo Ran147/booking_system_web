@@ -14,6 +14,7 @@ export const FUNCTION_NAME = Object.freeze({
   REPLY_TO_SUPPORT_TICKET: "replyToSupportTicket",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
+  RESOLVE_SUPPORT_TICKET: "resolveSupportTicket",
   SEND_CONTACT_MESSAGE: "sendContactMessage",
   UPDATE_BOOKING_STATUS: "updateBookingStatus",
   UPDATE_BUSINESS_HOURS: "updateBusinessHours",

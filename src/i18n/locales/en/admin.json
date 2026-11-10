@@ -45,6 +45,16 @@
       "successToast": "Reply successfully sent to the business owner.",
       "title": "Reply to ticket"
     },
+    "resolve": {
+      "actionButton": "Mark as resolved",
+      "cancelAction": "Cancel",
+      "confirmAction": "Confirm resolution",
+      "confirmMessage": "Are you sure you want to mark this ticket as resolved? This indicates that the inquiry has been completely addressed.",
+      "confirmTitle": "Mark ticket as resolved",
+      "errorToast": "Could not mark the ticket as resolved.",
+      "resolving": "Resolving ticket...",
+      "successToast": "Ticket successfully marked as resolved."
+    },
     "status": {
       "in_progress": "In progress",
       "open": "Open",

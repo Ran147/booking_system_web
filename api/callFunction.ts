@@ -48,6 +48,7 @@ const FUNCTION_NAME = Object.freeze({
   REPLY_TO_SUPPORT_TICKET: "replyToSupportTicket",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
+  RESOLVE_SUPPORT_TICKET: "resolveSupportTicket",
   SEND_CONTACT_MESSAGE: "sendContactMessage",
   UPDATE_BOOKING_STATUS: "updateBookingStatus",
   UPDATE_BUSINESS_HOURS: "updateBusinessHours",
@@ -653,7 +654,10 @@ const checkCallerAccess = async (
     return CALLER_ACCESS.UNAUTHENTICATED;
   }
 
-  if (functionName === FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET) {
+  if (
+    functionName === FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET ||
+    functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET
+  ) {
     const role = caller.claims?.role;
     return role === USER_ROLE.SUPER_ADMIN
       ? CALLER_ACCESS.ALLOWED
@@ -845,7 +849,10 @@ export default async function handler(
       return;
     }
 
-    if (functionName === FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET) {
+    if (
+      functionName === FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET ||
+      functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET
+    ) {
       const ticketId = String(payload.ticketId || "");
       const body = String(payload.body || "").trim();
       if (!ticketId || !body) {
@@ -901,6 +908,40 @@ export default async function handler(
           sentAt: now.toISOString(),
         },
         status: nextStatus,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET) {
+      const ticketId = String(payload.ticketId || "");
+      if (!ticketId) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-argument",
+          message: "Invalid ticketId.",
+        });
+        return;
+      }
+      const ticketReference = firestore
+        .collection("supportTickets")
+        .doc(ticketId);
+      const ticketSnapshot = await ticketReference.get();
+      if (!ticketSnapshot.exists) {
+        sendJsonResponse(response, HTTP_STATUS.NOT_FOUND, {
+          error: "not-found",
+          message: "Ticket not found.",
+        });
+        return;
+      }
+      const now = new Date();
+      await ticketReference.update({
+        resolvedAt: Timestamp.fromDate(now),
+        status: SUPPORT_TICKET_STATUS.RESOLVED,
+        updatedAt: Timestamp.fromDate(now),
+      });
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        resolvedAt: now.toISOString(),
+        status: SUPPORT_TICKET_STATUS.RESOLVED,
+        ticketId,
       });
       return;
     }

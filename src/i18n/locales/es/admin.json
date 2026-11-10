@@ -45,6 +45,16 @@
       "successToast": "Respuesta enviada con éxito al dueño del negocio.",
       "title": "Responder al ticket"
     },
+    "resolve": {
+      "actionButton": "Marcar como resuelto",
+      "cancelAction": "Cancelar",
+      "confirmAction": "Confirmar resolución",
+      "confirmMessage": "¿Estás seguro de que deseas marcar este ticket como resuelto? Esta acción indicará que la consulta fue atendida por completo.",
+      "confirmTitle": "Marcar ticket como resuelto",
+      "errorToast": "No se pudo marcar el ticket como resuelto.",
+      "resolving": "Resolviendo ticket...",
+      "successToast": "Ticket marcado como resuelto con éxito."
+    },
     "status": {
       "in_progress": "En proceso",
       "open": "Abierto",

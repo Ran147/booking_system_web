@@ -10,6 +10,7 @@ import { useCursorPagination } from "@/hooks";
 import type { Nullable } from "@/types";
 import {
   useReplyToSupportTicketMutation,
+  useResolveSupportTicketMutation,
   useSupportTicketsQuery,
 } from "../api";
 import {
@@ -23,10 +24,12 @@ const VALID_STATUSES: readonly string[] = Object.values(SUPPORT_TICKET_STATUS);
 export const useSupportTicketsViewModel = (): SupportTicketsViewModel => {
   const [activeTicket, setActiveTicket] =
     useState<Nullable<SupportTicket>>(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchParameters, setSearchParameters] = useSearchParams();
 
   const replyMutation = useReplyToSupportTicketMutation();
+  const resolveMutation = useResolveSupportTicketMutation();
 
   const rawStatus = searchParameters.get(SUPPORT_TICKET_QUERY_PARAM.STATUS);
   const filterStatus: Nullable<SupportTicketStatus> =
@@ -55,7 +58,16 @@ export const useSupportTicketsViewModel = (): SupportTicketsViewModel => {
 
   const closeDrawer = (): void => {
     setIsDrawerOpen(false);
+    setIsConfirmModalOpen(false);
     setActiveTicket(null);
+  };
+
+  const openConfirmModal = (): void => {
+    setIsConfirmModalOpen(true);
+  };
+
+  const closeConfirmModal = (): void => {
+    setIsConfirmModalOpen(false);
   };
 
   const nextPage = (): void => {
@@ -85,46 +97,85 @@ export const useSupportTicketsViewModel = (): SupportTicketsViewModel => {
       return;
     }
 
-    const result = await replyMutation.mutateAsync({
-      body,
-      ticketId: activeTicket.id,
-    });
+    try {
+      const result = await replyMutation.mutateAsync({
+        body,
+        ticketId: activeTicket.id,
+      });
 
-    const newReplyItem: SupportTicketReply = {
-      body: result.reply.body,
-      emailFailed: result.reply.emailFailed,
-      id: result.reply.id,
-      sentAt: new Date(result.reply.sentAt),
-      sentByEmail: result.reply.sentByEmail,
-      sentByUserId: result.reply.sentByUserId,
-    };
-
-    setActiveTicket((previousTicket) => {
-      if (!previousTicket) {
-        return null;
-      }
-      return {
-        ...previousTicket,
-        replies: [...previousTicket.replies, newReplyItem],
-        status: result.status as SupportTicketStatus,
-        updatedAt: new Date(),
+      const newReplyItem: SupportTicketReply = {
+        body: result.reply.body,
+        emailFailed: result.reply.emailFailed,
+        id: result.reply.id,
+        sentAt: new Date(result.reply.sentAt),
+        sentByEmail: result.reply.sentByEmail,
+        sentByUserId: result.reply.sentByUserId,
       };
-    });
+
+      setActiveTicket((previousTicket) => {
+        if (!previousTicket) {
+          return null;
+        }
+        return {
+          ...previousTicket,
+          replies: [...previousTicket.replies, newReplyItem],
+          status: result.status as SupportTicketStatus,
+          updatedAt: new Date(),
+        };
+      });
+    } catch {
+      // Handled by onError in mutation hook
+    }
+  };
+
+  const handleResolveTicket = async (): Promise<void> => {
+    if (!activeTicket) {
+      return;
+    }
+
+    try {
+      const result = await resolveMutation.mutateAsync({
+        ticketId: activeTicket.id,
+      });
+
+      const resolvedDate = new Date(result.resolvedAt);
+
+      setActiveTicket((previousTicket) => {
+        if (!previousTicket) {
+          return null;
+        }
+        return {
+          ...previousTicket,
+          resolvedAt: resolvedDate,
+          status: SUPPORT_TICKET_STATUS.RESOLVED,
+          updatedAt: resolvedDate,
+        };
+      });
+    } catch {
+      // Handled by onError in mutation hook
+    } finally {
+      setIsConfirmModalOpen(false);
+    }
   };
 
   return {
     activeTicket,
+    closeConfirmModal,
     closeDrawer,
     filterStatus,
     handleFilterStatusChange,
     handleReplyTicket,
+    handleResolveTicket,
     hasNextPage: Boolean(queryResult.data?.nextCursor),
     hasPreviousPage,
+    isConfirmModalOpen,
     isDrawerOpen,
     isError: queryResult.isError,
     isLoading: queryResult.isLoading,
     isReplying: replyMutation.isPending,
+    isResolving: resolveMutation.isPending,
     nextPage,
+    openConfirmModal,
     openDrawer,
     pageNumber,
     previousPage,

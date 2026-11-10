@@ -1,4 +1,4 @@
-import { useEffect, type ReactElement } from "react";
+import { useEffect, useId, type ReactElement } from "react";
 import type { NullableRef } from "@/types";
 import { cn } from "@/utils/cn";
 import {
@@ -21,6 +21,7 @@ export const Modal = ({
   children,
   className,
   closeAriaLabel = DEFAULT_CLOSE_LABEL,
+  id,
   isOpen = false,
   maxWidth = MODAL_MAX_WIDTH.LG,
   onClose,
@@ -28,6 +29,9 @@ export const Modal = ({
 }: ModalProps & {
   readonly closeAriaLabel?: string;
 }): NullableRef<ReactElement> => {
+  const generatedId = useId();
+  const titleId = id ? `${id}-title` : `modal-title-${generatedId}`;
+
   useEffect(() => {
     const handleKeyDown = (keyboardEvent: KeyboardEvent): void => {
       if (
@@ -65,7 +69,7 @@ export const Modal = ({
 
   return (
     <div
-      aria-labelledby={title ? "modal-title" : undefined}
+      aria-labelledby={title ? titleId : undefined}
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
       role="dialog"
@@ -89,7 +93,7 @@ export const Modal = ({
           {title && (
             <h2
               className="text-lg font-semibold text-foreground tracking-tight"
-              id="modal-title"
+              id={titleId}
             >
               {title}
             </h2>

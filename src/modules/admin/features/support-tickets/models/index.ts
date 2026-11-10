@@ -1,4 +1,5 @@
 export type * from "./ReplyToSupportTicket.mutation";
+export type * from "./ResolveSupportTicket.mutation";
 export {
   supportTicketReplyFormSchema,
   type SupportTicketReplyFormValues,

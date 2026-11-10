@@ -358,5 +358,25 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
     } as Response;
   }
 
+  if (functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET) {
+    const ticketId = String(genericPayload.ticketId ?? "");
+    const ticketReference = doc(firestore, "supportTickets", ticketId);
+    const ticketSnapshot = await getDoc(ticketReference);
+    if (!ticketSnapshot.exists()) {
+      throw new Error("Ticket not found");
+    }
+    const now = new Date();
+    await updateDoc(ticketReference, {
+      resolvedAt: Timestamp.fromDate(now),
+      status: SUPPORT_TICKET_STATUS.RESOLVED,
+      updatedAt: Timestamp.fromDate(now),
+    });
+    return {
+      resolvedAt: now.toISOString(),
+      status: SUPPORT_TICKET_STATUS.RESOLVED,
+      ticketId,
+    } as Response;
+  }
+
   throw new Error(`Cloud function "${functionName}" is not available.`);
 };

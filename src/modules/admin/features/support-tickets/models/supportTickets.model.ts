@@ -2,10 +2,15 @@ import type { SupportTicket, SupportTicketStatus } from "@/domain";
 import type { Nullable, PageCursor } from "@/types";
 
 export interface SupportTicketDetailDrawerProps {
+  readonly isConfirmModalOpen?: boolean;
   readonly isOpen: boolean;
   readonly isReplying?: boolean;
+  readonly isResolving?: boolean;
   readonly onClose: () => void;
+  readonly onCloseConfirmModal?: () => void;
+  readonly onOpenConfirmModal?: () => void;
   readonly onReply?: (body: string) => Promise<void>;
+  readonly onResolve?: () => Promise<void>;
   readonly ticket: Nullable<SupportTicket>;
 }
 
@@ -37,19 +42,24 @@ export interface SupportTicketsQueryParams {
 
 export interface SupportTicketsViewModel {
   readonly activeTicket: Nullable<SupportTicket>;
+  readonly closeConfirmModal: () => void;
   readonly closeDrawer: () => void;
   readonly filterStatus: Nullable<SupportTicketStatus>;
   readonly handleFilterStatusChange: (
     status: Nullable<SupportTicketStatus>,
   ) => void;
   readonly handleReplyTicket: (body: string) => Promise<void>;
+  readonly handleResolveTicket: () => Promise<void>;
   readonly hasNextPage: boolean;
   readonly hasPreviousPage: boolean;
+  readonly isConfirmModalOpen: boolean;
   readonly isDrawerOpen: boolean;
   readonly isError: boolean;
   readonly isLoading: boolean;
   readonly isReplying: boolean;
+  readonly isResolving: boolean;
   readonly nextPage: () => void;
+  readonly openConfirmModal: () => void;
   readonly openDrawer: (ticket: SupportTicket) => void;
   readonly pageNumber: number;
   readonly previousPage: () => void;
