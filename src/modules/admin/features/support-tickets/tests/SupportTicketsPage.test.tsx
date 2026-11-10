@@ -434,3 +434,124 @@ describe("SupportTickets Reply (KAN-191)", () => {
     ).toBeNull();
   });
 });
+
+describe("SupportTickets Resolve (KAN-192)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("AC-KAN-192-01 / AC-KAN-192-02 / AC-KAN-192-03 / AC-KAN-192-04: opens confirmation modal, resolves ticket, updates status and shows toast", async () => {
+    const ticket = buildTicket({
+      id: "ticket-resolve-1",
+      status: SUPPORT_TICKET_STATUS.IN_PROGRESS,
+    });
+
+    vi.spyOn(
+      fetchSupportTicketsPageModule,
+      "fetchSupportTicketsPage",
+    ).mockResolvedValue(buildPage([ticket]));
+
+    const toastSuccessSpy = vi.spyOn(toast, "success");
+    const callFunctionSpy = vi
+      .spyOn(callFunctionModule, "callFunction")
+      .mockResolvedValueOnce({
+        resolvedAt: new Date().toISOString(),
+        status: SUPPORT_TICKET_STATUS.RESOLVED,
+        ticketId: "ticket-resolve-1",
+      });
+
+    renderWithProviders(<SupportTicketsPage />, {
+      initialPath: SUPPORT_TICKETS_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createSupportTicketsPage();
+    await page.clickViewDetail(0);
+
+    await page.clickMarkAsResolved();
+    expect(await page.findResolveConfirmationModal()).toBeInTheDocument();
+
+    await page.clickConfirmResolve();
+
+    await waitFor(() => {
+      expect(callFunctionSpy).toHaveBeenCalledWith(
+        FUNCTION_NAME.RESOLVE_SUPPORT_TICKET,
+        { ticketId: "ticket-resolve-1" },
+      );
+    });
+
+    await waitFor(() => {
+      expect(toastSuccessSpy).toHaveBeenCalledWith(
+        testI18n.t("admin:supportTickets.resolve.successToast"),
+      );
+    });
+
+    expect(await page.findResolvedNotice()).toBeInTheDocument();
+    expect(page.queryMarkAsResolvedButton()).toBeNull();
+  });
+
+  it("AC-KAN-192-05: shows error toast when resolving ticket fails", async () => {
+    const ticket = buildTicket({
+      id: "ticket-resolve-fail",
+      status: SUPPORT_TICKET_STATUS.OPEN,
+    });
+
+    vi.spyOn(
+      fetchSupportTicketsPageModule,
+      "fetchSupportTicketsPage",
+    ).mockResolvedValue(buildPage([ticket]));
+
+    const toastErrorSpy = vi.spyOn(toast, "error");
+    vi.spyOn(callFunctionModule, "callFunction").mockRejectedValueOnce(
+      new Error("Server error"),
+    );
+
+    renderWithProviders(<SupportTicketsPage />, {
+      initialPath: SUPPORT_TICKETS_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createSupportTicketsPage();
+    await page.clickViewDetail(0);
+
+    await page.clickMarkAsResolved();
+    await page.clickConfirmResolve();
+
+    await waitFor(() => {
+      expect(toastErrorSpy).toHaveBeenCalledWith("Server error");
+    });
+  });
+
+  it("AC-KAN-192-08: cancels resolve dialog without calling resolve function", async () => {
+    const ticket = buildTicket({
+      id: "ticket-resolve-cancel",
+      status: SUPPORT_TICKET_STATUS.OPEN,
+    });
+
+    vi.spyOn(
+      fetchSupportTicketsPageModule,
+      "fetchSupportTicketsPage",
+    ).mockResolvedValue(buildPage([ticket]));
+
+    const callFunctionSpy = vi.spyOn(callFunctionModule, "callFunction");
+
+    renderWithProviders(<SupportTicketsPage />, {
+      initialPath: SUPPORT_TICKETS_PATH,
+      session: SUPER_ADMIN_SESSION,
+    });
+
+    const page = createSupportTicketsPage();
+    await page.clickViewDetail(0);
+
+    await page.clickMarkAsResolved();
+    expect(await page.findResolveConfirmationModal()).toBeInTheDocument();
+
+    await page.clickCancelResolve();
+
+    expect(callFunctionSpy).not.toHaveBeenCalled();
+  });
+});
