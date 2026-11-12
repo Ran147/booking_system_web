@@ -9,6 +9,7 @@ import type {
 } from "./models/CreateBooking.mutation.js";
 import { createBookingPayloadSchema } from "./models/CreateBooking.schema.js";
 import { buildServiceSnapshot } from "./utils/buildServiceSnapshot.js";
+import { resolveBookingResource } from "./utils/resolveBookingResource.js";
 import { BOOKING_STATUS } from "../shared/constants/BookingStatus.constants.js";
 import { BUSINESS_STATUS } from "../shared/constants/BusinessStatus.constants.js";
 import { FIRESTORE_COLLECTION } from "../shared/constants/FirestoreCollection.constants.js";
@@ -17,7 +18,7 @@ import { SERVICE_STATUS } from "../shared/constants/ServiceStatus.constants.js";
 import { USER_ROLE } from "../shared/constants/UserRole.constants.js";
 import { firestore } from "../shared/firebaseAdmin.js";
 import { readPayload } from "../shared/readPayload.js";
-import type { Nullable } from "../shared/types/Nullable.js";
+import type { AvailabilityBusinessHours } from "./availability/models/Availability.model.js";
 
 export const createBooking = onCall<
   CreateBookingPayload,
@@ -42,14 +43,10 @@ export const createBooking = onCall<
 
   const authenticatedUserId = request.auth.uid;
 
-  const {
-    businessId,
-    collaboratorId,
-    customerId,
-    endsAt,
-    serviceId,
-    startsAt,
-  } = readPayload(
+  // `endsAt` and `customerId` in the payload are ignored (spec KAN-139, D-4):
+  // the end comes from the service duration and a customer always books for
+  // themselves.
+  const { businessId, collaboratorId, serviceId, startsAt } = readPayload(
     createBookingPayloadSchema,
     request.data,
     CREATE_BOOKING_ERROR.INVALID_PAYLOAD,
@@ -93,18 +90,7 @@ export const createBooking = onCall<
       );
     }
 
-    let collaboratorName: Nullable<string> = null;
-    if (collaboratorId) {
-      const collaboratorDoc = await transaction.get(
-        businessReference
-          .collection(FIRESTORE_COLLECTION.COLLABORATORS)
-          .doc(collaboratorId),
-      );
-      if (collaboratorDoc.exists) {
-        collaboratorName = collaboratorDoc.data()?.fullName ?? null;
-      }
-    }
-
+    const timeZone: string = businessSnapshot.data()?.timeZone ?? "UTC";
     const serviceSnapshot = buildServiceSnapshot({
       serviceData: {
         discounts: serviceData?.discounts,
@@ -112,7 +98,7 @@ export const createBooking = onCall<
         name: serviceData?.name,
         priceInCents: serviceData?.priceInCents,
       },
-      timeZone: businessSnapshot.data()?.timeZone ?? "UTC",
+      timeZone,
     });
 
     const startsAtDate = new Date(startsAt);
@@ -120,10 +106,22 @@ export const createBooking = onCall<
       serviceSnapshot.durationMinutes *
       TIME_CONVERSION.SECONDS_PER_MINUTE *
       TIME_CONVERSION.MILLISECONDS_PER_SECOND;
+    const endsAtDate = new Date(startsAtDate.getTime() + durationMilliseconds);
 
-    const endsAtDate = endsAt
-      ? new Date(endsAt)
-      : new Date(startsAtDate.getTime() + durationMilliseconds);
+    const { collaboratorId: assignedCollaboratorId, collaboratorName } =
+      await resolveBookingResource({
+        businessHours: (businessSnapshot.data()?.businessHours ??
+          {}) as AvailabilityBusinessHours,
+        businessReference,
+        chosenCollaboratorId: collaboratorId ?? null,
+        customerUserId: authenticatedUserId,
+        durationMinutes: serviceSnapshot.durationMinutes,
+        now: new Date(),
+        serviceId,
+        startsAt: startsAtDate,
+        timeZone,
+        transaction,
+      });
 
     const bookingReference = businessReference
       .collection(FIRESTORE_COLLECTION.BOOKINGS)
@@ -132,9 +130,9 @@ export const createBooking = onCall<
     transaction.set(bookingReference, {
       businessId,
       cancellation: null,
-      collaboratorId: collaboratorId ?? null,
+      collaboratorId: assignedCollaboratorId,
       collaboratorName,
-      customerId,
+      customerId: authenticatedUserId,
       customerUserId: authenticatedUserId,
       endsAt: endsAtDate,
       id: bookingReference.id,

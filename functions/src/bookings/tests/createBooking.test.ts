@@ -11,6 +11,10 @@ import {
   clearEmulators,
   functionsTestEnvironment,
 } from "../../shared/tests/emulatorTestHelpers.js";
+import {
+  formatZonedDate,
+  resolveZonedInstant,
+} from "../../shared/zonedTime.js";
 import { createBooking } from "../createBooking.js";
 
 const callCreateBooking = functionsTestEnvironment.wrap(createBooking);
@@ -18,6 +22,31 @@ const callCreateBooking = functionsTestEnvironment.wrap(createBooking);
 const TEST_BUSINESS_ID = "business-123";
 const TEST_SERVICE_ID = "service-456";
 const TEST_CUSTOMER_ID = "customer-789";
+
+const COSTA_RICA_TIME_ZONE = "America/Costa_Rica";
+const MS_PER_DAY = 86_400_000;
+const BOOKING_DAYS_AHEAD = 2;
+// A day two days from now in the business time zone, open 08:00 to 18:00.
+const BOOKING_DATE = formatZonedDate(
+  new Date(Date.now() + BOOKING_DAYS_AHEAD * MS_PER_DAY),
+  COSTA_RICA_TIME_ZONE,
+);
+const OPEN_EVERY_DAY = Object.fromEntries(
+  [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ].map((weekday) => [weekday, [{ closesAt: "18:00", opensAt: "08:00" }]]),
+);
+
+const slotAt = (time: string): Date =>
+  resolveZonedInstant(BOOKING_DATE, time, COSTA_RICA_TIME_ZONE) as Date;
+
+const FREE_SLOT_START = slotAt("10:00").toISOString();
 
 const CALLER_AUTH = {
   token: {
@@ -36,8 +65,10 @@ describe("createBooking", () => {
       .collection(FIRESTORE_COLLECTION.BUSINESSES)
       .doc(TEST_BUSINESS_ID)
       .set({
+        businessHours: OPEN_EVERY_DAY,
         name: "Barbería Don Juan",
         status: "active",
+        timeZone: COSTA_RICA_TIME_ZONE,
       });
 
     await firestore
@@ -55,7 +86,7 @@ describe("createBooking", () => {
   });
 
   it("AC-KAN-62-01: stores snapshot of name, priceInCents, and durationMinutes valid at booking moment", async () => {
-    const startsAt = new Date().toISOString();
+    const startsAt = FREE_SLOT_START;
 
     const response = await callCreateBooking(
       buildAuthenticatedCallableRequest(
@@ -118,7 +149,7 @@ describe("createBooking", () => {
           businessId: TEST_BUSINESS_ID,
           customerId: TEST_CUSTOMER_ID,
           serviceId: TEST_SERVICE_ID,
-          startsAt: now.toISOString(),
+          startsAt: FREE_SLOT_START,
         },
         CALLER_AUTH,
       ),
@@ -154,7 +185,7 @@ describe("createBooking", () => {
           businessId: TEST_BUSINESS_ID,
           customerId: TEST_CUSTOMER_ID,
           serviceId: TEST_SERVICE_ID,
-          startsAt: now.toISOString(),
+          startsAt: FREE_SLOT_START,
         },
         CALLER_AUTH,
       ),
@@ -180,7 +211,7 @@ describe("createBooking", () => {
             businessId: TEST_BUSINESS_ID,
             customerId: TEST_CUSTOMER_ID,
             serviceId: TEST_SERVICE_ID,
-            startsAt: new Date().toISOString(),
+            startsAt: FREE_SLOT_START,
           },
           CALLER_AUTH,
         ),
@@ -201,7 +232,7 @@ describe("createBooking", () => {
             businessId: TEST_BUSINESS_ID,
             customerId: TEST_CUSTOMER_ID,
             serviceId: "non-existent-service",
-            startsAt: new Date().toISOString(),
+            startsAt: FREE_SLOT_START,
           },
           CALLER_AUTH,
         ),
@@ -221,7 +252,7 @@ describe("createBooking", () => {
           businessId: TEST_BUSINESS_ID,
           customerId: TEST_CUSTOMER_ID,
           serviceId: TEST_SERVICE_ID,
-          startsAt: new Date().toISOString(),
+          startsAt: FREE_SLOT_START,
         }),
       ),
     );
@@ -237,7 +268,7 @@ describe("createBooking", () => {
             businessId: TEST_BUSINESS_ID,
             customerId: TEST_CUSTOMER_ID,
             serviceId: TEST_SERVICE_ID,
-            startsAt: new Date().toISOString(),
+            startsAt: FREE_SLOT_START,
           },
           {
             token: {
@@ -265,7 +296,7 @@ describe("createBooking", () => {
             businessId: TEST_BUSINESS_ID,
             customerId: TEST_CUSTOMER_ID,
             serviceId: TEST_SERVICE_ID,
-            startsAt: new Date().toISOString(),
+            startsAt: FREE_SLOT_START,
           },
           CALLER_AUTH,
         ),
@@ -283,7 +314,7 @@ describe("createBooking", () => {
           customerId: TEST_CUSTOMER_ID,
           customerUserId: "spoofed-user-id",
           serviceId: TEST_SERVICE_ID,
-          startsAt: new Date().toISOString(),
+          startsAt: FREE_SLOT_START,
         },
         CALLER_AUTH,
       ),
