@@ -265,7 +265,10 @@
     "description": "Plataforma integral de gestión de reservas y citas para negocios de servicios.",
     "landmarkLabel": "Pie de página de Booking System",
     "links": {
+      "about": "Sobre nosotros",
       "contact": "Contacto",
+      "faq": "Preguntas frecuentes",
+      "help": "Ayuda",
       "home": "Inicio",
       "plans": "Planes",
       "terms": "Términos y condiciones",
@@ -347,7 +350,10 @@
       "goToPortal": "Ir a mi panel",
       "landmarkLabel": "Barra de navegación principal",
       "links": {
+        "about": "Sobre nosotros",
         "contact": "Contacto",
+        "faq": "Preguntas frecuentes",
+        "help": "Ayuda",
         "home": "Inicio",
         "plans": "Planes"
       },
