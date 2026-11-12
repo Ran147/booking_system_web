@@ -1,4 +1,60 @@
 {
+  "auditLog": {
+    "actionType": {
+      "business_approved": "Business approved",
+      "business_reactivated": "Business reactivated",
+      "business_rejected": "Business rejected",
+      "business_suspended": "Business suspended",
+      "plan_activated": "Plan activated",
+      "plan_created": "Plan created",
+      "plan_deactivated": "Plan deactivated",
+      "plan_price_changed": "Plan price changed",
+      "plan_updated": "Plan updated",
+      "platform_settings_updated": "Platform settings updated"
+    },
+    "detail": {
+      "action": "Action performed",
+      "actor": "Super administrator",
+      "after": "Values after",
+      "before": "Values before",
+      "close": "Close",
+      "dateTime": "Date & time",
+      "noChanges": "No changes recorded",
+      "reason": "Reason",
+      "target": "Affected item",
+      "targetId": "Identifier",
+      "targetType": "Item type",
+      "title": "Audit Event Details"
+    },
+    "filters": {
+      "actionType": "Action type",
+      "allActionTypes": "All actions",
+      "clear": "Clear filters",
+      "from": "From",
+      "invalidActionType": "The action type specified in the link is invalid.",
+      "invalidDateRange": "The start date cannot be after the end date.",
+      "title": "Audit filters",
+      "to": "To"
+    },
+    "list": {
+      "description": "Immutable log of critical actions performed by super administrators.",
+      "empty": "No audit events recorded.",
+      "emptyDescription": "When critical actions are performed on businesses, plans, or settings, they will appear here.",
+      "emptyFiltered": "No audit events found for the applied filters.",
+      "retryAction": "Retry",
+      "title": "Audit Log",
+      "unknownAction": "Unknown action ({{action}})"
+    },
+    "table": {
+      "action": "Action",
+      "actions": "Detail",
+      "actor": "Administrator",
+      "caption": "Chronological history of administrative audit events",
+      "dateTime": "Date & time",
+      "target": "Affected item",
+      "viewDetail": "View detail"
+    }
+  },
   "layout": {
     "title": "Administration"
   },

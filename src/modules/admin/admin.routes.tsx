@@ -17,6 +17,14 @@ export const adminRoutes: RouteObject[] = [
               return { Component: AdminPlaceholderPage };
             },
           },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { AuditLogPage } =
+                await import("./features/audit-log/AuditLogPage");
+              return { Component: AuditLogPage };
+            },
+            path: ROUTE_PATH.ADMIN.AUDIT_LOG,
+          },
         ],
         element: <AdminLayout />,
       },

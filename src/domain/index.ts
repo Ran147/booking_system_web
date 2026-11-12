@@ -1,4 +1,6 @@
 export * from "./audit-log/AuditLogActionType.constants";
+export type * from "./audit-log/AuditLogEntry.interface";
+export * from "./audit-log/AuditLogTargetType.constants";
 export type * from "./booking/Booking.interface";
 export * from "./booking/BookingStatus.constants";
 export * from "./booking/BookingStatusTone.constants";

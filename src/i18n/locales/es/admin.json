@@ -1,4 +1,60 @@
 {
+  "auditLog": {
+    "actionType": {
+      "business_approved": "Negocio aprobado",
+      "business_reactivated": "Negocio reactivado",
+      "business_rejected": "Negocio rechazado",
+      "business_suspended": "Negocio suspendido",
+      "plan_activated": "Plan activado",
+      "plan_created": "Plan creado",
+      "plan_deactivated": "Plan desactivado",
+      "plan_price_changed": "Precio de plan modificado",
+      "plan_updated": "Plan actualizado",
+      "platform_settings_updated": "Parámetros globales actualizados"
+    },
+    "detail": {
+      "action": "Acción realizada",
+      "actor": "Super administrador",
+      "after": "Valores posteriores",
+      "before": "Valores anteriores",
+      "close": "Cerrar",
+      "dateTime": "Fecha y hora",
+      "noChanges": "Sin cambios registrados",
+      "reason": "Motivo",
+      "target": "Elemento afectado",
+      "targetId": "Identificador",
+      "targetType": "Tipo de elemento",
+      "title": "Detalle del evento de auditoría"
+    },
+    "filters": {
+      "actionType": "Tipo de acción",
+      "allActionTypes": "Todas las acciones",
+      "clear": "Limpiar filtros",
+      "from": "Desde",
+      "invalidActionType": "El tipo de acción especificado en el enlace no es válido.",
+      "invalidDateRange": "La fecha inicial no puede ser posterior a la fecha final.",
+      "title": "Filtros de auditoría",
+      "to": "Hasta"
+    },
+    "list": {
+      "description": "Historial inmutable de acciones críticas ejecutadas por los super administradores.",
+      "empty": "No hay eventos de auditoría registrados.",
+      "emptyDescription": "Cuando se realicen acciones críticas sobre negocios, planes o configuración, aparecerán aquí.",
+      "emptyFiltered": "No se encontraron eventos de auditoría para los filtros aplicados.",
+      "retryAction": "Reintentar",
+      "title": "Registro de Auditoría",
+      "unknownAction": "Acción desconocida ({{action}})"
+    },
+    "table": {
+      "action": "Acción",
+      "actions": "Detalle",
+      "actor": "Administrador",
+      "caption": "Historial cronológico de eventos de auditoría administrativa",
+      "dateTime": "Fecha y hora",
+      "target": "Elemento afectado",
+      "viewDetail": "Ver detalle"
+    }
+  },
   "layout": {
     "title": "Administración"
   },
