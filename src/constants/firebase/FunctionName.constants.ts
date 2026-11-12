@@ -11,6 +11,7 @@ export const FUNCTION_NAME = Object.freeze({
   FETCH_BOOKING_HISTORY: "fetchBookingHistory",
   FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
+  REPLY_TO_SUPPORT_TICKET: "replyToSupportTicket",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
   SEND_CONTACT_MESSAGE: "sendContactMessage",

@@ -5,5 +5,61 @@
   "placeholder": {
     "description": "Aquí se gestionarán los negocios, los planes y los tickets de soporte.",
     "title": "Panel de administración"
+  },
+  "supportTickets": {
+    "detail": {
+      "business": "Negocio",
+      "close": "Cerrar",
+      "createdAt": "Fecha de creación",
+      "noReplies": "No hay respuestas registradas aún.",
+      "originalMessage": "Mensaje original",
+      "ownerEmail": "Correo del dueño",
+      "ownerUnavailable": "Correo no disponible",
+      "repliesTitle": "Historial de respuestas",
+      "resolvedAt": "Fecha de resolución",
+      "status": "Estado",
+      "title": "Detalle del ticket de soporte",
+      "updatedAt": "Última actualización"
+    },
+    "filters": {
+      "allStatuses": "Todos los estados",
+      "clear": "Limpiar filtro",
+      "statusLabel": "Filtrar por estado"
+    },
+    "list": {
+      "description": "Listado completo de incidencias y consultas creadas por los dueños de negocios.",
+      "empty": "No hay tickets de soporte para mostrar.",
+      "retryAction": "Reintentar",
+      "title": "Tickets de Soporte"
+    },
+    "reply": {
+      "bodyLabel": "Respuesta",
+      "bodyPlaceholder": "Escribe una respuesta para el dueño del negocio...",
+      "bodyRequired": "La respuesta es requerida.",
+      "bodyTooLong": "La respuesta no puede exceder los 5000 caracteres.",
+      "emailFailed": "La respuesta se guardó pero falló el envío del correo electrónico.",
+      "errorToast": "No se pudo enviar la respuesta.",
+      "resolvedNotice": "Este ticket ya se encuentra resuelto y no admite más respuestas.",
+      "submitButton": "Enviar respuesta",
+      "submitting": "Enviando respuesta...",
+      "successToast": "Respuesta enviada con éxito al dueño del negocio.",
+      "title": "Responder al ticket"
+    },
+    "status": {
+      "in_progress": "En proceso",
+      "open": "Abierto",
+      "resolved": "Resuelto"
+    },
+    "table": {
+      "actions": "Acciones",
+      "business": "Negocio",
+      "caption": "Listado de tickets de soporte técnico",
+      "createdAt": "Creado el",
+      "status": "Estado",
+      "subject": "Asunto",
+      "unnamedBusiness": "Negocio sin nombre",
+      "updatedAt": "Actualizado el",
+      "viewDetail": "Ver detalle"
+    }
   }
 }
