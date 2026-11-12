@@ -53,6 +53,17 @@ const readOffsetInMilliseconds = (
   return instantAsIfUtc - instantWithoutMilliseconds;
 };
 
+// The local calendar day (YYYY-MM-DD) an instant falls on in an IANA time
+// zone.
+export const formatZonedDate = (instant: Date, timeZone: string): string => {
+  const parts = readFormatter(timeZone).formatToParts(instant);
+  const readPart = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return [readPart("year"), readPart("month"), readPart("day")].join(
+    DATE_PART_SEPARATOR,
+  );
+};
+
 // The instant a wall-clock time (YYYY-MM-DD and HH:mm) has in an IANA time
 // zone. Around a daylight-saving change:
 // - a wall-clock time that does not exist (the clocks jump forward) returns
