@@ -23,6 +23,7 @@ import type { NullableUndefined } from "../../shared/types/Nullable.js";
 import {
   PLAN_CHECKOUT_ERROR_REASON,
   SIMULATED_GATEWAY,
+  TERMS_VERSION,
 } from "../constants/PlanCheckout.constants.js";
 import { payPlanCheckout } from "../payPlanCheckout.js";
 
@@ -72,7 +73,7 @@ describe("payPlanCheckout", () => {
       language: "es",
       planId: CHECKOUT_TEST_PLAN.ID,
       signUpCompletedAt: null,
-      termsVersion: expect.any(String),
+      termsVersion: TERMS_VERSION.CURRENT,
     });
     expect(planCheckout?.paidAt).toBeTruthy();
     expect(planCheckout?.termsAcceptedAt).toEqual(planCheckout?.paidAt);

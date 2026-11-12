@@ -4,18 +4,17 @@ import { useTranslation } from "react-i18next";
 import {
   Alert,
   ALERT_VARIANT,
-  AppLink,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  CheckboxField,
   InputField,
 } from "@/components/common";
-import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { I18N_NAMESPACE } from "@/constants";
 import type { Nullable } from "@/types";
+import { PlanCheckoutTermsField } from "./PlanCheckoutTermsField";
 import type {
   PlanCheckoutFieldErrors,
   PlanCheckoutFields,
@@ -33,8 +32,11 @@ export interface PlanCheckoutFormProps {
   readonly fieldErrors: PlanCheckoutFieldErrors;
   readonly fields: PlanCheckoutFields;
   readonly formattedPrice: string;
+  readonly hasOpenedTerms: boolean;
+  readonly isTermsAccepted: boolean;
   readonly onBackToDetail: () => void;
   readonly onSubmit: (event?: FormEvent<HTMLFormElement>) => void;
+  readonly onTermsOpened: () => void;
   readonly plan: PlanDetail;
 }
 
@@ -45,8 +47,11 @@ export const PlanCheckoutForm = ({
   fieldErrors,
   fields,
   formattedPrice,
+  hasOpenedTerms,
+  isTermsAccepted,
   onBackToDetail,
   onSubmit,
+  onTermsOpened,
   plan,
 }: PlanCheckoutFormProps): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
@@ -149,29 +154,18 @@ export const PlanCheckoutForm = ({
 
               {/* Términos y condiciones */}
               <div className="pt-2">
-                <CheckboxField
-                  {...fields.termsAccepted}
-                  error={fieldErrors.termsAccepted}
-                  id="checkout-terms"
-                  label={
-                    <span>
-                      {t("planCheckout.checkout.termsAcceptance")}{" "}
-                      <AppLink
-                        className="font-medium underline hover:text-primary"
-                        target="_blank"
-                        to={ROUTE_PATH.LANDING.TERMS}
-                      >
-                        {t("planCheckout.checkout.termsLink")}
-                      </AppLink>
-                    </span>
-                  }
-                  required
+                <PlanCheckoutTermsField
+                  field={fields.termsAccepted}
+                  hasOpenedTerms={hasOpenedTerms}
+                  isTermsAccepted={isTermsAccepted}
+                  onTermsOpened={onTermsOpened}
                 />
               </div>
 
               {/* Acciones */}
               <div className="flex flex-col gap-3 pt-3">
                 <Button
+                  disabled={!isTermsAccepted}
                   fullWidth
                   isLoading={isProcessing}
                   size="lg"
