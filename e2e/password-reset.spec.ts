@@ -14,6 +14,9 @@ const UNKNOWN_EMAIL = "nadie-registrado@demo.test";
 const NEW_PASSWORD = "Nueva-Clave-456!";
 const RESET_REQUEST_TYPE = "PASSWORD_RESET";
 const RESET_EMAIL = `recuperacion-${Date.now()}@demo.test`;
+// The first call wakes the function in the emulator (a few seconds on
+// Windows) and the function answers no sooner than 1.5 s on purpose.
+const FIRST_RESPONSE_TIMEOUT_MS = 15_000;
 
 // The emulator forgets a link once it is used: the second test keeps it.
 let usedResetCode = "";
@@ -79,7 +82,7 @@ test("AC-KAN-36-02: an existing account and an unknown email get the same neutra
   await requestRecovery(page, UNKNOWN_EMAIL);
   await expect(
     page.getByText(common.auth.passwordReset.requestSent),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: FIRST_RESPONSE_TIMEOUT_MS });
   expect(await readResetCodes(UNKNOWN_EMAIL)).toHaveLength(0);
 
   await requestRecovery(page, RESET_EMAIL);
