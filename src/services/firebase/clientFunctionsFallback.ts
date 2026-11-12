@@ -15,6 +15,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { FUNCTION_NAME, MONEY, TIME_MS, type FunctionName } from "@/constants";
+import { SUPPORT_TICKET_STATUS } from "@/domain";
 import type { Nullable } from "@/types";
 import { auth, firestore } from "./firebaseApp";
 
@@ -316,6 +317,65 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
       updatedAt: Timestamp.now(),
     });
     return { serviceId } as Response;
+  }
+
+  if (functionName === FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET) {
+    const ticketId = String(genericPayload.ticketId ?? "");
+    const body = String(genericPayload.body ?? "").trim();
+    const ticketReference = doc(firestore, "supportTickets", ticketId);
+    const ticketSnapshot = await getDoc(ticketReference);
+    if (!ticketSnapshot.exists()) {
+      throw new Error("Ticket not found");
+    }
+    const ticketData = ticketSnapshot.data();
+    const now = new Date();
+    const reply = {
+      body,
+      emailFailed: !ticketData?.ownerEmail,
+      id: crypto.randomUUID(),
+      sentAt: Timestamp.fromDate(now),
+      sentByEmail: auth.currentUser?.email ?? "support@platform.com",
+      sentByUserId: auth.currentUser?.uid ?? "super-admin",
+    };
+    const nextStatus =
+      ticketData?.status === SUPPORT_TICKET_STATUS.OPEN
+        ? SUPPORT_TICKET_STATUS.IN_PROGRESS
+        : (ticketData?.status ?? SUPPORT_TICKET_STATUS.IN_PROGRESS);
+    const existingReplies = Array.isArray(ticketData?.replies)
+      ? ticketData.replies
+      : [];
+    await updateDoc(ticketReference, {
+      replies: [...existingReplies, reply],
+      status: nextStatus,
+      updatedAt: Timestamp.fromDate(now),
+    });
+    return {
+      reply: {
+        ...reply,
+        sentAt: now.toISOString(),
+      },
+      status: nextStatus,
+    } as Response;
+  }
+
+  if (functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET) {
+    const ticketId = String(genericPayload.ticketId ?? "");
+    const ticketReference = doc(firestore, "supportTickets", ticketId);
+    const ticketSnapshot = await getDoc(ticketReference);
+    if (!ticketSnapshot.exists()) {
+      throw new Error("Ticket not found");
+    }
+    const now = new Date();
+    await updateDoc(ticketReference, {
+      resolvedAt: Timestamp.fromDate(now),
+      status: SUPPORT_TICKET_STATUS.RESOLVED,
+      updatedAt: Timestamp.fromDate(now),
+    });
+    return {
+      resolvedAt: now.toISOString(),
+      status: SUPPORT_TICKET_STATUS.RESOLVED,
+      ticketId,
+    } as Response;
   }
 
   throw new Error(`Cloud function "${functionName}" is not available.`);

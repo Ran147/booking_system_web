@@ -5,5 +5,71 @@
   "placeholder": {
     "description": "This is where businesses, plans and support tickets will be managed.",
     "title": "Administration dashboard"
+  },
+  "supportTickets": {
+    "detail": {
+      "business": "Business",
+      "close": "Close",
+      "createdAt": "Creation date",
+      "noReplies": "No replies recorded yet.",
+      "originalMessage": "Original inquiry",
+      "ownerEmail": "Owner email",
+      "ownerUnavailable": "Email not available",
+      "repliesTitle": "Reply history",
+      "resolvedAt": "Resolution date",
+      "status": "Status",
+      "title": "Support Ticket Details",
+      "updatedAt": "Last update"
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "clear": "Clear filter",
+      "statusLabel": "Filter by status"
+    },
+    "list": {
+      "description": "Complete list of inquiries and issues submitted by business owners.",
+      "empty": "No support tickets found.",
+      "retryAction": "Retry",
+      "title": "Support Tickets"
+    },
+    "reply": {
+      "bodyLabel": "Reply",
+      "bodyPlaceholder": "Write a reply for the business owner...",
+      "bodyRequired": "Reply is required.",
+      "bodyTooLong": "Reply cannot exceed 5000 characters.",
+      "emailFailed": "The reply was saved but the email notification could not be delivered.",
+      "errorToast": "Could not send the reply.",
+      "resolvedNotice": "This ticket is already resolved and cannot receive more replies.",
+      "submitButton": "Send reply",
+      "submitting": "Sending reply...",
+      "successToast": "Reply successfully sent to the business owner.",
+      "title": "Reply to ticket"
+    },
+    "resolve": {
+      "actionButton": "Mark as resolved",
+      "cancelAction": "Cancel",
+      "confirmAction": "Confirm resolution",
+      "confirmMessage": "Are you sure you want to mark this ticket as resolved? This indicates that the inquiry has been completely addressed.",
+      "confirmTitle": "Mark ticket as resolved",
+      "errorToast": "Could not mark the ticket as resolved.",
+      "resolving": "Resolving ticket...",
+      "successToast": "Ticket successfully marked as resolved."
+    },
+    "status": {
+      "in_progress": "In progress",
+      "open": "Open",
+      "resolved": "Resolved"
+    },
+    "table": {
+      "actions": "Actions",
+      "business": "Business",
+      "caption": "List of support tickets",
+      "createdAt": "Created at",
+      "status": "Status",
+      "subject": "Subject",
+      "unnamedBusiness": "Unnamed business",
+      "updatedAt": "Updated at",
+      "viewDetail": "View details"
+    }
   }
 }
