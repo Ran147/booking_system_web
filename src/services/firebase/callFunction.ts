@@ -44,9 +44,13 @@ export const callFunction = async <Payload, Response>(
           // Response is not JSON (e.g. 404 HTML on static host), fall through to callable
         }
 
+        // Without admin credentials (local runs against the emulators) or
+        // without a handler, the server cannot answer: use the callable.
+        let isCredentialOrHandlerMissing = false;
+
         if (errorJson) {
           const rawErrorMessage = errorJson.message || errorJson.error || "";
-          const isCredentialOrHandlerMissing =
+          isCredentialOrHandlerMissing =
             rawErrorMessage.includes("Firebase credentials not found") ||
             rawErrorMessage.includes("not implemented in server handler");
 
@@ -61,7 +65,10 @@ export const callFunction = async <Payload, Response>(
           }
         }
 
-        if (serverResponse.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {
+        if (
+          !isCredentialOrHandlerMissing &&
+          serverResponse.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR
+        ) {
           throw new FunctionsError(
             "internal",
             `El servidor respondió con un error (${serverResponse.status}).`,

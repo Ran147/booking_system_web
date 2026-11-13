@@ -105,7 +105,7 @@ test("AC-KAN-154-03: filters by business", async ({ page }) => {
   await signInAsCustomer(page);
 
   await page
-    .getByLabel(customer.myBookings.filters.business)
+    .getByLabel(customer.myBookings.filters.business, { exact: true })
     .selectOption({ label: SEED_BUSINESS.NAME });
 
   await expect(page).toHaveURL(/business=/);
