@@ -100,11 +100,15 @@ describe("completeSubscriberSignUp", () => {
       status: "pending",
       timeZone: "America/Mexico_City",
     });
-    expect(userRecord.customClaims).toMatchObject({
+    expect(userRecord.customClaims).toEqual({
       businessId: businessSnapshot?.id,
-      business_id: businessSnapshot?.id,
-      role: "business_owner",
+      role: "subscriber",
     });
+    // Q10: only the canonical field names are written.
+    expect(businessSnapshot?.data()).toMatchObject({
+      ownerUserId: userRecord.uid,
+    });
+    expect(businessSnapshot?.data()).not.toHaveProperty("owner_id");
 
     const ownerCollaboratorSnapshot = await businessSnapshot!.ref
       .collection(FIRESTORE_COLLECTION.COLLABORATORS)
@@ -273,7 +277,7 @@ describe("completeSubscriberSignUp", () => {
 
     expect(signUpResponse).toEqual({ email: TEST_CHECKOUT_EMAIL });
     const userRecord = await auth.getUserByEmail(TEST_CHECKOUT_EMAIL);
-    expect(userRecord.customClaims).toMatchObject({ role: "business_owner" });
+    expect(userRecord.customClaims).toMatchObject({ role: "subscriber" });
     expect(wait).toHaveBeenCalledExactlyOnceWith(
       SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS,
     );

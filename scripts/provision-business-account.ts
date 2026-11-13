@@ -106,13 +106,10 @@ const provision = async (): Promise<void> => {
   const businessId = `business-${slug}`;
 
   // 2. Asignar los Custom Claims de Firebase Auth requeridos por la app
-  console.log(
-    "- Asignando Custom Claims (role: business_owner, business_id)...",
-  );
+  console.log("- Asignando Custom Claims (role: subscriber, businessId)...");
   await auth.setCustomUserClaims(userId, {
     businessId,
-    business_id: businessId,
-    role: USER_ROLE.BUSINESS_OWNER,
+    role: USER_ROLE.SUBSCRIBER,
   });
 
   // 3. Crear o actualizar el perfil de usuario en /users/{userId} segun el diagrama ER
@@ -122,13 +119,12 @@ const provision = async (): Promise<void> => {
     .doc(userId)
     .set(
       {
-        business_id: businessId,
         businessId,
         email,
         fullName: businessName,
         language: process.argv[6] || LANGUAGE.EN,
         phone: DEFAULT_CREDENTIALS.PHONE,
-        role: USER_ROLE.BUSINESS_OWNER,
+        role: USER_ROLE.SUBSCRIBER,
         theme: THEME_MODE.SYSTEM,
         uid: userId,
       },
@@ -211,7 +207,6 @@ const provision = async (): Promise<void> => {
       id: businessId,
       logoUrl: null,
       name: businessName,
-      owner_id: userId,
       ownerUserId: userId,
       plan_id: "plan-pro",
       reviewed_by: null,
