@@ -4,12 +4,12 @@ import { Button, TextareaField } from "@/components";
 import { BUSINESS_PROFILE, I18N_NAMESPACE } from "@/constants";
 import type { ValidationMessageKey } from "@/constants";
 import type { NullableUndefined } from "@/types";
-import { BUSINESS_PROFILE_FORM_FIELD } from "../constants/BusinessProfileForm.constants";
-import { useBusinessProfileForm } from "../hooks/useBusinessProfileForm";
-import type { BusinessProfileFormProps } from "../models";
 import { BusinessProfileContactSection } from "./BusinessProfileContactSection";
 import { BusinessProfileIdentitySection } from "./BusinessProfileIdentitySection";
 import { BusinessProfileSocialLinksSection } from "./BusinessProfileSocialLinksSection";
+import { BUSINESS_PROFILE_FORM_FIELD } from "../constants/BusinessProfileForm.constants";
+import { useBusinessProfileForm } from "../hooks/useBusinessProfileForm";
+import type { BusinessProfileFormProps } from "../models";
 
 export const BusinessProfileForm = ({
   profile,

@@ -1,7 +1,8 @@
 import { screen, waitFor } from "@testing-library/react";
 import { ThemeContext } from "@/app/providers/theme/ThemeContext";
-import { LANGUAGE, STORAGE_KEY, THEME_MODE } from "@/constants";
+import { LANGUAGE, ROUTE_PATH, STORAGE_KEY, THEME_MODE } from "@/constants";
 import {
+  BUSINESS_OWNER_SESSION,
   COLLABORATOR_SESSION,
   renderWithProviders,
   SUBSCRIBER_SESSION,
@@ -23,7 +24,7 @@ describe("SettingsPage", () => {
     vi.mocked(saveUserTheme).mockResolvedValue();
   });
 
-  it("renders language, appearance, and password settings together", () => {
+  it("renders language, appearance, and password navigation without the expanded form", () => {
     renderWithProviders(<SettingsPage />, {
       initialPath: "/business/settings",
       session: SUBSCRIBER_SESSION,
@@ -34,8 +35,64 @@ describe("SettingsPage", () => {
       screen.getByRole("heading", { name: "Apariencia" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Cambiar contraseña" }),
+      screen.getByRole("heading", { name: "Contraseña" }),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(
+        testI18n.t("business:settings.password.currentPasswordLabel"),
+      ),
+    ).not.toBeInTheDocument();
+    expect(createSettingsPage().getPasswordSettingsLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`,
+    );
+  });
+
+  it("KAN-199: shows the business-profile option to a subscriber", () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: SUBSCRIBER_SESSION,
+    });
+
+    expect(createSettingsPage().getBusinessProfileLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+    );
+  });
+
+  it("KAN-199: shows the business-profile option to a business owner", () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: BUSINESS_OWNER_SESSION,
+    });
+
+    expect(createSettingsPage().getBusinessProfileLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.BUSINESS_PROFILE}`,
+    );
+    expect(screen.getByRole("heading", { name: "Idioma" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Apariencia" }),
+    ).toBeInTheDocument();
+    expect(createSettingsPage().getPasswordSettingsLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`,
+    );
+  });
+
+  it("KAN-199: hides the business-profile option from a collaborator", () => {
+    renderWithProviders(<SettingsPage />, {
+      initialPath: "/business/settings",
+      session: COLLABORATOR_SESSION,
+    });
+
+    expect(
+      createSettingsPage().queryBusinessProfileLink(),
+    ).not.toBeInTheDocument();
+    expect(createSettingsPage().getPasswordSettingsLink()).toHaveAttribute(
+      "href",
+      `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD}`,
+    );
   });
 
   it("KAN-51: changes Spanish to English immediately and persists it", async () => {

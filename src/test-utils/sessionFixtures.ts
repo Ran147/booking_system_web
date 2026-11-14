@@ -1,6 +1,14 @@
 import { SESSION_STATUS, type Session } from "@/modules/auth";
 import { USER_ROLE } from "@/shared/domain";
 
+export const BUSINESS_OWNER_SESSION = {
+  businessId: "business-test",
+  collaboratorId: null,
+  role: USER_ROLE.BUSINESS_OWNER,
+  status: SESSION_STATUS.SIGNED_IN,
+  userId: "business-owner-test",
+} as const satisfies Session;
+
 export const SUBSCRIBER_SESSION = {
   businessId: "business-test",
   collaboratorId: null,

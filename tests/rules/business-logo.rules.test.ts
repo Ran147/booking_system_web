@@ -36,6 +36,14 @@ const ownerContext = (): ReturnType<
     role: "subscriber",
   });
 
+const businessOwnerContext = (): ReturnType<
+  RulesTestEnvironment["authenticatedContext"]
+> =>
+  testEnvironment.authenticatedContext("subscriber-a", {
+    businessId: "business-a",
+    role: "business_owner",
+  });
+
 describe("storage.rules: business logo", () => {
   beforeAll(async () => {
     testEnvironment = await initializeTestEnvironment({
@@ -62,6 +70,40 @@ describe("storage.rules: business logo", () => {
 
   it("KAN-199: lets the owner upload a valid image", async () => {
     await assertSucceeds(uploadLogo(ownerContext(), "image/png"));
+  });
+
+  it("KAN-199: lets the recorded business owner upload a valid image", async () => {
+    await assertSucceeds(uploadLogo(businessOwnerContext(), "image/png"));
+  });
+
+  it("KAN-199: accepts Sprint_1 claim and owner field aliases", async () => {
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc("businesses/business-a")
+        .set({ owner_id: "business-owner-a", status: "active" });
+    });
+    const businessOwner = testEnvironment.authenticatedContext(
+      "business-owner-a",
+      {
+        business_id: "business-a",
+        role: "business_owner",
+      },
+    );
+
+    await assertSucceeds(uploadLogo(businessOwner, "image/png"));
+  });
+
+  it("KAN-199: denies a forged business owner uploading the logo", async () => {
+    const forgedBusinessOwner = testEnvironment.authenticatedContext(
+      "attacker",
+      {
+        businessId: "business-a",
+        role: "business_owner",
+      },
+    );
+
+    await assertFails(uploadLogo(forgedBusinessOwner, "image/png"));
   });
 
   it("KAN-199: lets a visitor read a public business logo", async () => {

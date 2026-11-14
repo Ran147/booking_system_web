@@ -1,5 +1,12 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
+  SIGN_UP_LINK_STATE,
+  TEST_CHECKOUT_EMAIL,
+  TEST_PLAN,
+  seedCheckout,
+  seedPlan,
+} from "./signUpTestFixtures.js";
+import {
   assertEmulatorsRunning,
   buildCallableRequest,
   captureHttpsError,
@@ -9,13 +16,6 @@ import {
 } from "../../shared/tests/emulatorTestHelpers.js";
 import { SIGN_UP_ERROR_REASON } from "../constants/SubscriberSignUp.constants.js";
 import { validateSignUpLink } from "../validateSignUpLink.js";
-import {
-  SIGN_UP_LINK_STATE,
-  TEST_CHECKOUT_EMAIL,
-  TEST_PLAN,
-  seedCheckout,
-  seedPlan,
-} from "./signUpTestFixtures.js";
 
 const callValidateSignUpLink =
   functionsTestEnvironment.wrap(validateSignUpLink);

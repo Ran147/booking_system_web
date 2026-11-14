@@ -2,15 +2,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { forwardRef, type ForwardedRef, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { I18N_NAMESPACE } from "@/constants";
+import { Button, BUTTON_SIZE, BUTTON_VARIANT } from "../button";
+import { InputField } from "../input-field";
 import { PASSWORD_INPUT_TYPE } from "./constants/passwordInput.constants";
 import type { PasswordInputProps } from "./models/passwordInput.model";
 import { usePasswordInput } from "./usePasswordInput";
-import { Button } from "../button";
-import {
-  BUTTON_SIZE,
-  BUTTON_VARIANT,
-} from "../button/constants/button.constants";
-import { InputField } from "../input-field";
 
 // Shared by sign-in (US-33), sign-up (KAN-25), change password (KAN-53,
 // HU-171) and password recovery.

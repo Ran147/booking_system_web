@@ -5,11 +5,26 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /businesses/{businessId}/profile/logo {
+      function claimedBusinessId() {
+        return request.auth.token.get(
+          'businessId',
+          request.auth.token.get('business_id', null)
+        );
+      }
+
+      function recordedOwnerId() {
+        return firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.get(
+          'ownerUserId',
+          firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.get('owner_id', null)
+        );
+      }
+
       function ownsBusiness() {
         return request.auth != null
-          && request.auth.token.role == 'subscriber'
-          && request.auth.token.businessId == businessId
-          && firestore.get(/databases/(default)/documents/businesses/$(businessId)).data.ownerUserId == request.auth.uid;
+          && (request.auth.token.role == 'business_owner'
+            || request.auth.token.role == 'subscriber')
+          && claimedBusinessId() == businessId
+          && recordedOwnerId() == request.auth.uid;
       }
 
       function businessIsWritable() {

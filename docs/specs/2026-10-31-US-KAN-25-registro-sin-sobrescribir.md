@@ -84,3 +84,19 @@ Con `npm run dev` apuntando a `practica1webcourse` (`.env.local`):
 | D1 | Se corrige dentro de `api/callFunction.ts` con el mismo estilo, sin mover código a otro archivo | Seguir la línea del backend de Vercel que ya usa el equipo |
 | D2 | `create` en Firestore en vez de leer y después escribir | Es atómico: evita que dos registros simultáneos tomen el mismo `slug`, sin transacción aparte |
 | D3 | Tests en `tests/api/` con `firebase-admin` simulado | Sin tocar producción y sin depender del emulador en `test:run` |
+
+## 7. Integración de seguridad con KAN-199
+
+El registro no tiene una implementación alternativa en el cliente. Si el
+endpoint de Vercel y la Cloud Function no están disponibles, la operación debe
+fallar sin crear usuarios, negocios ni documentos parciales. El aprovisionamiento
+requiere Admin SDK para emitir los custom claims `role`, `businessId` y
+`business_id`, y para poder revertir Auth y Firestore como una sola operación
+lógica.
+
+Las cuentas creadas históricamente sin esos claims no se corrigen relajando
+`firestore.rules`. Antes de desplegar las reglas estrictas, el equipo debe
+inventariarlas y migrarlas con Admin SDK, comprobando que el UID coincida con
+`ownerUserId` o `owner_id`, y luego forzar la renovación del token. Esta tarea es
+operativa y no autoriza ejecutar cambios contra producción desde pruebas o desde
+el cliente.
