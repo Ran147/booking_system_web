@@ -1,0 +1,263 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BOOKING_STATUS } from "@/domain";
+import { fetchBookingHistory } from "../api/fetchBookingHistory";
+
+const mockDocs: Array<{ ["data"]: () => Record<string, unknown>; id: string }> =
+  [];
+
+vi.mock("firebase/firestore", () => ({
+  collection: vi.fn(),
+  getDocs: vi.fn(async () => ({
+    docs: mockDocs,
+  })),
+  limit: vi.fn(),
+  orderBy: vi.fn(),
+  query: vi.fn(),
+}));
+
+vi.mock("@/services/firebase", () => ({
+  firestore: {},
+}));
+
+describe("fetchBookingHistory (KAN-76)", () => {
+  const businessId = "business-123";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDocs.length = 0;
+
+    // Base mock bookings:
+    // 1. Past completed booking on 2026-11-05
+    mockDocs.push({
+      ["data"]: () => ({
+        businessId,
+        collaboratorId: "collab-1",
+        customerId: "cust-1",
+        endsAt: new Date("2026-11-05T15:00:00.000Z"),
+        serviceId: "service-haircut",
+        serviceSnapshot: {
+          durationMinutes: 30,
+          name: "Corte",
+          priceInCents: 1000,
+        },
+        startsAt: new Date("2026-11-05T14:30:00.000Z"),
+        status: "completed",
+      }),
+      id: "booking-1",
+    });
+
+    // 2. Future cancelled booking on 2026-11-10
+    mockDocs.push({
+      ["data"]: () => ({
+        businessId,
+        collaboratorId: "collab-2",
+        customerId: "cust-2",
+        endsAt: new Date("2026-11-10T16:00:00.000Z"),
+        serviceId: "service-beard",
+        serviceSnapshot: {
+          durationMinutes: 30,
+          name: "Barba",
+          priceInCents: 800,
+        },
+        startsAt: new Date("2026-11-10T15:30:00.000Z"),
+        status: "cancelled",
+      }),
+      id: "booking-2",
+    });
+
+    // 3. Past confirmed booking on 2026-11-01
+    mockDocs.push({
+      ["data"]: () => ({
+        businessId,
+        collaboratorId: "collab-1",
+        customerId: "cust-3",
+        endsAt: new Date("2026-11-01T17:00:00.000Z"),
+        serviceId: "service-haircut",
+        serviceSnapshot: {
+          durationMinutes: 30,
+          name: "Corte",
+          priceInCents: 1000,
+        },
+        startsAt: new Date("2026-11-01T16:30:00.000Z"),
+        status: "confirmed",
+      }),
+      id: "booking-3",
+    });
+  });
+
+  it("AC-KAN-76-01: returns all historical bookings (past and terminal status)", async () => {
+    const result = await fetchBookingHistory(businessId, { status: "all" });
+
+    expect(result.totalCount).toBe(3);
+    expect(result.bookings).toHaveLength(3);
+  });
+
+  it("AC-KAN-76-02: returns all bookings with all statuses when status is all", async () => {
+    mockDocs.push({
+      ["data"]: () => ({
+        businessId,
+        collaboratorId: "collab-1",
+        customerId: "cust-pending",
+        endsAt: new Date(Date.now() + 86_400_000 + 1_800_000),
+        serviceId: "service-haircut",
+        serviceSnapshot: {
+          durationMinutes: 30,
+          name: "Corte",
+          priceInCents: 1000,
+        },
+        startsAt: new Date(Date.now() + 86_400_000),
+        status: BOOKING_STATUS.PENDING,
+      }),
+      id: "booking-pending",
+    });
+
+    const result = await fetchBookingHistory(businessId, {
+      status: "all",
+    });
+
+    expect(result.totalCount).toBe(4);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.PENDING,
+      ),
+    ).toBe(true);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.COMPLETED,
+      ),
+    ).toBe(true);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.CANCELLED,
+      ),
+    ).toBe(true);
+    expect(
+      result.bookings.some(
+        (booking) => booking.status === BOOKING_STATUS.CONFIRMED,
+      ),
+    ).toBe(true);
+  });
+
+  it("AC-KAN-76-02: filters by status correctly", async () => {
+    const result = await fetchBookingHistory(businessId, {
+      status: "cancelled",
+    });
+
+    expect(result.totalCount).toBe(1);
+    expect(result.bookings[0]?.id).toBe("booking-2");
+  });
+
+  it("AC-KAN-76-02: filters by confirmed status and returns confirmed bookings including future", async () => {
+    mockDocs.push({
+      ["data"]: () => ({
+        businessId,
+        collaboratorId: "collab-1",
+        customerId: "cust-4",
+        endsAt: new Date(Date.now() + 86_400_000 + 3_600_000),
+        serviceId: "service-haircut",
+        serviceSnapshot: {
+          durationMinutes: 30,
+          name: "Corte",
+          priceInCents: 1000,
+        },
+        startsAt: new Date(Date.now() + 86_400_000),
+        status: "confirmed",
+      }),
+      id: "booking-4",
+    });
+
+    const result = await fetchBookingHistory(businessId, {
+      status: "confirmed",
+    });
+
+    expect(result.totalCount).toBe(2);
+    expect(
+      result.bookings.every(
+        (booking) => booking.status === BOOKING_STATUS.CONFIRMED,
+      ),
+    ).toBe(true);
+  });
+
+  it("AC-KAN-76-02: filters by serviceId correctly", async () => {
+    const result = await fetchBookingHistory(businessId, {
+      serviceId: "service-beard",
+      status: "all",
+    });
+
+    expect(result.totalCount).toBe(1);
+    expect(result.bookings[0]?.id).toBe("booking-2");
+  });
+
+  it("AC-KAN-76-02: filters by date range in Costa Rica time", async () => {
+    const result = await fetchBookingHistory(
+      businessId,
+      {
+        endDate: "2026-11-06",
+        startDate: "2026-11-04",
+        status: "all",
+      },
+      1,
+      10,
+      "America/Costa_Rica",
+    );
+
+    expect(result.totalCount).toBe(1);
+    expect(result.bookings[0]?.id).toBe("booking-1");
+  });
+
+  it("AC-KAN-76-02: filters by single date in Costa Rica time", async () => {
+    const result = await fetchBookingHistory(
+      businessId,
+      {
+        date: "2026-11-05",
+        status: "all",
+      },
+      1,
+      10,
+      "America/Costa_Rica",
+    );
+
+    expect(result.totalCount).toBe(1);
+    expect(result.bookings[0]?.id).toBe("booking-1");
+  });
+
+  it("AC-KAN-76-03: does not apply date filter when end date is before start date", async () => {
+    const result = await fetchBookingHistory(
+      businessId,
+      {
+        endDate: "2026-11-01",
+        startDate: "2026-11-10",
+        status: "all",
+      },
+      1,
+      10,
+      "America/Costa_Rica",
+    );
+
+    // Filter was skipped per AC-KAN-76-03
+    expect(result.totalCount).toBe(3);
+  });
+
+  it("AC-KAN-76-04: paginates results correctly by page and pageSize", async () => {
+    const pageOne = await fetchBookingHistory(
+      businessId,
+      { status: "all" },
+      1,
+      2,
+    );
+    expect(pageOne.totalCount).toBe(3);
+    expect(pageOne.bookings).toHaveLength(2);
+    expect(pageOne.bookings[0]?.id).toBe("booking-1");
+    expect(pageOne.bookings[1]?.id).toBe("booking-2");
+
+    const pageTwo = await fetchBookingHistory(
+      businessId,
+      { status: "all" },
+      2,
+      2,
+    );
+    expect(pageTwo.totalCount).toBe(3);
+    expect(pageTwo.bookings).toHaveLength(1);
+    expect(pageTwo.bookings[0]?.id).toBe("booking-3");
+  });
+});

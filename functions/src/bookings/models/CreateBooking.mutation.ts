@@ -9,8 +9,10 @@ export interface ServiceSnapshot {
 export interface CreateBookingPayload {
   readonly businessId: string;
   readonly collaboratorId?: Nullable<string>;
-  readonly customerId: string;
+  /** Ignored: a customer always books for themselves (spec KAN-139, D-4). */
+  readonly customerId?: string;
   readonly customerUserId?: Nullable<string>;
+  /** Ignored: the end comes from the service duration (D-4). */
   readonly endsAt?: string;
   readonly serviceId: string;
   readonly startsAt: string;

@@ -40,9 +40,11 @@ describe("firestore.rules: tenant isolation", () => {
     await testEnvironment.clearFirestore();
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       const adminFirestore = context.firestore();
-      await adminFirestore
-        .doc("businesses/business-a")
-        .set({ ownerUserId: "subscriber-a", status: "active" });
+      await adminFirestore.doc("businesses/business-a").set({
+        name: "Business A",
+        ownerUserId: "subscriber-a",
+        status: "active",
+      });
       await adminFirestore
         .doc(BUSINESS_A_BOOKING_PATH)
         .set({ customerUserId: "customer-1", status: "confirmed" });
@@ -263,6 +265,46 @@ describe("firestore.rules: tenant isolation", () => {
         .firestore()
         .doc("businesses/business-a")
         .update({ name: "Anonymous business" }),
+    );
+  });
+
+  it("KAN-64, KAN-70: allows updating business hours and booking confirmation mode", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriberA
+        .firestore()
+        .doc("businesses/business-a")
+        .update({
+          bookingConfirmationMode: "manual",
+          businessHours: {
+            monday: [{ closesAt: "18:00", opensAt: "09:00" }],
+          },
+        }),
+    );
+  });
+
+  it("KAN-65, KAN-66: allows subscriber to create and read schedule blocks", async () => {
+    const subscriberA = testEnvironment.authenticatedContext(
+      "subscriber-a",
+      subscriberOf("business-a"),
+    );
+
+    await assertSucceeds(
+      subscriberA
+        .firestore()
+        .collection("businesses/business-a/scheduleBlocks")
+        .add({
+          businessId: "business-a",
+          collaboratorId: null,
+          endsAt: new Date(),
+          isFullDay: true,
+          reason: "Feriado",
+          startsAt: new Date(),
+        }),
     );
   });
 
