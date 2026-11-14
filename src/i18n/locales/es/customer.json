@@ -1,7 +1,7 @@
 {
   "layout": {
     "business": {
-      "unavailable": "Este negocio no estÃ¡ disponible para nuevas reservaciones en este momento."
+      "unavailable": "Este negocio no está disponible para nuevas reservaciones en este momento."
     },
     "businessNotFound": "No encontramos el negocio solicitado.",
     "footer": {
@@ -30,7 +30,7 @@
     },
     "navbar": {
       "businessHomeLabel": "Ir al inicio de {{businessName}}",
-      "landmarkLabel": "NavegaciÃ³n del negocio"
+      "landmarkLabel": "Navegación del negocio"
     },
     "retryAction": "Reintentar",
     "title": "Portal del cliente"
