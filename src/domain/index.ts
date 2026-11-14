@@ -17,6 +17,8 @@ export type * from "./service/Service.interface";
 export * from "./service/ServiceStatus.constants";
 export * from "./stateMachine";
 export * from "./subscription/SubscriptionStatus.constants";
+export type * from "./support-ticket/SupportTicket.interface";
+export type * from "./support-ticket/SupportTicketReply.interface";
 export * from "./support-ticket/SupportTicketStatus.constants";
 export * from "./user/evaluatePasswordStrength";
 export * from "./user/FullNameRule.constants";

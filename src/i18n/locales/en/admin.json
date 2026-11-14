@@ -5,5 +5,51 @@
   "placeholder": {
     "description": "This is where businesses, plans and support tickets will be managed.",
     "title": "Administration dashboard"
+  },
+  "supportTickets": {
+    "detail": {
+      "business": "Business",
+      "close": "Close",
+      "createdAt": "Creation date",
+      "noReplies": "No replies recorded yet.",
+      "originalMessage": "Original inquiry",
+      "ownerEmail": "Owner email",
+      "ownerUnavailable": "Email not available",
+      "repliesTitle": "Reply history",
+      "resolvedAt": "Resolution date",
+      "status": "Status",
+      "title": "Support Ticket Details",
+      "updatedAt": "Last update"
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "clear": "Clear filter",
+      "statusLabel": "Filter by status"
+    },
+    "list": {
+      "description": "Complete list of inquiries and issues submitted by business owners.",
+      "empty": "No support tickets found.",
+      "retryAction": "Retry",
+      "title": "Support Tickets"
+    },
+    "reply": {
+      "emailFailed": "The reply was saved but the email notification could not be delivered."
+    },
+    "status": {
+      "in_progress": "In progress",
+      "open": "Open",
+      "resolved": "Resolved"
+    },
+    "table": {
+      "actions": "Actions",
+      "business": "Business",
+      "caption": "List of support tickets",
+      "createdAt": "Created at",
+      "status": "Status",
+      "subject": "Subject",
+      "unnamedBusiness": "Unnamed business",
+      "updatedAt": "Updated at",
+      "viewDetail": "View details"
+    }
   }
 }

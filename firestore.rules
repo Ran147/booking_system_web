@@ -271,6 +271,18 @@ service cloud.firestore {
       allow write: if false; // functions only
     }
 
+    // Support tickets (KAN-189, KAN-190, PROP-3):
+    // Read: super admins can read any ticket; subscribers can read their own
+    // business's tickets (AC-KAN-190-07).
+    // Write: client writes are strictly disallowed; tickets, replies and
+    // status transitions (KAN-191, KAN-192) are handled by Cloud Functions
+    // (AC-KAN-190-07, AC-KAN-192-06).
+    match /supportTickets/{supportTicketId} {
+      allow read: if isSuperAdmin()
+        || (isSignedIn() && ownsBusiness(resource.data.businessId));
+      allow write: if false;
+    }
+
     // Deny by default.
     match /{document=**} {
       allow read, write: if false;
