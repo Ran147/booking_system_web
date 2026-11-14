@@ -56,7 +56,13 @@ describe("CustomerLayout", () => {
 
     renderLayout();
 
-    expect(await screen.findByText(BUSINESS_PROFILE.name)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", {
+        name: testI18n.t("customer:layout.navbar.businessHomeLabel", {
+          businessName: BUSINESS_PROFILE.name,
+        }),
+      }),
+    ).toBeInTheDocument();
     expect(fetchBusinessPublicProfileBySlug).toHaveBeenCalledWith(
       BUSINESS_PROFILE.slug,
     );
@@ -85,11 +91,32 @@ describe("CustomerLayout", () => {
     renderLayout();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      testI18n.t("errors.unknown"),
+      testI18n.t("errors.network"),
     );
+    expect(
+      screen.getByRole("button", {
+        name: testI18n.t("customer:layout.retryAction"),
+      }),
+    ).toBeInTheDocument();
     expect(screen.queryByText(BUSINESS_PROFILE.name)).not.toBeInTheDocument();
     expect(screen.queryByText("Contenido Customer")).not.toBeInTheDocument();
     expect(createCustomerFooterPage().getTermsLink()).toBeInTheDocument();
+  });
+
+  it("AC-KAN-107-06: identifies an unavailable business and warns the visitor", async () => {
+    vi.mocked(fetchBusinessPublicProfileBySlug).mockResolvedValue({
+      ...BUSINESS_PROFILE,
+      status: BUSINESS_STATUS.SUSPENDED,
+    });
+
+    renderLayout();
+
+    expect(
+      await screen.findByText(
+        testI18n.t("customer:layout.business.unavailable"),
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Contenido Customer")).toBeInTheDocument();
   });
 
   it("KAN-117: reports an unknown slug and keeps legal navigation", async () => {
