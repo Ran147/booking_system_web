@@ -12,7 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { cert, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { FieldValue, getFirestore, Timestamp } from "firebase-admin/firestore";
 import { FIRESTORE_COLLECTION } from "../src/constants/firestore/FirestoreCollection.constants";
 import { LANGUAGE } from "../src/constants/i18n/Language.constants";
 import { THEME_MODE } from "../src/constants/theme/ThemeMode.constants";
@@ -207,6 +207,9 @@ const provision = async (): Promise<void> => {
       id: businessId,
       logoUrl: null,
       name: businessName,
+      // Q10: with merge the legacy owner_id of a previous owner would survive
+      // and keep them authorized by the compatibility rules; delete it.
+      owner_id: FieldValue.delete(),
       ownerUserId: userId,
       plan_id: "plan-pro",
       reviewed_by: null,

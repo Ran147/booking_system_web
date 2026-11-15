@@ -130,6 +130,12 @@ describe("completeSubscriberSignUp", () => {
       language: "es",
       phone: "+52 55 1234 5678",
     });
+    // Q10: the profile matches the claims and has no legacy names.
+    expect(userSnapshot.data()).toMatchObject({
+      businessId: businessSnapshot?.id,
+      role: "subscriber",
+    });
+    expect(userSnapshot.data()).not.toHaveProperty("business_id");
 
     const paymentsSnapshot = await businessSnapshot!.ref
       .collection(FIRESTORE_COLLECTION.PAYMENTS)
