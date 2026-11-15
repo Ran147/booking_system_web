@@ -104,4 +104,18 @@ Cada PR es pequeño, con su spec primero y los criterios que cubre en la descrip
 - Las pantallas del horario del negocio (KAN-64 a 66) y de colaboradores (KAN-77, 81).
 - La selección de servicio y colaborador (KAN-134 a 138).
 - Reprogramar (KAN-157, 158), que reutilizará este motor en su propia spec.
-- El modo de confirmación manual (KAN-70) y el correo de confirmación (KAN-163, bloqueado por Q9).
+- El correo de confirmación (KAN-163, bloqueado por Q9). El modo de confirmación manual (KAN-70) se conserva en el handler (§8, D-10).
+
+### 8. Producción en Vercel (Q8, 2026-11-15)
+
+Producción no tiene Cloud Functions: la app llama a `api/callFunction.ts`. Ese despachador tenía su propia copia de `createBooking` (sin el motor ni la revalidación) y no tenía `getAvailability`. Q8 pide que `functions/src` sea la única fuente de la lógica del servidor.
+
+| Id | Decisión |
+| --- | --- |
+| D-7 | **Handlers compartidos:** la lógica de `getAvailability` y `createBooking` pasa a `functions/src/bookings/handlers/handle*.ts`, que reciben `{ caller, payload, firestore, now }`. No importan `firebase-functions` ni `shared/firebaseAdmin`: el `onCall` del emulador y el despachador les pasan su propia instancia de Firestore. |
+| D-8 | **Errores:** los handlers lanzan `CallableFailure` (`code`, `message`, `details`) con los códigos de `HttpsError`. El `onCall` la convierte con `toHttpsError`; el despachador responde con el estado HTTP equivalente y `{ code, message, details }`, que `callFunction` vuelve a convertir en el mismo `FunctionsError`. |
+| D-9 | **Quién usa el handler en el despachador:** solo un `customer` (o `client`). El personal del negocio que crea una reserva para un cliente (KAN-69) sigue con el código actual del despachador. |
+| D-10 | **Lo que el despachador ya hacía y se conserva:** el modo de confirmación del negocio (KAN-70: `manual` crea la reserva `pending`), el rechazo de un cliente bloqueado (`customer:bookingCheckout.confirm.customerBlockedError`), y `createdAt` / `updatedAt`. Se agregan al handler, con sus tests en el emulador. La respuesta incluye `status`. |
+| D-11 | **Copias de `firebase-admin`:** en local, `functions/` y la raíz tienen su propia copia. Por eso el handler reconoce un `Timestamp` por su método `toDate` (no con `instanceof`) y escribe `createdAt` con `now` (no con `FieldValue`). |
+
+**Verificación en Vercel:** la vista previa del PR. Un `GET /api/callFunction` debe responder `405` (el módulo cargó con sus importaciones de `functions/src`); después, con una cuenta de cliente, una consulta de horarios.
