@@ -26,4 +26,3 @@ export interface BookingDetailDrawerProps {
   readonly onSuccess?: () => void;
   readonly timeZone?: string;
 }
-

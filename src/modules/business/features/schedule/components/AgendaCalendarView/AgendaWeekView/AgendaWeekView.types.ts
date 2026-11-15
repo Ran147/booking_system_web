@@ -18,4 +18,3 @@ export interface AgendaWeekViewProps {
   readonly hasDeleteBlockAction: boolean;
   readonly weekDays: readonly AgendaWeekDayViewItem[];
 }
-

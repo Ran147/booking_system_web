@@ -9,4 +9,3 @@
 export interface BusinessHoursFormProps {
   readonly className?: string;
 }
-

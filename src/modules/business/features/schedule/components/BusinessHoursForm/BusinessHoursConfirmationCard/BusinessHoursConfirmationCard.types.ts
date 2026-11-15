@@ -20,4 +20,3 @@ export interface BusinessHoursConfirmationCardProps {
   readonly onModeChange: (value: string) => void;
   readonly onSave: () => void;
 }
-

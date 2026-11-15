@@ -11,4 +11,3 @@ import type { BusinessHoursDayRow as BusinessHoursDayRowModel } from "@/modules/
 export interface BusinessHoursDayRowProps {
   readonly dayRow: BusinessHoursDayRowModel;
 }
-

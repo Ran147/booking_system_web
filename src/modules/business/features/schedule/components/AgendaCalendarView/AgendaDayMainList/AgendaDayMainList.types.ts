@@ -22,4 +22,3 @@ export interface AgendaDayMainListProps {
   readonly timedBlocks: readonly AgendaBlockViewItem[];
   readonly timeZone: string;
 }
-

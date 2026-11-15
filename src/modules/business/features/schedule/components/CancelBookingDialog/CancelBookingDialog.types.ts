@@ -18,4 +18,3 @@ export interface CancelBookingDialogProps {
   readonly onClose: () => void;
   readonly onSuccess?: () => void;
 }
-

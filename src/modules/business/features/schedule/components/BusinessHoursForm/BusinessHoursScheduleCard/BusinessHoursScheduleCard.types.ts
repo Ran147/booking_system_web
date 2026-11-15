@@ -22,4 +22,3 @@ export interface BusinessHoursScheduleCardProps {
   readonly successMessage: Nullable<string>;
   readonly timeZone: string;
 }
-

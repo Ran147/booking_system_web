@@ -19,4 +19,3 @@ export interface BookingListTableProps {
   readonly onSelectBooking: (booking: Booking) => void;
   readonly timeZone?: string;
 }
-

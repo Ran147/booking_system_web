@@ -17,4 +17,3 @@ export interface AgendaBlockCardProps {
   readonly isHighlighted?: boolean;
   readonly onGoToDate: () => void;
 }
-

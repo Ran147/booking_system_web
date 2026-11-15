@@ -6,4 +6,3 @@ export const BUSINESS_HOURS_DAY_ROW_CONFIG = Object.freeze({
   TIME_INPUT_TYPE: "time",
   TOGGLE_BUTTON_SIZE: BUTTON_SIZE.SM,
 } as const);
-

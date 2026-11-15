@@ -27,4 +27,3 @@ export interface BookingDetailActionsProps {
   readonly onMarkNoShow: () => void;
   readonly onRescheduleClick: () => void;
 }
-

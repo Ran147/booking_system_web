@@ -11,4 +11,3 @@ import type { AgendaWeekDayViewItem } from "@/modules/business/features/schedule
 export interface AgendaWeekDayColumnProps {
   readonly dayItem: AgendaWeekDayViewItem;
 }
-

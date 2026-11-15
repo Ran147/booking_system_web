@@ -3,4 +3,3 @@ export const SCHEDULE_BLOCK_DIALOG_CONFIG = Object.freeze({
   SUBMIT_BUTTON_TYPE: "submit",
   TIME_INPUT_TYPE: "time",
 } as const);
-

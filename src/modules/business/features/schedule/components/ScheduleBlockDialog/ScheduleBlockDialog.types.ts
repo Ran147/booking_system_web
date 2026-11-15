@@ -11,4 +11,3 @@ import type { ScheduleBlockViewModelResult } from "@/modules/business/features/s
 export interface ScheduleBlockDialogProps {
   readonly viewModel: ScheduleBlockViewModelResult;
 }
-

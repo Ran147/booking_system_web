@@ -13,4 +13,3 @@ export interface BookingFormDialogProps {
   readonly onClose: () => void;
   readonly onSuccess?: () => void;
 }
-

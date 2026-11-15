@@ -20,4 +20,3 @@ export interface AgendaDayViewProps {
   readonly hasDeleteBlockAction: boolean;
   readonly timeZone: string;
 }
-

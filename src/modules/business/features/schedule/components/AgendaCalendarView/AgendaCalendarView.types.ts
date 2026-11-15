@@ -35,4 +35,3 @@ export interface AgendaCalendarViewProps {
   readonly timeZone?: string;
   readonly viewMode: ScheduleViewMode;
 }
-

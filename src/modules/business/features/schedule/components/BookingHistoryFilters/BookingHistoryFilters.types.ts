@@ -18,4 +18,3 @@ export interface BookingHistoryFiltersProps {
     value: BookingHistoryFilterValues[Key],
   ) => void;
 }
-

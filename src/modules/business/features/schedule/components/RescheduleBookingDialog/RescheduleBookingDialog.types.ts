@@ -18,4 +18,3 @@ export interface RescheduleBookingDialogProps {
   readonly onClose: () => void;
   readonly onSuccess?: () => void;
 }
-

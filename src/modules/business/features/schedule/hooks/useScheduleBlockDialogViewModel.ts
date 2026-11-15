@@ -95,4 +95,3 @@ export const useScheduleBlockDialogViewModel = (
       formData.startTime ?? SCHEDULE_BLOCK_DEFAULT_TIME.FALLBACK_START_TIME,
   };
 };
-

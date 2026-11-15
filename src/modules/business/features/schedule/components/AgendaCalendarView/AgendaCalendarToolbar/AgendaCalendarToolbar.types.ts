@@ -23,4 +23,3 @@ export interface AgendaCalendarToolbarProps {
   readonly onSwitchToWeekView: () => void;
   readonly onToday: () => void;
 }
-

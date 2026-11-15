@@ -15,4 +15,3 @@ export interface AgendaDayBlocksSidebarProps {
   readonly currentDayBlocks: readonly AgendaBlockViewItem[];
   readonly hasDeleteBlockAction: boolean;
 }
-

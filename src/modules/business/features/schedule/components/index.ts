@@ -48,4 +48,3 @@ export {
   SCHEDULE_BLOCK_DIALOG_CONFIG,
   type ScheduleBlockDialogProps,
 } from "./ScheduleBlockDialog";
-
