@@ -8,6 +8,9 @@ import {
   Timestamp,
   type Firestore,
 } from "firebase-admin/firestore";
+import { handleCreateBooking } from "../functions/src/bookings/handlers/handleCreateBooking.js";
+import { handleGetAvailability } from "../functions/src/bookings/handlers/handleGetAvailability.js";
+import { CallableFailure } from "../functions/src/shared/CallableFailure.js";
 import type { Nullable } from "../src/types/Nullable";
 
 const HTTP_METHOD = Object.freeze({
@@ -44,6 +47,7 @@ const FUNCTION_NAME = Object.freeze({
   EXPORT_COLLECTION: "exportCollection",
   FETCH_BOOKING_HISTORY: "fetchBookingHistory",
   FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
+  GET_AVAILABILITY: "getAvailability",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
@@ -536,6 +540,45 @@ const readCaller = async (
   }
 };
 
+const isCustomerCaller = (caller: Nullable<Caller>): caller is Caller =>
+  caller?.claims.role === USER_ROLE.CUSTOMER ||
+  caller?.claims.role === USER_ROLE.CLIENT;
+
+// HTTP status of each code a shared handler of functions/src reports (Q8).
+const CALLABLE_FAILURE_HTTP_STATUS: Readonly<Record<string, number>> =
+  Object.freeze({
+    "failed-precondition": HTTP_STATUS.PRECONDITION_FAILED,
+    "invalid-argument": HTTP_STATUS.BAD_REQUEST,
+    "not-found": HTTP_STATUS.NOT_FOUND,
+    "permission-denied": HTTP_STATUS.FORBIDDEN,
+    unauthenticated: HTTP_STATUS.UNAUTHORIZED,
+  });
+
+// Runs a shared handler of functions/src (Q8) and answers like a callable:
+// the result on success, `{ code, message, details }` on a CallableFailure,
+// which callFunction turns back into the same FunctionsError.
+const runSharedHandler = async (
+  response: ServerResponse,
+  runHandler: () => Promise<unknown>,
+): Promise<void> => {
+  try {
+    sendJsonResponse(response, HTTP_STATUS.OK, await runHandler());
+  } catch (error) {
+    if (!(error instanceof CallableFailure)) throw error;
+    sendJsonResponse(
+      response,
+      CALLABLE_FAILURE_HTTP_STATUS[error.code] ??
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      {
+        code: error.code,
+        details: error.details,
+        error: error.code,
+        message: error.message,
+      },
+    );
+  }
+};
+
 const readClaimBusinessId = (caller: Caller): unknown =>
   caller.claims.businessId ?? caller.claims.business_id;
 
@@ -711,14 +754,21 @@ const checkCallerAccess = async (
     return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
   }
 
-  if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
-    const role = caller.claims.role;
-    if (
-      (role === USER_ROLE.CUSTOMER || role === USER_ROLE.CLIENT) &&
-      payload.customerId === caller.userId
-    ) {
+  // A customer always books for themselves: the shared handler takes the uid
+  // from the token and ignores any customerId in the payload (KAN-139, D-4).
+  if (
+    functionName === FUNCTION_NAME.GET_AVAILABILITY ||
+    functionName === FUNCTION_NAME.CREATE_BOOKING
+  ) {
+    if (isCustomerCaller(caller)) {
       return CALLER_ACCESS.ALLOWED;
     }
+  }
+  if (functionName === FUNCTION_NAME.GET_AVAILABILITY) {
+    return CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
     const isStaff = await hasCollaboratorPermission(
       firestore,
       caller,
@@ -1272,6 +1322,40 @@ export default async function handler(
       return;
     }
 
+    // Customers run the same handlers as the callables (Q8): the availability
+    // engine and the re-check before booking (KAN-139, KAN-144).
+    if (
+      functionName === FUNCTION_NAME.GET_AVAILABILITY &&
+      isCustomerCaller(caller)
+    ) {
+      await runSharedHandler(response, () =>
+        handleGetAvailability({
+          caller: { role: caller.claims.role, uid: caller.userId },
+          payload,
+          firestore,
+          now: new Date(),
+        }),
+      );
+      return;
+    }
+
+    if (
+      functionName === FUNCTION_NAME.CREATE_BOOKING &&
+      isCustomerCaller(caller)
+    ) {
+      await runSharedHandler(response, () =>
+        handleCreateBooking({
+          caller: { role: caller.claims.role, uid: caller.userId },
+          payload,
+          firestore,
+          now: new Date(),
+        }),
+      );
+      return;
+    }
+
+    // Staff (owner or collaborator with manage_bookings) still book for a
+    // customer through the code below (KAN-69).
     if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
       const businessId = String(payload.businessId || "");
       const serviceId = String(payload.serviceId || "");
