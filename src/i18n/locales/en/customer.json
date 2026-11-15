@@ -1,5 +1,8 @@
 {
   "layout": {
+    "business": {
+      "unavailable": "This business is not available for new bookings right now."
+    },
     "businessNotFound": "We could not find the requested business.",
     "footer": {
       "contact": {
@@ -25,6 +28,11 @@
         "text": "Terms and conditions"
       }
     },
+    "navbar": {
+      "businessHomeLabel": "Go to {{businessName}} home",
+      "landmarkLabel": "Business navigation"
+    },
+    "retryAction": "Try again",
     "title": "Customer portal"
   },
   "myBookings": {
