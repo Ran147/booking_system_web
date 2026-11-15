@@ -57,12 +57,19 @@ export const handleCreateBooking = async ({
   // `endsAt` and `customerId` in the payload are ignored (spec KAN-139, D-4):
   // the end comes from the service duration and a customer always books for
   // themselves.
-  const { businessId, collaboratorId, serviceId, startsAt } =
-    parseCallablePayload(
-      createBookingPayloadSchema,
-      payload,
-      CREATE_BOOKING_ERROR.INVALID_PAYLOAD,
-    );
+  const {
+    businessId,
+    collaboratorId,
+    expectedDurationMinutes,
+    expectedPriceInCents,
+    requestId,
+    serviceId,
+    startsAt,
+  } = parseCallablePayload(
+    createBookingPayloadSchema,
+    payload,
+    CREATE_BOOKING_ERROR.INVALID_PAYLOAD,
+  );
 
   const businessReference = firestore
     .collection(FIRESTORE_COLLECTION.BUSINESSES)
@@ -73,8 +80,34 @@ export const handleCreateBooking = async ({
   const customerReference = businessReference
     .collection(FIRESTORE_COLLECTION.CUSTOMERS)
     .doc(customerUserId);
+  const bookingsCollection = businessReference.collection(
+    FIRESTORE_COLLECTION.BOOKINGS,
+  );
+  // S-1: with a requestId every retry of one checkout targets the same
+  // document, so a retry after a lost answer never creates a second booking.
+  const bookingReference = requestId
+    ? bookingsCollection.doc(requestId)
+    : bookingsCollection.doc();
 
   return firestore.runTransaction(async (transaction) => {
+    if (requestId) {
+      const previousBooking = await transaction.get(bookingReference);
+      if (previousBooking.exists) {
+        const previousData = previousBooking.data();
+        if (previousData?.customerUserId !== customerUserId) {
+          throw new CallableFailure(
+            "invalid-argument",
+            CREATE_BOOKING_ERROR.REQUEST_ID_TAKEN,
+          );
+        }
+        return {
+          bookingId: previousBooking.id,
+          serviceSnapshot: previousData.serviceSnapshot,
+          status: previousData.status,
+        } as CreateBookingResponse;
+      }
+    }
+
     const businessSnapshot = await transaction.get(businessReference);
     const businessData = businessSnapshot.data();
     if (
@@ -93,6 +126,21 @@ export const handleCreateBooking = async ({
       throw serviceUnavailable("failed-precondition");
     }
 
+    // S-2, AC-KAN-148-08: the price or duration the customer saw changed.
+    const hasPriceChanged =
+      expectedPriceInCents !== undefined &&
+      Number(serviceData?.priceInCents) !== expectedPriceInCents;
+    const hasDurationChanged =
+      expectedDurationMinutes !== undefined &&
+      Number(serviceData?.durationMinutes) !== expectedDurationMinutes;
+    if (hasPriceChanged || hasDurationChanged) {
+      throw new CallableFailure(
+        "failed-precondition",
+        CREATE_BOOKING_ERROR.SERVICE_CHANGED,
+        { reason: CREATE_BOOKING_ERROR_REASON.SERVICE_CHANGED },
+      );
+    }
+
     // A customer the business blocked cannot book there (KAN-148).
     const customerSnapshot = await transaction.get(customerReference);
     if (customerSnapshot.data()?.status === CUSTOMER_STATUS.BLOCKED) {
@@ -102,6 +150,17 @@ export const handleCreateBooking = async ({
         { reason: CREATE_BOOKING_ERROR_REASON.CUSTOMER_BLOCKED },
       );
     }
+    // S-3, AS-4: the first booking at a business creates the Customer record
+    // from the account profile. Read here; written with the booking below.
+    const profileData = customerSnapshot.exists
+      ? null
+      : ((
+          await transaction.get(
+            firestore
+              .collection(FIRESTORE_COLLECTION.USERS)
+              .doc(customerUserId),
+          )
+        ).data() ?? {});
 
     const timeZone: string = businessData?.timeZone ?? "UTC";
     const serviceSnapshot = buildServiceSnapshot({
@@ -142,9 +201,16 @@ export const handleCreateBooking = async ({
         ? BOOKING_STATUS.PENDING
         : BOOKING_STATUS.CONFIRMED;
 
-    const bookingReference = businessReference
-      .collection(FIRESTORE_COLLECTION.BOOKINGS)
-      .doc();
+    if (profileData) {
+      transaction.set(customerReference, {
+        createdAt: now,
+        email: profileData.email ?? null,
+        fullName: profileData.fullName ?? null,
+        phone: profileData.phone ?? null,
+        status: CUSTOMER_STATUS.ACTIVE,
+        userId: customerUserId,
+      });
+    }
 
     transaction.set(bookingReference, {
       businessId,
