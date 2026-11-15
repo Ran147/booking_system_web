@@ -3,7 +3,7 @@ import type {
   DocumentReference,
   Transaction,
 } from "firebase-admin/firestore";
-import { HttpsError } from "firebase-functions/v2/https";
+import { CallableFailure } from "../../shared/CallableFailure.js";
 import type { Nullable } from "../../shared/types/Nullable.js";
 import { formatZonedDate } from "../../shared/zonedTime.js";
 import { buildAvailabilityResources } from "../availability/buildAvailabilityResources.js";
@@ -36,8 +36,8 @@ export interface BookingResource {
   readonly collaboratorName: Nullable<string>;
 }
 
-const slotTakenError = (): HttpsError =>
-  new HttpsError("failed-precondition", CREATE_BOOKING_ERROR.SLOT_TAKEN, {
+const slotTakenError = (): CallableFailure =>
+  new CallableFailure("failed-precondition", CREATE_BOOKING_ERROR.SLOT_TAKEN, {
     reason: CREATE_BOOKING_ERROR_REASON.SLOT_TAKEN,
   });
 
