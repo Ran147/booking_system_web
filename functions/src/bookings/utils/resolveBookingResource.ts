@@ -4,13 +4,13 @@ import type {
   Transaction,
 } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
-import { BOOKING_STATUS } from "../../shared/constants/BookingStatus.constants.js";
 import type { Nullable } from "../../shared/types/Nullable.js";
 import { formatZonedDate } from "../../shared/zonedTime.js";
 import { buildAvailabilityResources } from "../availability/buildAvailabilityResources.js";
 import { computeFreeSlots } from "../availability/computeFreeSlots.js";
 import { AVAILABILITY } from "../availability/constants/Availability.constants.js";
 import type { AvailabilityBusinessHours } from "../availability/models/Availability.model.js";
+import { overlapsOwnOpenBooking } from "../availability/overlapsOwnOpenBooking.js";
 import { readAvailabilityData } from "../availability/readAvailabilityData.js";
 import { selectCollaborator } from "../availability/selectCollaborator.js";
 import {
@@ -35,11 +35,6 @@ export interface BookingResource {
   readonly collaboratorId: Nullable<string>;
   readonly collaboratorName: Nullable<string>;
 }
-
-const OPEN_BOOKING_STATUSES: readonly string[] = [
-  BOOKING_STATUS.CONFIRMED,
-  BOOKING_STATUS.PENDING,
-];
 
 const slotTakenError = (): HttpsError =>
   new HttpsError("failed-precondition", CREATE_BOOKING_ERROR.SLOT_TAKEN, {
@@ -85,14 +80,12 @@ export const resolveBookingResource = async ({
   const endsAt = new Date(
     startsAt.getTime() + durationMinutes * AVAILABILITY.MS_PER_MINUTE,
   );
-  const hasOverlappingOwnBooking = availabilityData.bookings.some(
-    (booking) =>
-      booking.customerUserId === customerUserId &&
-      OPEN_BOOKING_STATUSES.includes(booking.status) &&
-      booking.startsAt.getTime() < endsAt.getTime() &&
-      startsAt.getTime() < booking.endsAt.getTime(),
-  );
-  if (hasOverlappingOwnBooking) {
+  if (
+    overlapsOwnOpenBooking(availabilityData.bookings, customerUserId, {
+      endsAt,
+      startsAt,
+    })
+  ) {
     throw slotTakenError();
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveZonedInstant } from "../zonedTime.js";
+import { addCalendarDays, resolveZonedInstant } from "../zonedTime.js";
 
 describe("resolveZonedInstant", () => {
   it("converts a wall-clock time in a zone without daylight saving", () => {
@@ -59,5 +59,18 @@ describe("resolveZonedInstant", () => {
     );
 
     expect(instant?.toISOString()).toBe("2026-11-01T05:30:00.000Z");
+  });
+});
+
+describe("addCalendarDays", () => {
+  it("adds calendar days across the end of a month and a year", () => {
+    expect(addCalendarDays("2026-11-15", 16)).toBe("2026-12-01");
+    expect(addCalendarDays("2026-12-25", 10)).toBe("2027-01-04");
+  });
+
+  it("is not moved by a daylight-saving change", () => {
+    // America/New_York jumps forward on 2026-03-08: 60 days of 24 hours from
+    // late on 2026-02-01 would land on the wrong local day.
+    expect(addCalendarDays("2026-02-01", 60)).toBe("2026-04-02");
   });
 });
