@@ -30,6 +30,10 @@ export const ROUTE_PATH = {
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
+    // Booking flow (KAN-134 minimum, KAN-139, KAN-145).
+    BOOK: "book",
+    BOOK_CONFIRM: "book/:serviceId/confirm",
+    BOOK_SERVICE: "book/:serviceId",
     BOOKING_DETAIL: "my-bookings/:bookingId",
     MY_BOOKINGS: "my-bookings",
     ROOT: "/:businessSlug",
