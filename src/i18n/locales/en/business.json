@@ -238,7 +238,8 @@
       "tablePrice": "Price",
       "tableService": "Service",
       "tableStatus": "Status",
-      "title": "Upcoming bookings"
+      "title": "Upcoming bookings",
+      "viewDetail": "View detail"
     },
     "bookings": {
       "cancellationNote": "Note: {{note}}",

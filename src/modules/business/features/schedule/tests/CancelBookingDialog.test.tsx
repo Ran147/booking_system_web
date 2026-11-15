@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BOOKING_STATUS } from "@/domain";
 import { renderWithProviders } from "@/shared/test-utils/renderWithProviders";
 import { SUBSCRIBER_SESSION } from "@/shared/test-utils/sessionFixtures";
-import { CancelBookingDialog } from "../components/bookings/CancelBookingDialog";
+import { CancelBookingDialog } from "../components";
 
 const mockCancelMutation = vi.fn();
 
