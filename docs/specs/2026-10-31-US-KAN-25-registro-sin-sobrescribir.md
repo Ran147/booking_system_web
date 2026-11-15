@@ -90,8 +90,7 @@ Con `npm run dev` apuntando a `practica1webcourse` (`.env.local`):
 El registro no tiene una implementación alternativa en el cliente. Si el
 endpoint de Vercel y la Cloud Function no están disponibles, la operación debe
 fallar sin crear usuarios, negocios ni documentos parciales. El aprovisionamiento
-requiere Admin SDK para emitir los custom claims `role`, `businessId` y
-`business_id`, y para poder revertir Auth y Firestore como una sola operación
+requiere Admin SDK para emitir los custom claims `role: subscriber` y `businessId` (Q10), y para poder revertir Auth y Firestore como una sola operación
 lógica.
 
 Las cuentas creadas históricamente sin esos claims no se corrigen relajando

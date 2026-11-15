@@ -1,6 +1,8 @@
 import type { Nullable } from "./types/Nullable.js";
 
 const DATE_PART_SEPARATOR = "-";
+// Length of "YYYY-MM-DD" at the start of an ISO 8601 string.
+const ISO_DATE_LENGTH = 10;
 const TIME_PART_SEPARATOR = ":";
 const TIME_BOUNDS_MS = Object.freeze({
   MS_PER_DAY: 86_400_000,
@@ -62,6 +64,17 @@ export const formatZonedDate = (instant: Date, timeZone: string): string => {
   return [readPart("year"), readPart("month"), readPart("day")].join(
     DATE_PART_SEPARATOR,
   );
+};
+
+// The calendar day (YYYY-MM-DD) that comes `days` after another. Pure
+// calendar arithmetic, so a daylight-saving change cannot shift the result.
+export const addCalendarDays = (dateText: string, days: number): string => {
+  const [year = 0, month = 1, day = 1] = dateText
+    .split(DATE_PART_SEPARATOR)
+    .map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days))
+    .toISOString()
+    .slice(0, ISO_DATE_LENGTH);
 };
 
 // The instant a wall-clock time (YYYY-MM-DD and HH:mm) has in an IANA time

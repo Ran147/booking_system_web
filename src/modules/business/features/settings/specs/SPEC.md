@@ -20,8 +20,9 @@ The subscriber, or a collaborator, adjusts their own account from a settings scr
 | collaborator (own account only, `active`) | Change their own language, theme and password, exactly like the subscriber. No permission is needed (AS-5). |
 | business owner (own business) | Change their own language, theme and password. Can open the business profile, using the same authorization policy as its route guard. |
 
-New owner accounts use `business_owner`; existing owner accounts with the legacy
-`subscriber` role remain compatible. Owner-only access also requires the
+New owner accounts use canonical `subscriber` (Q10, decided 2026-11-13);
+existing owner accounts with legacy `business_owner` remain compatible until
+the authorized migration and subsequent removal of read compatibility. Owner-only access also requires the
 authenticated tenant claim (`businessId` or the Sprint_1 alias `business_id`)
 and the matching business owner record (`ownerUserId` or `owner_id`). The
 Sidebar exposes one Settings entry for every business-portal role; Business

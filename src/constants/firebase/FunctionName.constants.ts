@@ -10,6 +10,7 @@ export const FUNCTION_NAME = Object.freeze({
   EXPORT_COLLECTION: "exportCollection",
   FETCH_BOOKING_HISTORY: "fetchBookingHistory",
   FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
+  GET_AVAILABILITY: "getAvailability",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
