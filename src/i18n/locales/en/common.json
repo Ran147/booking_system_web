@@ -1,4 +1,7 @@
 {
+  "actions": {
+    "cancel": "Cancel"
+  },
   "auth": {
     "idle": {
       "signOutAction": "Sign out",

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/shared/test-utils/renderWithProviders";
 import { SUBSCRIBER_SESSION } from "@/shared/test-utils/sessionFixtures";
-import { ScheduleBlockDialog } from "../components/blocks/ScheduleBlockDialog";
+import { ScheduleBlockDialog } from "../components";
 
 describe("ScheduleBlockDialog (KAN-65)", () => {
   const createMockViewModel = (
