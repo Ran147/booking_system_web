@@ -282,3 +282,19 @@ test(e2e): recuperar contrasena con el emulador (US-36)
 **Orden propuesto de trabajo:** primero las dos páginas (frontend, con la API mockeada) y sus tests; después la callable cuando el PR #5 esté en `develop`; al final el e2e. La callable comparte `functions/src/index.ts` con las tres funciones del PR #5: se agrega una línea en orden A-Z y se resuelve el conflicto dejando ambas.
 
 **Conforme a `cloud-functions-standards` (PR #17, propuesta):** payload leído con Zod, `HttpsError` con los códigos de la tabla, el reCAPTCHA dentro de la función, y la función registrada en `FUNCTION_NAME`.
+
+---
+
+### 10. Correo en producción sin Cloud Functions (2026-11-13)
+
+**Problema:** producción no tiene Cloud Functions (plan Spark, Q8). La app llama a `api/callFunction.ts` en Vercel, y ese despachador respondía `{ isRequested: true }` **sin enviar nada**. El respaldo del cliente (`clientFunctionsFallback.ts`) hacía lo mismo. Nadie recibía el enlace.
+
+| Id | Decisión |
+| --- | --- |
+| D-11 | **Despachador de Vercel:** `requestPasswordReset` hace lo mismo que D-1b. Busca la cuenta con el Admin SDK, lee `users/{uid}.language` (`es` si falta o no es `es`/`en`), llama a `accounts:sendOobCode` con `X-Firebase-Locale` y tarda al menos `MINIMUM_RESPONSE_MS`. Responde `{ isRequested: true }` exista o no la cuenta, y también si Google falla. La clave web se lee de `FIREBASE_WEB_API_KEY` y, si falta, de `VITE_FIREBASE_API_KEY`, que Vercel ya tiene para el build. Sin ninguna de las dos responde `500 internal` en vez de "enviado". El correo lo manda Firebase Auth: es gratis en Spark y no necesita proveedor, así que no lo bloquea Q9. |
+| D-12 | **Respaldo del cliente:** llama a `sendPasswordResetEmail` del SDK web y se traga el error, para no revelar si la cuenta existe. El correo sale en el idioma por defecto del proyecto, no en el de la cuenta (AC-KAN-36-02 parcial solo en este camino de respaldo). |
+| D-13 | **reCAPTCHA en el despachador:** sigue sin verificarse, igual que el resto de funciones de `api/callFunction.ts` (`verifyRecaptcha` responde `true`). Queda para cuando haya claves reales. Mientras tanto, Firebase limita los envíos por su cuenta. |
+
+**Requisito en Firebase Console (D-8, una sola vez):** *Authentication → Plantillas → Restablecer contraseña → Personalizar URL de acción* = `https://<dominio de Vercel>/password-reset`. Sin eso, el enlace abre la página genérica de Firebase en vez de la nuestra.
+
+**Pruebas:** `tests/api/requestPasswordReset.test.ts` (idioma de la cuenta, cuenta desconocida, Google caído, clave ausente, correo vacío).
