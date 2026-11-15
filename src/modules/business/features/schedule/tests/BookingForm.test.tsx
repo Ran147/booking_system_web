@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/shared/test-utils/renderWithProviders";
 import { SUBSCRIBER_SESSION } from "@/shared/test-utils/sessionFixtures";
-import { BookingFormDialog } from "../components/bookings/BookingFormDialog";
+import { BookingFormDialog } from "../components";
 
 const mockCreateMutation = vi.fn();
 

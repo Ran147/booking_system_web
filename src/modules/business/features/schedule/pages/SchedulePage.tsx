@@ -10,16 +10,18 @@ import {
   Tabs,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import { AgendaCalendarView } from "../components/agenda/AgendaCalendarView";
-import { ScheduleBlockDialog } from "../components/blocks/ScheduleBlockDialog";
-import { BookingDetailDrawer } from "../components/bookings/BookingDetailDrawer";
-import { BookingFormDialog } from "../components/bookings/BookingFormDialog";
-import { CancelBookingDialog } from "../components/bookings/CancelBookingDialog";
-import { RescheduleBookingDialog } from "../components/bookings/RescheduleBookingDialog";
-import { BookingHistoryFilters } from "../components/history/BookingHistoryFilters";
-import { BookingHistoryTable } from "../components/history/BookingHistoryTable";
-import { BusinessHoursForm } from "../components/hours/BusinessHoursForm";
-import { BookingListTable } from "../components/list/BookingListTable";
+import {
+  AgendaCalendarView,
+  BookingDetailDrawer,
+  BookingFormDialog,
+  BookingHistoryFilters,
+  BookingHistoryTable,
+  BookingListTable,
+  BusinessHoursForm,
+  CancelBookingDialog,
+  RescheduleBookingDialog,
+  ScheduleBlockDialog,
+} from "../components";
 import { SCHEDULE_TAB, type ScheduleTab } from "../constants";
 import { useScheduleViewModel } from "../hooks/useScheduleViewModel";
 

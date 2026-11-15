@@ -1,16 +1,50 @@
-export { useBookingFormViewModel } from "./useBookingFormViewModel";
-export type { BookingFormViewModelResult } from "./useBookingFormViewModel";
-export { useBusinessHoursViewModel } from "./useBusinessHoursViewModel";
-export type {
-  BusinessHoursFormState,
-  BusinessHoursViewModelResult,
-  DayHoursState,
+export { useAgendaCalendarViewModel } from "./useAgendaCalendarViewModel";
+export {
+  useBookingDetailViewModel,
+  type BookingDetailRescheduleHistoryItem,
+  type BookingDetailViewModelResult,
+  type UseBookingDetailViewModelOptions,
+} from "./useBookingDetailViewModel";
+export {
+  useBookingFormViewModel,
+  type BookingFormViewModelResult,
+} from "./useBookingFormViewModel";
+export {
+  useBookingHistoryFiltersViewModel,
+  type BookingHistoryFiltersViewModelResult,
+  type UseBookingHistoryFiltersViewModelOptions,
+} from "./useBookingHistoryFiltersViewModel";
+export {
+  useBookingTableViewModel,
+  type BookingTableRowItem,
+  type BookingTableViewModelResult,
+  type UseBookingTableViewModelOptions,
+} from "./useBookingTableViewModel";
+export {
+  useBusinessHoursViewModel,
+  type BusinessHoursDayRangeRow,
+  type BusinessHoursDayRow,
+  type BusinessHoursFormState,
+  type BusinessHoursViewModelResult,
+  type DayHoursState,
 } from "./useBusinessHoursViewModel";
-export { useCancelBookingViewModel } from "./useCancelBookingViewModel";
-export type { CancelBookingViewModelResult } from "./useCancelBookingViewModel";
-export { useRescheduleBookingViewModel } from "./useRescheduleBookingViewModel";
-export type { RescheduleBookingViewModelResult } from "./useRescheduleBookingViewModel";
-export { useScheduleBlockViewModel } from "./useScheduleBlockViewModel";
-export type { ScheduleBlockViewModelResult } from "./useScheduleBlockViewModel";
-export { useScheduleViewModel } from "./useScheduleViewModel";
-export type { ScheduleViewModelResult } from "./useScheduleViewModel";
+export {
+  useCancelBookingViewModel,
+  type CancelBookingViewModelResult,
+} from "./useCancelBookingViewModel";
+export {
+  useRescheduleBookingViewModel,
+  type RescheduleBookingViewModelResult,
+} from "./useRescheduleBookingViewModel";
+export {
+  useScheduleBlockDialogViewModel,
+  type ScheduleBlockDialogViewModelResult,
+} from "./useScheduleBlockDialogViewModel";
+export {
+  useScheduleBlockViewModel,
+  type ScheduleBlockViewModelResult,
+} from "./useScheduleBlockViewModel";
+export {
+  useScheduleViewModel,
+  type ScheduleViewModelResult,
+} from "./useScheduleViewModel";
