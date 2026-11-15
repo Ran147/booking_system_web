@@ -111,11 +111,13 @@ const addCollaborator = async (
 const addBooking = async (
   startsAt: Date,
   collaboratorId: Nullable<string> = null,
+  customerUserId = "another-customer",
 ): Promise<void> => {
   await businessReference()
     .collection(FIRESTORE_COLLECTION.BOOKINGS)
     .add({
       collaboratorId,
+      customerUserId,
       endsAt: Timestamp.fromDate(
         new Date(startsAt.getTime() + SERVICE_DURATION_MINUTES * MS_PER_MINUTE),
       ),
@@ -196,6 +198,24 @@ describe("getAvailability", () => {
     await addBooking(slotAt("10:00"), "collaborator-a");
 
     expect(await readStartTimes()).toContain(slotAt("10:00").toISOString());
+  });
+
+  it("AC-KAN-144-06: does not offer a slot that overlaps an open booking of the same customer", async () => {
+    await addCollaborator("collaborator-a");
+    await addCollaborator("collaborator-b");
+    await addBooking(slotAt("10:00"), "collaborator-a", CUSTOMER_AUTH.uid);
+
+    const ownStartTimes = await readStartTimes();
+    const otherCustomerStartTimes = (
+      await requestAvailability(
+        {},
+        { token: { role: USER_ROLE.CUSTOMER }, uid: "customer-2" },
+      )
+    ).slots.map((slot) => slot.startsAt);
+
+    expect(ownStartTimes).not.toContain(slotAt("10:00").toISOString());
+    expect(ownStartTimes).not.toContain(slotAt("09:30").toISOString());
+    expect(otherCustomerStartTimes).toContain(slotAt("10:00").toISOString());
   });
 
   it("AC-KAN-142-01: with a chosen collaborator only their time counts", async () => {
@@ -300,6 +320,16 @@ describe("getAvailability", () => {
 
     expect(visitor.code).toBe("unauthenticated");
     expect(subscriber.code).toBe("permission-denied");
+  });
+
+  it("rejects a day that does not exist instead of rolling it over", async () => {
+    // Day 32 of the booking month would roll over into the next month, which
+    // is still inside the booking window.
+    const error = await captureHttpsError(
+      requestAvailability({ date: `${BOOKING_DATE.slice(0, 8)}32` }),
+    );
+
+    expect(error.code).toBe("invalid-argument");
   });
 
   it("rejects a malformed date", async () => {

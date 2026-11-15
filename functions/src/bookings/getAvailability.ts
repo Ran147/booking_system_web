@@ -6,6 +6,7 @@ import type {
   AvailabilityBusinessHours,
   AvailabilityTimeRange,
 } from "./availability/models/Availability.model.js";
+import { overlapsOwnOpenBooking } from "./availability/overlapsOwnOpenBooking.js";
 import { readAvailabilityData } from "./availability/readAvailabilityData.js";
 import {
   GET_AVAILABILITY_ERROR,
@@ -22,10 +23,13 @@ import { SERVICE_STATUS } from "../shared/constants/ServiceStatus.constants.js";
 import { USER_ROLE } from "../shared/constants/UserRole.constants.js";
 import { firestore } from "../shared/firebaseAdmin.js";
 import { readPayload } from "../shared/readPayload.js";
-import { formatZonedDate, resolveZonedInstant } from "../shared/zonedTime.js";
+import {
+  addCalendarDays,
+  formatZonedDate,
+  resolveZonedInstant,
+} from "../shared/zonedTime.js";
 
 const MIDDAY = "12:00";
-const MS_PER_DAY = 86_400_000;
 
 const failedPrecondition = (message: string, reason: string): HttpsError =>
   new HttpsError("failed-precondition", message, { reason });
@@ -105,13 +109,22 @@ export const getAvailability = onCall<
 
   const timeZone: string = businessSnapshot.get("timeZone") ?? "UTC";
   const now = new Date();
-  const today = formatZonedDate(now, timeZone);
-  const lastBookableDay = formatZonedDate(
-    new Date(now.getTime() + AVAILABILITY.BOOKING_WINDOW_DAYS * MS_PER_DAY),
-    timeZone,
-  );
   const middayOfDate = resolveZonedInstant(date, MIDDAY, timeZone);
-  if (date < today || date > lastBookableDay || !middayOfDate) {
+  // A day that does not exist, like 2026-11-31, rolls over to another day.
+  if (!middayOfDate || formatZonedDate(middayOfDate, timeZone) !== date) {
+    throw new HttpsError(
+      "invalid-argument",
+      GET_AVAILABILITY_ERROR.INVALID_PAYLOAD,
+    );
+  }
+  const today = formatZonedDate(now, timeZone);
+  // Calendar days, not 24-hour periods: a daylight-saving change must not
+  // move the last bookable day.
+  const lastBookableDay = addCalendarDays(
+    today,
+    AVAILABILITY.BOOKING_WINDOW_DAYS,
+  );
+  if (date < today || date > lastBookableDay) {
     throw new HttpsError(
       "invalid-argument",
       GET_AVAILABILITY_ERROR.INVALID_PAYLOAD,
@@ -166,9 +179,17 @@ export const getAvailability = onCall<
     timeZone,
   });
 
+  // The customer cannot book a slot that overlaps one of their own open
+  // bookings (AC-KAN-144-06), so it is not offered either.
+  const callerUserId = request.auth.uid;
+  const bookableSlots = slots.filter(
+    (slot) =>
+      !overlapsOwnOpenBooking(availabilityData.bookings, callerUserId, slot),
+  );
+
   return {
     date,
-    slots: slots.map((slot) => ({
+    slots: bookableSlots.map((slot) => ({
       endsAt: slot.endsAt.toISOString(),
       startsAt: slot.startsAt.toISOString(),
     })),
