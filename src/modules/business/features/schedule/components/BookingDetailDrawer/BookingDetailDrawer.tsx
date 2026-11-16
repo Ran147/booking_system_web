@@ -9,6 +9,7 @@ import type { BookingDetailDrawerProps } from "./BookingDetailDrawer.types";
 
 export const BookingDetailDrawer = ({
   booking,
+  canManageBookings = true,
   hasStarted = false,
   isOpen,
   onCancelClick,
@@ -40,6 +41,7 @@ export const BookingDetailDrawer = ({
     statusTone,
   } = useBookingDetailViewModel({
     booking,
+    canManageBookings,
     hasStarted,
     isOpen,
     onClose,
