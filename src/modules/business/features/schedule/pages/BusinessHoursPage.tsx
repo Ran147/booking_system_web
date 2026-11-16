@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { PageTemplate } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import { BusinessHoursForm } from "../components/hours/BusinessHoursForm";
+import { BusinessHoursForm } from "../components";
 
 export const BusinessHoursPage = (): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);

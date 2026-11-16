@@ -1,4 +1,7 @@
 {
+  "actions": {
+    "cancel": "Cancelar"
+  },
   "auth": {
     "idle": {
       "signOutAction": "Cerrar sesión",
