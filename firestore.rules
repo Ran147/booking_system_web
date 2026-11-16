@@ -183,13 +183,11 @@ service cloud.firestore {
         allow read: if collaboratorCan(businessId, 'manage_customers');
       }
 
-      // Collaborator records can be read by owner or self, and created by owner on sign-up
+      // Collaborator records are managed exclusively by server handlers
       match /collaborators/{collaboratorId} {
         allow read: if ownsBusiness(businessId)
           || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
-        allow create, update: if isSignedIn()
-          && (collaboratorId == request.auth.uid || ownsBusiness(businessId));
-        allow delete: if false;
+        allow write: if false;
       }
 
       // Subscription can be read and initialized by the owner
@@ -269,6 +267,11 @@ service cloud.firestore {
     match /auditLog/{auditLogEntryId} {
       allow read: if isSuperAdmin();
       allow write: if false; // functions only
+    }
+
+    // Invitation tokens are hashed and handled exclusively by server handlers.
+    match /collaboratorInvitations/{tokenHash} {
+      allow read, write: if false;
     }
 
     // Deny by default.
