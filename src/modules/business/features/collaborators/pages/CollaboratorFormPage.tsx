@@ -12,7 +12,11 @@ import {
   Spinner,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import { CollaboratorForm, CollaboratorLimitDialog } from "../components";
+import {
+  CollaboratorForm,
+  CollaboratorInvitationLinkDialog,
+  CollaboratorLimitDialog,
+} from "../components";
 import { useCollaboratorFormViewModel } from "../hooks";
 
 export const CollaboratorFormPage = (): ReactElement => {
@@ -23,10 +27,12 @@ export const CollaboratorFormPage = (): ReactElement => {
   const viewModel = useCollaboratorFormViewModel();
   const {
     handleCancel,
+    handleCloseInvitationLinkDialog,
     handleCloseLimitDialog,
     handleNavigateToServices,
     handleNavigateToUpgrade,
     hasNoActiveServices,
+    invitationLinkDialog,
     isEditMode,
     isLoading,
     isReadOnly,
@@ -86,6 +92,11 @@ export const CollaboratorFormPage = (): ReactElement => {
         dialog={limitDialog}
         onClose={handleCloseLimitDialog}
         onUpgrade={handleNavigateToUpgrade}
+      />
+
+      <CollaboratorInvitationLinkDialog
+        dialog={invitationLinkDialog}
+        onClose={handleCloseInvitationLinkDialog}
       />
     </PageTemplate>
   );

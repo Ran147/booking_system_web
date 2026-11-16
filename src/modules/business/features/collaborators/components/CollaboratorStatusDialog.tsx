@@ -16,6 +16,7 @@ import {
 
 interface CollaboratorStatusDialogProps {
   readonly collaboratorName: string;
+  readonly hasBookingsLoadError?: boolean;
   readonly isLoading: boolean;
   readonly mode: Nullable<CollaboratorStatusDialogMode>;
   readonly onClose: () => void;
@@ -25,6 +26,7 @@ interface CollaboratorStatusDialogProps {
 
 export const CollaboratorStatusDialog = ({
   collaboratorName,
+  hasBookingsLoadError = false,
   isLoading,
   mode,
   onClose,
@@ -55,7 +57,15 @@ export const CollaboratorStatusDialog = ({
               })}
         </p>
 
-        {isDeactivate && upcomingBookingsCount > 0 && (
+        {isDeactivate && hasBookingsLoadError && (
+          <Alert variant={ALERT_VARIANT.WARNING}>
+            {t("business:collaborators.deactivate.bookingsLoadWarning", {
+              name: collaboratorName,
+            })}
+          </Alert>
+        )}
+
+        {isDeactivate && !hasBookingsLoadError && upcomingBookingsCount > 0 && (
           <Alert variant={ALERT_VARIANT.WARNING}>
             {t("business:collaborators.deactivate.confirmWithBookings", {
               count: upcomingBookingsCount,

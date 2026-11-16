@@ -59,6 +59,7 @@ export interface ActiveServiceOption {
  * @property {string} businessId - Identificador del negocio propietario.
  * @property {string} email - Correo del colaborador.
  * @property {string} fullName - Nombre completo del colaborador.
+ * @property {boolean} [hasUpcomingBookingsError] - Indica si fallo la verificacion de reservas futuras.
  * @property {string} id - Identificador del colaborador.
  * @property {Nullable<string>} lastEmailSentAt - Fecha ISO del ultimo envio de correo.
  * @property {readonly CollaboratorPermission[]} permissions - Permisos habilitados.
@@ -77,6 +78,7 @@ export interface CollaboratorDetailData {
   readonly businessId: string;
   readonly email: string;
   readonly fullName: string;
+  readonly hasUpcomingBookingsError?: boolean;
   readonly id: string;
   readonly lastEmailSentAt: Nullable<string>;
   readonly permissions: readonly CollaboratorPermission[];
@@ -133,13 +135,27 @@ export interface CollaboratorLimitDialogState {
 }
 
 /**
+ * @typedef {Object} CollaboratorInvitationLinkDialogState
+ * @property {string} collaboratorName - Nombre del colaborador invitado.
+ * @property {string} invitationUrl - URL completa para aceptar la invitacion.
+ * @property {boolean} isOpen - Visibilidad del modal con el enlace copiable.
+ */
+export interface CollaboratorInvitationLinkDialogState {
+  readonly collaboratorName: string;
+  readonly invitationUrl: string;
+  readonly isOpen: boolean;
+}
+
+/**
  * @typedef {Object} CollaboratorStatusDialogState
  * @property {Nullable<CollaboratorListItem>} collaborator - Colaborador objetivo.
+ * @property {boolean} [hasBookingsLoadError] - Indica si fallo la consulta de reservas futuras.
  * @property {Nullable<CollaboratorStatusDialogMode>} mode - Accion a confirmar.
  * @property {number} upcomingBookingsCount - Reservas futuras activas al desactivar.
  */
 export interface CollaboratorStatusDialogState {
   readonly collaborator: Nullable<CollaboratorListItem>;
+  readonly hasBookingsLoadError?: boolean;
   readonly mode: Nullable<CollaboratorStatusDialogMode>;
   readonly upcomingBookingsCount: number;
 }
@@ -148,6 +164,7 @@ export interface CollaboratorStatusDialogState {
  * @typedef {Object} CollaboratorListViewModel
  * @property {CollaboratorListFilters} filters - Filtros activos sincronizados con URL.
  * @property {() => void} handleClearFilters - Limpia busqueda y filtro de estado.
+ * @property {() => void} handleCloseInvitationLinkDialog - Cierra el dialogo del enlace de invitacion.
  * @property {() => void} handleCloseLimitDialog - Cierra el dialogo de limite de plan.
  * @property {() => void} handleCloseStatusDialog - Cierra el dialogo de estado.
  * @property {() => Promise<void>} handleConfirmStatusChange - Ejecuta desactivar o reactivar.
@@ -167,6 +184,7 @@ export interface CollaboratorStatusDialogState {
  * @property {boolean} hasActiveFilters - Indica si hay filtros aplicados.
  * @property {boolean} hasNextPage - Hay pagina siguiente.
  * @property {boolean} hasPreviousPage - Hay pagina anterior.
+ * @property {CollaboratorInvitationLinkDialogState} invitationLinkDialog - Dialogo con enlace de invitacion.
  * @property {boolean} isLimitReached - Indica si alcanzo maxCollaborators.
  * @property {boolean} isMutatingStatus - Mutacion de estado en curso.
  * @property {boolean} isReadOnly - Negocio en modo solo lectura.
@@ -183,6 +201,7 @@ export interface CollaboratorStatusDialogState {
 export interface CollaboratorListViewModel {
   readonly filters: CollaboratorListFilters;
   readonly handleClearFilters: () => void;
+  readonly handleCloseInvitationLinkDialog: () => void;
   readonly handleCloseLimitDialog: () => void;
   readonly handleCloseStatusDialog: () => void;
   readonly handleConfirmStatusChange: () => Promise<void>;
@@ -208,6 +227,7 @@ export interface CollaboratorListViewModel {
   readonly hasActiveFilters: boolean;
   readonly hasNextPage: boolean;
   readonly hasPreviousPage: boolean;
+  readonly invitationLinkDialog: CollaboratorInvitationLinkDialogState;
   readonly isLimitReached: boolean;
   readonly isMutatingStatus: boolean;
   readonly isReadOnly: boolean;
@@ -227,6 +247,7 @@ export interface CollaboratorListViewModel {
  * @property {readonly ActiveServiceOption[]} activeServices - Servicios activos seleccionables.
  * @property {UseFormReturn<CollaboratorFormValues>} form - Formulario React Hook Form.
  * @property {() => void} handleCancel - Regresa al listado o detalle.
+ * @property {() => void} handleCloseInvitationLinkDialog - Cierra modal de enlace y continua la navegacion.
  * @property {() => void} handleCloseLimitDialog - Cierra el dialogo de limite de plan.
  * @property {() => void} handleNavigateToServices - Navega a servicios cuando no hay activos.
  * @property {() => void} handleNavigateToUpgrade - Navega al catalogo de planes.
@@ -234,6 +255,8 @@ export interface CollaboratorListViewModel {
  * @property {(serviceId: string) => void} handleToggleService - Alterna servicio asignado.
  * @property {(event?: BaseSyntheticEvent) => Promise<void>} handleSubmit - Valida y guarda.
  * @property {boolean} hasNoActiveServices - True en alta si no hay servicios activos.
+ * @property {boolean} hasUpcomingBookingsError - Fallo verificacion de reservas futuras al editar.
+ * @property {CollaboratorInvitationLinkDialogState} invitationLinkDialog - Dialogo con enlace copiable al crear o cambiar correo.
  * @property {boolean} isEmailLocked - Bloquea el correo cuando el colaborador no esta invited.
  * @property {boolean} isEditMode - True si edita colaborador existente.
  * @property {boolean} isLoading - Cargando datos iniciales.
@@ -250,6 +273,7 @@ export interface CollaboratorFormViewModel {
   readonly activeServices: readonly ActiveServiceOption[];
   readonly form: UseFormReturn<CollaboratorFormValues>;
   readonly handleCancel: () => void;
+  readonly handleCloseInvitationLinkDialog: () => void;
   readonly handleCloseLimitDialog: () => void;
   readonly handleNavigateToServices: () => void;
   readonly handleNavigateToUpgrade: () => void;
@@ -257,6 +281,8 @@ export interface CollaboratorFormViewModel {
   readonly handleTogglePermission: (permission: CollaboratorPermission) => void;
   readonly handleToggleService: (serviceId: string) => void;
   readonly hasNoActiveServices: boolean;
+  readonly hasUpcomingBookingsError: boolean;
+  readonly invitationLinkDialog: CollaboratorInvitationLinkDialogState;
   readonly isEditMode: boolean;
   readonly isEmailLocked: boolean;
   readonly isLoading: boolean;
@@ -275,6 +301,7 @@ export interface CollaboratorFormViewModel {
  * @property {Nullable<CollaboratorDetailData>} collaborator - Detalle cargado del colaborador.
  * @property {number} cooldownSecondsRemaining - Segundos restantes para poder reenviar correo.
  * @property {() => void} handleBackToList - Regresa al listado de colaboradores.
+ * @property {() => void} handleCloseInvitationLinkDialog - Cierra modal con enlace de invitacion.
  * @property {() => void} handleCloseLimitDialog - Cierra el dialogo de limite de plan.
  * @property {() => void} handleCloseStatusDialog - Cierra confirmacion de estado.
  * @property {() => Promise<void>} handleConfirmStatusChange - Ejecuta desactivar o reactivar.
@@ -285,6 +312,7 @@ export interface CollaboratorFormViewModel {
  * @property {() => void} handleOpenReactivateDialog - Abre dialogo de reactivar.
  * @property {() => Promise<void>} handleResendEmail - Reenvia invitacion o restablecimiento.
  * @property {() => void} handleRetry - Reintenta carga del detalle.
+ * @property {CollaboratorInvitationLinkDialogState} invitationLinkDialog - Dialogo con enlace de invitacion generado.
  * @property {boolean} isLoading - Cargando detalle.
  * @property {boolean} isMutatingStatus - Mutacion de estado en curso.
  * @property {boolean} isNotFound - El colaborador no existe.
@@ -298,6 +326,7 @@ export interface CollaboratorProfileViewModel {
   readonly collaborator: Nullable<CollaboratorDetailData>;
   readonly cooldownSecondsRemaining: number;
   readonly handleBackToList: () => void;
+  readonly handleCloseInvitationLinkDialog: () => void;
   readonly handleCloseLimitDialog: () => void;
   readonly handleCloseStatusDialog: () => void;
   readonly handleConfirmStatusChange: () => Promise<void>;
@@ -308,6 +337,7 @@ export interface CollaboratorProfileViewModel {
   readonly handleOpenReactivateDialog: () => void;
   readonly handleResendEmail: () => Promise<void>;
   readonly handleRetry: () => void;
+  readonly invitationLinkDialog: CollaboratorInvitationLinkDialogState;
   readonly isLoading: boolean;
   readonly isMutatingStatus: boolean;
   readonly isNotFound: boolean;

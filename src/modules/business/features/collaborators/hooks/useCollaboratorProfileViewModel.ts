@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "@/components/common";
-import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { I18N_NAMESPACE, ROUTE_PATH, STRING } from "@/constants";
 import { COLLABORATOR_STATUS } from "@/domain";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
 import {
+  buildCollaboratorInvitationUrl,
   useCollaboratorDetailQuery,
   useCollaboratorUsageQuery,
   useResendCollaboratorEmailMutation,
@@ -21,6 +22,7 @@ import {
   type CollaboratorStatusDialogMode,
 } from "../constants/CollaboratorFeature.constants";
 import type {
+  CollaboratorInvitationLinkDialogState,
   CollaboratorLimitDialogState,
   CollaboratorProfileViewModel,
 } from "../models";
@@ -67,6 +69,12 @@ export const useCollaboratorProfileViewModel =
         hasHigherPlan: false,
         isOpen: false,
         limit: null,
+      });
+    const [invitationLinkDialog, setInvitationLinkDialog] =
+      useState<CollaboratorInvitationLinkDialogState>({
+        collaboratorName: STRING.EMPTY,
+        invitationUrl: STRING.EMPTY,
+        isOpen: false,
       });
     const [cooldownSecondsRemaining, setCooldownSecondsRemaining] = useState(0);
 
@@ -141,8 +149,18 @@ export const useCollaboratorProfileViewModel =
           collaboratorId: collaborator.id,
         });
         setCooldownSecondsRemaining(COLLABORATOR_RULE.RESEND_COOLDOWN_SECONDS);
+        const isInvitation = result.kind === COLLABORATOR_EMAIL_KIND.INVITATION;
+        if (isInvitation && result.invitationToken) {
+          setInvitationLinkDialog({
+            collaboratorName: collaborator.fullName,
+            invitationUrl: buildCollaboratorInvitationUrl(
+              result.invitationToken,
+            ),
+            isOpen: true,
+          });
+        }
         toast.success(
-          result.kind === COLLABORATOR_EMAIL_KIND.INVITATION
+          isInvitation
             ? t("business:collaborators.resend.successInvited")
             : t("business:collaborators.resend.successReset"),
         );
@@ -172,6 +190,13 @@ export const useCollaboratorProfileViewModel =
         void navigate(
           `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}`,
         );
+      },
+      handleCloseInvitationLinkDialog: (): void => {
+        setInvitationLinkDialog({
+          collaboratorName: STRING.EMPTY,
+          invitationUrl: STRING.EMPTY,
+          isOpen: false,
+        });
       },
       handleCloseLimitDialog: (): void => {
         setLimitDialog((current) => ({ ...current, isOpen: false }));
@@ -204,6 +229,7 @@ export const useCollaboratorProfileViewModel =
       handleRetry: (): void => {
         void detailQuery.refetch();
       },
+      invitationLinkDialog,
       isLoading: detailQuery.isPending,
       isMutatingStatus: statusMutation.isPending,
       isNotFound:
