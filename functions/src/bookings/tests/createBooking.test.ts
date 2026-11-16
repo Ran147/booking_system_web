@@ -475,6 +475,27 @@ describe("createBooking", () => {
     });
   });
 
+  it("AS-4: a Customer record stored under another id is found by userId: no duplicate, and blocking applies", async () => {
+    const customersCollection = firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.CUSTOMERS);
+    await customersCollection
+      .doc("added-by-the-business")
+      .set({ status: "active", userId: CALLER_AUTH.uid });
+
+    await bookFreeSlot();
+    expect((await customersCollection.get()).size).toBe(1);
+
+    await customersCollection
+      .doc("added-by-the-business")
+      .update({ status: "blocked" });
+    const error = await captureHttpsError(
+      bookWith({ startsAt: slotAt("15:00").toISOString() }),
+    );
+    expect(error.details).toEqual({ reason: "customer_blocked" });
+  });
+
   it("AS-4: an existing Customer record is left as it is", async () => {
     const customerReference = firestore
       .collection(FIRESTORE_COLLECTION.BUSINESSES)

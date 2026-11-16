@@ -141,9 +141,23 @@ export const handleCreateBooking = async ({
       );
     }
 
+    // The Customer record of this account: stored under the uid, or under any
+    // id the business gave it, linked by userId (glossary §3, KAN-88).
+    const [customerByIdSnapshot, customersByUserId] = await Promise.all([
+      transaction.get(customerReference),
+      transaction.get(
+        businessReference
+          .collection(FIRESTORE_COLLECTION.CUSTOMERS)
+          .where("userId", "==", customerUserId)
+          .limit(1),
+      ),
+    ]);
+    const existingCustomerData = customerByIdSnapshot.exists
+      ? customerByIdSnapshot.data()
+      : customersByUserId.docs[0]?.data();
+
     // A customer the business blocked cannot book there (KAN-148).
-    const customerSnapshot = await transaction.get(customerReference);
-    if (customerSnapshot.data()?.status === CUSTOMER_STATUS.BLOCKED) {
+    if (existingCustomerData?.status === CUSTOMER_STATUS.BLOCKED) {
       throw new CallableFailure(
         "failed-precondition",
         CREATE_BOOKING_ERROR.CUSTOMER_BLOCKED,
@@ -152,7 +166,7 @@ export const handleCreateBooking = async ({
     }
     // S-3, AS-4: the first booking at a business creates the Customer record
     // from the account profile. Read here; written with the booking below.
-    const profileData = customerSnapshot.exists
+    const profileData = existingCustomerData
       ? null
       : ((
           await transaction.get(
