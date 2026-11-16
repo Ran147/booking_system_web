@@ -5,16 +5,11 @@ import {
   ALERT_VARIANT,
   Button,
   BUTTON_VARIANT,
-  CheckboxField,
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  InputField,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
+import { CollaboratorFormFields } from "./CollaboratorFormFields";
+import { CollaboratorFormServicesSection } from "./CollaboratorFormServicesSection";
 import { CollaboratorPermissionsCheckboxes } from "./CollaboratorPermissionsCheckboxes";
 import type { CollaboratorFormViewModel } from "../models";
 
@@ -28,7 +23,6 @@ export const CollaboratorForm = ({
   const { t } = useTranslation([
     I18N_NAMESPACE.BUSINESS,
     I18N_NAMESPACE.COMMON,
-    I18N_NAMESPACE.VALIDATION,
   ]);
   const {
     activeServices,
@@ -37,6 +31,7 @@ export const CollaboratorForm = ({
     handleSubmit,
     handleTogglePermission,
     handleToggleService,
+    hasUpcomingBookingsError,
     isEditMode,
     isEmailLocked,
     isReadOnly,
@@ -47,6 +42,14 @@ export const CollaboratorForm = ({
     serverErrorKey,
   } = viewModel;
 
+  const submitLabel = isEditMode
+    ? isSubmitting
+      ? t("business:collaborators.edit.submittingLabel")
+      : t("business:collaborators.edit.submitAction")
+    : isSubmitting
+      ? t("business:collaborators.create.submittingLabel")
+      : t("business:collaborators.create.submitAction");
+
   return (
     <Form {...form}>
       <form className="flex flex-col gap-6" noValidate onSubmit={handleSubmit}>
@@ -56,141 +59,23 @@ export const CollaboratorForm = ({
           </Alert>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t("business:collaborators.form.fullNameLabel")}
-                </FormLabel>
-                <FormControl>
-                  <InputField
-                    {...field}
-                    disabled={isReadOnly || isSubmitting}
-                    placeholder={t(
-                      "business:collaborators.form.fullNamePlaceholder",
-                    )}
-                    type="text"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <CollaboratorFormFields
+          form={form}
+          isEmailLocked={isEmailLocked}
+          isReadOnly={isReadOnly}
+          isSubmitting={isSubmitting}
+        />
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t("business:collaborators.form.emailLabel")}
-                </FormLabel>
-                <FormControl>
-                  <InputField
-                    {...field}
-                    disabled={isReadOnly || isEmailLocked || isSubmitting}
-                    helperText={
-                      isEmailLocked
-                        ? t("business:collaborators.edit.emailLockedHint")
-                        : undefined
-                    }
-                    placeholder={t(
-                      "business:collaborators.form.emailPlaceholder",
-                    )}
-                    type="email"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t("business:collaborators.form.phoneLabel")}
-                </FormLabel>
-                <FormControl>
-                  <InputField
-                    {...field}
-                    disabled={isReadOnly || isSubmitting}
-                    placeholder={t(
-                      "business:collaborators.form.phonePlaceholder",
-                    )}
-                    type="tel"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="specialty"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t("business:collaborators.form.specialtyLabel")}
-                </FormLabel>
-                <FormControl>
-                  <InputField
-                    {...field}
-                    disabled={isReadOnly || isSubmitting}
-                    placeholder={t(
-                      "business:collaborators.form.specialtyPlaceholder",
-                    )}
-                    type="text"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <div>
-            <h2 className="text-base font-medium text-foreground">
-              {t("business:collaborators.form.servicesSectionTitle")}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {t("business:collaborators.form.servicesRequiredHint")}
-            </p>
-          </div>
-          {removedServicesBookingsCount > 0 && (
-            <Alert variant={ALERT_VARIANT.WARNING}>
-              {t("business:collaborators.edit.serviceHasBookingsWarning", {
-                count: removedServicesBookingsCount,
-              })}
-            </Alert>
-          )}
-          <div className="grid gap-2 sm:grid-cols-2">
-            {activeServices.map((service) => (
-              <CheckboxField
-                checked={selectedServiceIds.includes(service.id)}
-                disabled={isReadOnly || isSubmitting}
-                key={service.id}
-                label={service.name}
-                name={`service-${service.id}`}
-                onChange={(): void => {
-                  handleToggleService(service.id);
-                }}
-              />
-            ))}
-          </div>
-          {form.formState.errors.serviceIds?.message && (
-            <p className="text-sm text-destructive">
-              {t(form.formState.errors.serviceIds.message as never)}
-            </p>
-          )}
-        </div>
+        <CollaboratorFormServicesSection
+          activeServices={activeServices}
+          errorMessageKey={form.formState.errors.serviceIds?.message}
+          hasUpcomingBookingsError={hasUpcomingBookingsError}
+          isReadOnly={isReadOnly}
+          isSubmitting={isSubmitting}
+          onToggleService={handleToggleService}
+          removedServicesBookingsCount={removedServicesBookingsCount}
+          selectedServiceIds={selectedServiceIds}
+        />
 
         {!isEditMode && (
           <div className="flex flex-col gap-3">
@@ -216,13 +101,7 @@ export const CollaboratorForm = ({
           </Button>
           {!isReadOnly && (
             <Button isLoading={isSubmitting} type="submit">
-              {isEditMode
-                ? isSubmitting
-                  ? t("business:collaborators.edit.submittingLabel")
-                  : t("business:collaborators.edit.submitAction")
-                : isSubmitting
-                  ? t("business:collaborators.create.submittingLabel")
-                  : t("business:collaborators.create.submitAction")}
+              {submitLabel}
             </Button>
           )}
         </div>

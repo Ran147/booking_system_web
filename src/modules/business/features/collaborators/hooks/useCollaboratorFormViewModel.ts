@@ -4,11 +4,12 @@ import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "@/components/common";
-import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { I18N_NAMESPACE, ROUTE_PATH, STRING } from "@/constants";
 import { COLLABORATOR_STATUS, type CollaboratorPermission } from "@/domain";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
 import {
+  buildCollaboratorInvitationUrl,
   useActiveServicesForCollaboratorQuery,
   useCollaboratorDetailQuery,
   useCollaboratorUsageQuery,
@@ -24,6 +25,7 @@ import {
   collaboratorFormSchema,
   type CollaboratorFormValues,
   type CollaboratorFormViewModel,
+  type CollaboratorInvitationLinkDialogState,
   type CollaboratorLimitDialogState,
 } from "../models";
 
@@ -44,11 +46,19 @@ export const useCollaboratorFormViewModel = (): CollaboratorFormViewModel => {
 
   const [serverErrorKey, setServerErrorKey] = useState<Nullable<string>>(null);
   const hydratedSnapshotReference = useRef<Nullable<string>>(null);
+  const [pendingNavigationPath, setPendingNavigationPath] =
+    useState<Nullable<string>>(null);
   const [limitDialog, setLimitDialog] = useState<CollaboratorLimitDialogState>({
     hasHigherPlan: false,
     isOpen: false,
     limit: null,
   });
+  const [invitationLinkDialog, setInvitationLinkDialog] =
+    useState<CollaboratorInvitationLinkDialogState>({
+      collaboratorName: STRING.EMPTY,
+      invitationUrl: STRING.EMPTY,
+      isOpen: false,
+    });
 
   const activeServicesQuery = useActiveServicesForCollaboratorQuery(businessId);
   const detailQuery = useCollaboratorDetailQuery(
@@ -141,7 +151,7 @@ export const useCollaboratorFormViewModel = (): CollaboratorFormViewModel => {
     setServerErrorKey(null);
     try {
       if (isEditMode && collaboratorId) {
-        await updateMutation.mutateAsync({
+        const updateResult = await updateMutation.mutateAsync({
           businessId,
           collaboratorId,
           email: isEmailLocked ? undefined : values.email.trim().toLowerCase(),
@@ -152,13 +162,23 @@ export const useCollaboratorFormViewModel = (): CollaboratorFormViewModel => {
           specialty: values.specialty.trim() || null,
         });
         toast.success(t("business:collaborators.edit.success"));
-        void navigate(
-          `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}/${collaboratorId}`,
-        );
+        const profilePath = `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}/${collaboratorId}`;
+        if (updateResult.emailChanged && updateResult.invitationToken) {
+          setPendingNavigationPath(profilePath);
+          setInvitationLinkDialog({
+            collaboratorName: values.fullName.trim(),
+            invitationUrl: buildCollaboratorInvitationUrl(
+              updateResult.invitationToken,
+            ),
+            isOpen: true,
+          });
+          return;
+        }
+        void navigate(profilePath);
         return;
       }
 
-      await registerMutation.mutateAsync({
+      const registerResult = await registerMutation.mutateAsync({
         businessId,
         email: values.email.trim().toLowerCase(),
         fullName: values.fullName.trim(),
@@ -168,9 +188,19 @@ export const useCollaboratorFormViewModel = (): CollaboratorFormViewModel => {
         specialty: values.specialty.trim() || null,
       });
       toast.success(t("business:collaborators.create.success"));
-      void navigate(
-        `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}`,
-      );
+      const listPath = `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}`;
+      if (registerResult.invitationToken) {
+        setPendingNavigationPath(listPath);
+        setInvitationLinkDialog({
+          collaboratorName: values.fullName.trim(),
+          invitationUrl: buildCollaboratorInvitationUrl(
+            registerResult.invitationToken,
+          ),
+          isOpen: true,
+        });
+        return;
+      }
+      void navigate(listPath);
     } catch (error) {
       const mapped = error as CollaboratorMutationError;
       if (mapped.reason === COLLABORATOR_ERROR_REASON.LIMIT_REACHED) {
@@ -203,6 +233,18 @@ export const useCollaboratorFormViewModel = (): CollaboratorFormViewModel => {
         `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}`,
       );
     },
+    handleCloseInvitationLinkDialog: (): void => {
+      setInvitationLinkDialog({
+        collaboratorName: STRING.EMPTY,
+        invitationUrl: STRING.EMPTY,
+        isOpen: false,
+      });
+      const targetPath = pendingNavigationPath;
+      setPendingNavigationPath(null);
+      if (targetPath) {
+        void navigate(targetPath);
+      }
+    },
     handleCloseLimitDialog: (): void => {
       setLimitDialog((current) => ({ ...current, isOpen: false }));
     },
@@ -222,6 +264,10 @@ export const useCollaboratorFormViewModel = (): CollaboratorFormViewModel => {
       !isEditMode &&
       !activeServicesQuery.isPending &&
       activeServices.length === 0,
+    hasUpcomingBookingsError: Boolean(
+      isEditMode && detail?.hasUpcomingBookingsError,
+    ),
+    invitationLinkDialog,
     isEditMode,
     isEmailLocked,
     isLoading:

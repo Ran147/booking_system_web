@@ -1,3 +1,4 @@
+export { buildCollaboratorInvitationUrl } from "./buildCollaboratorInvitationUrl";
 export {
   mapCollaboratorMutationError,
   registerCollaborator,

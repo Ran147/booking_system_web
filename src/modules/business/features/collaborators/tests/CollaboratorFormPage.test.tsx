@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { FirebaseError } from "firebase/app";
 import type { RouteObject } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -98,6 +99,7 @@ describe("CollaboratorFormPage (KAN-78, KAN-80, KAN-85)", () => {
     vi.mocked(collaboratorClient.registerCollaborator).mockResolvedValue({
       collaboratorId: "new-collab",
       email: "camila@salon.com",
+      invitationToken: "invite-token-new",
       status: COLLABORATOR_STATUS.INVITED,
     });
 
@@ -130,6 +132,18 @@ describe("CollaboratorFormPage (KAN-78, KAN-80, KAN-85)", () => {
         specialty: "Estilista",
       });
     });
+
+    const linkInput = (await screen.findByLabelText(
+      testI18n.t("business:collaborators.invitationLink.linkLabel"),
+    )) as HTMLInputElement;
+    expect(linkInput.value).toContain(
+      `${ROUTE_PATH.AUTH.ACCEPT_INVITATION}?token=invite-token-new`,
+    );
+
+    const closeInvitationButton = await screen.findByRole("button", {
+      name: testI18n.t("business:collaborators.invitationLink.closeAction"),
+    });
+    await userEvent.setup().click(closeInvitationButton);
 
     expect(
       await screen.findByText("Collaborators List Route"),
@@ -271,6 +285,7 @@ describe("CollaboratorFormPage (KAN-78, KAN-80, KAN-85)", () => {
     vi.mocked(collaboratorClient.updateCollaborator).mockResolvedValue({
       collaboratorId: "collab-2",
       emailChanged: true,
+      invitationToken: "invite-token-edited",
       upcomingAffectedBookingsCount: 3,
     });
 
@@ -306,5 +321,12 @@ describe("CollaboratorFormPage (KAN-78, KAN-80, KAN-85)", () => {
         }),
       );
     });
+
+    const linkInput = (await screen.findByLabelText(
+      testI18n.t("business:collaborators.invitationLink.linkLabel"),
+    )) as HTMLInputElement;
+    expect(linkInput.value).toContain(
+      `${ROUTE_PATH.AUTH.ACCEPT_INVITATION}?token=invite-token-edited`,
+    );
   });
 });

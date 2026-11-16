@@ -1,4 +1,4 @@
-import { waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { FirebaseError } from "firebase/app";
 import type { RouteObject } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -224,6 +224,7 @@ describe("CollaboratorProfilePage (KAN-81..KAN-85)", () => {
     });
     vi.mocked(collaboratorClient.resendCollaboratorEmail).mockResolvedValue({
       collaboratorId: "collab-2",
+      invitationToken: "profile-invite-token",
       kind: "invitation",
     });
 
@@ -234,6 +235,13 @@ describe("CollaboratorProfilePage (KAN-81..KAN-85)", () => {
     const page = createCollaboratorProfilePage();
 
     await page.clickResendInvited();
+
+    const linkInput = (await screen.findByLabelText(
+      testI18n.t("business:collaborators.invitationLink.linkLabel"),
+    )) as HTMLInputElement;
+    expect(linkInput.value).toContain(
+      `${ROUTE_PATH.AUTH.ACCEPT_INVITATION}?token=profile-invite-token`,
+    );
 
     const cooldownButton = await page.findCooldownButton(60);
     expect(cooldownButton).toBeDisabled();

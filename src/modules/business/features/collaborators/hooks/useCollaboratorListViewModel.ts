@@ -9,6 +9,7 @@ import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
 import { resolveViewState } from "@/utils";
 import {
+  buildCollaboratorInvitationUrl,
   fetchCollaboratorDetail,
   useActiveServicesForCollaboratorQuery,
   useCollaboratorListQuery,
@@ -24,6 +25,7 @@ import {
   COLLABORATOR_STATUS_DIALOG_MODE,
 } from "../constants/CollaboratorFeature.constants";
 import type {
+  CollaboratorInvitationLinkDialogState,
   CollaboratorLimitDialogState,
   CollaboratorListFilters,
   CollaboratorListItem,
@@ -65,8 +67,15 @@ export const useCollaboratorListViewModel = (): CollaboratorListViewModel => {
   const [statusDialog, setStatusDialog] =
     useState<CollaboratorStatusDialogState>({
       collaborator: null,
+      hasBookingsLoadError: false,
       mode: null,
       upcomingBookingsCount: 0,
+    });
+  const [invitationLinkDialog, setInvitationLinkDialog] =
+    useState<CollaboratorInvitationLinkDialogState>({
+      collaboratorName: STRING.EMPTY,
+      invitationUrl: STRING.EMPTY,
+      isOpen: false,
     });
 
   const filters: CollaboratorListFilters = {
@@ -138,6 +147,7 @@ export const useCollaboratorListViewModel = (): CollaboratorListViewModel => {
   ): void => {
     setStatusDialog({
       collaborator,
+      hasBookingsLoadError: false,
       mode: COLLABORATOR_STATUS_DIALOG_MODE.DEACTIVATE,
       upcomingBookingsCount: 0,
     });
@@ -151,12 +161,20 @@ export const useCollaboratorListViewModel = (): CollaboratorListViewModel => {
           current.mode === COLLABORATOR_STATUS_DIALOG_MODE.DEACTIVATE
             ? {
                 ...current,
+                hasBookingsLoadError: Boolean(detail.hasUpcomingBookingsError),
                 upcomingBookingsCount: detail.upcomingBookingsCount,
               }
             : current,
         );
       })
-      .catch(() => undefined);
+      .catch(() => {
+        setStatusDialog((current) =>
+          current.collaborator?.id === collaborator.id &&
+          current.mode === COLLABORATOR_STATUS_DIALOG_MODE.DEACTIVATE
+            ? { ...current, hasBookingsLoadError: true }
+            : current,
+        );
+      });
   };
 
   const handleConfirmStatusChange = async (): Promise<void> => {
@@ -213,9 +231,18 @@ export const useCollaboratorListViewModel = (): CollaboratorListViewModel => {
         businessId,
         collaboratorId: collaborator.id,
       });
-      toast.success(
+      const isInvitation =
         result.kind === COLLABORATOR_STATUS.INVITED ||
-          result.kind === COLLABORATOR_EMAIL_KIND.INVITATION
+        result.kind === COLLABORATOR_EMAIL_KIND.INVITATION;
+      if (isInvitation && result.invitationToken) {
+        setInvitationLinkDialog({
+          collaboratorName: collaborator.fullName,
+          invitationUrl: buildCollaboratorInvitationUrl(result.invitationToken),
+          isOpen: true,
+        });
+      }
+      toast.success(
+        isInvitation
           ? t("business:collaborators.resend.successInvited")
           : t("business:collaborators.resend.successReset"),
       );
@@ -242,12 +269,20 @@ export const useCollaboratorListViewModel = (): CollaboratorListViewModel => {
     handleClearFilters: (): void => {
       updateUrlParams(STRING.EMPTY, COLLABORATOR_ALL_STATUS_FILTER);
     },
+    handleCloseInvitationLinkDialog: (): void => {
+      setInvitationLinkDialog({
+        collaboratorName: STRING.EMPTY,
+        invitationUrl: STRING.EMPTY,
+        isOpen: false,
+      });
+    },
     handleCloseLimitDialog: (): void => {
       setLimitDialog((current) => ({ ...current, isOpen: false }));
     },
     handleCloseStatusDialog: (): void => {
       setStatusDialog({
         collaborator: null,
+        hasBookingsLoadError: false,
         mode: null,
         upcomingBookingsCount: 0,
       });
@@ -308,6 +343,7 @@ export const useCollaboratorListViewModel = (): CollaboratorListViewModel => {
     hasActiveFilters,
     hasNextPage: Boolean(listQuery.data?.nextCursor),
     hasPreviousPage: pagination.hasPreviousPage,
+    invitationLinkDialog,
     isLimitReached,
     isMutatingStatus: statusMutation.isPending,
     isReadOnly,
