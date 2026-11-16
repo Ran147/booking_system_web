@@ -60,7 +60,7 @@ If another skill's example uses a name that contradicts this glossary, the gloss
 | Bloqueo de agenda / día bloqueado | `ScheduleBlock` | `businesses/{businessId}/scheduleBlocks/{scheduleBlockId}` | Partial (KAN-65) or full-day (KAN-66). `collaboratorId` `Nullable`: `null` blocks the whole business; set, it is that collaborator's absence (vacation, sick leave, KAN-66). |
 | Agenda | `Schedule` | — (view, not stored) | Bookings + schedule blocks in a calendar. |
 | Horario disponible | `TimeSlot` | — (computed) | KAN-141 |
-| Políticas de reservación | `BookingPolicy` | field on `Business` | Cancellation/reschedule window and penalty (KAN-147, KAN-160). |
+| Políticas de reservación | `BookingPolicy` | field on `Business` | Cancellation/reschedule window and penalty (KAN-147, KAN-160). Proposed shape (spec KAN-145, P-1): `bookingPolicy: { cancellationWindowHours, penaltyDescription }`; no screen sets it yet. |
 | Plan | `Plan` | `plans/{planId}` | Includes `limits`: `maxBookings`, `maxCollaborators` (KAN-181, KAN-85). |
 | Contratación de plan (checkout) | `PlanCheckout` | `planCheckouts/{planCheckoutId}` | Created by the simulated checkout from the landing when the payment succeeds (KAN-22, Q7), before any account exists: `planId`, `email`, `amountInCents`, `paidAt`, `termsAcceptedAt` (KAN-23), `signUpCompletedAt` (`Nullable`; single use, KAN-25). The KAN-24 email links to the sign-up with it. Written only by Cloud Functions. |
 | Suscripción | `Subscription` | `businesses/{businessId}/subscription/current` | One active subscription per business. Created `active` when the super admin approves the business (the period starts at approval, KAN-176); a `pending` or `rejected` business has none. |
