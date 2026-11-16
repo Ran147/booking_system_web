@@ -318,7 +318,7 @@ describe("CollaboratorListPage (KAN-81..KAN-85)", () => {
     expect(await page.findLimitDialogHeading()).toBeInTheDocument();
   });
 
-  it("KAN-84: resends invitation email from row action for invited collaborator", async () => {
+  it("KAN-84: resends invitation email from row action and displays copyable activation link", async () => {
     vi.mocked(fetchCollaboratorListPage).mockResolvedValue({
       items: [INVITED_COLLABORATOR],
       nextCursor: null,
@@ -326,6 +326,7 @@ describe("CollaboratorListPage (KAN-81..KAN-85)", () => {
     });
     vi.mocked(collaboratorClient.resendCollaboratorEmail).mockResolvedValue({
       collaboratorId: INVITED_COLLABORATOR.id,
+      invitationToken: "resend-token-123",
       kind: "invitation",
     });
 
@@ -343,5 +344,34 @@ describe("CollaboratorListPage (KAN-81..KAN-85)", () => {
         collaboratorId: INVITED_COLLABORATOR.id,
       });
     });
+
+    const linkInput = (await screen.findByLabelText(
+      testI18n.t("business:collaborators.invitationLink.linkLabel"),
+    )) as HTMLInputElement;
+    expect(linkInput.value).toContain(
+      `${ROUTE_PATH.AUTH.ACCEPT_INVITATION}?token=resend-token-123`,
+    );
+  });
+
+  it("KAN-81: warns when upcoming bookings check fails while opening deactivate dialog", async () => {
+    vi.mocked(fetchCollaboratorDetail).mockRejectedValue(
+      new Error("network-error"),
+    );
+
+    renderRoutesWithProviders(listRoutes, {
+      initialPath: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}`,
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createCollaboratorListPage();
+
+    await page.clickDeactivateRowAction();
+
+    expect(
+      await page.findText(
+        testI18n.t("business:collaborators.deactivate.bookingsLoadWarning", {
+          name: ACTIVE_COLLABORATOR.fullName,
+        }),
+      ),
+    ).toBeInTheDocument();
   });
 });
