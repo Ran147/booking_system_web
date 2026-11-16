@@ -22,6 +22,50 @@
     "timeZoneNote": "Los horarios están en la zona horaria del negocio ({{timeZone}}).",
     "title": "Elige fecha y hora"
   },
+  "bookingCheckout": {
+    "changeServiceAction": "Cambiar servicio",
+    "changeTimeAction": "Cambiar horario",
+    "confirm": {
+      "action": "Confirmar reserva",
+      "chooseAnotherTime": "Elegir otro horario",
+      "customerBlockedError": "No puedes reservar en este negocio. Comunícate con el negocio para más información.",
+      "serviceChangedError": "El precio o la duración de este servicio cambiaron. Revisa el resumen y confirma de nuevo.",
+      "slotTakenError": "Ese horario se acaba de ocupar. Elige otro horario.",
+      "submitting": "Confirmando…",
+      "unavailableError": "Este negocio o servicio no está recibiendo reservas en este momento."
+    },
+    "policies": {
+      "acknowledge": "Leí y acepto las políticas de reserva",
+      "noPolicyEmpty": "Este negocio no tiene políticas de reserva.",
+      "penalty": "Penalización: {{penalty}}",
+      "title": "Políticas de reserva",
+      "window": "Puedes cancelar o reprogramar hasta {{hours}} horas antes de la reserva."
+    },
+    "retryAction": "Reintentar",
+    "subtitle": "Revisa los datos antes de confirmar.",
+    "success": {
+      "backToBusinessAction": "Volver al negocio",
+      "confirmedTitle": "Tu reserva está confirmada",
+      "myBookingsAction": "Ir a mis reservas",
+      "pendingDescription": "El negocio la confirmará pronto. Puedes seguirla en Mis reservas.",
+      "pendingTitle": "Tu reserva espera la confirmación del negocio"
+    },
+    "summary": {
+      "anyCollaborator": "Cualquier persona disponible",
+      "business": "Negocio",
+      "collaborator": "Te atiende",
+      "date": "Fecha",
+      "duration": "Duración",
+      "durationValue": "{{minutes}} min",
+      "label": "Resumen de la reserva",
+      "originalPrice": "Precio sin descuento: {{price}}",
+      "price": "Precio",
+      "service": "Servicio",
+      "time": "Horario",
+      "timeZoneNote": "Los horarios están en la zona horaria del negocio ({{timeZone}})."
+    },
+    "title": "Revisa y confirma"
+  },
   "layout": {
     "businessNotFound": "No encontramos el negocio solicitado.",
     "footer": {

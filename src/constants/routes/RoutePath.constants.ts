@@ -33,6 +33,7 @@ export const ROUTE_PATH = {
     // Booking flow (KAN-134 minimum, KAN-139, KAN-145).
     BOOK: "book",
     BOOK_CONFIRM: "book/:serviceId/confirm",
+    BOOK_DONE: "book/done/:bookingId",
     BOOK_SERVICE: "book/:serviceId",
     BOOKING_DETAIL: "my-bookings/:bookingId",
     MY_BOOKINGS: "my-bookings",
