@@ -263,7 +263,7 @@ const adminFake = vi.hoisted(() => {
     runTransaction: async <T>(
       callback: (transaction: {
         create: (
-          ref: FakeDocumentReference,
+          documentReference: FakeDocumentReference,
           value: Record<string, unknown>,
         ) => void;
         get: <Q extends FakeDocumentReference | FakeQuery>(
@@ -274,23 +274,23 @@ const adminFake = vi.hoisted(() => {
             : FakeQuerySnapshot
         >;
         set: (
-          ref: FakeDocumentReference,
+          documentReference: FakeDocumentReference,
           value: Record<string, unknown>,
           options?: { merge?: boolean },
         ) => void;
         update: (
-          ref: FakeDocumentReference,
+          documentReference: FakeDocumentReference,
           value: Record<string, unknown>,
         ) => void;
       }) => Promise<T>,
     ): Promise<T> => {
-      const pendingOps: Array<() => Promise<void>> = [];
+      const pendingOperations: Array<() => Promise<void>> = [];
       const transaction = {
         create: (
-          ref: FakeDocumentReference,
+          documentReference: FakeDocumentReference,
           value: Record<string, unknown>,
         ): void => {
-          pendingOps.push(() => ref.create(value));
+          pendingOperations.push(() => documentReference.create(value));
         },
         get: <Q extends FakeDocumentReference | FakeQuery>(
           target: Q,
@@ -305,24 +305,24 @@ const adminFake = vi.hoisted(() => {
               : FakeQuerySnapshot
           >,
         set: (
-          ref: FakeDocumentReference,
+          documentReference: FakeDocumentReference,
           value: Record<string, unknown>,
           options?: { merge?: boolean },
         ): void => {
-          pendingOps.push(() => ref.set(value, options));
+          pendingOperations.push(() => documentReference.set(value, options));
         },
         update: (
-          ref: FakeDocumentReference,
+          documentReference: FakeDocumentReference,
           value: Record<string, unknown>,
         ): void => {
-          pendingOps.push(() => ref.update(value));
+          pendingOperations.push(() => documentReference.update(value));
         },
       };
 
       const result = await callback(transaction);
       const snapshotBackup = new Map(documents);
       try {
-        for (const operation of pendingOps) {
+        for (const operation of pendingOperations) {
           await operation();
         }
       } catch (error) {
@@ -471,6 +471,8 @@ describe("api collaborator functions (KAN-78..KAN-86)", () => {
 
     expect(result.statusCode).toBe(200);
     expect(result.body.status).toBe("invited");
+    expect(typeof result.body.invitationToken).toBe("string");
+    expect(String(result.body.invitationToken).length).toBeGreaterThan(10);
     const collaboratorId = String(result.body.collaboratorId);
     const saved = adminFake.documents.get(
       `${BUSINESS_PATH}/collaborators/${collaboratorId}`,
@@ -490,6 +492,14 @@ describe("api collaborator functions (KAN-78..KAN-86)", () => {
       key.startsWith("collaboratorInvitations/"),
     );
     expect(invitationKeys).toHaveLength(1);
+
+    const validationResult = await callEndpoint(
+      COLLABORATOR_FUNCTION_NAME.VALIDATE_COLLABORATOR_INVITATION,
+      { invitationToken: result.body.invitationToken },
+      "",
+    );
+    expect(validationResult.statusCode).toBe(200);
+    expect(validationResult.body.email).toBe("carlos@example.com");
   });
 
   it("KAN-78 & KAN-85: enforces Auth/business email uniqueness and plan maxCollaborators (ignoring owner doc)", async () => {
@@ -665,14 +675,14 @@ describe("api collaborator functions (KAN-78..KAN-86)", () => {
         serviceIds: ["service-1"],
       },
     );
-    expect(editResult).toEqual({
-      body: {
-        collaboratorId: "collab-1",
-        emailChanged: true,
-        upcomingAffectedBookingsCount: 1,
-      },
-      statusCode: 200,
+    expect(editResult.statusCode).toBe(200);
+    expect(editResult.body).toMatchObject({
+      collaboratorId: "collab-1",
+      emailChanged: true,
+      upcomingAffectedBookingsCount: 1,
     });
+    expect(typeof editResult.body.invitationToken).toBe("string");
+    expect(String(editResult.body.invitationToken).length).toBeGreaterThan(10);
   });
 
   it("KAN-81 & KAN-82: deactivates active collaborator revoking Auth, rejects invited deactivation, and checks limit on reactivation", async () => {
@@ -705,6 +715,16 @@ describe("api collaborator functions (KAN-78..KAN-86)", () => {
       },
     );
     expect(invalidDeactivate.statusCode).toBe(412);
+
+    const invalidActivate = await callEndpoint(
+      COLLABORATOR_FUNCTION_NAME.UPDATE_COLLABORATOR_STATUS,
+      {
+        businessId: BUSINESS_ID,
+        collaboratorId: "collab-invited",
+        targetStatus: "active",
+      },
+    );
+    expect(invalidActivate.statusCode).toBe(412);
 
     const deactivateResult = await callEndpoint(
       COLLABORATOR_FUNCTION_NAME.UPDATE_COLLABORATOR_STATUS,
@@ -775,10 +795,67 @@ describe("api collaborator functions (KAN-78..KAN-86)", () => {
       COLLABORATOR_FUNCTION_NAME.RESEND_COLLABORATOR_EMAIL,
       { businessId: BUSINESS_ID, collaboratorId: "collab-1" },
     );
-    expect(resendOk).toEqual({
-      body: { collaboratorId: "collab-1", kind: "invitation" },
-      statusCode: 200,
+    expect(resendOk.statusCode).toBe(200);
+    expect(resendOk.body).toMatchObject({
+      collaboratorId: "collab-1",
+      kind: "invitation",
     });
+    expect(typeof resendOk.body.invitationToken).toBe("string");
+
+    const previousFirebaseWebKey = process.env.FIREBASE_WEB_API_KEY;
+    const previousViteWebKey = process.env.VITE_FIREBASE_API_KEY;
+    delete process.env.FIREBASE_WEB_API_KEY;
+    delete process.env.VITE_FIREBASE_API_KEY;
+    adminFake.documents.set(
+      `${BUSINESS_PATH}/collaborators/collab-active-key`,
+      {
+        businessId: BUSINESS_ID,
+        email: "active@example.com",
+        fullName: "Activo",
+        lastEmailSentAt: new Date(Date.now() - 120_000),
+        permissions: [],
+        status: "active",
+        userId: "user-active",
+      },
+    );
+
+    try {
+      const missingKeyResult = await callEndpoint(
+        COLLABORATOR_FUNCTION_NAME.RESEND_COLLABORATOR_EMAIL,
+        { businessId: BUSINESS_ID, collaboratorId: "collab-active-key" },
+      );
+      expect(missingKeyResult.statusCode).toBe(500);
+
+      process.env.VITE_FIREBASE_API_KEY = "test-public-web-key";
+      const fetchSpy = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(new Response("{}", { status: 200 }));
+      const resetOk = await callEndpoint(
+        COLLABORATOR_FUNCTION_NAME.RESEND_COLLABORATOR_EMAIL,
+        { businessId: BUSINESS_ID, collaboratorId: "collab-active-key" },
+      );
+      expect(resetOk).toEqual({
+        body: {
+          collaboratorId: "collab-active-key",
+          invitationToken: null,
+          kind: "password_reset",
+        },
+        statusCode: 200,
+      });
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      fetchSpy.mockRestore();
+    } finally {
+      if (previousFirebaseWebKey === undefined) {
+        delete process.env.FIREBASE_WEB_API_KEY;
+      } else {
+        process.env.FIREBASE_WEB_API_KEY = previousFirebaseWebKey;
+      }
+      if (previousViteWebKey === undefined) {
+        delete process.env.VITE_FIREBASE_API_KEY;
+      } else {
+        process.env.VITE_FIREBASE_API_KEY = previousViteWebKey;
+      }
+    }
 
     const badPermission = await callEndpoint(
       COLLABORATOR_FUNCTION_NAME.UPDATE_COLLABORATOR_PERMISSIONS,

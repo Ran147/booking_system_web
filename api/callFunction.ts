@@ -11,7 +11,7 @@ import {
 import {
   COLLABORATOR_FUNCTION_NAME,
   handleCollaboratorFunction,
-} from "./_collaborators";
+} from "./_collaborators.js";
 import type { Nullable } from "../src/types/Nullable";
 
 const HTTP_METHOD = Object.freeze({

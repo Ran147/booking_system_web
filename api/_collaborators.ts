@@ -64,6 +64,7 @@ const COLLABORATOR_RULE = Object.freeze({
 const HTTP_STATUS = Object.freeze({
   BAD_REQUEST: 400,
   CONFLICT: 409,
+  INTERNAL_SERVER_ERROR: 500,
   NOT_FOUND: 404,
   OK: 200,
   PRECONDITION_FAILED: 412,
@@ -78,7 +79,7 @@ const BOOKING_ACTIVE_STATUSES: readonly string[] = Object.freeze([
 const COLLABORATOR_STATUS_TRANSITIONS: Record<string, readonly string[]> = {
   [COLLABORATOR_STATUS.ACTIVE]: [COLLABORATOR_STATUS.INACTIVE],
   [COLLABORATOR_STATUS.INACTIVE]: [COLLABORATOR_STATUS.ACTIVE],
-  [COLLABORATOR_STATUS.INVITED]: [COLLABORATOR_STATUS.ACTIVE],
+  [COLLABORATOR_STATUS.INVITED]: [],
 };
 
 const PHONE_PATTERN = /^(\+\d{1,3}[\s-]?)?(\d[\s-]?){7,15}\d$/;
@@ -391,15 +392,33 @@ const verifyRecaptchaToken = async (token: string): Promise<boolean> => {
   return Boolean(parsedResponse.success);
 };
 
+const FIREBASE_WEB_API_KEY_ENV_VARS = [
+  "FIREBASE_WEB_API_KEY",
+  "VITE_FIREBASE_API_KEY",
+] as const;
+
+const readWebApiKey = (): Nullable<string> => {
+  for (const environmentVariable of FIREBASE_WEB_API_KEY_ENV_VARS) {
+    const configuredKey = process.env[environmentVariable]?.trim();
+    if (configuredKey) {
+      return configuredKey;
+    }
+  }
+  return null;
+};
+
 const sendPasswordResetViaIdentityToolkit = async (
   email: string,
   language: string,
 ): Promise<void> => {
-  const apiKey = process.env.FIREBASE_WEB_API_KEY;
+  const apiKey = readWebApiKey();
   if (!apiKey) {
-    // Spark local/emulator fallback: when no Firebase Web API key is configured,
-    // allow cooldown & audit checks without requiring a paid mail relay.
-    return;
+    throw new CollaboratorActionError(
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      "internal",
+      COLLABORATOR_ERROR_REASON.EMAIL_DISPATCH_FAILED,
+      "FIREBASE_WEB_API_KEY is not set: the reset email cannot be requested",
+    );
   }
 
   const identityResponse = await fetch(
@@ -487,8 +506,8 @@ const handleRegisterCollaborator = async (
     );
 
     let activeAndInvitedCount = 0;
-    for (const collaboratorDoc of existingCollaborators.docs) {
-      const record = collaboratorDoc.data() as Record<string, unknown>;
+    for (const collaboratorDocument of existingCollaborators.docs) {
+      const record = collaboratorDocument.data() as Record<string, unknown>;
       if (record.is_owner === true) {
         continue;
       }
@@ -582,12 +601,10 @@ const handleRegisterCollaborator = async (
     });
   });
 
-  // Q9 is open (no Spark email provider selected); token is safely persisted.
-  void rawToken;
-
   sendJsonResponse(response, HTTP_STATUS.OK, {
     collaboratorId: collaboratorReference.id,
     email: input.email,
+    invitationToken: rawToken,
     status: COLLABORATOR_STATUS.INVITED,
   });
 };
@@ -987,6 +1004,8 @@ const handleUpdateCollaborator = async (
         .where("usedAt", "==", null)
         .get()
     : null;
+  const nextInvitation =
+    isEmailChanged && input.email ? createInvitationToken() : null;
 
   await firestore.runTransaction(async (transaction) => {
     const freshSnapshot = await transaction.get(collaboratorReference);
@@ -1019,11 +1038,11 @@ const handleUpdateCollaborator = async (
       const existingCollaborators = await transaction.get(
         businessReference.collection("collaborators"),
       );
-      const isDuplicate = existingCollaborators.docs.some((docItem) => {
-        if (docItem.id === input.collaboratorId) {
+      const isDuplicate = existingCollaborators.docs.some((documentItem) => {
+        if (documentItem.id === input.collaboratorId) {
           return false;
         }
-        const record = docItem.data() as Record<string, unknown>;
+        const record = documentItem.data() as Record<string, unknown>;
         if (record.is_owner === true) {
           return false;
         }
@@ -1075,7 +1094,7 @@ const handleUpdateCollaborator = async (
       updatedAt: nowTimestamp,
     };
 
-    if (isEmailChanged && input.email) {
+    if (isEmailChanged && input.email && nextInvitation) {
       updateFields.email = input.email;
       updateFields.lastEmailSentAt = nowTimestamp;
 
@@ -1085,10 +1104,9 @@ const handleUpdateCollaborator = async (
         }
       }
 
-      const { tokenHash } = createInvitationToken();
       const newInvitationReference = firestore
         .collection("collaboratorInvitations")
-        .doc(tokenHash);
+        .doc(nextInvitation.tokenHash);
       transaction.create(newInvitationReference, {
         businessId: input.businessId,
         collaboratorId: input.collaboratorId,
@@ -1107,6 +1125,7 @@ const handleUpdateCollaborator = async (
   sendJsonResponse(response, HTTP_STATUS.OK, {
     collaboratorId: input.collaboratorId,
     emailChanged: isEmailChanged,
+    invitationToken: nextInvitation?.rawToken ?? null,
     upcomingAffectedBookingsCount,
   });
 };
@@ -1196,14 +1215,14 @@ const handleUpdateCollaboratorStatus = async (
         businessReference.collection("collaborators"),
       );
       const activeAndInvitedCount = existingCollaborators.docs.filter(
-        (docItem) => {
-          const docRecord = docItem.data() as Record<string, unknown>;
-          if (docRecord.is_owner === true) {
+        (documentItem) => {
+          const documentRecord = documentItem.data() as Record<string, unknown>;
+          if (documentRecord.is_owner === true) {
             return false;
           }
           return (
-            docRecord.status === COLLABORATOR_STATUS.ACTIVE ||
-            docRecord.status === COLLABORATOR_STATUS.INVITED
+            documentRecord.status === COLLABORATOR_STATUS.ACTIVE ||
+            documentRecord.status === COLLABORATOR_STATUS.INVITED
           );
         },
       ).length;
@@ -1411,7 +1430,7 @@ const handleResendCollaboratorEmail = async (
       .where("usedAt", "==", null)
       .get();
 
-    const { tokenHash } = createInvitationToken();
+    const { rawToken, tokenHash } = createInvitationToken();
     const newInvitationReference = firestore
       .collection("collaboratorInvitations")
       .doc(tokenHash);
@@ -1438,6 +1457,7 @@ const handleResendCollaboratorEmail = async (
 
     sendJsonResponse(response, HTTP_STATUS.OK, {
       collaboratorId: input.collaboratorId,
+      invitationToken: rawToken,
       kind: "invitation",
     });
     return;
@@ -1457,6 +1477,7 @@ const handleResendCollaboratorEmail = async (
 
   sendJsonResponse(response, HTTP_STATUS.OK, {
     collaboratorId: input.collaboratorId,
+    invitationToken: null,
     kind: "password_reset",
   });
 };

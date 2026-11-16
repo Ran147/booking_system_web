@@ -52,11 +52,12 @@
       "noActiveServicesAction": "Go to services",
       "submitAction": "Register collaborator",
       "submittingLabel": "Registering…",
-      "success": "The collaborator was registered and their invitation is ready.",
+      "success": "The collaborator was registered. Share the invitation link so they can activate their account.",
       "title": "Register collaborator"
     },
     "deactivate": {
       "action": "Deactivate",
+      "bookingsLoadWarning": "We could not verify whether {{name}} has upcoming active bookings before deactivating.",
       "cancelAction": "Cancel",
       "confirmAction": "Confirm deactivation",
       "confirmLabel": "If you deactivate {{name}}, they will immediately lose access to the business portal.",
@@ -67,6 +68,7 @@
       "title": "Deactivate collaborator"
     },
     "edit": {
+      "bookingsLoadWarning": "We could not verify how many upcoming bookings are associated with the current services.",
       "concurrentError": "Another user modified this collaborator while you were editing. Reload the data and try again.",
       "emailLockedHint": "The email address cannot be modified after the collaborator accepts their invitation.",
       "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned.",
@@ -90,6 +92,15 @@
       "validation": {
         "serviceRequired": "You must assign at least one active service."
       }
+    },
+    "invitationLink": {
+      "closeAction": "Close",
+      "copiedSuccess": "Invitation link copied to clipboard.",
+      "copyAction": "Copy link",
+      "copyError": "Could not copy automatically. Please copy the link manually.",
+      "description": "Share this link with {{name}} so they can set their password and activate their account. It expires in 7 days.",
+      "linkLabel": "Invitation link",
+      "title": "Activation link"
     },
     "limit": {
       "closeAction": "Close",
@@ -189,7 +200,7 @@
       "invitedAction": "Resend invitation",
       "lastSentLabel": "Last email sent",
       "sendingLabel": "Sending…",
-      "successInvited": "A new invitation was generated and sent to the collaborator.",
+      "successInvited": "A new invitation link was generated. Share it with the collaborator so they can activate their account.",
       "successReset": "Password reset email sent."
     }
   },
