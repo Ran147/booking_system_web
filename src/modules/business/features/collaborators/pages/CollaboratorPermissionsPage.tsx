@@ -5,21 +5,16 @@ import {
   ALERT_VARIANT,
   Button,
   BUTTON_VARIANT,
-  Card,
-  CardContent,
   ErrorState,
   PageTemplate,
   Spinner,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import { CollaboratorPermissionsCheckboxes } from "../components";
+import { CollaboratorPermissionsCard } from "../components";
 import { useCollaboratorPermissionsViewModel } from "../hooks";
 
 export const CollaboratorPermissionsPage = (): ReactElement => {
-  const { t } = useTranslation([
-    I18N_NAMESPACE.BUSINESS,
-    I18N_NAMESPACE.COMMON,
-  ]);
+  const { t } = useTranslation([I18N_NAMESPACE.BUSINESS]);
   const viewModel = useCollaboratorPermissionsViewModel();
   const {
     collaborator,
@@ -84,43 +79,16 @@ export const CollaboratorPermissionsPage = (): ReactElement => {
         )}
 
         {!isLoading && !loadError && collaborator && (
-          <Card>
-            <CardContent className="flex flex-col gap-6 pt-6">
-              <p className="text-sm text-muted-foreground">
-                {t("business:collaborators.permissions.noPermissionsNote")}
-              </p>
-
-              <CollaboratorPermissionsCheckboxes
-                disabled={isReadOnly || isSaving}
-                onToggle={handleTogglePermission}
-                selectedPermissions={selectedPermissions}
-              />
-
-              <div className="flex flex-wrap justify-end gap-3">
-                <Button
-                  disabled={isSaving}
-                  onClick={handleCancel}
-                  type="button"
-                  variant={BUTTON_VARIANT.OUTLINE}
-                >
-                  {t("common:actions.cancel")}
-                </Button>
-                {!isReadOnly && (
-                  <Button
-                    isLoading={isSaving}
-                    onClick={(): void => {
-                      void handleSave();
-                    }}
-                    type="button"
-                  >
-                    {isSaving
-                      ? t("business:collaborators.permissions.savingLabel")
-                      : t("business:collaborators.permissions.saveAction")}
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <CollaboratorPermissionsCard
+            isReadOnly={isReadOnly}
+            isSaving={isSaving}
+            onCancel={handleCancel}
+            onSave={(): void => {
+              void handleSave();
+            }}
+            onToggle={handleTogglePermission}
+            selectedPermissions={selectedPermissions}
+          />
         )}
       </div>
     </PageTemplate>

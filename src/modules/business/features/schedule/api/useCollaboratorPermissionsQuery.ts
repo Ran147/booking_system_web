@@ -1,43 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { doc, getDoc } from "firebase/firestore";
-import { z } from "zod";
-import { FIRESTORE_COLLECTION } from "@/constants";
 import { COLLABORATOR_PERMISSION, USER_ROLE } from "@/domain";
 import { SESSION_STATUS, useCurrentBusiness, useSession } from "@/modules/auth";
-import { firestore } from "@/services/firebase";
-
-const collaboratorPermissionsSchema = z.object({
-  permissions: z.array(z.string()).optional().default([]),
-});
+import {
+  businessLayoutQueryKeys,
+  fetchCollaboratorProfile,
+  type CollaboratorProfileData,
+} from "@/modules/business/layout/api";
 
 export interface SchedulePermissions {
   readonly canManageBookings: boolean;
   readonly canManageScheduleBlocks: boolean;
 }
 
-const fetchScheduleCollaboratorPermissions = async (
-  businessId: string,
-  collaboratorId: string,
-): Promise<readonly string[]> => {
-  const collaboratorRef = doc(
-    firestore,
-    FIRESTORE_COLLECTION.BUSINESSES,
-    businessId,
-    FIRESTORE_COLLECTION.COLLABORATORS,
-    collaboratorId,
-  );
-  const snapshot = await getDoc(collaboratorRef);
-
-  if (!snapshot.exists()) {
-    return [];
-  }
-
-  return collaboratorPermissionsSchema.parse(snapshot.data() ?? {}).permissions;
-};
-
 /**
  * Resuelve si el usuario actual en el portal puede gestionar reservas y bloqueos de agenda (AS-4, KAN-86).
- * Suscriptores y duenos siempre tienen acceso; colaboradores dependen de sus permisos asignados.
+ * Reutiliza el cache de `businessLayoutQueryKeys.collaboratorProfile` para evitar lecturas duplicadas a Firestore.
  * @returns {SchedulePermissions}
  */
 export const useCollaboratorPermissionsQuery = (): SchedulePermissions => {
@@ -52,16 +29,13 @@ export const useCollaboratorPermissionsQuery = (): SchedulePermissions => {
   const isCollaborator = isSignedIn && session.role === USER_ROLE.COLLABORATOR;
   const collaboratorId = isCollaborator ? (session.collaboratorId ?? "") : "";
 
-  const permissionsQuery = useQuery<readonly string[]>({
+  const collaboratorProfileQuery = useQuery<CollaboratorProfileData>({
     enabled: Boolean(isCollaborator && businessId && collaboratorId),
-    queryFn: () =>
-      fetchScheduleCollaboratorPermissions(businessId, collaboratorId),
-    queryKey: [
-      FIRESTORE_COLLECTION.BUSINESSES,
+    queryFn: () => fetchCollaboratorProfile(businessId, collaboratorId),
+    queryKey: businessLayoutQueryKeys.collaboratorProfile(
       businessId,
-      FIRESTORE_COLLECTION.COLLABORATORS,
       collaboratorId,
-    ] as const,
+    ),
   });
 
   if (isSubscriber) {
@@ -78,7 +52,7 @@ export const useCollaboratorPermissionsQuery = (): SchedulePermissions => {
     };
   }
 
-  const permissions = permissionsQuery.data ?? [];
+  const permissions = collaboratorProfileQuery.data?.permissions ?? [];
 
   return {
     canManageBookings: permissions.includes(
