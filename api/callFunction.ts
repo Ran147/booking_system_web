@@ -39,6 +39,7 @@ const FUNCTION_NAME = Object.freeze({
   CREATE_BOOKING: "createBooking",
   CREATE_SCHEDULE_BLOCK: "createScheduleBlock",
   CREATE_SERVICE: "createService",
+  CREATE_SUPPORT_TICKET: "createSupportTicket",
   DELETE_SCHEDULE_BLOCK: "deleteScheduleBlock",
   DELETE_SERVICE: "deleteService",
   EXPORT_COLLECTION: "exportCollection",
@@ -648,9 +649,10 @@ const checkCallerAccess = async (
   const businessId = String(payload.businessId || "");
 
   if (
+    functionName === FUNCTION_NAME.CREATE_SUPPORT_TICKET ||
+    functionName === FUNCTION_NAME.DELETE_SERVICE ||
     functionName === FUNCTION_NAME.UPDATE_BUSINESS_HOURS ||
-    functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE ||
-    functionName === FUNCTION_NAME.DELETE_SERVICE
+    functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE
   ) {
     const isOwner = await ownsBusiness(firestore, caller, businessId);
     return isOwner ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
@@ -948,6 +950,57 @@ export default async function handler(
       await serviceReference.delete();
       sendJsonResponse(response, HTTP_STATUS.OK, {
         deletedServiceId: serviceId,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.CREATE_SUPPORT_TICKET) {
+      const businessId = String(payload.businessId || "");
+      const subject = String(payload.subject || "").trim();
+      const message = String(payload.message || "").trim();
+
+      if (!businessId || !subject || !message) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-payload",
+        });
+        return;
+      }
+
+      if (subject.length > 120 || message.length > 5000) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-payload-length",
+        });
+        return;
+      }
+
+      const businessSnapshot = await firestore
+        .collection("businesses")
+        .doc(businessId)
+        .get();
+      const businessName = String(businessSnapshot.data()?.name || "");
+
+      const ticketReference = firestore.collection("supportTickets").doc();
+      const now = Timestamp.now();
+
+      await ticketReference.set({
+        businessId,
+        businessName,
+        createdAt: now,
+        createdByUserId: caller?.userId ?? "",
+        message,
+        ownerEmail:
+          typeof caller?.claims?.email === "string"
+            ? caller.claims.email
+            : null,
+        replies: [],
+        resolvedAt: null,
+        status: "open",
+        subject,
+        updatedAt: now,
+      });
+
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        ticketId: ticketReference.id,
       });
       return;
     }

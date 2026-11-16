@@ -1,0 +1,11 @@
+export const CREATE_SUPPORT_TICKET_ERROR = Object.freeze({
+  INVALID_PAYLOAD: "INVALID_PAYLOAD",
+  UNKNOWN: "UNKNOWN",
+} as const);
+
+export const SUPPORT_TICKET_LIMITS = Object.freeze({
+  MESSAGE_MAX_LENGTH: 5000,
+  MESSAGE_MIN_LENGTH: 1,
+  SUBJECT_MAX_LENGTH: 120,
+  SUBJECT_MIN_LENGTH: 1,
+} as const);

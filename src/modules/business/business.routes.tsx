@@ -34,6 +34,14 @@ export const businessRoutes: RouteObject[] = [
                     },
                     path: ROUTE_PATH.BUSINESS.BUSINESS_PROFILE,
                   },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { SupportPage } =
+                        await import("./features/support");
+                      return { Component: SupportPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.SUPPORT,
+                  },
                 ],
                 element: (
                   <RequireRole

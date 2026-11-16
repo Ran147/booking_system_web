@@ -20,7 +20,7 @@ Source: `docs/backlog/jira-export.csv` (31 epics, 164 stories, exported 2026-09)
 | KAN-87 | Clientes | business | `portals/business/features/customers` |
 | KAN-99 | Notificaciones | business | `portals/business/features/notification-settings` |
 | KAN-102 | Reportes | business | `portals/business/features/reports` |
-| PROP-3 | Soporte (Proposed — not in Jira yet) | business | `portals/business/features/support` |
+| KAN-197 / KAN-198 | Soporte (KAN-202) | business | `portals/business/features/support` |
 | PROP-4 | Perfil público del negocio (Proposed — not in Jira yet) | business | `portals/business/features/business-profile` |
 | KAN-96 | Navbar | customer | `portals/customer/layout` |
 | KAN-111 | Página principal del negocio | customer | `portals/customer/features/business-home` |

@@ -5,6 +5,7 @@ export const FUNCTION_NAME = Object.freeze({
   CREATE_BOOKING: "createBooking",
   CREATE_SCHEDULE_BLOCK: "createScheduleBlock",
   CREATE_SERVICE: "createService",
+  CREATE_SUPPORT_TICKET: "createSupportTicket",
   DELETE_SCHEDULE_BLOCK: "deleteScheduleBlock",
   DELETE_SERVICE: "deleteService",
   EXPORT_COLLECTION: "exportCollection",
