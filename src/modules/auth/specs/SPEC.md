@@ -4,7 +4,7 @@
 | --- | --- |
 | Portal | shared (used from landing, business, customer and admin) |
 | Feature folder | `src/modules/auth/` |
-| Stories | KAN-33, KAN-34, KAN-35, KAN-36, KAN-37, KAN-38 (KAN-28); KAN-129, KAN-130, KAN-131, KAN-132, KAN-133 (KAN-128) |
+| Stories | KAN-33, KAN-34, KAN-35, KAN-36, KAN-37, KAN-38 (KAN-28); KAN-129, KAN-130, KAN-131, KAN-132, KAN-133 (KAN-128); KAN-204 (KAN-198) |
 | Status | Draft |
 | Depends on | KAN-182 platform settings (`PlatformSettings.idleTimeoutMinutes`, admin); KAN-26 subscriber sign-up; KAN-122 customer sign-up; KAN-29 / KAN-110 sign-out; Q7 and Q2 decided 2026-09-28 (a subscriber whose business is `pending` lands on the "under review" screen); Q1 decided 2026-09-28 (collaborators sign in to the business portal); KAN-174 admin businesses (approval PROP-1) |
 
@@ -48,7 +48,12 @@ Signed-in users who open sign-in or password recovery are sent to their own port
 
 ### KAN-33 — Sign in validating a reCAPTCHA (subscriber)
 - [ ] **AC-KAN-33-01** · happy · Given a subscriber with a valid account and a business, when they enter their email and password, solve the reCAPTCHA and submit, then they are signed in and taken to the business portal home of their own business. [KAN-33]
-- [ ] **AC-KAN-33-02** · happy · Given a super admin, when they sign in with the same form, then they are taken to the admin portal home. [KAN-33]
+- [x] **AC-KAN-33-02** · happy · Given a super admin, when they sign in with the same form, then they are taken to the admin portal home. [KAN-33, KAN-204]
+- [x] **AC-KAN-204-01** · happy · Given a super admin with valid credentials, when they enter email, password and solve reCAPTCHA, then they are authenticated and redirected to the backoffice (`/admin`). [KAN-204]
+- [x] **AC-KAN-204-02** · happy · Given an unauthenticated super admin attempting to open a backoffice route, when redirected to sign-in with `redirectTo`, then after valid sign-in they return to the requested admin route. [KAN-204]
+- [x] **AC-KAN-204-03** · edge · Given an authenticated non-super-admin (subscriber, collaborator, customer), when they open `/admin`, then `RequireRole` denies access and redirects to their own portal. [KAN-204]
+- [x] **AC-KAN-204-04** · edge · Given a super admin already signed in, when navigating to `/sign-in`, then `GuestOnly` redirects to the backoffice (`/admin`). [KAN-204]
+- [x] **AC-KAN-204-05** · error · Given invalid credentials or missing reCAPTCHA, then backoffice access is denied with neutral security messages and no session is created. [KAN-204]
 - [ ] **AC-KAN-33-03** · happy · Given a signed-out user was sent to sign-in from a protected page (`redirectTo`), when they sign in with a role allowed on that page, then they return to that page; if their role is not allowed there, they go to their own portal home. [KAN-33, KAN-129]
 - [ ] **AC-KAN-33-04** · error · Given the reCAPTCHA is not solved, when the user looks at the form, then submit is disabled; and given the token is rejected by the server, when they submit, then they are not signed in, the reCAPTCHA is reset and `validation:recaptchaRequired` is shown. [KAN-33]
 - [ ] **AC-KAN-33-05** · error · Given the request fails because of the network, when the user submits, then they stay signed out, the email is kept, the password is cleared and `common:errors.network` is shown. [KAN-33]
