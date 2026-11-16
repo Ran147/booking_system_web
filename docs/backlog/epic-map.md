@@ -39,5 +39,6 @@ Source: `docs/backlog/jira-export.csv` (31 epics, 164 stories, exported 2026-09)
 | KAN-186 | Dashboard global | admin | `portals/admin/features/dashboard` |
 | KAN-189 | Ticketing | admin | `portals/admin/features/support-tickets` |
 | KAN-193 | Auditoría | admin | `portals/admin/features/audit-log` |
+| KAN-198 | [Admin] Acceso (KAN-204) | admin / shared | `features/auth` |
 
 Proposed stories (`PROP-n`, `docs/decisions/open-questions.md`) are not Jira epics: PROP-3 and PROP-4 have their own folders above; PROP-1 (approve or reject a pending business) and PROP-2 (suspend a business) live in the KAN-174 spec, `portals/admin/features/businesses`. Each PROP story must be created in Jira before it is implemented.
