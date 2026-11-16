@@ -22,6 +22,7 @@ export interface RegisterCollaboratorPayload {
 export interface RegisterCollaboratorResponse {
   readonly collaboratorId: string;
   readonly email: string;
+  readonly invitationToken?: Nullable<string>;
   readonly status: string;
 }
 
@@ -39,6 +40,7 @@ export interface UpdateCollaboratorPayload {
 export interface UpdateCollaboratorResponse {
   readonly collaboratorId: string;
   readonly emailChanged: boolean;
+  readonly invitationToken?: Nullable<string>;
   readonly upcomingAffectedBookingsCount: number;
 }
 
@@ -71,6 +73,7 @@ export interface ResendCollaboratorEmailPayload {
 
 export interface ResendCollaboratorEmailResponse {
   readonly collaboratorId: string;
+  readonly invitationToken?: Nullable<string>;
   readonly kind: string;
 }
 
