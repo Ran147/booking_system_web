@@ -28,6 +28,7 @@ export const ROUTE_PATH = {
     SERVICES: "services",
     SETTINGS: "settings",
     SUBSCRIPTION: "subscription",
+    SUPPORT: "support",
   },
   CUSTOMER: {
     BOOKING_DETAIL: "my-bookings/:bookingId",

@@ -242,6 +242,41 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
     return { deletedServiceId: serviceId } as Response;
   }
 
+  if (functionName === FUNCTION_NAME.CREATE_SUPPORT_TICKET) {
+    const businessId = String(genericPayload.businessId ?? "");
+    const message = String(genericPayload.message ?? "").trim();
+    const subject = String(genericPayload.subject ?? "").trim();
+
+    if (!businessId || !subject || !message) {
+      throw new Error("Missing required parameters for createSupportTicket");
+    }
+
+    const businessSnapshot = await getDoc(
+      doc(firestore, "businesses", businessId),
+    );
+    const businessName = String(businessSnapshot.data()?.name ?? "");
+
+    const now = Timestamp.now();
+    const ticketReference = await addDoc(
+      collection(firestore, "supportTickets"),
+      {
+        businessId,
+        businessName,
+        createdAt: now,
+        createdByUserId: auth.currentUser?.uid ?? "",
+        message,
+        ownerEmail: auth.currentUser?.email ?? null,
+        replies: [],
+        resolvedAt: null,
+        status: "open",
+        subject,
+        updatedAt: now,
+      },
+    );
+
+    return { ticketId: ticketReference.id } as Response;
+  }
+
   if (functionName === FUNCTION_NAME.CREATE_SERVICE) {
     const businessId = String(genericPayload.businessId ?? "");
     const formValues = (genericPayload.formValues ?? {}) as {
