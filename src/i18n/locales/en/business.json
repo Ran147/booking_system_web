@@ -166,7 +166,9 @@
       "settingsDescription": "System settings and profile",
       "signOut": "Sign out",
       "subscription": "Subscription",
-      "subscriptionDescription": "Subscribed plan and billing"
+      "subscriptionDescription": "Subscribed plan and billing",
+      "support": "Support",
+      "supportDescription": "Tickets and technical queries"
     },
     "signOut": {
       "cancelAction": "Stay here",
@@ -550,5 +552,53 @@
       "title": "Appearance"
     },
     "title": "Settings"
+  },
+  "support": {
+    "actions": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "create": "Create ticket",
+      "creating": "Creating ticket...",
+      "newTicket": "New ticket"
+    },
+    "create": {
+      "description": "Describe the technical issue or query with as much detail as possible.",
+      "messageLabel": "Message or query",
+      "messagePlaceholder": "Describe the issue or query you wish to report...",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "E.g. Issue configuring schedule",
+      "success": "Support ticket created successfully.",
+      "title": "New support ticket"
+    },
+    "detail": {
+      "businessOwner": "You",
+      "createdAt": "Created on {{date}}",
+      "drawerTitle": "Ticket detail",
+      "emptyReplies": "There are no replies from technical support yet. We will reply shortly.",
+      "originalMessage": "Original message",
+      "repliesTitle": "Support replies ({{count}})",
+      "replyAt": "{{date}}",
+      "statusLabel": "Status:",
+      "supportTeam": "Support Team",
+      "updatedAt": "Last update: {{date}}"
+    },
+    "list": {
+      "createdAtHeader": "Creation date",
+      "emptyAction": "Create my first ticket",
+      "emptyDescription": "You have no support tickets registered. If you have any questions or issues with the platform, you can create a ticket here.",
+      "emptyTitle": "No support tickets",
+      "lastUpdateHeader": "Last update",
+      "pageDescription": "Create and check the status of your technical queries and issues with our team.",
+      "pageTitle": "Technical support",
+      "statusHeader": "Status",
+      "subjectHeader": "Subject",
+      "tableAriaLabel": "List of technical support tickets",
+      "totalTickets": "Total tickets: {{count}}"
+    },
+    "status": {
+      "in_progress": "In progress",
+      "open": "Open",
+      "resolved": "Resolved"
+    }
   }
 }

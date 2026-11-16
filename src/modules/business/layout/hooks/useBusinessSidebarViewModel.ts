@@ -3,6 +3,7 @@ import {
   BarChart3,
   Calendar,
   CreditCard,
+  Headset,
   LayoutDashboard,
   Scissors,
   Settings,
@@ -285,6 +286,15 @@ export const useBusinessSidebarViewModel = (
             isAvailable: false,
             isSubscriberOnly: true,
             label: t("business:layout.sidebar.subscription"),
+          },
+          {
+            description: t("business:layout.sidebar.supportDescription"),
+            href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.SUPPORT}`,
+            icon: Headset,
+            id: "support",
+            isAvailable: true,
+            isSubscriberOnly: true,
+            label: t("business:layout.sidebar.support"),
           },
         ]
       : []),

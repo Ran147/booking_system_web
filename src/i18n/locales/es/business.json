@@ -166,7 +166,9 @@
       "settingsDescription": "Ajustes del sistema y perfil",
       "signOut": "Cerrar sesión",
       "subscription": "Suscripción",
-      "subscriptionDescription": "Plan contratado y facturación"
+      "subscriptionDescription": "Plan contratado y facturación",
+      "support": "Soporte",
+      "supportDescription": "Tickets y consultas técnicas"
     },
     "signOut": {
       "cancelAction": "Permanecer aquí",
@@ -550,5 +552,53 @@
       "title": "Apariencia"
     },
     "title": "Configuración"
+  },
+  "support": {
+    "actions": {
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "create": "Crear ticket",
+      "creating": "Creando ticket...",
+      "newTicket": "Nuevo ticket"
+    },
+    "create": {
+      "description": "Describe el problema o consulta técnica con el mayor detalle posible.",
+      "messageLabel": "Mensaje o consulta",
+      "messagePlaceholder": "Detalla la incidencia o consulta que deseas reportar...",
+      "subjectLabel": "Asunto",
+      "subjectPlaceholder": "Ej. Problema con la configuración de la agenda",
+      "success": "Ticket de soporte creado correctamente.",
+      "title": "Nuevo ticket de soporte"
+    },
+    "detail": {
+      "businessOwner": "Tú",
+      "createdAt": "Creado el {{date}}",
+      "drawerTitle": "Detalle del ticket",
+      "emptyReplies": "Aún no hay respuestas del equipo de soporte. Te responderemos a la brevedad.",
+      "originalMessage": "Mensaje original",
+      "repliesTitle": "Respuestas de soporte ({{count}})",
+      "replyAt": "{{date}}",
+      "statusLabel": "Estado:",
+      "supportTeam": "Equipo de Soporte",
+      "updatedAt": "Última actualización: {{date}}"
+    },
+    "list": {
+      "createdAtHeader": "Fecha de creación",
+      "emptyAction": "Crear mi primer ticket",
+      "emptyDescription": "No tienes tickets de soporte registrados. Si tienes alguna duda o problema con la plataforma, puedes crear un ticket aquí.",
+      "emptyTitle": "No hay tickets de soporte",
+      "lastUpdateHeader": "Última actualización",
+      "pageDescription": "Crea y consulta el estado de tus incidencias y consultas técnicas con nuestro equipo.",
+      "pageTitle": "Soporte técnico",
+      "statusHeader": "Estado",
+      "subjectHeader": "Asunto",
+      "tableAriaLabel": "Listado de tickets de soporte técnico",
+      "totalTickets": "Total de tickets: {{count}}"
+    },
+    "status": {
+      "in_progress": "En proceso",
+      "open": "Abierto",
+      "resolved": "Resuelto"
+    }
   }
 }
