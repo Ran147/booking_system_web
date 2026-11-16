@@ -48,14 +48,14 @@ export const fetchCollaboratorDetail = async (
   businessId: string,
   collaboratorId: string,
 ): Promise<Nullable<CollaboratorDetailData>> => {
-  const collaboratorRef = doc(
+  const collaboratorDocumentReference = doc(
     firestore,
     FIRESTORE_COLLECTION.BUSINESSES,
     businessId,
     FIRESTORE_COLLECTION.COLLABORATORS,
     collaboratorId,
   );
-  const documentSnapshot = await getDoc(collaboratorRef);
+  const documentSnapshot = await getDoc(collaboratorDocumentReference);
   if (!documentSnapshot.exists()) {
     return null;
   }
@@ -69,16 +69,16 @@ export const fetchCollaboratorDetail = async (
 
   const resolvedServices: ActiveServiceOption[] = await Promise.all(
     parsed.serviceIds.map(async (serviceId) => {
-      const serviceRef = doc(
+      const serviceDocumentReference = doc(
         firestore,
         FIRESTORE_COLLECTION.BUSINESSES,
         businessId,
         FIRESTORE_COLLECTION.SERVICES,
         serviceId,
       );
-      const serviceSnap = await getDoc(serviceRef);
-      const serviceName = serviceSnap.exists()
-        ? serviceNameSchema.parse(serviceSnap.data() ?? {}).name
+      const serviceSnapshot = await getDoc(serviceDocumentReference);
+      const serviceName = serviceSnapshot.exists()
+        ? serviceNameSchema.parse(serviceSnapshot.data() ?? {}).name
         : serviceId;
       return {
         id: serviceId,
@@ -106,14 +106,15 @@ export const fetchCollaboratorDetail = async (
     ),
   );
 
+  let hasUpcomingBookingsError = false;
   let upcomingBookingsCount = 0;
   const upcomingServicesWithBookings = new Set<string>();
   const upcomingBookingsByService: Record<string, number> = {};
   try {
-    const bookingsSnap = await getDocs(upcomingBookingsQuery);
+    const bookingsSnapshot = await getDocs(upcomingBookingsQuery);
     const nowMillis = Date.now();
-    for (const bookingDoc of bookingsSnap.docs) {
-      const booking = bookingPreviewSchema.parse(bookingDoc.data() ?? {});
+    for (const bookingDocument of bookingsSnapshot.docs) {
+      const booking = bookingPreviewSchema.parse(bookingDocument.data() ?? {});
       const startsAtIso = parseIsoTimestamp(booking.startsAt);
       if (startsAtIso && Date.parse(startsAtIso) > nowMillis) {
         upcomingBookingsCount += 1;
@@ -125,13 +126,14 @@ export const fetchCollaboratorDetail = async (
       }
     }
   } catch {
-    // Do not fail profile view if bookings preview query is unavailable.
+    hasUpcomingBookingsError = true;
   }
 
   return {
     businessId,
     email: parsed.email,
     fullName: parsed.fullName,
+    hasUpcomingBookingsError,
     id: documentSnapshot.id,
     lastEmailSentAt: parseIsoTimestamp(parsed.lastEmailSentAt),
     permissions: normalizePermissions(parsed.permissions),

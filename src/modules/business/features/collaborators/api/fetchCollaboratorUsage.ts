@@ -42,14 +42,14 @@ const planLimitsSchema = z.object({
 export const fetchCollaboratorUsage = async (
   businessId: string,
 ): Promise<CollaboratorUsageSummary> => {
-  const subscriptionRef = doc(
+  const subscriptionDocumentReference = doc(
     firestore,
     FIRESTORE_COLLECTION.BUSINESSES,
     businessId,
     FIRESTORE_COLLECTION.SUBSCRIPTION,
     COLLABORATOR_RULE.CURRENT_SUBSCRIPTION_ID,
   );
-  const businessRef = doc(
+  const businessDocumentReference = doc(
     firestore,
     FIRESTORE_COLLECTION.BUSINESSES,
     businessId,
@@ -61,16 +61,17 @@ export const fetchCollaboratorUsage = async (
     FIRESTORE_COLLECTION.COLLABORATORS,
   );
 
-  const [subscriptionSnap, businessSnap, collaboratorsSnap] = await Promise.all(
-    [
-      getDoc(subscriptionRef),
-      getDoc(businessRef),
+  const [subscriptionSnapshot, businessSnapshot, collaboratorsSnapshot] =
+    await Promise.all([
+      getDoc(subscriptionDocumentReference),
+      getDoc(businessDocumentReference),
       getDocs(collaboratorsCollection),
-    ],
-  );
+    ]);
 
-  const used = collaboratorsSnap.docs.filter((docSnapshot) => {
-    const parsed = collaboratorDocumentSchema.parse(docSnapshot.data() ?? {});
+  const used = collaboratorsSnapshot.docs.filter((documentSnapshot) => {
+    const parsed = collaboratorDocumentSchema.parse(
+      documentSnapshot.data() ?? {},
+    );
     if (parsed.is_owner) {
       return false;
     }
@@ -81,30 +82,30 @@ export const fetchCollaboratorUsage = async (
   }).length;
 
   const businessFallback = businessPlanFallbackSchema.parse(
-    businessSnap.data() ?? {},
+    businessSnapshot.data() ?? {},
   );
   const isReadOnly =
-    businessSnap.exists() &&
+    businessSnapshot.exists() &&
     Boolean(businessFallback.status) &&
     businessFallback.status !== BUSINESS_STATUS.ACTIVE;
-  const planId = subscriptionSnap.exists()
-    ? subscriptionDocumentSchema.parse(subscriptionSnap.data() ?? {}).planId
+  const planId = subscriptionSnapshot.exists()
+    ? subscriptionDocumentSchema.parse(subscriptionSnapshot.data() ?? {}).planId
     : (businessFallback.subscription?.planId ?? businessFallback.plan_id ?? "");
 
   if (!planId) {
     return { hasHigherPlan: false, isReadOnly, limit: null, used };
   }
 
-  const planSnap = await getDoc(
+  const planSnapshot = await getDoc(
     doc(firestore, FIRESTORE_COLLECTION.PLANS, planId),
   );
-  if (!planSnap.exists()) {
+  if (!planSnapshot.exists()) {
     return { hasHigherPlan: false, isReadOnly, limit: null, used };
   }
 
   const currentLimit =
-    planLimitsSchema.parse(planSnap.data() ?? {}).limits?.maxCollaborators ??
-    null;
+    planLimitsSchema.parse(planSnapshot.data() ?? {}).limits
+      ?.maxCollaborators ?? null;
 
   if (currentLimit === null) {
     return { hasHigherPlan: false, isReadOnly, limit: null, used };
@@ -118,10 +119,10 @@ export const fetchCollaboratorUsage = async (
       PLAN_STATUS.ACTIVE,
     ),
   );
-  const activePlansSnap = await getDocs(activePlansQuery);
-  const hasHigherPlan = activePlansSnap.docs.some((activePlanDoc) => {
+  const activePlansSnapshot = await getDocs(activePlansQuery);
+  const hasHigherPlan = activePlansSnapshot.docs.some((activePlanDocument) => {
     const otherLimit =
-      planLimitsSchema.parse(activePlanDoc.data() ?? {}).limits
+      planLimitsSchema.parse(activePlanDocument.data() ?? {}).limits
         ?.maxCollaborators ?? null;
     return typeof otherLimit === "number" && otherLimit > currentLimit;
   });
