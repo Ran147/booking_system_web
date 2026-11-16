@@ -271,6 +271,12 @@ service cloud.firestore {
       allow write: if false; // functions only
     }
 
+    match /supportTickets/{supportTicketId} {
+      allow read: if isSuperAdmin()
+        || (isSignedIn() && ownsBusiness(resource.data.businessId));
+      allow write: if false;
+    }
+
     // Deny by default.
     match /{document=**} {
       allow read, write: if false;
