@@ -17,6 +17,14 @@ export const adminRoutes: RouteObject[] = [
               return { Component: AdminPlaceholderPage };
             },
           },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { SupportTicketsPage } =
+                await import("./features/support-tickets/SupportTicketsPage");
+              return { Component: SupportTicketsPage };
+            },
+            path: ROUTE_PATH.ADMIN.SUPPORT_TICKETS,
+          },
         ],
         element: <AdminLayout />,
       },

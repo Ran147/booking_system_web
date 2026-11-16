@@ -45,8 +45,10 @@ const FUNCTION_NAME = Object.freeze({
   FETCH_BOOKING_HISTORY: "fetchBookingHistory",
   FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
+  REPLY_TO_SUPPORT_TICKET: "replyToSupportTicket",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
+  RESOLVE_SUPPORT_TICKET: "resolveSupportTicket",
   SEND_CONTACT_MESSAGE: "sendContactMessage",
   UPDATE_BOOKING_STATUS: "updateBookingStatus",
   UPDATE_BUSINESS_HOURS: "updateBusinessHours",
@@ -96,6 +98,12 @@ const SERVICE_STATUS = Object.freeze({
   INACTIVE: "inactive",
 } as const);
 
+const SUPPORT_TICKET_STATUS = Object.freeze({
+  IN_PROGRESS: "in_progress",
+  OPEN: "open",
+  RESOLVED: "resolved",
+} as const);
+
 const CHECKOUT_SIMULATION = Object.freeze({
   DECLINED_CARD_NUMBER: "4000000000000002",
   DECLINED_CARD_SUFFIX: "0002",
@@ -127,6 +135,7 @@ const USER_ROLE = Object.freeze({
   COLLABORATOR: "collaborator",
   CUSTOMER: "customer",
   SUBSCRIBER: "subscriber",
+  SUPER_ADMIN: "super_admin",
 } as const);
 
 const COLLABORATOR_PERMISSION = Object.freeze({
@@ -645,6 +654,16 @@ const checkCallerAccess = async (
     return CALLER_ACCESS.UNAUTHENTICATED;
   }
 
+  if (
+    functionName === FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET ||
+    functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET
+  ) {
+    const role = caller.claims?.role;
+    return role === USER_ROLE.SUPER_ADMIN
+      ? CALLER_ACCESS.ALLOWED
+      : CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
   const businessId = String(payload.businessId || "");
 
   if (
@@ -827,6 +846,103 @@ export default async function handler(
 
     if (functionName === FUNCTION_NAME.VERIFY_RECAPTCHA) {
       sendJsonResponse(response, HTTP_STATUS.OK, { isVerified: true });
+      return;
+    }
+
+    if (
+      functionName === FUNCTION_NAME.REPLY_TO_SUPPORT_TICKET ||
+      functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET
+    ) {
+      const ticketId = String(payload.ticketId || "");
+      const body = String(payload.body || "").trim();
+      if (!ticketId || !body) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-argument",
+          message: "Invalid reply payload.",
+        });
+        return;
+      }
+      const ticketReference = firestore
+        .collection("supportTickets")
+        .doc(ticketId);
+      const ticketSnapshot = await ticketReference.get();
+      if (!ticketSnapshot.exists) {
+        sendJsonResponse(response, HTTP_STATUS.NOT_FOUND, {
+          error: "not-found",
+          message: "Ticket not found.",
+        });
+        return;
+      }
+      const ticketData = ticketSnapshot.data();
+      if (ticketData?.status === SUPPORT_TICKET_STATUS.RESOLVED) {
+        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
+          error: "failed-precondition",
+          message: "Ticket is already resolved.",
+        });
+        return;
+      }
+      const now = new Date();
+      const newReply = {
+        body,
+        emailFailed: !ticketData?.ownerEmail,
+        id: crypto.randomUUID(),
+        sentAt: Timestamp.fromDate(now),
+        sentByEmail: caller?.claims?.email || "support@platform.com",
+        sentByUserId: caller?.userId || "super-admin",
+      };
+      const nextStatus =
+        ticketData?.status === SUPPORT_TICKET_STATUS.OPEN
+          ? SUPPORT_TICKET_STATUS.IN_PROGRESS
+          : ticketData?.status || SUPPORT_TICKET_STATUS.IN_PROGRESS;
+      const existingReplies = Array.isArray(ticketData?.replies)
+        ? ticketData.replies
+        : [];
+      await ticketReference.update({
+        replies: [...existingReplies, newReply],
+        status: nextStatus,
+        updatedAt: Timestamp.fromDate(now),
+      });
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        reply: {
+          ...newReply,
+          sentAt: now.toISOString(),
+        },
+        status: nextStatus,
+      });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.RESOLVE_SUPPORT_TICKET) {
+      const ticketId = String(payload.ticketId || "");
+      if (!ticketId) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-argument",
+          message: "Invalid ticketId.",
+        });
+        return;
+      }
+      const ticketReference = firestore
+        .collection("supportTickets")
+        .doc(ticketId);
+      const ticketSnapshot = await ticketReference.get();
+      if (!ticketSnapshot.exists) {
+        sendJsonResponse(response, HTTP_STATUS.NOT_FOUND, {
+          error: "not-found",
+          message: "Ticket not found.",
+        });
+        return;
+      }
+      const now = new Date();
+      await ticketReference.update({
+        resolvedAt: Timestamp.fromDate(now),
+        status: SUPPORT_TICKET_STATUS.RESOLVED,
+        updatedAt: Timestamp.fromDate(now),
+      });
+      sendJsonResponse(response, HTTP_STATUS.OK, {
+        resolvedAt: now.toISOString(),
+        status: SUPPORT_TICKET_STATUS.RESOLVED,
+        ticketId,
+      });
       return;
     }
 

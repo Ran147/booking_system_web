@@ -101,6 +101,14 @@
         { "fieldPath": "searchName", "order": "ASCENDING" }
       ],
       "queryScope": "COLLECTION"
+    },
+    {
+      "collectionGroup": "supportTickets",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ],
+      "queryScope": "COLLECTION"
     }
   ],
   "fieldOverrides": []

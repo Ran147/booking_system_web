@@ -10,6 +10,7 @@ export type ModalMaxWidth =
 export interface ModalProps {
   readonly children: ReactNode;
   readonly className?: string;
+  readonly id?: string;
   readonly isOpen: boolean;
   readonly maxWidth?: ModalMaxWidth;
   readonly onClose: () => void;
