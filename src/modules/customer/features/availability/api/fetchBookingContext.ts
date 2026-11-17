@@ -1,3 +1,4 @@
+import { FirebaseError } from "firebase/app";
 import {
   collection,
   doc,
@@ -6,9 +7,14 @@ import {
   limit,
   query,
   where,
+  type DocumentSnapshot,
 } from "firebase/firestore";
 import { z } from "zod";
-import { FIRESTORE_COLLECTION, FIRESTORE_OPERATOR } from "@/constants";
+import {
+  FIREBASE_ERROR_CODE,
+  FIRESTORE_COLLECTION,
+  FIRESTORE_OPERATOR,
+} from "@/constants";
 import { firestore } from "@/services";
 import type { Nullable } from "@/types";
 import type { BookingContext } from "../models/availability.model";
@@ -34,6 +40,38 @@ const bookingServiceSchema = z.object({
 });
 
 /**
+ * The service of the booking flow, or `null` when it cannot be booked. The
+ * rules let a customer read only active services, so a deactivated or
+ * missing one is denied: that denial means "service unavailable"
+ * (AC-KAN-140-03). Any other failure, such as no network, still throws.
+ */
+export const readBookableService = async (
+  businessId: string,
+  serviceId: string,
+): Promise<Nullable<DocumentSnapshot>> => {
+  try {
+    const serviceDocument = await getDoc(
+      doc(
+        firestore,
+        FIRESTORE_COLLECTION.BUSINESSES,
+        businessId,
+        FIRESTORE_COLLECTION.SERVICES,
+        serviceId,
+      ),
+    );
+    return serviceDocument.exists() ? serviceDocument : null;
+  } catch (error) {
+    if (
+      error instanceof FirebaseError &&
+      error.code === FIREBASE_ERROR_CODE.PERMISSION_DENIED
+    ) {
+      return null;
+    }
+    throw error;
+  }
+};
+
+/**
  * The business (by its public slug) and the active service of the booking
  * flow. `null` when the business or the service cannot be booked.
  */
@@ -51,16 +89,11 @@ export const fetchBookingContext = async (
   const [businessDocument] = businessSnapshot.docs;
   if (!businessDocument) return null;
 
-  const serviceDocument = await getDoc(
-    doc(
-      firestore,
-      FIRESTORE_COLLECTION.BUSINESSES,
-      businessDocument.id,
-      FIRESTORE_COLLECTION.SERVICES,
-      serviceId,
-    ),
+  const serviceDocument = await readBookableService(
+    businessDocument.id,
+    serviceId,
   );
-  if (!serviceDocument.exists()) return null;
+  if (!serviceDocument) return null;
 
   const business = bookingBusinessSchema.parse(businessDocument.data());
   const service = bookingServiceSchema.parse(serviceDocument.data());
