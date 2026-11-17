@@ -76,6 +76,7 @@ src/modules/customer/features/
 | P5-6 | **Horas en la zona del negocio** con `Intl.DateTimeFormat` (`timeZone` de la respuesta) y la zona indicada arriba de la lista (AC-KAN-140-06). Nunca se muestra quién atendería (AC-KAN-142-02). |
 | P5-7 | **El horario elegido vive en el estado de la pantalla.** Cambiar de fecha o de servicio lo borra (AC-KAN-135-10, 142-05). Si la sesión se cierra, el `RequireRole` saca al cliente y no se guarda nada (AC-KAN-140-10). |
 | P5-8 | **Lectura del negocio y del servicio** con el SDK web, que las reglas ya permiten: el negocio por `slug` y el servicio activo. Las reglas niegan a un cliente un servicio desactivado o inexistente: esa denegación se trata como `service_unavailable`, no como error con reintento (revisión de Copilot, 2026-11-16). Solo se leen `timeZone`, `businessHours`, `name`, `durationMinutes`, `priceInCents`, `status` y `currency`. |
+| P5-9 | **Contratos de props en `models/`** (skill `component-architecture` §4): `DateStripProps` y `SlotListProps` viven documentadas en `availability.model.ts` y se exportan por el `index.ts` de la feature. Los componentes solo las importan (ajuste del 2026-11-17, sin cambio de comportamiento). |
 
 ### 5. Claves i18n nuevas (es, en)
 

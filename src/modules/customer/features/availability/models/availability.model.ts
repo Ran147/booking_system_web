@@ -53,6 +53,44 @@ export interface WeekDay {
   readonly isToday: boolean;
 }
 
+/**
+ * Props of DateStrip: the week strip where the customer picks a day.
+ * @property canGoToNextWeek - The next week still has bookable days (AC-KAN-140-05).
+ * @property canGoToPreviousWeek - The previous week is not wholly in the past (AC-KAN-140-04).
+ * @property language - Language used to format the day labels.
+ * @property onNextWeek - Moves the strip one week forward.
+ * @property onPreviousWeek - Moves the strip one week back.
+ * @property onSelectDate - Selects a day (YYYY-MM-DD).
+ * @property selectedDate - The selected day, or `null` before one is chosen.
+ * @property weekDays - The 7 days shown, with their disabled and today flags.
+ */
+export interface DateStripProps {
+  readonly canGoToNextWeek: boolean;
+  readonly canGoToPreviousWeek: boolean;
+  readonly language: string;
+  readonly onNextWeek: () => void;
+  readonly onPreviousWeek: () => void;
+  readonly onSelectDate: (date: string) => void;
+  readonly selectedDate: Nullable<string>;
+  readonly weekDays: readonly WeekDay[];
+}
+
+/**
+ * Props of SlotList: the free slots of the selected day as a single choice.
+ * @property language - Language used to format the times.
+ * @property onSelectSlot - Selects a slot by its start instant.
+ * @property selectedSlotStartsAt - Start instant of the chosen slot; empty when none.
+ * @property slots - Free slots of the day, as the server sends them.
+ * @property timeZone - IANA time zone of the business; times are shown in it (AC-KAN-140-06).
+ */
+export interface SlotListProps {
+  readonly language: string;
+  readonly onSelectSlot: (startsAt: string) => void;
+  readonly selectedSlotStartsAt: string;
+  readonly slots: readonly AvailableSlot[];
+  readonly timeZone: string;
+}
+
 /** customer namespace keys an availability error can show. */
 export type AvailabilityMessageKey =
   | "availability.errors.businessUnavailable"
