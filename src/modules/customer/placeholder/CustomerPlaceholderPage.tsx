@@ -18,6 +18,7 @@ export const CustomerPlaceholderPage = (): ReactElement => {
   const { businessSlug = STRING.EMPTY } = useParams();
 
   const myBookingsPath = `/${businessSlug}/${ROUTE_PATH.CUSTOMER.MY_BOOKINGS}`;
+  const bookPath = `/${businessSlug}/${ROUTE_PATH.CUSTOMER.BOOK}`;
 
   return (
     <PageTemplate
@@ -25,6 +26,24 @@ export const CustomerPlaceholderPage = (): ReactElement => {
       title={t("placeholder.title")}
     >
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <Card className="border-border shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-foreground">
+              {t("placeholder.bookCard.title")}
+            </CardTitle>
+            <CardDescription>
+              {t("placeholder.bookCard.description")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AppLink
+              className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline text-sm"
+              to={bookPath}
+            >
+              <span>{t("placeholder.bookCard.action")}</span>
+            </AppLink>
+          </CardContent>
+        </Card>
         <Card className="border-border shadow-sm">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-foreground">

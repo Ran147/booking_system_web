@@ -1,4 +1,27 @@
 {
+  "availability": {
+    "backToServices": "Choose another service",
+    "continueAction": "Continue",
+    "dateGroupLabel": "Days of the week",
+    "dayUnavailable": "No bookings on this day",
+    "errors": {
+      "businessUnavailable": "This business is not taking bookings right now.",
+      "collaboratorUnavailable": "The person you chose is no longer available for this service. Choose again.",
+      "serviceUnavailable": "This service is no longer available."
+    },
+    "nextWeek": "Next week",
+    "previousWeek": "Previous week",
+    "retryAction": "Try again",
+    "slots": {
+      "emptyDay": "There are no free times on this day. Pick another date.",
+      "groupLabel": "Free times",
+      "noCollaborator": "Nobody can serve this service right now.",
+      "notConfigured": "This business has not set its opening hours yet."
+    },
+    "subtitle": "{{service}}: pick a day and a free time.",
+    "timeZoneNote": "Times are shown in the business time zone ({{timeZone}}).",
+    "title": "Pick a date and time"
+  },
   "layout": {
     "businessNotFound": "We could not find the requested business.",
     "footer": {
@@ -90,7 +113,25 @@
     }
   },
   "placeholder": {
+    "bookCard": {
+      "action": "Book now",
+      "description": "Choose a service, a day and a free time.",
+      "title": "Book an appointment"
+    },
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
+  },
+  "serviceSelection": {
+    "continueAction": "Continue",
+    "errors": {
+      "serviceRequired": "Choose a service to continue."
+    },
+    "groupLabel": "Services",
+    "list": {
+      "empty": "This business has no services to book yet."
+    },
+    "serviceDetail": "{{minutes}} min · {{price}}",
+    "subtitle": "Choose the service you want to book.",
+    "title": "Book an appointment"
   }
 }
