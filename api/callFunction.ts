@@ -1238,7 +1238,7 @@ export default async function handler(
               view_reports: true,
             },
             phone,
-            service_ids: ["service-default"],
+            serviceIds: ["service-default"],
             status: "active",
             uid: userId,
           });

@@ -218,6 +218,23 @@ describe("getAvailability", () => {
     expect(otherCustomerStartTimes).toContain(slotAt("10:00").toISOString());
   });
 
+  it("Q10: a collaborator assigned with the legacy service_ids field still serves the service", async () => {
+    // Accounts created before Q10 store the owner's services as service_ids.
+    await collaboratorsCollection()
+      .doc("owner")
+      .set({
+        fullName: "owner",
+        service_ids: [SERVICE_ID],
+        status: COLLABORATOR_STATUS.ACTIVE,
+      });
+    await addBooking(slotAt("10:00"), "owner");
+
+    expect(await readStartTimes()).not.toContain(slotAt("10:00").toISOString());
+    expect(await readStartTimes({ collaboratorId: "owner" })).toContain(
+      slotAt("09:00").toISOString(),
+    );
+  });
+
   it("AC-KAN-142-01: with a chosen collaborator only their time counts", async () => {
     await addCollaborator("collaborator-a");
     await addCollaborator("collaborator-b");
