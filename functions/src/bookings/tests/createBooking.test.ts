@@ -329,4 +329,49 @@ describe("createBooking", () => {
 
     expect(bookingDoc.data()?.customerUserId).toBe(CALLER_AUTH.uid);
   });
+
+  const bookFreeSlot = (): ReturnType<typeof callCreateBooking> =>
+    callCreateBooking(
+      buildAuthenticatedCallableRequest(
+        {
+          businessId: TEST_BUSINESS_ID,
+          serviceId: TEST_SERVICE_ID,
+          startsAt: FREE_SLOT_START,
+        },
+        CALLER_AUTH,
+      ),
+    );
+
+  it("KAN-70: a business that confirms by hand gets the booking as pending", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .update({ bookingConfirmationMode: "manual" });
+
+    const response = await bookFreeSlot();
+
+    expect(response.status).toBe("pending");
+  });
+
+  it("KAN-70: with automatic confirmation the booking is confirmed", async () => {
+    const response = await bookFreeSlot();
+
+    expect(response.status).toBe("confirmed");
+  });
+
+  it("KAN-148: a customer the business blocked cannot book there", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.CUSTOMERS)
+      .doc(CALLER_AUTH.uid)
+      .set({ status: "blocked" });
+
+    const error = await captureHttpsError(bookFreeSlot());
+
+    expect(error.code).toBe("failed-precondition");
+    expect(error.message).toBe(
+      "customer:bookingCheckout.confirm.customerBlockedError",
+    );
+  });
 });

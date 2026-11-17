@@ -140,7 +140,7 @@ const writeSignUpDocuments = async (
       COLLABORATOR_PERMISSION.VIEW_REPORTS,
     ],
     phone: signUpPayload.phone === STRING.EMPTY ? null : signUpPayload.phone,
-    service_ids: [],
+    serviceIds: [],
     status: COLLABORATOR_STATUS.ACTIVE,
     uid: signUpAccount.userId,
   });

@@ -17,7 +17,9 @@ export interface AvailabilityResources {
  *   one resource (`id: null`), busy with the bookings that have no
  *   collaborator;
  * - otherwise each active assigned collaborator is a resource, busy with
- *   their own bookings and blocks;
+ *   their own bookings and blocks, and with the bookings staff created
+ *   without a collaborator: nobody knows who serves those, so they keep
+ *   everyone busy (as the staff booking check does);
  * - with a chosen collaborator only that one counts (AC-KAN-142-01); if they
  *   are not an active assigned collaborator there is no resource
  *   (AC-KAN-144-09).
@@ -60,7 +62,9 @@ export const buildAvailabilityResources = (
           (block) => block.collaboratorId === collaborator.id,
         ),
         bookings: bookings.filter(
-          (booking) => booking.collaboratorId === collaborator.id,
+          (booking) =>
+            !booking.collaboratorId ||
+            booking.collaboratorId === collaborator.id,
         ),
         id: collaborator.id,
       })),

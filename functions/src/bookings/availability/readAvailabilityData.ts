@@ -34,25 +34,35 @@ export const readAvailabilityData = async ({
   serviceId,
   window,
 }: ReadAvailabilityDataOptions): Promise<AvailabilityData> => {
-  const [collaboratorsSnapshot, bookingsSnapshot, blocksSnapshot] =
-    await Promise.all([
-      readQuery(
-        businessReference
-          .collection(FIRESTORE_COLLECTION.COLLABORATORS)
-          .where("serviceIds", "array-contains", serviceId),
-      ),
-      readQuery(
-        businessReference
-          .collection(FIRESTORE_COLLECTION.BOOKINGS)
-          .where("startsAt", ">=", window.from)
-          .where("startsAt", "<", window.to),
-      ),
-      readQuery(
-        businessReference
-          .collection(FIRESTORE_COLLECTION.SCHEDULE_BLOCKS)
-          .where("endsAt", ">", window.from),
-      ),
-    ]);
+  const collaboratorsCollection = businessReference.collection(
+    FIRESTORE_COLLECTION.COLLABORATORS,
+  );
+  const [
+    collaboratorsSnapshot,
+    legacyCollaboratorsSnapshot,
+    bookingsSnapshot,
+    blocksSnapshot,
+  ] = await Promise.all([
+    readQuery(
+      collaboratorsCollection.where("serviceIds", "array-contains", serviceId),
+    ),
+    // Q10: accounts created before the rename store the assignment as
+    // service_ids. Read both until the data is migrated (Q10 step 3).
+    readQuery(
+      collaboratorsCollection.where("service_ids", "array-contains", serviceId),
+    ),
+    readQuery(
+      businessReference
+        .collection(FIRESTORE_COLLECTION.BOOKINGS)
+        .where("startsAt", ">=", window.from)
+        .where("startsAt", "<", window.to),
+    ),
+    readQuery(
+      businessReference
+        .collection(FIRESTORE_COLLECTION.SCHEDULE_BLOCKS)
+        .where("endsAt", ">", window.from),
+    ),
+  ]);
 
   const blocks = blocksSnapshot.docs
     .map((blockDocument) => ({
@@ -62,8 +72,20 @@ export const readAvailabilityData = async ({
     }))
     .filter((block) => block.startsAt.getTime() < window.to.getTime());
 
+  // A collaborator with both fields appears in both queries: keep one.
+  const assignedCollaborators = [
+    ...new Map(
+      [...collaboratorsSnapshot.docs, ...legacyCollaboratorsSnapshot.docs].map(
+        (collaboratorDocument) => [
+          collaboratorDocument.id,
+          collaboratorDocument,
+        ],
+      ),
+    ).values(),
+  ];
+
   return {
-    activeCollaborators: collaboratorsSnapshot.docs
+    activeCollaborators: assignedCollaborators
       .filter(
         (collaboratorDocument) =>
           collaboratorDocument.get("status") === COLLABORATOR_STATUS.ACTIVE,
@@ -80,6 +102,6 @@ export const readAvailabilityData = async ({
       startsAt: readFirestoreDate(bookingDocument.get("startsAt")),
       status: bookingDocument.get("status"),
     })),
-    hasAssignedCollaborators: !collaboratorsSnapshot.empty,
+    hasAssignedCollaborators: assignedCollaborators.length > 0,
   };
 };
