@@ -34,6 +34,22 @@ const MS_PER_DAY = 86_400_000;
 export const countDaysBetween = (from: string, to: string): number =>
   Math.round((parseDate(to) - parseDate(from)) / MS_PER_DAY);
 
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
+
+/**
+ * True when `date` is a real calendar day (YYYY-MM-DD, so not 2026-02-30)
+ * from `firstDay` to `lastDay`, both included.
+ */
+export const isDateInRange = (
+  date: string,
+  firstDay: string,
+  lastDay: string,
+): boolean =>
+  ISO_DATE_PATTERN.test(date) &&
+  addCalendarDays(date, 0) === date &&
+  countDaysBetween(firstDay, date) >= 0 &&
+  countDaysBetween(date, lastDay) >= 0;
+
 /** The weekday key of businessHours (`monday` …) of a calendar day. */
 export const readWeekday = (date: string): string =>
   WEEKDAY_BY_UTC_DAY[new Date(parseDate(date)).getUTCDay()] ?? "";

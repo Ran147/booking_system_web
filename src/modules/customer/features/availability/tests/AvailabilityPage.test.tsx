@@ -110,6 +110,25 @@ describe("AvailabilityPage (KAN-140 to KAN-143)", () => {
     );
   });
 
+  it.each([
+    ["a date that does not exist", "not-a-date"],
+    ["an expired bookmarked date", addCalendarDays(TODAY, -1)],
+  ])(
+    "AC-KAN-140-04: %s in the link is ignored and the first day with free slots is shown",
+    async (_case, dateParam) => {
+      slotsByDate({ [TOMORROW]: [SLOT] });
+      const page = createAvailabilityPage();
+
+      renderPage(`${PAGE_PATH}?date=${dateParam}`);
+
+      expect(await page.findSlotLabels()).toEqual([slotLabel(SLOT_START)]);
+      expect(callFunctionMock).not.toHaveBeenCalledWith(
+        "getAvailability",
+        expect.objectContaining({ date: dateParam }),
+      );
+    },
+  );
+
   it("AC-KAN-140-06: says the times are in the business time zone", async () => {
     slotsByDate({ [TODAY]: [SLOT] });
 
