@@ -28,14 +28,6 @@ export const authRoutes: RouteObject[] = [
         },
         path: ROUTE_PATH.AUTH.PASSWORD_RESET,
       },
-      {
-        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-          const { AcceptInvitationPage } =
-            await import("./AcceptInvitationPage");
-          return { Component: AcceptInvitationPage };
-        },
-        path: ROUTE_PATH.AUTH.ACCEPT_INVITATION,
-      },
     ],
     element: <GuestOnly />,
   },
