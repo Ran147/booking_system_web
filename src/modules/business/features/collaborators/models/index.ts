@@ -6,6 +6,7 @@ export type {
   ActiveServiceOption,
   CollaboratorDetailData,
   CollaboratorFormViewModel,
+  CollaboratorInvitationLinkDialogState,
   CollaboratorLimitDialogState,
   CollaboratorListFilters,
   CollaboratorListItem,
