@@ -7,6 +7,7 @@ import {
   useBookingHistoryQuery,
   useBookingListQuery,
   useBusinessHoursQuery,
+  useCollaboratorPermissionsQuery,
   useScheduleBlocksQuery,
 } from "../api";
 import { useActiveServicesQuery } from "../api/useActiveServicesQuery";
@@ -36,6 +37,8 @@ export interface ScheduleViewModelResult {
   readonly bookingList: readonly Booking[];
   readonly businessHours: NullableUndefined<BusinessHours>;
   readonly calendarViewMode: ScheduleViewMode;
+  readonly canManageBookings: boolean;
+  readonly canManageScheduleBlocks: boolean;
   readonly handleClearFilters: () => void;
   readonly handleCloseCancel: () => void;
   readonly handleCloseDetail: () => void;
@@ -79,6 +82,8 @@ export interface ScheduleViewModelResult {
 
 export const useScheduleViewModel = (): ScheduleViewModelResult => {
   const { businessId } = useCurrentBusiness();
+  const { canManageBookings, canManageScheduleBlocks } =
+    useCollaboratorPermissionsQuery();
 
   const [activeTab, setActiveTab] = useState<ScheduleTab>(SCHEDULE_TAB.AGENDA);
   const [selectedBooking, setSelectedBooking] =
@@ -237,6 +242,8 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     bookingList: bookingListQuery.data?.bookings ?? [],
     businessHours: businessHoursQuery.data?.businessHours,
     calendarViewMode,
+    canManageBookings,
+    canManageScheduleBlocks,
     handleClearFilters,
     handleCloseCancel,
     handleCloseDetail,

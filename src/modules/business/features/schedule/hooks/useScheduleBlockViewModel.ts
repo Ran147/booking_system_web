@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { I18N_NAMESPACE } from "@/constants";
+import { I18N_NAMESPACE, STRING } from "@/constants";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
 import { parseZonedDateTime, zonedDayBounds } from "@/utils/date";
 import { useScheduleBlockMutations, useScheduleBlocksQuery } from "../api";
-import { SCHEDULE_CONSTANTS } from "../constants";
+import { SCHEDULE_BLOCK_DEFAULT_TIME, SCHEDULE_CONSTANTS } from "../constants";
 import type { ScheduleBlock, ScheduleBlockFormData } from "../models";
 
 export interface ScheduleBlockViewModelResult {
@@ -28,17 +28,30 @@ export interface ScheduleBlockViewModelResult {
 }
 
 const getTodayIso = (): string =>
-  new Intl.DateTimeFormat("en-CA", {
+  new Intl.DateTimeFormat(SCHEDULE_CONSTANTS.ISO_DATE_LOCALE, {
     day: "2-digit",
     month: "2-digit",
     timeZone: SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
     year: "numeric",
   }).format(new Date());
 
+const createInitialBlockFormData = (): ScheduleBlockFormData => ({
+  collaboratorId: null,
+  endDate: getTodayIso(),
+  endTime: SCHEDULE_BLOCK_DEFAULT_TIME.DEFAULT_END_TIME,
+  isFullDay: false,
+  reason: STRING.EMPTY,
+  startDate: getTodayIso(),
+  startTime: SCHEDULE_BLOCK_DEFAULT_TIME.DEFAULT_START_TIME,
+});
+
 export const useScheduleBlockViewModel = (
   onBlockCreated?: (startsAt: Date) => void,
 ): ScheduleBlockViewModelResult => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+  const { t } = useTranslation([
+    I18N_NAMESPACE.BUSINESS,
+    I18N_NAMESPACE.COMMON,
+  ]);
   const { businessId } = useCurrentBusiness();
 
   const blocksQuery = useScheduleBlocksQuery(businessId);
@@ -46,28 +59,14 @@ export const useScheduleBlockViewModel = (
     useScheduleBlockMutations();
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [formData, setFormData] = useState<ScheduleBlockFormData>({
-    collaboratorId: null,
-    endDate: getTodayIso(),
-    endTime: "13:00",
-    isFullDay: false,
-    reason: "",
-    startDate: getTodayIso(),
-    startTime: "12:00",
-  });
+  const [formData, setFormData] = useState<ScheduleBlockFormData>(
+    createInitialBlockFormData,
+  );
   const [errorMessage, setErrorMessage] = useState<Nullable<string>>(null);
   const [showOverlapConfirm, setShowOverlapConfirm] = useState<boolean>(false);
 
   const openDialog = (): void => {
-    setFormData({
-      collaboratorId: null,
-      endDate: getTodayIso(),
-      endTime: "13:00",
-      isFullDay: false,
-      reason: "",
-      startDate: getTodayIso(),
-      startTime: "12:00",
-    });
+    setFormData(createInitialBlockFormData());
     setErrorMessage(null);
     setShowOverlapConfirm(false);
     setIsDialogOpen(true);
@@ -79,9 +78,9 @@ export const useScheduleBlockViewModel = (
     setErrorMessage(null);
   };
 
-  const updateFormField = <K extends keyof ScheduleBlockFormData>(
-    field: K,
-    value: ScheduleBlockFormData[K],
+  const updateFormField = <Key extends keyof ScheduleBlockFormData>(
+    field: Key,
+    value: ScheduleBlockFormData[Key],
   ): void => {
     setFormData((previous) => ({ ...previous, [field]: value }));
   };
@@ -111,7 +110,6 @@ export const useScheduleBlockViewModel = (
       }
     }
 
-    // Determine start and end Date objects
     let startsAt: Date;
     let endsAt: Date;
 
@@ -129,12 +127,12 @@ export const useScheduleBlockViewModel = (
     } else {
       startsAt = parseZonedDateTime(
         formData.startDate,
-        formData.startTime || "09:00",
+        formData.startTime || SCHEDULE_BLOCK_DEFAULT_TIME.FALLBACK_START_TIME,
         SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
       );
       endsAt = parseZonedDateTime(
         formData.endDate,
-        formData.endTime || "10:00",
+        formData.endTime || SCHEDULE_BLOCK_DEFAULT_TIME.FALLBACK_END_TIME,
         SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
       );
     }
@@ -149,16 +147,11 @@ export const useScheduleBlockViewModel = (
         startsAt,
       });
 
-      if (onBlockCreated) {
-        onBlockCreated(startsAt);
-      }
-
+      onBlockCreated?.(startsAt);
       closeDialog();
       return true;
     } catch {
-      setErrorMessage(
-        t("errors.common.network", { defaultValue: "Error de red" }),
-      );
+      setErrorMessage(t("common:errors.network"));
       return false;
     }
   };
@@ -170,7 +163,7 @@ export const useScheduleBlockViewModel = (
         businessId,
       });
     } catch {
-      // Invalidate handles refresh
+      // Query invalidation handles refresh on error
     }
   };
 

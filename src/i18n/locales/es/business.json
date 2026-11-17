@@ -46,8 +46,162 @@
     "suspended": "Suspendido"
   },
   "collaborators": {
+    "create": {
+      "emailInUse": "Ya existe una cuenta o un colaborador en este negocio con ese correo electrónico.",
+      "noActiveServices": "Debes tener al menos un servicio activo antes de registrar un colaborador.",
+      "noActiveServicesAction": "Ir a servicios",
+      "submitAction": "Registrar colaborador",
+      "submittingLabel": "Registrando…",
+      "success": "El colaborador fue registrado. Comparte el enlace de invitación para que active su cuenta.",
+      "title": "Registrar colaborador"
+    },
+    "deactivate": {
+      "action": "Desactivar",
+      "bookingsLoadWarning": "No pudimos verificar si {{name}} tiene reservas próximas activas antes de desactivar.",
+      "cancelAction": "Cancelar",
+      "confirmAction": "Confirmar desactivación",
+      "confirmLabel": "Si desactivas a {{name}}, perderá el acceso al portal del negocio de inmediato.",
+      "confirmWithBookings": "{{name}} tiene {{count}} reserva(s) próxima(s) que se conservarán en la agenda para que las reasignes.",
+      "confirmingLabel": "Desactivando…",
+      "disabledActionHint": "Solo los colaboradores activos pueden desactivarse.",
+      "success": "Colaborador desactivado correctamente.",
+      "title": "Desactivar colaborador"
+    },
     "edit": {
-      "serviceHasBookingsWarning": "Este colaborador tiene {{count}} reserva(s) futura(s) de este servicio que se mantendrán asignadas."
+      "bookingsLoadWarning": "No pudimos verificar cuántas reservas futuras están asociadas a los servicios actuales.",
+      "concurrentError": "Otro usuario modificó este colaborador mientras lo editabas. Recarga los datos e inténtalo de nuevo.",
+      "emailLockedHint": "El correo electrónico no puede modificarse después de que el colaborador acepta su invitación.",
+      "serviceHasBookingsWarning": "Este colaborador tiene {{count}} reserva(s) futura(s) de este servicio que se mantendrán asignadas.",
+      "submitAction": "Guardar cambios",
+      "submittingLabel": "Guardando…",
+      "success": "Los datos del colaborador se actualizaron correctamente.",
+      "title": "Editar colaborador"
+    },
+    "form": {
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "colaborador@tunegocio.com",
+      "fullNameLabel": "Nombre completo",
+      "fullNamePlaceholder": "Ej. Carlos Méndez",
+      "permissionsSectionTitle": "Permisos iniciales",
+      "phoneLabel": "Teléfono",
+      "phonePlaceholder": "+506 8888 9999",
+      "servicesRequiredHint": "Selecciona al menos un servicio activo.",
+      "servicesSectionTitle": "Servicios asignados",
+      "specialtyLabel": "Especialidad",
+      "specialtyPlaceholder": "Ej. Barbería clásica",
+      "validation": {
+        "serviceRequired": "Debes asignar al menos un servicio activo."
+      }
+    },
+    "invitationLink": {
+      "closeAction": "Cerrar",
+      "copiedSuccess": "Enlace de invitación copiado al portapapeles.",
+      "copyAction": "Copiar enlace",
+      "copyError": "No se pudo copiar automáticamente. Copia el enlace manualmente.",
+      "description": "Comparte este enlace con {{name}} para que defina su contraseña y active su cuenta. Expira en 7 días.",
+      "linkLabel": "Enlace de invitación",
+      "title": "Enlace de activación"
+    },
+    "limit": {
+      "closeAction": "Cerrar",
+      "countSummary": "{{used}} de {{limit}} colaboradores",
+      "noHigherPlanNotice": "Tu plan actual ya tiene el máximo disponible de colaboradores en el catálogo.",
+      "reached": "Alcanzaste el límite de {{limit}} colaborador(es) permitido(s) por tu plan actual.",
+      "title": "Límite de colaboradores alcanzado",
+      "upgradeAction": "Mejorar plan"
+    },
+    "list": {
+      "actionsLabel": "Acciones de {{name}}",
+      "addAction": "Agregar colaborador",
+      "clearFiltersAction": "Limpiar filtros",
+      "description": "Administra tu equipo de colaboradores, sus servicios asignados y permisos de acceso.",
+      "empty": "Aún no tienes colaboradores registrados en tu negocio.",
+      "emptyFiltered": "No encontramos colaboradores que coincidan con tu búsqueda o filtro.",
+      "loadError": "No pudimos cargar la lista de colaboradores.",
+      "readOnly": "Tu negocio está en modo de solo lectura. No puedes registrar ni modificar colaboradores.",
+      "retryAction": "Reintentar",
+      "searchLabel": "Buscar colaborador",
+      "searchPlaceholder": "Buscar por nombre o correo…",
+      "statusFilterAll": "Todos los estados",
+      "statusFilterLabel": "Estado",
+      "tableColumns": {
+        "actions": "Acciones",
+        "email": "Correo",
+        "name": "Nombre",
+        "servicesCount": "Servicios",
+        "specialty": "Especialidad",
+        "status": "Estado"
+      },
+      "title": "Equipo"
+    },
+    "permissions": {
+      "action": "Editar permisos",
+      "description": "Configura qué áreas del portal del negocio puede gestionar {{name}}. La gestión del equipo, suscripción y ajustes del negocio permanecen exclusivas del suscriptor.",
+      "items": {
+        "manage_bookings": {
+          "description": "Ver todas las reservas del negocio y crear, confirmar, completar, cancelar o reagendar citas.",
+          "label": "Gestionar reservas"
+        },
+        "manage_customers": {
+          "description": "Consultar la lista de clientes, bloquear o desbloquear clientes y enviar invitaciones.",
+          "label": "Gestionar clientes"
+        },
+        "manage_schedule_blocks": {
+          "description": "Crear y eliminar bloqueos de horario en la agenda.",
+          "label": "Gestionar bloqueos de horario"
+        },
+        "manage_services": {
+          "description": "Crear, editar y asignar servicios y descuentos del catálogo.",
+          "label": "Gestionar servicios"
+        },
+        "view_reports": {
+          "description": "Acceder a las métricas y reportes del negocio.",
+          "label": "Ver reportes"
+        }
+      },
+      "noPermissionsNote": "Sin permisos adicionales, el colaborador solo puede ver sus propias citas asignadas en la agenda.",
+      "saveAction": "Guardar permisos",
+      "savingLabel": "Guardando permisos…",
+      "sectionTitle": "Permisos en el portal del negocio",
+      "success": "Permisos actualizados correctamente.",
+      "title": "Permisos del colaborador"
+    },
+    "profile": {
+      "backAction": "Volver al equipo",
+      "editAction": "Editar datos",
+      "emailLabel": "Correo electrónico",
+      "loadError": "No pudimos cargar la ficha del colaborador.",
+      "neverSent": "Aún no se ha enviado",
+      "noServices": "Sin servicios activos asignados.",
+      "noSpecialty": "Sin especialidad especificada",
+      "notFound": "No encontramos el colaborador solicitado.",
+      "permissionsAction": "Configurar permisos",
+      "phoneLabel": "Teléfono",
+      "retryAction": "Reintentar",
+      "servicesTitle": "Servicios asignados",
+      "specialtyLabel": "Especialidad",
+      "statusLabel": "Estado",
+      "title": "Ficha del colaborador"
+    },
+    "reactivate": {
+      "action": "Reactivar",
+      "cancelAction": "Cancelar",
+      "confirmAction": "Confirmar reactivación",
+      "confirmLabel": "Al reactivar a {{name}}, recuperará su acceso al portal con los mismos permisos y servicios que tenía.",
+      "confirmingLabel": "Reactivando…",
+      "success": "Colaborador reactivado correctamente.",
+      "title": "Reactivar colaborador"
+    },
+    "resend": {
+      "activeAction": "Enviar restablecimiento",
+      "cooldownError": "Debes esperar {{seconds}} s antes de reenviar otro correo.",
+      "cooldownLabel": "Reenviar en {{count}} s",
+      "dispatchError": "No se pudo enviar el correo. Inténtalo de nuevo más tarde.",
+      "invitedAction": "Reenviar invitación",
+      "lastSentLabel": "Último correo enviado",
+      "sendingLabel": "Enviando…",
+      "successInvited": "Se generó un nuevo enlace de invitación. Compártelo con el colaborador para que active su cuenta.",
+      "successReset": "Se envió el correo de restablecimiento de contraseña."
     }
   },
   "errors": {
@@ -238,7 +392,8 @@
       "tablePrice": "Precio",
       "tableService": "Servicio",
       "tableStatus": "Estado",
-      "title": "Próximas reservas"
+      "title": "Próximas reservas",
+      "viewDetail": "Ver detalle"
     },
     "bookings": {
       "cancellationNote": "Nota: {{note}}",

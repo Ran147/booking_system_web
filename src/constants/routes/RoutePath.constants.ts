@@ -11,12 +11,18 @@ export const ROUTE_PATH = {
     SUPPORT_TICKETS: "support-tickets",
   },
   AUTH: {
+    ACCEPT_INVITATION: "/accept-invitation",
     PASSWORD_RECOVERY: "/password-recovery",
     PASSWORD_RESET: "/password-reset",
     SIGN_IN: "/sign-in",
   },
   BUSINESS: {
     BUSINESS_PROFILE: "business-profile",
+    COLLABORATOR_DETAIL: "collaborators/:collaboratorId",
+    COLLABORATOR_EDIT: "collaborators/:collaboratorId/edit",
+    COLLABORATOR_NEW: "collaborators/new",
+    COLLABORATOR_PERMISSIONS: "collaborators/:collaboratorId/permissions",
+    COLLABORATORS: "collaborators",
     CUSTOMERS: "customers",
     REPORTS: "reports",
     ROOT: "/business",
