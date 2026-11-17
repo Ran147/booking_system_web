@@ -1,1 +1,5 @@
-export { CollaboratorListPage } from "./pages";
+export {
+  CollaboratorFormPage,
+  CollaboratorListPage,
+  CollaboratorProfilePage,
+} from "./pages";
