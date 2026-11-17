@@ -47,7 +47,11 @@ export const useBookingCheckoutViewModel = (): BookingCheckoutViewModel => {
 
   const summaryQuery = useCheckoutSummaryQuery(businessSlug, serviceId);
   const createBookingMutation = useCreateBookingMutation();
-  const summary = startsAt ? (summaryQuery.data ?? null) : null;
+  // After a failed reload (for example after service_changed) TanStack Query
+  // keeps the previous data; showing it would let the customer confirm a
+  // summary that is no longer true, so a failed load shows only the error.
+  const summary =
+    startsAt && !summaryQuery.isError ? (summaryQuery.data ?? null) : null;
   const language = i18n.language;
 
   // AC-KAN-146-04: missing, inactive or a bad startsAt read as not found.

@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import { FirebaseError } from "firebase/app";
 import { FunctionsError } from "firebase/functions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type * as FirebaseServices from "@/services/firebase";
@@ -282,5 +283,25 @@ describe("BookingCheckoutPage (KAN-146 to KAN-148)", () => {
       ),
     ).toBeInTheDocument();
     expect(summarySpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("AC-KAN-148-08: if reloading the changed service fails, the old summary cannot be confirmed", async () => {
+    vi.spyOn(fetchCheckoutSummaryModule, "fetchCheckoutSummary")
+      .mockResolvedValueOnce(SUMMARY)
+      .mockRejectedValueOnce(new FirebaseError("unavailable", "offline"));
+    callFunctionMock.mockRejectedValue(reasonError("service_changed"));
+    const page = createBookingCheckoutPage();
+
+    renderPage();
+
+    await page.clickConfirm();
+    expect(
+      await screen.findByText(testI18n.t("errors.network")),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: testI18n.t("customer:bookingCheckout.confirm.action"),
+      }),
+    ).not.toBeInTheDocument();
   });
 });
