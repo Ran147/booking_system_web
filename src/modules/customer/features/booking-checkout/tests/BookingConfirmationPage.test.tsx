@@ -43,6 +43,10 @@ const renderPage = (): ReturnType<typeof renderRoutesWithProviders> =>
         element: <BookingConfirmationPage />,
         path: "/:businessSlug/book/done/:bookingId",
       },
+      {
+        element: <p>booking detail step</p>,
+        path: "/:businessSlug/my-bookings/:bookingId",
+      },
     ],
     {
       initialPath: "/barberia-centro/book/done/booking-9",
@@ -102,6 +106,26 @@ describe("BookingConfirmationPage (KAN-149)", () => {
       }),
     ).toBeInTheDocument();
   });
+
+  it.each([
+    BOOKING_STATUS.CANCELLED,
+    BOOKING_STATUS.COMPLETED,
+    BOOKING_STATUS.NO_SHOW,
+  ])(
+    "AC-KAN-149-04: reloading a booking that is now %s opens its detail instead of saying it is confirmed",
+    async (status) => {
+      mockBooking({ status });
+
+      const { router } = renderPage();
+
+      expect(
+        await screen.findByText("booking detail step"),
+      ).toBeInTheDocument();
+      expect(router.state.location.pathname).toBe(
+        "/barberia-centro/my-bookings/booking-9",
+      );
+    },
+  );
 
   it("AC-KAN-149-05: shows who serves the booking when there is a collaborator", async () => {
     mockBooking({ collaboratorName: "Carlos Colaborador" });

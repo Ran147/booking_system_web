@@ -2,9 +2,19 @@ import { useEffect, useRef } from "react";
 import { useParams } from "react-router";
 import { ROUTE_PATH, STRING } from "@/constants";
 import { BOOKING_STATUS } from "@/domain";
-import { useBookingDetailViewModel } from "@/modules/customer/features/my-bookings";
+import {
+  buildBookingDetailPath,
+  useBookingDetailViewModel,
+} from "@/modules/customer/features/my-bookings";
 import type { NullableRef } from "@/types";
 import type { BookingConfirmationViewModel } from "../models/bookingConfirmation.model";
+
+// Statuses this screen describes; any other one is shown by the booking
+// detail of My bookings.
+const CONFIRMATION_STATUSES: readonly string[] = Object.freeze([
+  BOOKING_STATUS.CONFIRMED,
+  BOOKING_STATUS.PENDING,
+]);
 
 /**
  * The booking just created, read from the server with the detail of My
@@ -12,7 +22,8 @@ import type { BookingConfirmationViewModel } from "../models/bookingConfirmation
  */
 export const useBookingConfirmationViewModel =
   (): BookingConfirmationViewModel => {
-    const { businessSlug = STRING.EMPTY } = useParams();
+    const { bookingId = STRING.EMPTY, businessSlug = STRING.EMPTY } =
+      useParams();
     const detailViewModel = useBookingDetailViewModel();
     const headingReference = useRef<NullableRef<HTMLHeadingElement>>(null);
     const { detail } = detailViewModel;
@@ -22,9 +33,18 @@ export const useBookingConfirmationViewModel =
       if (detail) headingReference.current?.focus();
     }, [detail]);
 
+    // Reloading after the business cancelled the booking, or after it was
+    // served, must not say "confirmed" (AC-KAN-149-04).
+    const isNoLongerOpen = Boolean(
+      detail && !CONFIRMATION_STATUSES.includes(detail.status),
+    );
+
     return {
       ...detailViewModel,
       businessHomePath: `/${businessSlug}`,
+      closedBookingPath: isNoLongerOpen
+        ? buildBookingDetailPath(businessSlug, bookingId)
+        : null,
       headingReference,
       isPending: detailViewModel.detail?.status === BOOKING_STATUS.PENDING,
       myBookingsPath: `/${businessSlug}/${ROUTE_PATH.CUSTOMER.MY_BOOKINGS}`,

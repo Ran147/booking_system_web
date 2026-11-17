@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { Navigate } from "react-router";
 import {
   AppLink,
   Button,
@@ -29,6 +30,9 @@ export const BookingConfirmationPage = (): ReactElement => {
         ) : null}
       </div>
     );
+  }
+  if (viewModel.closedBookingPath) {
+    return <Navigate replace to={viewModel.closedBookingPath} />;
   }
 
   const rows = [
