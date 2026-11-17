@@ -166,9 +166,13 @@ export const handleCreateBooking = async ({
           .limit(1),
       ),
     ]);
-    const existingCustomerData = customerByIdSnapshot.exists
-      ? customerByIdSnapshot.data()
-      : customersByUserId.docs[0]?.data();
+    const existingCustomerDocument = customerByIdSnapshot.exists
+      ? customerByIdSnapshot
+      : customersByUserId.docs[0];
+    const existingCustomerData = existingCustomerDocument?.data();
+    // Booking.customerId is the id of the business's Customer record; a new
+    // record is stored under the uid.
+    const customerRecordId = existingCustomerDocument?.id ?? customerUserId;
 
     // A customer the business blocked cannot book there (KAN-148).
     if (existingCustomerData?.status === CUSTOMER_STATUS.BLOCKED) {
@@ -237,7 +241,7 @@ export const handleCreateBooking = async ({
       // `now`, not a FieldValue sentinel: the dispatcher and the functions
       // package may load different copies of firebase-admin (Q8).
       createdAt: now,
-      customerId: customerUserId,
+      customerId: customerRecordId,
       customerUserId,
       endsAt: endsAtDate,
       id: bookingReference.id,

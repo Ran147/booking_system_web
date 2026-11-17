@@ -526,6 +526,21 @@ describe("createBooking", () => {
     expect(error.details).toEqual({ reason: "customer_blocked" });
   });
 
+  it("AS-4: the booking points to the Customer record the business already has", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.CUSTOMERS)
+      .doc("added-by-the-business")
+      .set({ status: "active", userId: CALLER_AUTH.uid });
+
+    await bookWith({});
+    const booking = (await businessBookings()).docs[0]?.data();
+
+    expect(booking?.customerId).toBe("added-by-the-business");
+    expect(booking?.customerUserId).toBe(CALLER_AUTH.uid);
+  });
+
   it("AS-4: an existing Customer record is left as it is", async () => {
     const customerReference = firestore
       .collection(FIRESTORE_COLLECTION.BUSINESSES)
