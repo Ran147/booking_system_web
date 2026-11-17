@@ -126,13 +126,27 @@ export const handleCreateBooking = async ({
       throw serviceUnavailable("failed-precondition");
     }
 
+    const timeZone: string = businessData?.timeZone ?? "UTC";
+    const serviceSnapshot = buildServiceSnapshot({
+      serviceData: {
+        discounts: serviceData?.discounts,
+        durationMinutes: serviceData?.durationMinutes,
+        name: serviceData?.name,
+        priceInCents: serviceData?.priceInCents,
+      },
+      timeZone,
+    });
+
     // S-2, AC-KAN-148-08: the price or duration the customer saw changed.
+    // The customer sees the final price, with today's discount, so it is
+    // compared with the final price computed now: a discount that ended
+    // after the summary loaded is a change too.
     const hasPriceChanged =
       expectedPriceInCents !== undefined &&
-      Number(serviceData?.priceInCents) !== expectedPriceInCents;
+      serviceSnapshot.priceInCents !== expectedPriceInCents;
     const hasDurationChanged =
       expectedDurationMinutes !== undefined &&
-      Number(serviceData?.durationMinutes) !== expectedDurationMinutes;
+      serviceSnapshot.durationMinutes !== expectedDurationMinutes;
     if (hasPriceChanged || hasDurationChanged) {
       throw new CallableFailure(
         "failed-precondition",
@@ -175,17 +189,6 @@ export const handleCreateBooking = async ({
               .doc(customerUserId),
           )
         ).data() ?? {});
-
-    const timeZone: string = businessData?.timeZone ?? "UTC";
-    const serviceSnapshot = buildServiceSnapshot({
-      serviceData: {
-        discounts: serviceData?.discounts,
-        durationMinutes: serviceData?.durationMinutes,
-        name: serviceData?.name,
-        priceInCents: serviceData?.priceInCents,
-      },
-      timeZone,
-    });
 
     const startsAtDate = new Date(startsAt);
     const durationMilliseconds =

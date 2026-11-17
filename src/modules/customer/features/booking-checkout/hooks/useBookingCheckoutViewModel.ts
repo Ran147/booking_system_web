@@ -98,7 +98,7 @@ export const useBookingCheckoutViewModel = (): BookingCheckoutViewModel => {
         businessId: summary.businessId,
         ...(collaboratorId ? { collaboratorId } : {}),
         expectedDurationMinutes: summary.durationMinutes,
-        expectedPriceInCents: summary.basePriceInCents,
+        expectedPriceInCents: summary.finalPriceInCents,
         requestId,
         serviceId,
         startsAt: startsAt.toISOString(),

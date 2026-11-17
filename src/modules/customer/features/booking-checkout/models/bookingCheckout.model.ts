@@ -14,13 +14,16 @@ export interface BookingPolicy {
 
 /** What the summary shows before confirming (KAN-146, KAN-147). */
 export interface CheckoutSummary {
-  /** Service price without discount; sent back as expectedPriceInCents. */
+  /** Service price without discount; shown crossed out next to a discount. */
   readonly basePriceInCents: number;
   readonly businessId: string;
   readonly businessName: string;
   readonly currency: string;
   readonly durationMinutes: number;
-  /** Price after an active discount (P-2 = A); equal to the base without one. */
+  /**
+   * Price after an active discount (P-2 = A); equal to the base without one.
+   * Sent back as expectedPriceInCents: it is the price the customer saw.
+   */
   readonly finalPriceInCents: number;
   /** The service is served by collaborators (it has collaboratorSelection). */
   readonly hasCollaborators: boolean;

@@ -197,6 +197,23 @@ describe("BookingCheckoutPage (KAN-146 to KAN-148)", () => {
     );
   });
 
+  it("AC-KAN-148-08: with a discount, confirms with the discounted price the customer saw", async () => {
+    mockSummary({ ...SUMMARY, finalPriceInCents: 20_000 });
+    callFunctionMock.mockResolvedValue({
+      bookingId: "booking-9",
+      status: "confirmed",
+    });
+    const page = createBookingCheckoutPage();
+
+    renderPage();
+
+    await page.clickConfirm();
+    expect(callFunctionMock).toHaveBeenCalledWith(
+      "createBooking",
+      expect.objectContaining({ expectedPriceInCents: 20_000 }),
+    );
+  });
+
   it("AC-KAN-148-03: a taken slot offers to pick another time on the same day", async () => {
     mockSummary();
     callFunctionMock.mockRejectedValue(reasonError("slot_taken"));

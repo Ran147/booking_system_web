@@ -448,6 +448,36 @@ describe("createBooking", () => {
     expect(response.bookingId).toBeTruthy();
   });
 
+  it("AC-KAN-148-08: the customer sees the discounted price, so that is the price compared", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.SERVICES)
+      .doc(TEST_SERVICE_ID)
+      .update({
+        discounts: [
+          {
+            endsAt: new Date(Date.now() + MS_PER_DAY).toISOString(),
+            startsAt: new Date(Date.now() - MS_PER_DAY).toISOString(),
+            type: "percentage",
+            value: 20,
+          },
+        ],
+      });
+
+    // The base price no longer matches what the customer saw (16 000).
+    const basePrice = await captureHttpsError(
+      bookWith({ expectedDurationMinutes: 45, expectedPriceInCents: 20_000 }),
+    );
+    const response = await bookWith({
+      expectedDurationMinutes: 45,
+      expectedPriceInCents: 16_000,
+    });
+
+    expect(basePrice.details).toEqual({ reason: "service_changed" });
+    expect(response.serviceSnapshot.priceInCents).toBe(16_000);
+  });
+
   it("AC-KAN-148-09 and AC-KAN-148-11: the first booking creates the Customer record from the account", async () => {
     await firestore
       .collection(FIRESTORE_COLLECTION.USERS)
