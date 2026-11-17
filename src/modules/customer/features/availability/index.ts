@@ -1,3 +1,4 @@
+export { readBookableService } from "./api/fetchBookingContext";
 export { AvailabilityPage } from "./components/AvailabilityPage/AvailabilityPage";
 export { AVAILABILITY_ERROR_ACTION } from "./constants/Availability.constants";
 export { useAvailabilityViewModel } from "./hooks/useAvailabilityViewModel";

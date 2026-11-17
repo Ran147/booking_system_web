@@ -1,15 +1,8 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import { z } from "zod";
 import { FIRESTORE_COLLECTION, FIRESTORE_OPERATOR } from "@/constants";
 import { BUSINESS_STATUS, SERVICE_STATUS } from "@/domain";
+import { readBookableService } from "@/modules/customer/features/availability";
 import { firestore } from "@/services";
 import type { Nullable } from "@/types";
 import type { CheckoutSummary } from "../models/bookingCheckout.model";
@@ -61,16 +54,13 @@ export const fetchCheckoutSummary = async (
   const business = checkoutBusinessSchema.parse(businessDocument.data());
   if (business.status !== BUSINESS_STATUS.ACTIVE) return null;
 
-  const serviceDocument = await getDoc(
-    doc(
-      firestore,
-      FIRESTORE_COLLECTION.BUSINESSES,
-      businessDocument.id,
-      FIRESTORE_COLLECTION.SERVICES,
-      serviceId,
-    ),
+  // A deactivated service is denied to a customer by the rules: that also
+  // means not found, not an error with retry.
+  const serviceDocument = await readBookableService(
+    businessDocument.id,
+    serviceId,
   );
-  if (!serviceDocument.exists()) return null;
+  if (!serviceDocument) return null;
   const service = checkoutServiceSchema.parse(serviceDocument.data());
   if (service.status !== SERVICE_STATUS.ACTIVE) return null;
 
