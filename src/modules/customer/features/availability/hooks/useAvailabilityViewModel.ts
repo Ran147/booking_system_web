@@ -29,6 +29,7 @@ import {
   addCalendarDays,
   countDaysBetween,
   formatZonedDate,
+  isDateInRange,
 } from "../utils/calendarDate";
 import { mapAvailabilityError } from "../utils/mapAvailabilityError";
 
@@ -68,9 +69,17 @@ export const useAvailabilityViewModel = (): AvailabilityViewModel => {
     () => (context && today ? listOpenDays(context.businessHours, today) : []),
     [context, today],
   );
+  // A date in the link that does not exist or is outside the booking window
+  // (an old bookmark) is ignored, as if the link had no date.
+  const bookableDateParam =
+    dateParam &&
+    today &&
+    isDateInRange(dateParam, today, readLastBookableDay(today))
+      ? dateParam
+      : null;
 
   const firstDateQuery = useFirstAvailableDateQuery(
-    context && today && !dateParam
+    context && today && !bookableDateParam
       ? {
           businessId: context.businessId,
           collaboratorId,
@@ -80,7 +89,7 @@ export const useAvailabilityViewModel = (): AvailabilityViewModel => {
         }
       : null,
   );
-  const selectedDate = dateParam ?? firstDateQuery.data ?? null;
+  const selectedDate = bookableDateParam ?? firstDateQuery.data ?? null;
 
   const dayQuery = useAvailabilityQuery(
     context && selectedDate
@@ -177,7 +186,7 @@ export const useAvailabilityViewModel = (): AvailabilityViewModel => {
     isEmptyDay: dayQuery.isSuccess && dayQuery.data.slots.length === 0,
     isLoading:
       contextQuery.isPending ||
-      (!dateParam && firstDateQuery.isPending && Boolean(context)),
+      (!bookableDateParam && firstDateQuery.isPending && Boolean(context)),
     isLoadingSlots: dayQuery.isFetching,
     language: i18n.language,
     selectedDate,
