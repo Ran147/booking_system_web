@@ -46,8 +46,162 @@
     "suspended": "Suspended"
   },
   "collaborators": {
+    "create": {
+      "emailInUse": "An account or collaborator in this business already uses this email address.",
+      "noActiveServices": "You must have at least one active service before registering a collaborator.",
+      "noActiveServicesAction": "Go to services",
+      "submitAction": "Register collaborator",
+      "submittingLabel": "Registering…",
+      "success": "The collaborator was registered. Share the invitation link so they can activate their account.",
+      "title": "Register collaborator"
+    },
+    "deactivate": {
+      "action": "Deactivate",
+      "bookingsLoadWarning": "We could not verify whether {{name}} has upcoming active bookings before deactivating.",
+      "cancelAction": "Cancel",
+      "confirmAction": "Confirm deactivation",
+      "confirmLabel": "If you deactivate {{name}}, they will immediately lose access to the business portal.",
+      "confirmWithBookings": "{{name}} has {{count}} upcoming booking(s) that will remain on the schedule so you can reassign them.",
+      "confirmingLabel": "Deactivating…",
+      "disabledActionHint": "Only active collaborators can be deactivated.",
+      "success": "Collaborator deactivated successfully.",
+      "title": "Deactivate collaborator"
+    },
     "edit": {
-      "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned."
+      "bookingsLoadWarning": "We could not verify how many upcoming bookings are associated with the current services.",
+      "concurrentError": "Another user modified this collaborator while you were editing. Reload the data and try again.",
+      "emailLockedHint": "The email address cannot be modified after the collaborator accepts their invitation.",
+      "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned.",
+      "submitAction": "Save changes",
+      "submittingLabel": "Saving…",
+      "success": "Collaborator details updated successfully.",
+      "title": "Edit collaborator"
+    },
+    "form": {
+      "emailLabel": "Email address",
+      "emailPlaceholder": "collaborator@yourbusiness.com",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "e.g. Carlos Mendez",
+      "permissionsSectionTitle": "Initial permissions",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "+506 8888 9999",
+      "servicesRequiredHint": "Select at least one active service.",
+      "servicesSectionTitle": "Assigned services",
+      "specialtyLabel": "Specialty",
+      "specialtyPlaceholder": "e.g. Classic barbering",
+      "validation": {
+        "serviceRequired": "You must assign at least one active service."
+      }
+    },
+    "invitationLink": {
+      "closeAction": "Close",
+      "copiedSuccess": "Invitation link copied to clipboard.",
+      "copyAction": "Copy link",
+      "copyError": "Could not copy automatically. Please copy the link manually.",
+      "description": "Share this link with {{name}} so they can set their password and activate their account. It expires in 7 days.",
+      "linkLabel": "Invitation link",
+      "title": "Activation link"
+    },
+    "limit": {
+      "closeAction": "Close",
+      "countSummary": "{{used}} of {{limit}} collaborators",
+      "noHigherPlanNotice": "Your current plan already offers the highest collaborator limit in the catalog.",
+      "reached": "You have reached the limit of {{limit}} collaborator(s) allowed on your current plan.",
+      "title": "Collaborator limit reached",
+      "upgradeAction": "Upgrade plan"
+    },
+    "list": {
+      "actionsLabel": "Actions for {{name}}",
+      "addAction": "Add collaborator",
+      "clearFiltersAction": "Clear filters",
+      "description": "Manage your team of collaborators, their assigned services, and portal access permissions.",
+      "empty": "You have not registered any collaborators in your business yet.",
+      "emptyFiltered": "No collaborators match your search or status filter.",
+      "loadError": "Could not load the collaborators list.",
+      "readOnly": "Your business is in read-only mode. You cannot register or modify collaborators.",
+      "retryAction": "Retry",
+      "searchLabel": "Search collaborator",
+      "searchPlaceholder": "Search by name or email…",
+      "statusFilterAll": "All statuses",
+      "statusFilterLabel": "Status",
+      "tableColumns": {
+        "actions": "Actions",
+        "email": "Email",
+        "name": "Name",
+        "servicesCount": "Services",
+        "specialty": "Specialty",
+        "status": "Status"
+      },
+      "title": "Team"
+    },
+    "permissions": {
+      "action": "Edit permissions",
+      "description": "Choose which areas of the business portal {{name}} can manage. Team management, subscription, and business settings always remain exclusive to the subscriber.",
+      "items": {
+        "manage_bookings": {
+          "description": "View all business bookings and create, confirm, complete, cancel, or reschedule bookings.",
+          "label": "Manage bookings"
+        },
+        "manage_customers": {
+          "description": "Browse customers, block or unblock customer accounts, and send invitations.",
+          "label": "Manage customers"
+        },
+        "manage_schedule_blocks": {
+          "description": "Create and delete schedule blocks on the calendar.",
+          "label": "Manage schedule blocks"
+        },
+        "manage_services": {
+          "description": "Create, edit, and assign catalog services and discounts.",
+          "label": "Manage services"
+        },
+        "view_reports": {
+          "description": "Access business analytics and reports.",
+          "label": "View reports"
+        }
+      },
+      "noPermissionsNote": "With no additional permissions enabled, the collaborator can only view bookings assigned to them in the schedule.",
+      "saveAction": "Save permissions",
+      "savingLabel": "Saving permissions…",
+      "sectionTitle": "Business portal permissions",
+      "success": "Permissions updated successfully.",
+      "title": "Collaborator permissions"
+    },
+    "profile": {
+      "backAction": "Back to team",
+      "editAction": "Edit details",
+      "emailLabel": "Email address",
+      "loadError": "Could not load the collaborator profile.",
+      "neverSent": "Not sent yet",
+      "noServices": "No active services assigned.",
+      "noSpecialty": "No specialty specified",
+      "notFound": "We could not find the requested collaborator.",
+      "permissionsAction": "Configure permissions",
+      "phoneLabel": "Phone",
+      "retryAction": "Retry",
+      "servicesTitle": "Assigned services",
+      "specialtyLabel": "Specialty",
+      "statusLabel": "Status",
+      "title": "Collaborator profile"
+    },
+    "reactivate": {
+      "action": "Reactivate",
+      "cancelAction": "Cancel",
+      "confirmAction": "Confirm reactivation",
+      "confirmLabel": "When you reactivate {{name}}, they will regain portal access with their previous permissions and services.",
+      "confirmingLabel": "Reactivating…",
+      "success": "Collaborator reactivated successfully.",
+      "title": "Reactivate collaborator"
+    },
+    "resend": {
+      "activeAction": "Send password reset",
+      "cooldownError": "Please wait {{seconds}} s before sending another email.",
+      "cooldownLabel": "Resend in {{count}} s",
+      "dispatchError": "Could not send the email. Please try again later.",
+      "invitedAction": "Resend invitation",
+      "lastSentLabel": "Last email sent",
+      "sendingLabel": "Sending…",
+      "successInvited": "A new invitation link was generated. Share it with the collaborator so they can activate their account.",
+      "successReset": "Password reset email sent."
     }
   },
   "errors": {
@@ -238,7 +392,8 @@
       "tablePrice": "Price",
       "tableService": "Service",
       "tableStatus": "Status",
-      "title": "Upcoming bookings"
+      "title": "Upcoming bookings",
+      "viewDetail": "View detail"
     },
     "bookings": {
       "cancellationNote": "Note: {{note}}",

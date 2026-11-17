@@ -104,7 +104,6 @@ const handleCompleteSubscriberSignUpFallback = async (
       id: businessId,
       logoUrl: null,
       name: businessName,
-      owner_id: userId,
       ownerUserId: userId,
       plan_id: "plan-pro",
       reviewed_by: null,
@@ -127,13 +126,12 @@ const handleCompleteSubscriberSignUpFallback = async (
   batch.set(
     doc(firestore, "users", userId),
     {
-      business_id: businessId,
       businessId,
       email,
       fullName,
       language: "en",
       phone,
-      role: "business_owner",
+      role: "subscriber",
       theme: "system",
       uid: userId,
     },

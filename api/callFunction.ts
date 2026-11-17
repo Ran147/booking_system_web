@@ -1217,19 +1217,17 @@ export default async function handler(
 
         await auth.setCustomUserClaims(userId, {
           businessId,
-          business_id: businessId,
-          role: "business_owner",
+          role: USER_ROLE.SUBSCRIBER,
         });
 
         await userReference.set(
           {
-            business_id: businessId,
             businessId,
             email,
             fullName,
             language: "en",
             phone,
-            role: "business_owner",
+            role: USER_ROLE.SUBSCRIBER,
             theme: "system",
             uid: userId,
           },
@@ -1257,7 +1255,6 @@ export default async function handler(
           id: businessId,
           logoUrl: null,
           name: businessName,
-          owner_id: userId,
           ownerUserId: userId,
           plan_id: "plan-pro",
           reviewed_by: null,

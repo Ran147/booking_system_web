@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
+import type { RadioGroupOption } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
 import { useCurrentBusiness } from "@/modules/auth";
 import type { Nullable } from "@/types";
@@ -10,9 +11,12 @@ import {
 } from "../api";
 import {
   BOOKING_CONFIRMATION_MODE,
+  BUSINESS_HOURS_DEFAULT_RANGE,
+  BUSINESS_HOURS_FIELD,
   DAYS_OF_WEEK,
   SCHEDULE_CONSTANTS,
   type BookingConfirmationMode,
+  type BusinessHoursField,
   type DayOfWeek,
 } from "../constants";
 import type { BusinessHours, DayTimeRange } from "../models";
@@ -24,11 +28,35 @@ export interface DayHoursState {
 
 export type BusinessHoursFormState = Record<DayOfWeek, DayHoursState>;
 
+export interface BusinessHoursDayRangeRow {
+  readonly closesAt: string;
+  readonly id: string;
+  readonly onClosesAtChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  readonly onOpensAtChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  readonly onRemove: () => void;
+  readonly opensAt: string;
+}
+
+export interface BusinessHoursDayRow {
+  readonly canAddRange: boolean;
+  readonly canRemoveRange: boolean;
+  readonly day: DayOfWeek;
+  readonly isOpen: boolean;
+  readonly onAddRange: () => void;
+  readonly onToggleOpen: () => void;
+  readonly ranges: readonly BusinessHoursDayRangeRow[];
+}
+
 export interface BusinessHoursViewModelResult {
   readonly addRange: (day: DayOfWeek) => void;
   readonly confirmationMode: BookingConfirmationMode;
+  readonly confirmationOptions: readonly RadioGroupOption[];
+  readonly dayRows: readonly BusinessHoursDayRow[];
   readonly errorMessage: Nullable<string>;
   readonly formState: BusinessHoursFormState;
+  readonly handleConfirmationModeChange: (value: string) => void;
+  readonly handleSaveConfirmationMode: () => void;
+  readonly handleSaveHours: () => void;
   readonly isSaving: boolean;
   readonly removeRange: (day: DayOfWeek, index: number) => void;
   readonly saveConfirmationMode: () => Promise<void>;
@@ -40,7 +68,7 @@ export interface BusinessHoursViewModelResult {
   readonly updateRange: (
     day: DayOfWeek,
     index: number,
-    field: keyof DayTimeRange,
+    field: BusinessHoursField,
     value: string,
   ) => void;
 }
@@ -50,20 +78,29 @@ const createInitialDayState = (
 ): DayHoursState => ({
   isOpen: ranges.length > 0,
   ranges:
-    ranges.length > 0 ? [...ranges] : [{ closesAt: "17:00", opensAt: "09:00" }],
+    ranges.length > 0
+      ? [...ranges]
+      : [
+          {
+            closesAt: BUSINESS_HOURS_DEFAULT_RANGE.INITIAL_CLOSES_AT,
+            opensAt: BUSINESS_HOURS_DEFAULT_RANGE.INITIAL_OPENS_AT,
+          },
+        ],
 });
 
 const createInitialFormState = (
   businessHours?: BusinessHours,
-): BusinessHoursFormState => {
-  return DAYS_OF_WEEK.reduce((accumulator, day) => {
+): BusinessHoursFormState =>
+  DAYS_OF_WEEK.reduce((accumulator, day) => {
     accumulator[day] = createInitialDayState(businessHours?.[day]);
     return accumulator;
   }, {} as BusinessHoursFormState);
-};
 
 export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
-  const { t } = useTranslation(I18N_NAMESPACE.BUSINESS);
+  const { t } = useTranslation([
+    I18N_NAMESPACE.BUSINESS,
+    I18N_NAMESPACE.COMMON,
+  ]);
   const { businessId } = useCurrentBusiness();
 
   const hoursQuery = useBusinessHoursQuery(businessId);
@@ -109,7 +146,13 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
       ...currentFormState,
       [day]: {
         ...currentFormState[day],
-        ranges: [...currentRanges, { closesAt: "19:00", opensAt: "14:00" }],
+        ranges: [
+          ...currentRanges,
+          {
+            closesAt: BUSINESS_HOURS_DEFAULT_RANGE.SECOND_SHIFT_CLOSES_AT,
+            opensAt: BUSINESS_HOURS_DEFAULT_RANGE.SECOND_SHIFT_OPENS_AT,
+          },
+        ],
       },
     });
   };
@@ -130,7 +173,7 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
   const updateRange = (
     day: DayOfWeek,
     index: number,
-    field: keyof DayTimeRange,
+    field: BusinessHoursField,
     value: string,
   ): void => {
     const currentFormState = { ...formState };
@@ -155,24 +198,28 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    // Validate ranges
     for (const day of DAYS_OF_WEEK) {
-      const dayData = formState[day];
-      if (!dayData.isOpen) {
+      const daySchedule = formState[day];
+      if (!daySchedule.isOpen) {
         continue;
       }
-      for (const range of dayData.ranges) {
+      for (const range of daySchedule.ranges) {
         if (range.opensAt >= range.closesAt) {
           setErrorMessage(t("schedule.hours.invalidRangeError"));
           return;
         }
       }
       if (
-        dayData.ranges.length === SCHEDULE_CONSTANTS.MAX_HOURS_RANGES_PER_DAY
+        daySchedule.ranges.length ===
+        SCHEDULE_CONSTANTS.MAX_HOURS_RANGES_PER_DAY
       ) {
-        const first = dayData.ranges[0];
-        const second = dayData.ranges[1];
-        if (first && second && first.closesAt > second.opensAt) {
+        const firstRange = daySchedule.ranges[0];
+        const secondRange = daySchedule.ranges[1];
+        if (
+          firstRange &&
+          secondRange &&
+          firstRange.closesAt > secondRange.opensAt
+        ) {
           setErrorMessage(t("schedule.hours.overlappingRangesError"));
           return;
         }
@@ -195,9 +242,7 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
       setSuccessMessage(t("schedule.hours.saveSuccess"));
       setEditedFormState(null);
     } catch {
-      setErrorMessage(
-        t("errors.common.network", { defaultValue: "Error de red" }),
-      );
+      setErrorMessage(t("common:errors.network"));
     }
   };
 
@@ -213,17 +258,86 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
       setSuccessMessage(t("schedule.confirmation.saveSuccess"));
       setEditedConfirmationMode(null);
     } catch {
-      setErrorMessage(
-        t("errors.common.network", { defaultValue: "Error de red" }),
-      );
+      setErrorMessage(t("common:errors.network"));
     }
   };
+
+  const handleSaveHours = (): void => {
+    void saveHours();
+  };
+
+  const handleSaveConfirmationMode = (): void => {
+    void saveConfirmationMode();
+  };
+
+  const handleConfirmationModeChange = (value: string): void => {
+    setEditedConfirmationMode(value as BookingConfirmationMode);
+  };
+
+  const dayRows: readonly BusinessHoursDayRow[] = DAYS_OF_WEEK.map((day) => {
+    const daySchedule = formState[day];
+    return {
+      canAddRange:
+        daySchedule.isOpen &&
+        daySchedule.ranges.length < SCHEDULE_CONSTANTS.MAX_HOURS_RANGES_PER_DAY,
+      canRemoveRange: daySchedule.ranges.length > 1,
+      day,
+      isOpen: daySchedule.isOpen,
+      onAddRange: (): void => addRange(day),
+      onToggleOpen: (): void => toggleDayOpen(day),
+      ranges: daySchedule.ranges.map((range, rangeIndex) => ({
+        closesAt: range.closesAt,
+        id: `${day}-range-${rangeIndex}`,
+        onClosesAtChange: (event: ChangeEvent<HTMLInputElement>): void =>
+          updateRange(
+            day,
+            rangeIndex,
+            BUSINESS_HOURS_FIELD.CLOSES_AT,
+            event.target.value,
+          ),
+        onOpensAtChange: (event: ChangeEvent<HTMLInputElement>): void =>
+          updateRange(
+            day,
+            rangeIndex,
+            BUSINESS_HOURS_FIELD.OPENS_AT,
+            event.target.value,
+          ),
+        onRemove: (): void => removeRange(day, rangeIndex),
+        opensAt: range.opensAt,
+      })),
+    };
+  });
+
+  const confirmationOptions: readonly RadioGroupOption[] = [
+    {
+      description: t("schedule.confirmation.automaticDescription"),
+      label: t("schedule.confirmation.automaticLabel"),
+      value: BOOKING_CONFIRMATION_MODE.AUTOMATIC,
+    },
+    {
+      description: t("schedule.confirmation.manualDescription"),
+      label: t("schedule.confirmation.manualLabel"),
+      value: BOOKING_CONFIRMATION_MODE.MANUAL,
+    },
+  ];
+
+  const rawTimeZone = hoursQuery.data?.timeZone;
+  const resolvedTimeZone =
+    !rawTimeZone ||
+    rawTimeZone.includes(SCHEDULE_CONSTANTS.LEGACY_TIME_ZONE_SUBSTRING)
+      ? SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE
+      : rawTimeZone;
 
   return {
     addRange,
     confirmationMode,
+    confirmationOptions,
+    dayRows,
     errorMessage,
     formState,
+    handleConfirmationModeChange,
+    handleSaveConfirmationMode,
+    handleSaveHours,
     isSaving:
       updateHoursMutation.isPending || updateConfirmationMutation.isPending,
     removeRange,
@@ -231,10 +345,7 @@ export const useBusinessHoursViewModel = (): BusinessHoursViewModelResult => {
     saveHours,
     setConfirmationMode: setEditedConfirmationMode,
     successMessage,
-    timeZone:
-      !hoursQuery.data?.timeZone || hoursQuery.data.timeZone.includes("Mexico")
-        ? SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE
-        : hoursQuery.data.timeZone,
+    timeZone: resolvedTimeZone,
     toggleDayOpen,
     updateRange,
   };

@@ -10,16 +10,18 @@ import {
   Tabs,
 } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import { AgendaCalendarView } from "../components/agenda/AgendaCalendarView";
-import { ScheduleBlockDialog } from "../components/blocks/ScheduleBlockDialog";
-import { BookingDetailDrawer } from "../components/bookings/BookingDetailDrawer";
-import { BookingFormDialog } from "../components/bookings/BookingFormDialog";
-import { CancelBookingDialog } from "../components/bookings/CancelBookingDialog";
-import { RescheduleBookingDialog } from "../components/bookings/RescheduleBookingDialog";
-import { BookingHistoryFilters } from "../components/history/BookingHistoryFilters";
-import { BookingHistoryTable } from "../components/history/BookingHistoryTable";
-import { BusinessHoursForm } from "../components/hours/BusinessHoursForm";
-import { BookingListTable } from "../components/list/BookingListTable";
+import {
+  AgendaCalendarView,
+  BookingDetailDrawer,
+  BookingFormDialog,
+  BookingHistoryFilters,
+  BookingHistoryTable,
+  BookingListTable,
+  BusinessHoursForm,
+  CancelBookingDialog,
+  RescheduleBookingDialog,
+  ScheduleBlockDialog,
+} from "../components";
 import { SCHEDULE_TAB, type ScheduleTab } from "../constants";
 import { useScheduleViewModel } from "../hooks/useScheduleViewModel";
 
@@ -31,30 +33,38 @@ export const SchedulePage = (): ReactElement => {
     { id: SCHEDULE_TAB.AGENDA, label: t("schedule.tabs.agenda") },
     { id: SCHEDULE_TAB.BOOKINGS, label: t("schedule.tabs.bookings") },
     { id: SCHEDULE_TAB.HISTORY, label: t("schedule.tabs.history") },
-    { id: SCHEDULE_TAB.HOURS, label: t("schedule.tabs.hours") },
+    ...(viewModel.canManageScheduleBlocks
+      ? [{ id: SCHEDULE_TAB.HOURS, label: t("schedule.tabs.hours") }]
+      : []),
   ];
 
   return (
     <PageTemplate
       actions={
-        <div className="flex items-center gap-2">
-          <Button
-            leftIcon={Ban}
-            size={BUTTON_SIZE.SM}
-            variant={BUTTON_VARIANT.OUTLINE}
-            onClick={viewModel.blockViewModel.openDialog}
-          >
-            {t("schedule.blocks.newBlockAction")}
-          </Button>
-          <Button
-            leftIcon={Plus}
-            size={BUTTON_SIZE.SM}
-            variant={BUTTON_VARIANT.PRIMARY}
-            onClick={() => viewModel.setIsNewBookingOpen(true)}
-          >
-            {t("schedule.bookingList.newBookingAction")}
-          </Button>
-        </div>
+        viewModel.canManageScheduleBlocks || viewModel.canManageBookings ? (
+          <div className="flex items-center gap-2">
+            {viewModel.canManageScheduleBlocks && (
+              <Button
+                leftIcon={Ban}
+                size={BUTTON_SIZE.SM}
+                variant={BUTTON_VARIANT.OUTLINE}
+                onClick={viewModel.blockViewModel.openDialog}
+              >
+                {t("schedule.blocks.newBlockAction")}
+              </Button>
+            )}
+            {viewModel.canManageBookings && (
+              <Button
+                leftIcon={Plus}
+                size={BUTTON_SIZE.SM}
+                variant={BUTTON_VARIANT.PRIMARY}
+                onClick={() => viewModel.setIsNewBookingOpen(true)}
+              >
+                {t("schedule.bookingList.newBookingAction")}
+              </Button>
+            )}
+          </div>
+        ) : undefined
       }
       description={t("schedule.agenda.description")}
       title={t("schedule.agenda.title")}
@@ -75,7 +85,11 @@ export const SchedulePage = (): ReactElement => {
             timeZone={viewModel.timeZone}
             viewMode={viewModel.calendarViewMode}
             onDateChange={viewModel.setSelectedDate}
-            onDeleteBlock={viewModel.blockViewModel.handleDeleteBlock}
+            onDeleteBlock={
+              viewModel.canManageScheduleBlocks
+                ? viewModel.blockViewModel.handleDeleteBlock
+                : undefined
+            }
             onSelectBooking={viewModel.handleSelectBooking}
             onViewModeChange={viewModel.setCalendarViewMode}
           />
@@ -87,7 +101,11 @@ export const SchedulePage = (): ReactElement => {
               bookings={viewModel.bookingList}
               isLoading={viewModel.isLoading}
               timeZone={viewModel.timeZone}
-              onNewBooking={() => viewModel.setIsNewBookingOpen(true)}
+              onNewBooking={
+                viewModel.canManageBookings
+                  ? (): void => viewModel.setIsNewBookingOpen(true)
+                  : undefined
+              }
               onSelectBooking={viewModel.handleSelectBooking}
             />
             {viewModel.totalUpcomingCount > 0 && (
@@ -134,6 +152,7 @@ export const SchedulePage = (): ReactElement => {
         {/* Dialogs & Modals */}
         <BookingDetailDrawer
           booking={viewModel.selectedBooking}
+          canManageBookings={viewModel.canManageBookings}
           hasStarted={viewModel.selectedBookingHasStarted}
           isOpen={viewModel.isDetailOpen}
           timeZone={viewModel.timeZone}
