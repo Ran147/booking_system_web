@@ -10,6 +10,7 @@ export const FIREBASE_ERROR_CODE = {
   FUNCTIONS_INVALID_ARGUMENT: "functions/invalid-argument",
   FUNCTIONS_PERMISSION_DENIED: "functions/permission-denied",
   FUNCTIONS_RESOURCE_EXHAUSTED: "functions/resource-exhausted",
+  FUNCTIONS_UNAUTHENTICATED: "functions/unauthenticated",
   FUNCTIONS_UNAVAILABLE: "functions/unavailable",
   INVALID_ACTION_CODE: "auth/invalid-action-code",
   INVALID_CREDENTIAL: "auth/invalid-credential",

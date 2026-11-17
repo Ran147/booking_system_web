@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   updateProfile,
 } from "firebase/auth";
@@ -219,6 +220,13 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
   }
 
   if (functionName === FUNCTION_NAME.REQUEST_PASSWORD_RESET) {
+    // Firebase Auth emails its reset template (US-36). A failure is swallowed
+    // so the answer never reveals whether the account exists (AC-KAN-36-02).
+    try {
+      await sendPasswordResetEmail(auth, String(genericPayload.email ?? ""));
+    } catch {
+      // Same answer either way.
+    }
     return { isRequested: true } as Response;
   }
 
