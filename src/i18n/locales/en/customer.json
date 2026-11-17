@@ -22,6 +22,50 @@
     "timeZoneNote": "Times are shown in the business time zone ({{timeZone}}).",
     "title": "Pick a date and time"
   },
+  "bookingCheckout": {
+    "changeServiceAction": "Change service",
+    "changeTimeAction": "Change time",
+    "confirm": {
+      "action": "Confirm booking",
+      "chooseAnotherTime": "Pick another time",
+      "customerBlockedError": "You cannot book at this business. Contact the business for more information.",
+      "serviceChangedError": "The price or duration of this service changed. Review the summary and confirm again.",
+      "slotTakenError": "That time was just taken. Pick another time.",
+      "submitting": "Confirming…",
+      "unavailableError": "This business or service is not taking bookings right now."
+    },
+    "policies": {
+      "acknowledge": "I have read and accept the booking policies",
+      "noPolicyEmpty": "This business has no booking policies.",
+      "penalty": "Penalty: {{penalty}}",
+      "title": "Booking policies",
+      "window": "You can cancel or reschedule up to {{hours}} hours before the booking."
+    },
+    "retryAction": "Try again",
+    "subtitle": "Check the details before confirming.",
+    "success": {
+      "backToBusinessAction": "Back to the business",
+      "confirmedTitle": "Your booking is confirmed",
+      "myBookingsAction": "Go to my bookings",
+      "pendingDescription": "The business will confirm it soon. You can follow it in My bookings.",
+      "pendingTitle": "Your booking is waiting for the business to confirm it"
+    },
+    "summary": {
+      "anyCollaborator": "Any available person",
+      "business": "Business",
+      "collaborator": "Served by",
+      "date": "Date",
+      "duration": "Duration",
+      "durationValue": "{{minutes}} min",
+      "label": "Booking summary",
+      "originalPrice": "Price before discount: {{price}}",
+      "price": "Price",
+      "service": "Service",
+      "time": "Time",
+      "timeZoneNote": "Times are in the business time zone ({{timeZone}})."
+    },
+    "title": "Review and confirm"
+  },
   "layout": {
     "businessNotFound": "We could not find the requested business.",
     "footer": {

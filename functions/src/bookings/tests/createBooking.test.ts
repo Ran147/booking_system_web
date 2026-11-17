@@ -374,4 +374,189 @@ describe("createBooking", () => {
       "customer:bookingCheckout.confirm.customerBlockedError",
     );
   });
+
+  const REQUEST_ID = "5f0c8a52-3b0e-4c1d-9a51-6f1e2b7c9d10";
+
+  const bookWith = (
+    extra: Record<string, unknown>,
+    auth: typeof CALLER_AUTH = CALLER_AUTH,
+  ): ReturnType<typeof callCreateBooking> =>
+    callCreateBooking(
+      buildAuthenticatedCallableRequest(
+        {
+          businessId: TEST_BUSINESS_ID,
+          serviceId: TEST_SERVICE_ID,
+          startsAt: FREE_SLOT_START,
+          ...extra,
+        },
+        auth,
+      ),
+    );
+
+  const businessBookings = (): ReturnType<
+    ReturnType<typeof firestore.collection>["get"]
+  > =>
+    firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.BOOKINGS)
+      .get();
+
+  it("AC-KAN-148-06: retrying with the same requestId returns the same booking", async () => {
+    const first = await bookWith({ requestId: REQUEST_ID });
+    const retry = await bookWith({ requestId: REQUEST_ID });
+
+    expect(first.bookingId).toBe(REQUEST_ID);
+    expect(retry).toEqual(first);
+    expect((await businessBookings()).size).toBe(1);
+  });
+
+  it("AC-KAN-148-06: a requestId of another customer's booking is rejected", async () => {
+    await bookWith({ requestId: REQUEST_ID });
+
+    const error = await captureHttpsError(
+      bookWith(
+        { requestId: REQUEST_ID },
+        { token: { role: USER_ROLE.CUSTOMER }, uid: "customer-uid-2" },
+      ),
+    );
+
+    expect(error.code).toBe("invalid-argument");
+  });
+
+  it("AC-KAN-148-08: a price or duration different from what the customer saw is rejected", async () => {
+    const priceChanged = await captureHttpsError(
+      bookWith({ expectedDurationMinutes: 45, expectedPriceInCents: 19_000 }),
+    );
+    const durationChanged = await captureHttpsError(
+      bookWith({ expectedDurationMinutes: 30, expectedPriceInCents: 20_000 }),
+    );
+
+    expect(priceChanged.message).toBe(
+      "customer:bookingCheckout.confirm.serviceChangedError",
+    );
+    expect(durationChanged.details).toEqual({ reason: "service_changed" });
+    expect((await businessBookings()).size).toBe(0);
+  });
+
+  it("AC-KAN-148-08: the same price and duration book normally", async () => {
+    const response = await bookWith({
+      expectedDurationMinutes: 45,
+      expectedPriceInCents: 20_000,
+    });
+
+    expect(response.bookingId).toBeTruthy();
+  });
+
+  it("AC-KAN-148-08: the customer sees the discounted price, so that is the price compared", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.SERVICES)
+      .doc(TEST_SERVICE_ID)
+      .update({
+        discounts: [
+          {
+            endsAt: new Date(Date.now() + MS_PER_DAY).toISOString(),
+            startsAt: new Date(Date.now() - MS_PER_DAY).toISOString(),
+            type: "percentage",
+            value: 20,
+          },
+        ],
+      });
+
+    // The base price no longer matches what the customer saw (16 000).
+    const basePrice = await captureHttpsError(
+      bookWith({ expectedDurationMinutes: 45, expectedPriceInCents: 20_000 }),
+    );
+    const response = await bookWith({
+      expectedDurationMinutes: 45,
+      expectedPriceInCents: 16_000,
+    });
+
+    expect(basePrice.details).toEqual({ reason: "service_changed" });
+    expect(response.serviceSnapshot.priceInCents).toBe(16_000);
+  });
+
+  it("AC-KAN-148-09 and AC-KAN-148-11: the first booking creates the Customer record from the account", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.USERS)
+      .doc(CALLER_AUTH.uid)
+      .set({
+        email: "carla@demo.test",
+        fullName: "Carla Cliente",
+        phone: "+506 8888 0000",
+      });
+
+    await bookFreeSlot();
+
+    const customer = await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.CUSTOMERS)
+      .doc(CALLER_AUTH.uid)
+      .get();
+    expect(customer.data()).toMatchObject({
+      email: "carla@demo.test",
+      fullName: "Carla Cliente",
+      phone: "+506 8888 0000",
+      status: "active",
+      userId: CALLER_AUTH.uid,
+    });
+  });
+
+  it("AS-4: a Customer record stored under another id is found by userId: no duplicate, and blocking applies", async () => {
+    const customersCollection = firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.CUSTOMERS);
+    await customersCollection
+      .doc("added-by-the-business")
+      .set({ status: "active", userId: CALLER_AUTH.uid });
+
+    await bookFreeSlot();
+    expect((await customersCollection.get()).size).toBe(1);
+
+    await customersCollection
+      .doc("added-by-the-business")
+      .update({ status: "blocked" });
+    const error = await captureHttpsError(
+      bookWith({ startsAt: slotAt("15:00").toISOString() }),
+    );
+    expect(error.details).toEqual({ reason: "customer_blocked" });
+  });
+
+  it("AS-4: the booking points to the Customer record the business already has", async () => {
+    await firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.CUSTOMERS)
+      .doc("added-by-the-business")
+      .set({ status: "active", userId: CALLER_AUTH.uid });
+
+    await bookWith({});
+    const booking = (await businessBookings()).docs[0]?.data();
+
+    expect(booking?.customerId).toBe("added-by-the-business");
+    expect(booking?.customerUserId).toBe(CALLER_AUTH.uid);
+  });
+
+  it("AS-4: an existing Customer record is left as it is", async () => {
+    const customerReference = firestore
+      .collection(FIRESTORE_COLLECTION.BUSINESSES)
+      .doc(TEST_BUSINESS_ID)
+      .collection(FIRESTORE_COLLECTION.CUSTOMERS)
+      .doc(CALLER_AUTH.uid);
+    await customerReference.set({
+      fullName: "Nombre del negocio",
+      status: "active",
+    });
+
+    await bookFreeSlot();
+
+    expect((await customerReference.get()).data()).toEqual({
+      fullName: "Nombre del negocio",
+      status: "active",
+    });
+  });
 });

@@ -41,6 +41,22 @@ export const customerRoutes: RouteObject[] = [
           },
           {
             lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { BookingCheckoutPage } =
+                await import("./features/booking-checkout");
+              return { Component: BookingCheckoutPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.BOOK_CONFIRM,
+          },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { BookingConfirmationPage } =
+                await import("./features/booking-checkout");
+              return { Component: BookingConfirmationPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.BOOK_DONE,
+          },
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
               const { MyBookingsPage } = await import("./features/my-bookings");
               return { Component: MyBookingsPage };
             },
