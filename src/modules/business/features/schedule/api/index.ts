@@ -13,6 +13,7 @@ export * from "./useBookingHistoryQuery";
 export * from "./useBookingListQuery";
 export * from "./useBusinessHoursQuery";
 export * from "./useCancelBookingMutation";
+export * from "./useCollaboratorPermissionsQuery";
 export * from "./useCreateBookingMutation";
 export * from "./useRescheduleBookingMutation";
 export * from "./useScheduleBlockMutations";

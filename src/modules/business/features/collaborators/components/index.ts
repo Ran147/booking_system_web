@@ -7,6 +7,7 @@ export { CollaboratorListContent } from "./CollaboratorListContent";
 export { CollaboratorListRowActions } from "./CollaboratorListRowActions";
 export { CollaboratorListTable } from "./CollaboratorListTable";
 export { CollaboratorListToolbar } from "./CollaboratorListToolbar";
+export { CollaboratorPermissionsCard } from "./CollaboratorPermissionsCard";
 export { CollaboratorPermissionsCheckboxes } from "./CollaboratorPermissionsCheckboxes";
 export { CollaboratorProfileActions } from "./CollaboratorProfileActions";
 export { CollaboratorProfileBadgesCard } from "./CollaboratorProfileBadgesCard";

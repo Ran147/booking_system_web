@@ -20,6 +20,7 @@ export interface BookingDetailRescheduleHistoryItem {
 
 export interface UseBookingDetailViewModelOptions {
   readonly booking: Nullable<Booking>;
+  readonly canManageBookings?: boolean;
   readonly hasStarted?: boolean;
   readonly isOpen: boolean;
   readonly onClose: () => void;
@@ -56,6 +57,7 @@ type UpdatableBookingStatus =
 
 export const useBookingDetailViewModel = ({
   booking,
+  canManageBookings = true,
   hasStarted = false,
   isOpen,
   onClose,
@@ -116,10 +118,11 @@ export const useBookingDetailViewModel = ({
   return {
     bookingTitle: booking.serviceSnapshot.name,
     cancellation: booking.cancellation,
-    canCancel: isPending || isConfirmed,
-    canCompleteOrNoShow: isConfirmed && hasStarted,
-    canConfirm: isPending,
-    canReschedule: (isPending || isConfirmed) && !hasStarted,
+    canCancel: canManageBookings && (isPending || isConfirmed),
+    canCompleteOrNoShow: canManageBookings && isConfirmed && hasStarted,
+    canConfirm: canManageBookings && isPending,
+    canReschedule:
+      canManageBookings && (isPending || isConfirmed) && !hasStarted,
     collaboratorName: booking.collaboratorName,
     customerId: booking.customerId,
     durationMinutes: booking.serviceSnapshot.durationMinutes,
