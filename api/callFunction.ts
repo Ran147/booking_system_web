@@ -8,10 +8,6 @@ import {
   Timestamp,
   type Firestore,
 } from "firebase-admin/firestore";
-import {
-  COLLABORATOR_FUNCTION_NAME,
-  handleCollaboratorFunction,
-} from "./_collaborators.js";
 import type { Nullable } from "../src/types/Nullable";
 
 const HTTP_METHOD = Object.freeze({
@@ -37,7 +33,6 @@ const HTTP_STATUS = Object.freeze({
 } as const);
 
 const FUNCTION_NAME = Object.freeze({
-  ...COLLABORATOR_FUNCTION_NAME,
   CANCEL_BOOKING: "cancelBooking",
   CHECK_BUSINESS_SLUG: "checkBusinessSlug",
   COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
@@ -144,8 +139,6 @@ const COLLABORATOR_PERMISSION = Object.freeze({
 
 const COLLABORATOR_STATUS = Object.freeze({
   ACTIVE: "active",
-  INACTIVE: "inactive",
-  INVITED: "invited",
 } as const);
 
 const CALLER_ACCESS = Object.freeze({
@@ -157,13 +150,11 @@ const CALLER_ACCESS = Object.freeze({
 type CallerAccess = (typeof CALLER_ACCESS)[keyof typeof CALLER_ACCESS];
 
 const PUBLIC_FUNCTION_NAMES: readonly string[] = Object.freeze([
-  FUNCTION_NAME.ACCEPT_COLLABORATOR_INVITATION,
   FUNCTION_NAME.CHECK_BUSINESS_SLUG,
   FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP,
   FUNCTION_NAME.PAY_PLAN_CHECKOUT,
   FUNCTION_NAME.REQUEST_PASSWORD_RESET,
   FUNCTION_NAME.SEND_CONTACT_MESSAGE,
-  FUNCTION_NAME.VALIDATE_COLLABORATOR_INVITATION,
   FUNCTION_NAME.VALIDATE_SIGN_UP_LINK,
   FUNCTION_NAME.VERIFY_RECAPTCHA,
 ]);
@@ -659,12 +650,7 @@ const checkCallerAccess = async (
   if (
     functionName === FUNCTION_NAME.UPDATE_BUSINESS_HOURS ||
     functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE ||
-    functionName === FUNCTION_NAME.DELETE_SERVICE ||
-    functionName === FUNCTION_NAME.REGISTER_COLLABORATOR ||
-    functionName === FUNCTION_NAME.UPDATE_COLLABORATOR ||
-    functionName === FUNCTION_NAME.UPDATE_COLLABORATOR_STATUS ||
-    functionName === FUNCTION_NAME.UPDATE_COLLABORATOR_PERMISSIONS ||
-    functionName === FUNCTION_NAME.RESEND_COLLABORATOR_EMAIL
+    functionName === FUNCTION_NAME.DELETE_SERVICE
   ) {
     const isOwner = await ownsBusiness(firestore, caller, businessId);
     return isOwner ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
@@ -838,17 +824,6 @@ export default async function handler(
     }
 
     const caller = await readCaller(request, auth);
-
-    const isCollaboratorHandled = await handleCollaboratorFunction(
-      functionName,
-      payload,
-      response,
-      auth,
-      firestore,
-    );
-    if (isCollaboratorHandled) {
-      return;
-    }
 
     if (functionName === FUNCTION_NAME.VERIFY_RECAPTCHA) {
       sendJsonResponse(response, HTTP_STATUS.OK, { isVerified: true });
