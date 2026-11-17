@@ -86,3 +86,19 @@ export interface BookingCheckoutViewModel {
   readonly timeLabel: string;
   readonly priceLabel: string;
 }
+
+/**
+ * Props of BookingPolicyNotice: the business booking policy (KAN-147).
+ * @property viewModel - ViewModel of the step; gives the policy and the acknowledgement state.
+ */
+export interface BookingPolicyNoticeProps {
+  readonly viewModel: BookingCheckoutViewModel;
+}
+
+/**
+ * Props of BookingSummaryCard: the booking before confirming (KAN-146).
+ * @property viewModel - ViewModel of the step; gives the summary and its formatted labels.
+ */
+export interface BookingSummaryCardProps {
+  readonly viewModel: BookingCheckoutViewModel;
+}

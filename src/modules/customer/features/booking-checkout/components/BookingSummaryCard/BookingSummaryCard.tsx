@@ -2,12 +2,8 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import type { BookingCheckoutViewModel } from "@/modules/customer/features/booking-checkout";
+import type { BookingSummaryCardProps } from "@/modules/customer/features/booking-checkout";
 import type { Nullable } from "@/types";
-
-export interface BookingSummaryCardProps {
-  readonly viewModel: BookingCheckoutViewModel;
-}
 
 /** The booking before confirming (AC-KAN-146-01, 05 to 07). */
 export const BookingSummaryCard = ({

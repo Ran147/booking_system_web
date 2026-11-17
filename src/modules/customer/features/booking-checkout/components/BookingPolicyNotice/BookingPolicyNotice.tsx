@@ -2,11 +2,7 @@ import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { CheckboxField } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
-import type { BookingCheckoutViewModel } from "@/modules/customer/features/booking-checkout";
-
-export interface BookingPolicyNoticeProps {
-  readonly viewModel: BookingCheckoutViewModel;
-}
+import type { BookingPolicyNoticeProps } from "@/modules/customer/features/booking-checkout";
 
 /**
  * The business booking policy (KAN-147). With a policy the customer must

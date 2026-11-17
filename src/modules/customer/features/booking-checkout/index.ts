@@ -3,5 +3,9 @@ export { BookingConfirmationPage } from "./components/BookingConfirmationPage/Bo
 export { CHECKOUT_ERROR_ACTION } from "./constants/BookingCheckout.constants";
 export { useBookingCheckoutViewModel } from "./hooks/useBookingCheckoutViewModel";
 export { useBookingConfirmationViewModel } from "./hooks/useBookingConfirmationViewModel";
-export type { BookingCheckoutViewModel } from "./models/bookingCheckout.model";
+export type {
+  BookingCheckoutViewModel,
+  BookingPolicyNoticeProps,
+  BookingSummaryCardProps,
+} from "./models/bookingCheckout.model";
 export type { BookingConfirmationViewModel } from "./models/bookingConfirmation.model";
