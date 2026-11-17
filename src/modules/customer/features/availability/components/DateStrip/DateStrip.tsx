@@ -5,20 +5,8 @@ import { Button } from "@/components/common";
 import { I18N_NAMESPACE } from "@/constants";
 import {
   toDisplayDate,
-  type WeekDay,
+  type DateStripProps,
 } from "@/modules/customer/features/availability";
-import type { Nullable } from "@/types";
-
-export interface DateStripProps {
-  readonly canGoToNextWeek: boolean;
-  readonly canGoToPreviousWeek: boolean;
-  readonly language: string;
-  readonly onNextWeek: () => void;
-  readonly onPreviousWeek: () => void;
-  readonly onSelectDate: (date: string) => void;
-  readonly selectedDate: Nullable<string>;
-  readonly weekDays: readonly WeekDay[];
-}
 
 // The days are calendar days of the business; formatting them in UTC keeps
 // the label from moving with the device time zone (AC-KAN-140-06).

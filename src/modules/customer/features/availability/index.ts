@@ -5,6 +5,8 @@ export { useAvailabilityViewModel } from "./hooks/useAvailabilityViewModel";
 export type {
   AvailabilityViewModel,
   AvailableSlot,
+  DateStripProps,
+  SlotListProps,
   WeekDay,
 } from "./models/availability.model";
 export { toDisplayDate } from "./utils/calendarDate";
