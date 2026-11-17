@@ -260,7 +260,7 @@ const provision = async (): Promise<void> => {
         view_reports: true,
       },
       phone: DEFAULT_CREDENTIALS.PHONE,
-      service_ids: ["servicio-corte-clasico", "servicio-barba-completo"],
+      serviceIds: ["servicio-corte-clasico", "servicio-barba-completo"],
       status: "active",
       uid: userId,
     });
