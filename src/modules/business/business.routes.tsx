@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router";
 import { ROUTE_PATH } from "@/constants";
 import { COLLABORATOR_PERMISSION, USER_ROLE } from "@/domain";
 import { RequireRole } from "@/modules/auth";
+import { BUSINESS_PROFILE_ALLOWED_ROLES } from "./businessProfileAccess";
 import { BusinessLayout } from "./layout/BusinessLayout";
 import {
   BusinessStatusGate,
@@ -79,12 +80,7 @@ export const businessRoutes: RouteObject[] = [
                   },
                 ],
                 element: (
-                  <RequireRole
-                    allowedRoles={[
-                      USER_ROLE.BUSINESS_OWNER,
-                      USER_ROLE.SUBSCRIBER,
-                    ]}
-                  />
+                  <RequireRole allowedRoles={BUSINESS_PROFILE_ALLOWED_ROLES} />
                 ),
               },
               {
@@ -149,6 +145,14 @@ export const businessRoutes: RouteObject[] = [
                   return { Component: SettingsPage };
                 },
                 path: ROUTE_PATH.BUSINESS.SETTINGS,
+              },
+              {
+                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                  const { PasswordSettingsPage } =
+                    await import("./features/settings");
+                  return { Component: PasswordSettingsPage };
+                },
+                path: ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD,
               },
             ],
             element: <BusinessLayout />,

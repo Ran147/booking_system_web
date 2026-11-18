@@ -37,9 +37,15 @@ describe("firestore.rules: plans", () => {
       await adminFirestore
         .doc(`businesses/${SUBSCRIBED_BUSINESS_ID}/subscription/current`)
         .set({ planId: "plan-inactive" });
+      await adminFirestore.doc(`businesses/${SUBSCRIBED_BUSINESS_ID}`).set({
+        ownerUserId: "subscriber-owner",
+      });
       await adminFirestore
         .doc(`businesses/${OTHER_BUSINESS_ID}/subscription/current`)
         .set({ planId: "plan-active" });
+      await adminFirestore.doc(`businesses/${OTHER_BUSINESS_ID}`).set({
+        ownerUserId: "subscriber-other",
+      });
     });
   });
 
