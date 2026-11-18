@@ -8,6 +8,9 @@ import {
   Timestamp,
   type Firestore,
 } from "firebase-admin/firestore";
+import { handleCreateBooking } from "../functions/src/bookings/handlers/handleCreateBooking.js";
+import { handleGetAvailability } from "../functions/src/bookings/handlers/handleGetAvailability.js";
+import { CallableFailure } from "../functions/src/shared/CallableFailure.js";
 import type { Nullable } from "../src/types/Nullable";
 
 const HTTP_METHOD = Object.freeze({
@@ -44,6 +47,7 @@ const FUNCTION_NAME = Object.freeze({
   EXPORT_COLLECTION: "exportCollection",
   FETCH_BOOKING_HISTORY: "fetchBookingHistory",
   FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
+  GET_AVAILABILITY: "getAvailability",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
@@ -106,6 +110,30 @@ const CHECKOUT_SIMULATION = Object.freeze({
 const FIREBASE_ADMIN_ERROR_CODE = Object.freeze({
   EMAIL_ALREADY_EXISTS: "auth/email-already-exists",
   FIRESTORE_ALREADY_EXISTS: 6,
+  USER_NOT_FOUND: "auth/user-not-found",
+} as const);
+
+// requestPasswordReset (US-36, D-1b and D-11). Same behavior as the callable
+// in functions/src/auth/requestPasswordReset.ts: Firebase Auth emails its own
+// reset template, in the language of the account, at no cost on Spark.
+const PASSWORD_RESET = Object.freeze({
+  DEFAULT_LANGUAGE: "es",
+  LOCALE_HEADER: "X-Firebase-Locale",
+  MISSING_WEB_API_KEY:
+    "FIREBASE_WEB_API_KEY is not set: the reset email cannot be requested",
+  // The answer takes at least this long whether or not the account exists, so
+  // the response time does not reveal it (AC-KAN-36-02).
+  MINIMUM_RESPONSE_MS: 1500,
+  REQUEST_TYPE: "PASSWORD_RESET",
+  SEND_OOB_CODE_URL:
+    "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode",
+  SUPPORTED_LANGUAGES: Object.freeze(["en", "es"]),
+  // The public web API key of the Firebase project. Vercel already has it as
+  // VITE_FIREBASE_API_KEY for the build; FIREBASE_WEB_API_KEY wins if set.
+  WEB_API_KEY_ENV_VARS: Object.freeze([
+    "FIREBASE_WEB_API_KEY",
+    "VITE_FIREBASE_API_KEY",
+  ]),
 } as const);
 
 // Mirror of SIGN_UP_ERROR_REASON in
@@ -536,6 +564,45 @@ const readCaller = async (
   }
 };
 
+const isCustomerCaller = (caller: Nullable<Caller>): caller is Caller =>
+  caller?.claims.role === USER_ROLE.CUSTOMER ||
+  caller?.claims.role === USER_ROLE.CLIENT;
+
+// HTTP status of each code a shared handler of functions/src reports (Q8).
+const CALLABLE_FAILURE_HTTP_STATUS: Readonly<Record<string, number>> =
+  Object.freeze({
+    "failed-precondition": HTTP_STATUS.PRECONDITION_FAILED,
+    "invalid-argument": HTTP_STATUS.BAD_REQUEST,
+    "not-found": HTTP_STATUS.NOT_FOUND,
+    "permission-denied": HTTP_STATUS.FORBIDDEN,
+    unauthenticated: HTTP_STATUS.UNAUTHORIZED,
+  });
+
+// Runs a shared handler of functions/src (Q8) and answers like a callable:
+// the result on success, `{ code, message, details }` on a CallableFailure,
+// which callFunction turns back into the same FunctionsError.
+const runSharedHandler = async (
+  response: ServerResponse,
+  runHandler: () => Promise<unknown>,
+): Promise<void> => {
+  try {
+    sendJsonResponse(response, HTTP_STATUS.OK, await runHandler());
+  } catch (error) {
+    if (!(error instanceof CallableFailure)) throw error;
+    sendJsonResponse(
+      response,
+      CALLABLE_FAILURE_HTTP_STATUS[error.code] ??
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      {
+        code: error.code,
+        details: error.details,
+        error: error.code,
+        message: error.message,
+      },
+    );
+  }
+};
+
 const readClaimBusinessId = (caller: Caller): unknown =>
   caller.claims.businessId ?? caller.claims.business_id;
 
@@ -711,14 +778,21 @@ const checkCallerAccess = async (
     return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
   }
 
-  if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
-    const role = caller.claims.role;
-    if (
-      (role === USER_ROLE.CUSTOMER || role === USER_ROLE.CLIENT) &&
-      payload.customerId === caller.userId
-    ) {
+  // A customer always books for themselves: the shared handler takes the uid
+  // from the token and ignores any customerId in the payload (KAN-139, D-4).
+  if (
+    functionName === FUNCTION_NAME.GET_AVAILABILITY ||
+    functionName === FUNCTION_NAME.CREATE_BOOKING
+  ) {
+    if (isCustomerCaller(caller)) {
       return CALLER_ACCESS.ALLOWED;
     }
+  }
+  if (functionName === FUNCTION_NAME.GET_AVAILABILITY) {
+    return CALLER_ACCESS.PERMISSION_DENIED;
+  }
+
+  if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
     const isStaff = await hasCollaboratorPermission(
       firestore,
       caller,
@@ -764,6 +838,63 @@ const checkCallerAccess = async (
 
   return CALLER_ACCESS.PERMISSION_DENIED;
 };
+
+const readWebApiKey = (): Nullable<string> => {
+  for (const environmentVariable of PASSWORD_RESET.WEB_API_KEY_ENV_VARS) {
+    const configuredKey = process.env[environmentVariable]?.trim();
+    if (configuredKey) return configuredKey;
+  }
+  return null;
+};
+
+const readAccountLanguage = async (
+  firestore: Firestore,
+  userId: string,
+): Promise<string> => {
+  const userSnapshot = await firestore.collection("users").doc(userId).get();
+  const savedLanguage: unknown = userSnapshot.data()?.language;
+
+  const supportedLanguages: readonly string[] =
+    PASSWORD_RESET.SUPPORTED_LANGUAGES;
+
+  return typeof savedLanguage === "string" &&
+    supportedLanguages.includes(savedLanguage)
+    ? savedLanguage
+    : PASSWORD_RESET.DEFAULT_LANGUAGE;
+};
+
+// Asks Firebase Auth to email the reset link. Any failure (unknown account,
+// too many requests, Google down) is swallowed: the caller answers the same
+// either way, so nobody can tell whether the account exists (AC-KAN-36-02).
+const sendResetEmailIfAccountExists = async (
+  auth: Auth,
+  firestore: Firestore,
+  email: string,
+  webApiKey: string,
+): Promise<void> => {
+  try {
+    const { uid } = await auth.getUserByEmail(email);
+    const language = await readAccountLanguage(firestore, uid);
+    const query = new URLSearchParams({ key: webApiKey }).toString();
+
+    await fetch(`${PASSWORD_RESET.SEND_OOB_CODE_URL}?${query}`, {
+      body: JSON.stringify({ email, requestType: PASSWORD_RESET.REQUEST_TYPE }),
+      headers: {
+        "Content-Type": "application/json",
+        [PASSWORD_RESET.LOCALE_HEADER]: language,
+      },
+      method: HTTP_METHOD.POST,
+    });
+  } catch (error) {
+    if (hasErrorCode(error, FIREBASE_ADMIN_ERROR_CODE.USER_NOT_FOUND)) return;
+    // Infrastructure failures must not tell the visitor anything either.
+  }
+};
+
+const waitForMinimumResponseTime = (): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, PASSWORD_RESET.MINIMUM_RESPONSE_MS);
+  });
 
 export default async function handler(
   request: IncomingMessage,
@@ -844,6 +975,30 @@ export default async function handler(
     }
 
     if (functionName === FUNCTION_NAME.REQUEST_PASSWORD_RESET) {
+      const email =
+        typeof payload.email === "string" ? payload.email.trim() : "";
+      if (!email) {
+        sendJsonResponse(response, HTTP_STATUS.BAD_REQUEST, {
+          error: "invalid-argument",
+          message: "email is required",
+        });
+        return;
+      }
+      // A missing key is a configuration error: fail visibly instead of
+      // answering "sent" while no email leaves (US-36 D-1b).
+      const webApiKey = readWebApiKey();
+      if (!webApiKey) {
+        sendJsonResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {
+          error: "internal",
+          message: PASSWORD_RESET.MISSING_WEB_API_KEY,
+        });
+        return;
+      }
+
+      await Promise.all([
+        sendResetEmailIfAccountExists(auth, firestore, email, webApiKey),
+        waitForMinimumResponseTime(),
+      ]);
       sendJsonResponse(response, HTTP_STATUS.OK, { isRequested: true });
       return;
     }
@@ -1188,7 +1343,7 @@ export default async function handler(
               view_reports: true,
             },
             phone,
-            service_ids: ["service-default"],
+            serviceIds: ["service-default"],
             status: "active",
             uid: userId,
           });
@@ -1272,6 +1427,40 @@ export default async function handler(
       return;
     }
 
+    // Customers run the same handlers as the callables (Q8): the availability
+    // engine and the re-check before booking (KAN-139, KAN-144).
+    if (
+      functionName === FUNCTION_NAME.GET_AVAILABILITY &&
+      isCustomerCaller(caller)
+    ) {
+      await runSharedHandler(response, () =>
+        handleGetAvailability({
+          caller: { role: caller.claims.role, uid: caller.userId },
+          payload,
+          firestore,
+          now: new Date(),
+        }),
+      );
+      return;
+    }
+
+    if (
+      functionName === FUNCTION_NAME.CREATE_BOOKING &&
+      isCustomerCaller(caller)
+    ) {
+      await runSharedHandler(response, () =>
+        handleCreateBooking({
+          caller: { role: caller.claims.role, uid: caller.userId },
+          payload,
+          firestore,
+          now: new Date(),
+        }),
+      );
+      return;
+    }
+
+    // Staff (owner or collaborator with manage_bookings) still book for a
+    // customer through the code below (KAN-69).
     if (functionName === FUNCTION_NAME.CREATE_BOOKING) {
       const businessId = String(payload.businessId || "");
       const serviceId = String(payload.serviceId || "");

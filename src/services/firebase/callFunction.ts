@@ -4,7 +4,11 @@ import {
   httpsCallable,
   type FunctionsErrorCodeCore,
 } from "firebase/functions";
-import { HTTP_STATUS, type FunctionName } from "@/constants";
+import {
+  FIREBASE_ERROR_CODE,
+  HTTP_STATUS,
+  type FunctionName,
+} from "@/constants";
 import type { Nullable } from "@/types";
 import { executeClientFunctionsFallback } from "./clientFunctionsFallback";
 import { functions } from "./firebaseApp";
@@ -16,6 +20,22 @@ interface CallFunctionErrorPayload {
   readonly error?: string;
   readonly message?: string;
 }
+
+// A callable that answers with one of these codes exists and rejected the
+// request on purpose (bad payload, reCAPTCHA, permissions, a taken slot). The
+// client simulation only stands in for a missing server, so it must never
+// turn one of these answers into a success.
+const DELIBERATE_REJECTION_CODES: ReadonlySet<string> = new Set([
+  FIREBASE_ERROR_CODE.FAILED_PRECONDITION,
+  FIREBASE_ERROR_CODE.FUNCTIONS_ALREADY_EXISTS,
+  FIREBASE_ERROR_CODE.FUNCTIONS_INVALID_ARGUMENT,
+  FIREBASE_ERROR_CODE.FUNCTIONS_PERMISSION_DENIED,
+  FIREBASE_ERROR_CODE.FUNCTIONS_RESOURCE_EXHAUSTED,
+  FIREBASE_ERROR_CODE.FUNCTIONS_UNAUTHENTICATED,
+]);
+
+const isDeliberateRejection = (error: unknown): boolean =>
+  error instanceof FirebaseError && DELIBERATE_REJECTION_CODES.has(error.code);
 
 export const callFunction = async <Payload, Response>(
   functionName: FunctionName,
@@ -90,7 +110,10 @@ export const callFunction = async <Payload, Response>(
     const callableResult = await callable(payload);
     return callableResult.data;
   } catch (cloudFunctionsError) {
-    if (!import.meta.env.VITEST) {
+    if (
+      !import.meta.env.VITEST &&
+      !isDeliberateRejection(cloudFunctionsError)
+    ) {
       try {
         return await executeClientFunctionsFallback<Payload, Response>(
           functionName,

@@ -8,6 +8,7 @@ import type { Nullable } from "@/types";
 /**
  * @typedef {Object} BookingDetailDrawerProps
  * @property {Nullable<Booking>} booking - Reserva seleccionada para visualizar.
+ * @property {boolean} [canManageBookings] - Indica si el usuario puede mutar reservas (AS-4).
  * @property {boolean} [hasStarted] - Indica si la hora de inicio ya transcurrió.
  * @property {boolean} isOpen - Indica si el modal está abierto.
  * @property {() => void} onCancelClick - Callback al pulsar cancelar reserva.
@@ -18,6 +19,7 @@ import type { Nullable } from "@/types";
  */
 export interface BookingDetailDrawerProps {
   readonly booking: Nullable<Booking>;
+  readonly canManageBookings?: boolean;
   readonly hasStarted?: boolean;
   readonly isOpen: boolean;
   readonly onCancelClick: () => void;

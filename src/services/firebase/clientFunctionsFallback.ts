@@ -1,3 +1,4 @@
+import { sendPasswordResetEmail } from "firebase/auth";
 import {
   addDoc,
   collection,
@@ -9,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { FUNCTION_NAME, MONEY, type FunctionName } from "@/constants";
 import type { Nullable } from "@/types";
-import { firestore } from "./firebaseApp";
+import { auth, firestore } from "./firebaseApp";
 
 interface GenericPayload {
   readonly [key: string]: unknown;
@@ -72,6 +73,13 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
   }
 
   if (functionName === FUNCTION_NAME.REQUEST_PASSWORD_RESET) {
+    // Firebase Auth emails its reset template (US-36). A failure is swallowed
+    // so the answer never reveals whether the account exists (AC-KAN-36-02).
+    try {
+      await sendPasswordResetEmail(auth, String(genericPayload.email ?? ""));
+    } catch {
+      // Same answer either way.
+    }
     return { isRequested: true } as Response;
   }
 

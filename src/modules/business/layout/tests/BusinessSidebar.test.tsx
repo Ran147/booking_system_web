@@ -2,7 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import type { RouteObject } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ROUTE_PATH } from "@/constants";
-import { BUSINESS_STATUS } from "@/domain";
+import { BUSINESS_STATUS, COLLABORATOR_PERMISSION } from "@/domain";
 import { fetchBusinessStatus } from "@/modules/business/features/home";
 import { renderRoutesWithProviders } from "@/shared/test-utils/renderRoutesWithProviders";
 import {
@@ -59,6 +59,10 @@ const testRoutes: RouteObject[] = [
       {
         element: <div>Settings Page Outlet</div>,
         path: ROUTE_PATH.BUSINESS.SETTINGS,
+      },
+      {
+        element: <div>Collaborators Page Outlet</div>,
+        path: ROUTE_PATH.BUSINESS.COLLABORATORS,
       },
     ],
     element: <BusinessLayout />,
@@ -258,9 +262,45 @@ describe("BusinessSidebar (KAN-29, KAN-39, KAN-42)", () => {
     ).toBeInTheDocument();
 
     expect(page.queryCollaboratorsItem()).not.toBeInTheDocument();
+    expect(page.queryCustomersItem()).not.toBeInTheDocument();
+    expect(page.queryProfileItem()).not.toBeInTheDocument();
+    expect(page.queryServicesItem()).not.toBeInTheDocument();
+    expect(await page.findSettingsItem()).toBeInTheDocument();
+    expect(page.querySubscriptionItem()).not.toBeInTheDocument();
+  });
+
+  it("KAN-77: navigates subscriber to collaborators page from Team sidebar item", async () => {
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: SUBSCRIBER_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    await page.clickCollaboratorsItem();
+
+    expect(
+      await screen.findByText("Collaborators Page Outlet"),
+    ).toBeInTheDocument();
+    expect(page.queryPlaceholderModalHeading()).not.toBeInTheDocument();
+  });
+
+  it("KAN-86: AC-KAN-86-01 filters collaborator sidebar modules dynamically by granted permissions", async () => {
+    vi.mocked(layoutApi.fetchCollaboratorProfile).mockResolvedValueOnce({
+      fullName: "Carlos Barbero",
+      permissions: [COLLABORATOR_PERMISSION.MANAGE_SERVICES],
+    });
+
+    renderRoutesWithProviders(testRoutes, {
+      initialPath: ROUTE_PATH.BUSINESS.ROOT,
+      session: COLLABORATOR_SESSION,
+    });
+    const page = createBusinessSidebarPage();
+
+    expect(await page.findCreateServiceItem()).toBeInTheDocument();
+    expect(page.queryCustomersItem()).not.toBeInTheDocument();
+    expect(page.queryCollaboratorsItem()).not.toBeInTheDocument();
     expect(await page.findSettingsItem()).toBeInTheDocument();
     expect(page.queryProfileItem()).not.toBeInTheDocument();
-    expect(page.querySubscriptionItem()).not.toBeInTheDocument();
   });
 
   it("KAN-51: exposes active settings navigation to collaborators", async () => {

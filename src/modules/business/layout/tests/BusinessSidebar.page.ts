@@ -6,6 +6,7 @@ import type { Nullable } from "@/types";
 export interface BusinessSidebarPageObject {
   readonly clickCancelSignOut: () => Promise<void>;
   readonly clickClosePlaceholderModal: () => Promise<void>;
+  readonly clickCollaboratorsItem: () => Promise<void>;
   readonly clickConfirmSignOut: () => Promise<void>;
   readonly clickCreateServiceItem: () => Promise<void>;
   readonly clickCustomersItem: () => Promise<void>;
@@ -26,8 +27,10 @@ export interface BusinessSidebarPageObject {
   readonly findSidebarNav: () => Promise<HTMLElement>;
   readonly findSignOutConfirmDialog: () => Promise<HTMLElement>;
   readonly queryCollaboratorsItem: () => Nullable<HTMLElement>;
+  readonly queryCustomersItem: () => Nullable<HTMLElement>;
   readonly queryPlaceholderModalHeading: () => Nullable<HTMLElement>;
   readonly queryProfileItem: () => Nullable<HTMLElement>;
+  readonly queryServicesItem: () => Nullable<HTMLElement>;
   readonly querySettingsItem: () => Nullable<HTMLElement>;
   readonly querySubscriptionItem: () => Nullable<HTMLElement>;
 }
@@ -76,6 +79,16 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
 
   const clickCreateServiceItem = async (): Promise<void> => {
     const item = await findCreateServiceItem();
+    await user.click(item);
+  };
+
+  const clickCollaboratorsItem = async (): Promise<void> => {
+    const item = await screen.findByRole("button", {
+      name: new RegExp(
+        testI18n.t("business:layout.sidebar.collaborators"),
+        "i",
+      ),
+    });
     await user.click(item);
   };
 
@@ -175,6 +188,16 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
       ),
     });
 
+  const queryCustomersItem = (): Nullable<HTMLElement> =>
+    screen.queryByRole("button", {
+      name: new RegExp(testI18n.t("business:layout.sidebar.customers"), "i"),
+    });
+
+  const queryServicesItem = (): Nullable<HTMLElement> =>
+    screen.queryByRole("button", {
+      name: new RegExp(testI18n.t("business:layout.sidebar.services"), "i"),
+    });
+
   const querySettingsItem = (): Nullable<HTMLElement> =>
     screen.queryByRole("button", {
       name: new RegExp(testI18n.t("business:layout.sidebar.settings"), "i"),
@@ -193,6 +216,7 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
   return {
     clickCancelSignOut,
     clickClosePlaceholderModal,
+    clickCollaboratorsItem,
     clickConfirmSignOut,
     clickCreateServiceItem,
     clickCustomersItem,
@@ -213,8 +237,10 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     findSidebarNav,
     findSignOutConfirmDialog,
     queryCollaboratorsItem,
+    queryCustomersItem,
     queryPlaceholderModalHeading,
     queryProfileItem,
+    queryServicesItem,
     querySettingsItem,
     querySubscriptionItem,
   };

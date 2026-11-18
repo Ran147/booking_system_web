@@ -74,6 +74,22 @@ describe("buildAvailabilityResources", () => {
     expect(resources[1]?.bookings).toEqual([buildBooking("collaborator-b")]);
   });
 
+  it("AC-KAN-144-03: a booking staff created without a collaborator keeps every collaborator busy", () => {
+    const { resources } = buildAvailabilityResources(
+      buildData({
+        activeCollaborators: [
+          { fullName: "Ana", id: "collaborator-a" },
+          { fullName: "Beto", id: "collaborator-b" },
+        ],
+        bookings: [buildBooking(null)],
+        hasAssignedCollaborators: true,
+      }),
+    );
+
+    expect(resources[0]?.bookings).toEqual([buildBooking(null)]);
+    expect(resources[1]?.bookings).toEqual([buildBooking(null)]);
+  });
+
   it("AC-KAN-142-01: with a chosen collaborator only that collaborator is a resource", () => {
     const { resources } = buildAvailabilityResources(
       buildData({

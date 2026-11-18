@@ -13,7 +13,13 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
-import { BUSINESS_STATUS, USER_ROLE, type BusinessStatus } from "@/domain";
+import {
+  BUSINESS_STATUS,
+  COLLABORATOR_PERMISSION,
+  USER_ROLE,
+  type BusinessStatus,
+  type CollaboratorPermission,
+} from "@/domain";
 import {
   SESSION_STATUS,
   useCurrentBusiness,
@@ -37,6 +43,14 @@ import {
 import type { BusinessSidebarItem, BusinessSidebarViewModel } from "../models";
 import { calculateExpiryWarning } from "../utils";
 import type { UseBusinessSidebarViewModelOptions } from "./useBusinessSidebarViewModel.types";
+
+const COLLABORATOR_PERMISSION_BY_SIDEBAR_ITEM_ID: Partial<
+  Record<string, CollaboratorPermission>
+> = {
+  customers: COLLABORATOR_PERMISSION.MANAGE_CUSTOMERS,
+  reports: COLLABORATOR_PERMISSION.VIEW_REPORTS,
+  services: COLLABORATOR_PERMISSION.MANAGE_SERVICES,
+};
 
 export const useBusinessSidebarViewModel = (
   options: UseBusinessSidebarViewModelOptions = {},
@@ -253,9 +267,10 @@ export const useBusinessSidebarViewModel = (
       ? [
           {
             description: t("business:layout.sidebar.collaboratorsDescription"),
+            href: `${ROUTE_PATH.BUSINESS.ROOT}/${ROUTE_PATH.BUSINESS.COLLABORATORS}`,
             icon: UserCheck,
             id: "collaborators",
-            isAvailable: false,
+            isAvailable: true,
             isSubscriberOnly: true,
             label: t("business:layout.sidebar.collaborators"),
           },
@@ -283,6 +298,19 @@ export const useBusinessSidebarViewModel = (
       : []),
   ];
 
+  const collaboratorPermissions =
+    collaboratorProfileQuery.data?.permissions ?? [];
+  const navItems = isCollaborator
+    ? allNavItems.filter((item) => {
+        const requiredPermission =
+          COLLABORATOR_PERMISSION_BY_SIDEBAR_ITEM_ID[item.id];
+        return (
+          requiredPermission === undefined ||
+          collaboratorPermissions.includes(requiredPermission)
+        );
+      })
+    : allNavItems;
+
   return {
     activePlaceholderItem,
     businessError: businessProfileQuery.isError,
@@ -309,7 +337,7 @@ export const useBusinessSidebarViewModel = (
     isSubscriptionError: subscriptionQuery.isError,
     isSubscriptionLoading: subscriptionQuery.isLoading,
     logoUrl,
-    navItems: allNavItems,
+    navItems,
     planName: planQuery.data || null,
     subscription: subscriptionQuery.data ?? null,
     timeZone,

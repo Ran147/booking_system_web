@@ -1,10 +1,13 @@
 import type { RouteObject } from "react-router";
 import { ROUTE_PATH } from "@/constants";
-import { USER_ROLE } from "@/domain";
+import { COLLABORATOR_PERMISSION, USER_ROLE } from "@/domain";
 import { RequireRole } from "@/modules/auth";
 import { BUSINESS_PROFILE_ALLOWED_ROLES } from "./businessProfileAccess";
 import { BusinessLayout } from "./layout/BusinessLayout";
-import { BusinessStatusGate } from "./layout/components";
+import {
+  BusinessStatusGate,
+  RequireCollaboratorPermission,
+} from "./layout/components";
 
 // The subscriber and the collaborators of the business share this portal (Q1).
 // What a collaborator sees inside it is limited by the permissions the
@@ -35,34 +38,99 @@ export const businessRoutes: RouteObject[] = [
                     },
                     path: ROUTE_PATH.BUSINESS.BUSINESS_PROFILE,
                   },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { CollaboratorListPage } =
+                        await import("./features/collaborators");
+                      return { Component: CollaboratorListPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.COLLABORATORS,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { CollaboratorFormPage } =
+                        await import("./features/collaborators");
+                      return { Component: CollaboratorFormPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.COLLABORATOR_NEW,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { CollaboratorProfilePage } =
+                        await import("./features/collaborators");
+                      return { Component: CollaboratorProfilePage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.COLLABORATOR_DETAIL,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { CollaboratorFormPage } =
+                        await import("./features/collaborators");
+                      return { Component: CollaboratorFormPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.COLLABORATOR_EDIT,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { CollaboratorPermissionsPage } =
+                        await import("./features/collaborators");
+                      return { Component: CollaboratorPermissionsPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.COLLABORATOR_PERMISSIONS,
+                  },
                 ],
                 element: (
                   <RequireRole allowedRoles={BUSINESS_PROFILE_ALLOWED_ROLES} />
                 ),
               },
               {
-                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-                  const { ServiceListPage } =
-                    await import("./features/services");
-                  return { Component: ServiceListPage };
-                },
-                path: ROUTE_PATH.BUSINESS.SERVICES,
-              },
-              {
-                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-                  const { ServiceFormPage } =
-                    await import("./features/services");
-                  return { Component: ServiceFormPage };
-                },
-                path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
-              },
-              {
-                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-                  const { ServiceFormPage } =
-                    await import("./features/services");
-                  return { Component: ServiceFormPage };
-                },
-                path: ROUTE_PATH.BUSINESS.SERVICE_EDIT,
+                children: [
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { ServiceListPage } =
+                        await import("./features/services");
+                      return { Component: ServiceListPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.SERVICES,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { ServiceFormPage } =
+                        await import("./features/services");
+                      return { Component: ServiceFormPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.SERVICE_NEW,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { ServiceFormPage } =
+                        await import("./features/services");
+                      return { Component: ServiceFormPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.SERVICE_EDIT,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { ServiceCollaboratorsPage } =
+                        await import("./features/services");
+                      return { Component: ServiceCollaboratorsPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.SERVICE_COLLABORATORS,
+                  },
+                  {
+                    lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+                      const { ServiceDiscountsPage } =
+                        await import("./features/services");
+                      return { Component: ServiceDiscountsPage };
+                    },
+                    path: ROUTE_PATH.BUSINESS.SERVICE_DISCOUNTS,
+                  },
+                ],
+                element: (
+                  <RequireCollaboratorPermission
+                    permission={COLLABORATOR_PERMISSION.MANAGE_SERVICES}
+                  />
+                ),
               },
               {
                 lazy: async (): Promise<Pick<RouteObject, "Component">> => {
@@ -85,22 +153,6 @@ export const businessRoutes: RouteObject[] = [
                   return { Component: PasswordSettingsPage };
                 },
                 path: ROUTE_PATH.BUSINESS.SETTINGS_PASSWORD,
-              },
-              {
-                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-                  const { ServiceCollaboratorsPage } =
-                    await import("./features/services");
-                  return { Component: ServiceCollaboratorsPage };
-                },
-                path: ROUTE_PATH.BUSINESS.SERVICE_COLLABORATORS,
-              },
-              {
-                lazy: async (): Promise<Pick<RouteObject, "Component">> => {
-                  const { ServiceDiscountsPage } =
-                    await import("./features/services");
-                  return { Component: ServiceDiscountsPage };
-                },
-                path: ROUTE_PATH.BUSINESS.SERVICE_DISCOUNTS,
               },
             ],
             element: <BusinessLayout />,

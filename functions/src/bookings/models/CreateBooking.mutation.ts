@@ -1,3 +1,4 @@
+import type { BookingStatus } from "../../shared/constants/BookingStatus.constants.js";
 import type { Nullable } from "../../shared/types/Nullable.js";
 
 export interface ServiceSnapshot {
@@ -21,4 +22,6 @@ export interface CreateBookingPayload {
 export interface CreateBookingResponse {
   readonly bookingId: string;
   readonly serviceSnapshot: ServiceSnapshot;
+  /** `pending` when the business confirms bookings by hand (KAN-70). */
+  readonly status: BookingStatus;
 }
