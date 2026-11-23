@@ -28,6 +28,20 @@ export const CustomerPlaceholderPage = (): ReactElement => {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <Card className="border-border shadow-sm">
           <CardHeader>
+            <CardTitle>{t("profile.title")}</CardTitle>
+            <CardDescription>{t("profile.description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AppLink
+              className="focus-visible:outline"
+              to={`/${businessSlug}/${ROUTE_PATH.CUSTOMER.PROFILE}`}
+            >
+              {t("profile.navigation.open")}
+            </AppLink>
+          </CardContent>
+        </Card>
+        <Card className="border-border shadow-sm">
+          <CardHeader>
             <CardTitle className="text-xl font-bold text-foreground">
               {t("placeholder.bookCard.title")}
             </CardTitle>
