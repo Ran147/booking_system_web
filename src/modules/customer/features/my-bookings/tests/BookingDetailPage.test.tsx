@@ -159,6 +159,17 @@ describe("BookingDetailPage (KAN-152)", () => {
     expect(await screen.findByText("Carlos Colaborador")).toBeInTheDocument();
   });
 
+  it("AC-KAN-152-08: the collaborator name comes in the booking itself, so it stays after the collaborator is made inactive, with no contact data", async () => {
+    const fetchSpy = vi
+      .spyOn(fetchMyBookingModule, "fetchMyBooking")
+      .mockResolvedValue(BOOKING);
+    renderDetail();
+
+    expect(await screen.findByText("Carlos Colaborador")).toBeInTheDocument();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(/@/)).not.toBeInTheDocument();
+  });
+
   it("AC-KAN-152-07: without a collaborator it shows the business resource label", async () => {
     vi.spyOn(fetchMyBookingModule, "fetchMyBooking").mockResolvedValue({
       ...BOOKING,

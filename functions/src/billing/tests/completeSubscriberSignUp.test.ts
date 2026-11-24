@@ -100,11 +100,15 @@ describe("completeSubscriberSignUp", () => {
       status: "pending",
       timeZone: "America/Mexico_City",
     });
-    expect(userRecord.customClaims).toMatchObject({
+    expect(userRecord.customClaims).toEqual({
       businessId: businessSnapshot?.id,
-      business_id: businessSnapshot?.id,
-      role: "business_owner",
+      role: "subscriber",
     });
+    // Q10: only the canonical field names are written.
+    expect(businessSnapshot?.data()).toMatchObject({
+      ownerUserId: userRecord.uid,
+    });
+    expect(businessSnapshot?.data()).not.toHaveProperty("owner_id");
 
     const ownerCollaboratorSnapshot = await businessSnapshot!.ref
       .collection(FIRESTORE_COLLECTION.COLLABORATORS)
@@ -126,6 +130,12 @@ describe("completeSubscriberSignUp", () => {
       language: "es",
       phone: "+52 55 1234 5678",
     });
+    // Q10: the profile matches the claims and has no legacy names.
+    expect(userSnapshot.data()).toMatchObject({
+      businessId: businessSnapshot?.id,
+      role: "subscriber",
+    });
+    expect(userSnapshot.data()).not.toHaveProperty("business_id");
 
     const paymentsSnapshot = await businessSnapshot!.ref
       .collection(FIRESTORE_COLLECTION.PAYMENTS)
@@ -273,7 +283,7 @@ describe("completeSubscriberSignUp", () => {
 
     expect(signUpResponse).toEqual({ email: TEST_CHECKOUT_EMAIL });
     const userRecord = await auth.getUserByEmail(TEST_CHECKOUT_EMAIL);
-    expect(userRecord.customClaims).toMatchObject({ role: "business_owner" });
+    expect(userRecord.customClaims).toMatchObject({ role: "subscriber" });
     expect(wait).toHaveBeenCalledExactlyOnceWith(
       SIGN_UP_CLAIMS_RETRY_DELAY_MILLISECONDS,
     );

@@ -4,10 +4,15 @@ import {
   httpsCallable,
   type FunctionsErrorCodeCore,
 } from "firebase/functions";
-import { HTTP_STATUS, type FunctionName } from "@/constants";
+import {
+  FIREBASE_ERROR_CODE,
+  HTTP_STATUS,
+  type FunctionName,
+} from "@/constants";
 import type { Nullable } from "@/types";
 import { executeClientFunctionsFallback } from "./clientFunctionsFallback";
 import { functions } from "./firebaseApp";
+import { readAuthorizationHeader } from "./readAuthorizationHeader";
 
 interface CallFunctionErrorPayload {
   readonly code?: string;
@@ -15,6 +20,22 @@ interface CallFunctionErrorPayload {
   readonly error?: string;
   readonly message?: string;
 }
+
+// A callable that answers with one of these codes exists and rejected the
+// request on purpose (bad payload, reCAPTCHA, permissions, a taken slot). The
+// client simulation only stands in for a missing server, so it must never
+// turn one of these answers into a success.
+const DELIBERATE_REJECTION_CODES: ReadonlySet<string> = new Set([
+  FIREBASE_ERROR_CODE.FAILED_PRECONDITION,
+  FIREBASE_ERROR_CODE.FUNCTIONS_ALREADY_EXISTS,
+  FIREBASE_ERROR_CODE.FUNCTIONS_INVALID_ARGUMENT,
+  FIREBASE_ERROR_CODE.FUNCTIONS_PERMISSION_DENIED,
+  FIREBASE_ERROR_CODE.FUNCTIONS_RESOURCE_EXHAUSTED,
+  FIREBASE_ERROR_CODE.FUNCTIONS_UNAUTHENTICATED,
+]);
+
+const isDeliberateRejection = (error: unknown): boolean =>
+  error instanceof FirebaseError && DELIBERATE_REJECTION_CODES.has(error.code);
 
 export const callFunction = async <Payload, Response>(
   functionName: FunctionName,
@@ -24,7 +45,10 @@ export const callFunction = async <Payload, Response>(
     try {
       const serverResponse = await fetch("/api/callFunction", {
         body: JSON.stringify({ functionName, payload }),
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(await readAuthorizationHeader()),
+        },
         method: "POST",
       });
 
@@ -40,18 +64,31 @@ export const callFunction = async <Payload, Response>(
           // Response is not JSON (e.g. 404 HTML on static host), fall through to callable
         }
 
+        // Without admin credentials (local runs against the emulators) or
+        // without a handler, the server cannot answer: use the callable.
+        let isCredentialOrHandlerMissing = false;
+
         if (errorJson) {
-          const rawCode = (
-            errorJson.code ||
-            errorJson.error ||
-            "internal"
-          ).replace("functions/", "") as FunctionsErrorCodeCore;
-          const errorMessage =
-            errorJson.message || errorJson.error || "Function call failed";
-          throw new FunctionsError(rawCode, errorMessage, errorJson.details);
+          const rawErrorMessage = errorJson.message || errorJson.error || "";
+          isCredentialOrHandlerMissing =
+            rawErrorMessage.includes("Firebase credentials not found") ||
+            rawErrorMessage.includes("not implemented in server handler");
+
+          if (!isCredentialOrHandlerMissing) {
+            const rawCode = (
+              errorJson.code ||
+              errorJson.error ||
+              "internal"
+            ).replace("functions/", "") as FunctionsErrorCodeCore;
+            const errorMessage = rawErrorMessage || "Function call failed";
+            throw new FunctionsError(rawCode, errorMessage, errorJson.details);
+          }
         }
 
-        if (serverResponse.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {
+        if (
+          !isCredentialOrHandlerMissing &&
+          serverResponse.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR
+        ) {
           throw new FunctionsError(
             "internal",
             `El servidor respondió con un error (${serverResponse.status}).`,
@@ -73,7 +110,10 @@ export const callFunction = async <Payload, Response>(
     const callableResult = await callable(payload);
     return callableResult.data;
   } catch (cloudFunctionsError) {
-    if (!import.meta.env.VITEST) {
+    if (
+      !import.meta.env.VITEST &&
+      !isDeliberateRejection(cloudFunctionsError)
+    ) {
       try {
         return await executeClientFunctionsFallback<Payload, Response>(
           functionName,

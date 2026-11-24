@@ -4,6 +4,7 @@
 // top-level route adds its segment here in the same PR.
 export const RESERVED_BUSINESS_SLUG = Object.freeze({
   ABOUT: "about",
+  ACCEPT_INVITATION: "accept-invitation",
   ADMIN: "admin",
   BUSINESS: "business",
   CONTACT: "contact",

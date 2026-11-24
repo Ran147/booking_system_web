@@ -1,0 +1,8 @@
+import { BUTTON_SIZE } from "@/components/common";
+
+export const BUSINESS_HOURS_DAY_ROW_CONFIG = Object.freeze({
+  ADD_RANGE_BUTTON_SIZE: BUTTON_SIZE.SM,
+  REMOVE_RANGE_BUTTON_SIZE: BUTTON_SIZE.ICON,
+  TIME_INPUT_TYPE: "time",
+  TOGGLE_BUTTON_SIZE: BUTTON_SIZE.SM,
+} as const);

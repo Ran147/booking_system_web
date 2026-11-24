@@ -1,4 +1,7 @@
 {
+  "actions": {
+    "cancel": "Cancelar"
+  },
   "auth": {
     "idle": {
       "signOutAction": "Cerrar sesión",
@@ -6,6 +9,23 @@
       "stayConnectedAction": "Seguir conectado",
       "warningMessage": "Tu sesión se cerrará en {{count}} segundos por inactividad.",
       "warningTitle": "¿Sigues ahí?"
+    },
+    "invitation": {
+      "businessContext": "Invitación para unirte a {{businessName}} ({{email}}).",
+      "confirmationLabel": "Confirma tu contraseña",
+      "emailAlreadyInUse": "Ya existe una cuenta registrada con ese correo.",
+      "linkInvalid": "Esta invitación venció, ya fue utilizada o no es válida.",
+      "newPasswordLabel": "Contraseña",
+      "recaptchaLabel": "Verificación de seguridad",
+      "signInAction": "Ir a iniciar sesión",
+      "submitAction": "Activar mi cuenta",
+      "submittingLabel": "Activando cuenta…",
+      "subtitle": "Crea tu contraseña para acceder al portal de colaborador.",
+      "success": "Tu cuenta ya está activa. Ya puedes iniciar sesión.",
+      "title": "Aceptar invitación de colaborador",
+      "tooManyRequests": "Hiciste demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
+      "validating": "Validando invitación…",
+      "weakPassword": "La contraseña debe cumplir las reglas mínimas de seguridad."
     },
     "password": {
       "hide": "Ocultar contraseña",
@@ -78,6 +98,11 @@
     "confirmed": "Confirmada",
     "no_show": "No se presentó",
     "pending": "Pendiente de confirmación"
+  },
+  "collaboratorStatus": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "invited": "Invitado"
   },
   "errors": {
     "network": "Sin conexión. Revisa tu internet e inténtalo de nuevo.",
