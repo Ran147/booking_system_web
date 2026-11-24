@@ -8,7 +8,7 @@
 | Estado | Borrador para revisión |
 | SPEC de la feature | `src/modules/landing/features/plan-checkout/specs/SPEC.md` (AC-KAN-22-01 … 11, AS-9, AS-13) |
 | Specs base | `docs/specs/2026-10-17-US-KAN-22-pago-del-plan.md` (§4, pantalla) y `docs/specs/2026-10-31-US-KAN-22-pago-real-api.md` (la acción `payPlanCheckout` de `api/`) |
-| Depende de | PR #65 (pago real en `api/`), que a su vez depende de #64 |
+| Depende de | PR #65 (pago real en `api/` con el handler compartido) |
 
 ---
 
