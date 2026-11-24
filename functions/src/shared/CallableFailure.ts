@@ -6,7 +6,8 @@ export type CallableFailureCode =
   | "invalid-argument"
   | "not-found"
   | "permission-denied"
-  | "unauthenticated";
+  | "unauthenticated"
+  | "unavailable";
 
 export class CallableFailure extends Error {
   public readonly code: CallableFailureCode;
