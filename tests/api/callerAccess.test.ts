@@ -305,7 +305,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
   });
 
   describe("business settings (owner only)", () => {
-    it("KAN-63: the owner changes the confirmation mode of their business", async () => {
+    it("KAN-70: the owner changes the confirmation mode of their business", async () => {
       const result = await callAs("updateConfirmationMode", ID_TOKEN.OWNER);
 
       expect(result.statusCode).toBe(HTTP_STATUS.OK);
@@ -315,7 +315,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
     });
 
     it.each(["updateConfirmationMode", "updateBusinessHours"] as const)(
-      "KAN-63: %s is denied to a collaborator, even with every permission, and the business is left as it is",
+      "KAN-64, KAN-70: %s is denied to a collaborator, even with every permission, and the business is left as it is",
       async (functionName) => {
         grantCollaborator([
           "manage_bookings",
@@ -335,7 +335,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
   });
 
   describe("schedule blocks", () => {
-    it("KAN-63: a collaborator with manage_schedule_blocks creates and deletes blocks", async () => {
+    it("KAN-65, KAN-66: a collaborator with manage_schedule_blocks creates and deletes blocks", async () => {
       grantCollaborator(["manage_schedule_blocks"]);
 
       const createResult = await callAs(
@@ -352,20 +352,32 @@ describe("api callFunction: caller access (KAN-59)", () => {
       expect(firebaseAdminFake.documents.has(SCHEDULE_BLOCK_PATH)).toBe(false);
     });
 
-    it("KAN-63: a collaborator without manage_schedule_blocks cannot delete a block", async () => {
+    it("AC-KAN-66-09: a collaborator without manage_schedule_blocks cannot create a block", async () => {
+      const documentsBefore = readDocumentsCopy();
+
+      const result = await callAs("createScheduleBlock", ID_TOKEN.COLLABORATOR);
+
+      expect(result).toMatchObject({
+        body: { error: "permission-denied" },
+        statusCode: HTTP_STATUS.FORBIDDEN,
+      });
+      expect(firebaseAdminFake.documents).toEqual(documentsBefore);
+    });
+
+    it("KAN-65: a collaborator without manage_schedule_blocks cannot delete a block", async () => {
       const result = await callAs("deleteScheduleBlock", ID_TOKEN.COLLABORATOR);
 
       expect(result.statusCode).toBe(HTTP_STATUS.FORBIDDEN);
       expect(firebaseAdminFake.documents.has(SCHEDULE_BLOCK_PATH)).toBe(true);
     });
 
-    it("KAN-63: any active collaborator of the business reads its blocks", async () => {
+    it("KAN-67: any active collaborator of the business reads its blocks", async () => {
       const result = await callAs("fetchScheduleBlocks", ID_TOKEN.COLLABORATOR);
 
       expect(result.statusCode).toBe(HTTP_STATUS.OK);
     });
 
-    it("KAN-63: the owner of another business cannot read the blocks", async () => {
+    it("KAN-67: the owner of another business cannot read the blocks", async () => {
       const result = await callAs("fetchScheduleBlocks", ID_TOKEN.OTHER_OWNER);
 
       expect(result.statusCode).toBe(HTTP_STATUS.FORBIDDEN);
@@ -373,7 +385,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
   });
 
   describe("business bookings (manage_bookings)", () => {
-    it("KAN-63: a collaborator with manage_bookings reads the booking history and confirms a booking", async () => {
+    it("KAN-70, KAN-76: a collaborator with manage_bookings reads the booking history and confirms a booking", async () => {
       grantCollaborator(["manage_bookings"]);
       firebaseAdminFake.documents.set(BOOKING_PATH, {
         customerUserId: "customer-a",
@@ -395,7 +407,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
     });
 
     it.each(["fetchBookingHistory", "updateBookingStatus"] as const)(
-      "KAN-63: %s is denied to a collaborator without manage_bookings",
+      "KAN-70, KAN-76: %s is denied to a collaborator without manage_bookings",
       async (functionName) => {
         const bookingBefore = firebaseAdminFake.documents.get(BOOKING_PATH);
 
@@ -410,7 +422,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
   });
 
   describe("cancel and reschedule", () => {
-    it("KAN-63: the customer of the booking cancels it", async () => {
+    it("KAN-159: the customer of the booking cancels it", async () => {
       const result = await callAs("cancelBooking", ID_TOKEN.CUSTOMER);
 
       expect(result.statusCode).toBe(HTTP_STATUS.OK);
@@ -420,7 +432,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
     });
 
     it.each(["cancelBooking", "rescheduleBooking"] as const)(
-      "KAN-63: %s is denied to another customer and the booking is left as it is",
+      "KAN-158, KAN-159: %s is denied to another customer and the booking is left as it is",
       async (functionName) => {
         const bookingBefore = firebaseAdminFake.documents.get(BOOKING_PATH);
 
@@ -433,7 +445,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
       },
     );
 
-    it("KAN-63: a collaborator without manage_bookings cannot cancel a booking", async () => {
+    it("KAN-72: a collaborator without manage_bookings cannot cancel a booking", async () => {
       const result = await callAs("cancelBooking", ID_TOKEN.COLLABORATOR);
 
       expect(result.statusCode).toBe(HTTP_STATUS.FORBIDDEN);

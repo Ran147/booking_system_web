@@ -77,14 +77,14 @@ El cliente convierte esas respuestas en `FunctionsError` y la pantalla muestra `
 | Token inválido → `401` | quién llama |
 | Servicios: dueño (con y sin claims) y colaborador con `manage_services` permitidos; dueño de otro negocio, colaborador sin permiso o inactivo, y colaborador que elimina → `403` | servicios |
 | Configuración: el dueño cambia el modo de confirmación; un colaborador con todos los permisos → `403` en horario y modo, y el negocio no cambia | solo dueño |
-| Bloqueos: colaborador con `manage_schedule_blocks` crea y elimina; sin el permiso → `403`; cualquier colaborador activo lee; dueño de otro negocio → `403` | agenda |
+| Bloqueos: colaborador con `manage_schedule_blocks` crea y elimina; sin el permiso no crea (AC-KAN-66-09) ni elimina → `403`; cualquier colaborador activo lee; dueño de otro negocio → `403` | agenda |
 | Reservas del negocio: colaborador con `manage_bookings` lee el historial y confirma; sin el permiso → `403` y la reserva no cambia | reservas |
 | Cancelar / reprogramar: el cliente de la reserva cancela; otro cliente → `403` en ambas; colaborador sin permiso → `403` | reservas del cliente |
 | `createBooking`: el cliente reserva siempre a su nombre aunque mande otro `customerId`; dueño de otro negocio → `403` | nueva reserva |
 | `getAvailability`: cliente permitido; dueño → `403` | disponibilidad |
 | Acción pública sin token funciona; acción no declarada → `403` | sin regresión, negar por defecto |
 
-Con el control desactivado (todo permitido), 32 de los 43 tests fallan.
+Cada test cita la historia que cubre (KAN-64 a KAN-76 de agenda, KAN-158/KAN-159 del cliente). Con el control desactivado (todo permitido), 33 de los 44 tests fallan.
 
 ## 6. Prueba manual (base real)
 
