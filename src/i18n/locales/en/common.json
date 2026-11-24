@@ -1,4 +1,7 @@
 {
+  "actions": {
+    "cancel": "Cancel"
+  },
   "auth": {
     "idle": {
       "signOutAction": "Sign out",
@@ -6,6 +9,23 @@
       "stayConnectedAction": "Stay signed in",
       "warningMessage": "Your session will end in {{count}} seconds because of inactivity.",
       "warningTitle": "Are you still there?"
+    },
+    "invitation": {
+      "businessContext": "Invitation to join {{businessName}} ({{email}}).",
+      "confirmationLabel": "Confirm your password",
+      "emailAlreadyInUse": "An account already exists for that email.",
+      "linkInvalid": "This invitation has expired, was already used, or is not valid.",
+      "newPasswordLabel": "Password",
+      "recaptchaLabel": "Security check",
+      "signInAction": "Go to sign in",
+      "submitAction": "Activate my account",
+      "submittingLabel": "Activating account…",
+      "subtitle": "Create your password to access the collaborator portal.",
+      "success": "Your account is active. You can now sign in.",
+      "title": "Accept collaborator invitation",
+      "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
+      "validating": "Validating invitation…",
+      "weakPassword": "The password must meet the minimum security rules."
     },
     "password": {
       "hide": "Hide password",
@@ -78,6 +98,11 @@
     "confirmed": "Confirmed",
     "no_show": "No-show",
     "pending": "Pending confirmation"
+  },
+  "collaboratorStatus": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "invited": "Invited"
   },
   "errors": {
     "network": "You are offline. Check your connection and try again.",

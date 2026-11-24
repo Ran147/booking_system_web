@@ -9,3 +9,4 @@ export type {
   MyBookingsFiltersViewModel,
   MyBookingsViewModel,
 } from "./models";
+export { buildBookingDetailPath } from "./utils/buildBookingDetailPath";
