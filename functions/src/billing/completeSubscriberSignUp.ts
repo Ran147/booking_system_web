@@ -99,7 +99,6 @@ const writeSignUpDocuments = async (
     createdAt,
     id: businessReference.id,
     name: signUpPayload.businessName,
-    owner_id: signUpAccount.userId,
     ownerUserId: signUpAccount.userId,
     plan_id: planCheckout.planId,
     planCheckoutId: planCheckoutReference.id,
@@ -110,14 +109,13 @@ const writeSignUpDocuments = async (
   transaction.create(
     firestore.collection(FIRESTORE_COLLECTION.USERS).doc(signUpAccount.userId),
     {
-      business_id: businessReference.id,
       businessId: businessReference.id,
       createdAt,
       email: signUpAccount.email,
       fullName: signUpAccount.fullName,
       language: signUpPayload.language,
       phone: signUpPayload.phone === STRING.EMPTY ? null : signUpPayload.phone,
-      role: USER_ROLE.BUSINESS_OWNER,
+      role: USER_ROLE.SUBSCRIBER,
       uid: signUpAccount.userId,
     },
   );
@@ -142,7 +140,7 @@ const writeSignUpDocuments = async (
       COLLABORATOR_PERMISSION.VIEW_REPORTS,
     ],
     phone: signUpPayload.phone === STRING.EMPTY ? null : signUpPayload.phone,
-    service_ids: [],
+    serviceIds: [],
     status: COLLABORATOR_STATUS.ACTIVE,
     uid: signUpAccount.userId,
   });
@@ -230,8 +228,7 @@ const setSubscriberClaims = async (
     try {
       await auth.setCustomUserClaims(userId, {
         businessId,
-        business_id: businessId,
-        role: USER_ROLE.BUSINESS_OWNER,
+        role: USER_ROLE.SUBSCRIBER,
       });
       return;
     } catch (error) {

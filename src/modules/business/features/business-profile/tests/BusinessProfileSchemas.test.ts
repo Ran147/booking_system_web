@@ -1,5 +1,4 @@
-import { BUSINESS_STATUS } from "@/domain";
-import { BusinessPublicProfileDocumentSchema } from "../api/BusinessPublicProfileDocument.schema";
+import { BUSINESS_STATUS, BusinessPublicProfileDocumentSchema } from "@/domain";
 import { BusinessProfileFormSchema } from "../schemas/BusinessProfileForm.schema";
 
 const validFormValues = {

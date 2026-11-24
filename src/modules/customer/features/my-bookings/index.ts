@@ -6,5 +6,7 @@ export type {
   BookingDetailView,
   BookingDetailViewModel,
   MyBookingRow,
+  MyBookingsFiltersViewModel,
   MyBookingsViewModel,
 } from "./models";
+export { buildBookingDetailPath } from "./utils/buildBookingDetailPath";

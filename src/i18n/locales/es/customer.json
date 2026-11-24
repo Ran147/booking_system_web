@@ -1,5 +1,97 @@
 {
+  "availability": {
+    "backToServices": "Elegir otro servicio",
+    "continueAction": "Continuar",
+    "dateGroupLabel": "Días de la semana",
+    "dayUnavailable": "No hay reservas este día",
+    "errors": {
+      "businessUnavailable": "Este negocio no está recibiendo reservas en este momento.",
+      "collaboratorUnavailable": "La persona que elegiste ya no atiende este servicio. Elige de nuevo.",
+      "serviceUnavailable": "Este servicio ya no está disponible."
+    },
+    "nextWeek": "Semana siguiente",
+    "previousWeek": "Semana anterior",
+    "retryAction": "Reintentar",
+    "slots": {
+      "emptyDay": "No quedan horarios libres este día. Elige otra fecha.",
+      "groupLabel": "Horarios libres",
+      "noCollaborator": "Ahora mismo nadie puede atender este servicio.",
+      "notConfigured": "Este negocio todavía no configuró su horario de atención."
+    },
+    "subtitle": "{{service}}: elige un día y un horario libre.",
+    "timeZoneNote": "Los horarios están en la zona horaria del negocio ({{timeZone}}).",
+    "title": "Elige fecha y hora"
+  },
+  "bookingCheckout": {
+    "changeServiceAction": "Cambiar servicio",
+    "changeTimeAction": "Cambiar horario",
+    "confirm": {
+      "action": "Confirmar reserva",
+      "chooseAnotherTime": "Elegir otro horario",
+      "customerBlockedError": "No puedes reservar en este negocio. Comunícate con el negocio para más información.",
+      "serviceChangedError": "El precio o la duración de este servicio cambiaron. Revisa el resumen y confirma de nuevo.",
+      "slotTakenError": "Ese horario se acaba de ocupar. Elige otro horario.",
+      "submitting": "Confirmando…",
+      "unavailableError": "Este negocio o servicio no está recibiendo reservas en este momento."
+    },
+    "policies": {
+      "acknowledge": "Leí y acepto las políticas de reserva",
+      "noPolicyEmpty": "Este negocio no tiene políticas de reserva.",
+      "penalty": "Penalización: {{penalty}}",
+      "title": "Políticas de reserva",
+      "window": "Puedes cancelar o reprogramar hasta {{hours}} horas antes de la reserva."
+    },
+    "retryAction": "Reintentar",
+    "subtitle": "Revisa los datos antes de confirmar.",
+    "success": {
+      "backToBusinessAction": "Volver al negocio",
+      "confirmedTitle": "Tu reserva está confirmada",
+      "myBookingsAction": "Ir a mis reservas",
+      "pendingDescription": "El negocio la confirmará pronto. Puedes seguirla en Mis reservas.",
+      "pendingTitle": "Tu reserva espera la confirmación del negocio"
+    },
+    "summary": {
+      "anyCollaborator": "Cualquier persona disponible",
+      "business": "Negocio",
+      "collaborator": "Te atiende",
+      "date": "Fecha",
+      "duration": "Duración",
+      "durationValue": "{{minutes}} min",
+      "label": "Resumen de la reserva",
+      "originalPrice": "Precio sin descuento: {{price}}",
+      "price": "Precio",
+      "service": "Servicio",
+      "time": "Horario",
+      "timeZoneNote": "Los horarios están en la zona horaria del negocio ({{timeZone}})."
+    },
+    "title": "Revisa y confirma"
+  },
   "layout": {
+    "businessNotFound": "No encontramos el negocio solicitado.",
+    "footer": {
+      "contact": {
+        "emailLabel": "Enviar un correo electrónico a {{email}}",
+        "phoneLabel": "Llamar al {{phone}}",
+        "title": "Contacto"
+      },
+      "landmarkLabel": "Pie de página del negocio",
+      "social": {
+        "linkLabel": "Abrir {{network}} de {{businessName}} en una pestaña nueva",
+        "network": {
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "tiktok": "TikTok",
+          "website": "Sitio web",
+          "whatsapp": "WhatsApp"
+        },
+        "title": "Redes sociales"
+      },
+      "terms": {
+        "linkLabel": "Abrir los términos y condiciones en una pestaña nueva",
+        "navigationLabel": "Información legal",
+        "text": "Términos y condiciones"
+      }
+    },
     "title": "Portal del cliente"
   },
   "myBookings": {
@@ -28,6 +120,17 @@
       "status": "Estado",
       "title": "Detalle de la reserva"
     },
+    "filters": {
+      "all": "Todos",
+      "business": "Negocio",
+      "clearAction": "Limpiar filtros",
+      "from": "Desde",
+      "invalidRangeError": "La fecha final no puede ser anterior a la inicial.",
+      "label": "Filtros de reservas",
+      "noResultsEmpty": "Ninguna reserva coincide con los filtros.",
+      "status": "Estado",
+      "to": "Hasta"
+    },
     "history": {
       "empty": "Todavía no tienes reservas pasadas."
     },
@@ -54,7 +157,25 @@
     }
   },
   "placeholder": {
+    "bookCard": {
+      "action": "Reservar",
+      "description": "Elige un servicio, un día y un horario libre.",
+      "title": "Reservar una cita"
+    },
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
+  },
+  "serviceSelection": {
+    "continueAction": "Continuar",
+    "errors": {
+      "serviceRequired": "Elige un servicio para continuar."
+    },
+    "groupLabel": "Servicios",
+    "list": {
+      "empty": "Este negocio todavía no tiene servicios para reservar."
+    },
+    "serviceDetail": "{{minutes}} min · {{price}}",
+    "subtitle": "Elige el servicio que quieres reservar.",
+    "title": "Reservar una cita"
   }
 }

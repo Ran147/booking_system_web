@@ -4,4 +4,5 @@ export const SEARCH_PARAM = {
   REDIRECT_TO: "redirectTo",
   SEARCH: "q",
   STATUS: "status",
+  TOKEN: "token",
 } as const;

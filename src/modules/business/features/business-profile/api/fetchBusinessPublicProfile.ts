@@ -1,8 +1,10 @@
 import { doc, getDoc } from "firebase/firestore";
 import { FIRESTORE_COLLECTION } from "@/constants";
-import type { BusinessPublicProfile } from "@/domain";
+import {
+  BusinessPublicProfileDocumentSchema,
+  type BusinessPublicProfile,
+} from "@/domain";
 import { firestore } from "@/services";
-import { BusinessPublicProfileDocumentSchema } from "./BusinessPublicProfileDocument.schema";
 
 export const fetchBusinessPublicProfile = async (
   businessId: string,

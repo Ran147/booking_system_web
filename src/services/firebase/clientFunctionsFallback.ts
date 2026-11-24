@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   updateProfile,
 } from "firebase/auth";
@@ -103,7 +104,6 @@ const handleCompleteSubscriberSignUpFallback = async (
       id: businessId,
       logoUrl: null,
       name: businessName,
-      owner_id: userId,
       ownerUserId: userId,
       plan_id: "plan-pro",
       reviewed_by: null,
@@ -126,13 +126,12 @@ const handleCompleteSubscriberSignUpFallback = async (
   batch.set(
     doc(firestore, "users", userId),
     {
-      business_id: businessId,
       businessId,
       email,
       fullName,
       language: "en",
       phone,
-      role: "business_owner",
+      role: "subscriber",
       theme: "system",
       uid: userId,
     },
@@ -161,7 +160,7 @@ const handleCompleteSubscriberSignUpFallback = async (
       view_reports: true,
     },
     phone,
-    service_ids: ["service-default"],
+    serviceIds: ["service-default"],
     status: "active",
     uid: userId,
   });
@@ -216,7 +215,18 @@ export const executeClientFunctionsFallback = async <Payload, Response>(
     return { isVerified: true } as Response;
   }
 
+  if (functionName === FUNCTION_NAME.SEND_CONTACT_MESSAGE) {
+    return { isSent: true } as Response;
+  }
+
   if (functionName === FUNCTION_NAME.REQUEST_PASSWORD_RESET) {
+    // Firebase Auth emails its reset template (US-36). A failure is swallowed
+    // so the answer never reveals whether the account exists (AC-KAN-36-02).
+    try {
+      await sendPasswordResetEmail(auth, String(genericPayload.email ?? ""));
+    } catch {
+      // Same answer either way.
+    }
     return { isRequested: true } as Response;
   }
 

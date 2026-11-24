@@ -1,7 +1,9 @@
 import { waitFor } from "@testing-library/react";
 import type { RouteObject } from "react-router";
 import { describe, expect, it, vi } from "vitest";
+import { BUSINESS_STATUS } from "@/domain";
 import { customerRoutes } from "@/modules/customer";
+import { fetchBusinessPublicProfileBySlug } from "@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug";
 import {
   renderRoutesWithProviders,
   SIGNED_OUT_SESSION,
@@ -14,6 +16,22 @@ const MY_BOOKINGS_PATH = "/barberia-centro/my-bookings";
 const SIGN_IN_PATH = "/sign-in";
 const BUSINESS_PATH = "/business";
 const ADMIN_PATH = "/admin";
+
+vi.mock("@/modules/customer/layout/api/fetchBusinessPublicProfileBySlug");
+
+beforeEach(() => {
+  vi.mocked(fetchBusinessPublicProfileBySlug).mockResolvedValue({
+    contactEmail: null,
+    contactPhone: null,
+    description: null,
+    id: "business-id",
+    logoUrl: null,
+    name: "Barbería Centro",
+    slug: "barberia-centro",
+    socialLinks: [],
+    status: BUSINESS_STATUS.ACTIVE,
+  });
+});
 
 // Static portals rank above the /:businessSlug segment (Q4).
 const routes: RouteObject[] = [

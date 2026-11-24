@@ -1,7 +1,21 @@
-export { ContactPage } from "./components/ContactPage";
-export { useContactViewModel } from "./hooks/useContactViewModel";
+export { ContactPage, type ContactPageProps } from "./ContactPage";
+export { ContactDirectChannels } from "./components/ContactDirectChannels";
 export type {
   ContactChannelItem,
-  ContactFaqItem,
-  ContactViewModel,
-} from "./models/contact.model";
+  ContactDirectChannelsProps,
+  ContactSocialChannelItem,
+  UseContactChannelsViewModelReturn,
+} from "./components/ContactDirectChannels.types";
+export { ContactForm } from "./components/ContactForm";
+export {
+  CONTACT_CHANNEL_ICON,
+  CONTACT_CHANNEL_TYPE,
+  CONTACT_SOCIAL_NETWORKS,
+  CONTACT_TARGET,
+} from "./constants/contactChannels.constants";
+export { useContactChannelsViewModel } from "./hooks/useContactChannelsViewModel";
+export type { ContactFormProps } from "./models/contactForm.model";
+export {
+  contactFormSchema,
+  type ContactFormData,
+} from "./models/contactForm.schema";

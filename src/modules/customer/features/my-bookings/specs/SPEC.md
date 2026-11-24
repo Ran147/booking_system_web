@@ -44,7 +44,7 @@ A signed-in `customer` sees their upcoming bookings, their past bookings as a hi
 - [x] **AC-KAN-151-01** · happy · Given a signed-in `customer` with `pending` and `confirmed` bookings whose `startsAt` is in the future, when they open "My bookings", then those bookings are listed in ascending `startsAt` order, each with the business name, the service name, the date and start time in that business's `timeZone` and a status badge. [KAN-151]
 - [x] **AC-KAN-151-02** · happy · Given more upcoming bookings than one page holds, when the customer moves to the next or previous page, then the server returns only that page and the total count is shown. See AS-2. [KAN-151]
 - [x] **AC-KAN-151-03** · edge · Given a customer with no upcoming bookings, when they open the list, then `customer:myBookings.upcoming.empty` is shown. [KAN-151]
-- [ ] **AC-KAN-151-04** · edge · Given a `cancelled` booking whose `startsAt` is still in the future, when the upcoming list is shown, then that booking is not in it (it appears in the history). See AS-3. [KAN-151]
+- [x] **AC-KAN-151-04** · edge · Given a `cancelled` booking whose `startsAt` is still in the future, when the upcoming list is shown, then that booking is not in it (it appears in the history). See AS-3. [KAN-151]
 - [x] **AC-KAN-151-05** · error · Given the list cannot be loaded because of the network, when the customer opens it, then an error state with `common:errors.network` and a retry action is shown instead of the list. [KAN-151]
 - [x] **AC-KAN-151-06** · error · Given a visitor who is not signed in, or a signed-in `subscriber` or `super_admin`, when they open "My bookings", then the visitor is sent to sign-in and the other roles are sent to their own portal; no booking data is shown. [KAN-151]
 
@@ -56,24 +56,24 @@ A signed-in `customer` sees their upcoming bookings, their past bookings as a hi
 - [x] **AC-KAN-152-05** · edge · Given a booking that was rescheduled, when its detail is shown, then the current date and time are shown (the ones in `startsAt` / `endsAt`), not the original ones. [KAN-152, KAN-158]
 - [x] **AC-KAN-152-06** · edge · Given the service was renamed or its price changed after the booking was made, when the detail is shown, then the name and price are those of `serviceSnapshot`, not the current service. [KAN-152, KAN-62]
 - [x] **AC-KAN-152-07** · happy · Given a booking with a `collaboratorId`, when its detail is shown, then it shows the collaborator's full name under `customer:myBookings.detail.collaborator`; given a booking whose `collaboratorId` is `null` (the service has no collaborator), then `customer:myBookings.detail.businessResource` is shown instead. See AS-6. [KAN-152]
-- [ ] **AC-KAN-152-08** · edge · Given the booking's collaborator was later made `inactive`, when the detail is shown, then their full name is still shown; no contact data of the collaborator is shown. See AS-6. [KAN-152, KAN-83]
-- [ ] **AC-KAN-152-09** · error · Given the collaborator's name cannot be loaded (network), when the detail is shown, then the rest of the detail is still shown and the collaborator line shows `common:errors.network` with a retry action. [KAN-152]
+- [x] **AC-KAN-152-08** · edge · Given the booking's collaborator was later made `inactive`, when the detail is shown, then their full name is still shown; no contact data of the collaborator is shown. See AS-6. [KAN-152, KAN-83]
+- [x] ~~**AC-KAN-152-09** · error · Given the collaborator's name cannot be loaded (network), when the detail is shown, then the rest of the detail is still shown and the collaborator line shows `common:errors.network` with a retry action. [KAN-152]~~ Does not apply after D-1: the collaborator name comes in the same read as the booking, so it cannot fail on its own.
 
 ### KAN-153 — See my past bookings (history)
 - [x] **AC-KAN-153-01** · happy · Given a customer with bookings whose `startsAt` has passed and bookings that are `cancelled`, when they open the history, then those bookings are listed in descending `startsAt` order with business, service, date and time in the business `timeZone` and status (`completed`, `no_show`, `cancelled`, or `pending` / `confirmed` not yet updated by the business). See AS-3. [KAN-153]
-- [ ] **AC-KAN-153-02** · happy · Given more past bookings than one page holds, when the customer pages through the history, then pages come from the server with cursors and the total count is shown. See AS-2. [KAN-153]
+- [x] **AC-KAN-153-02** · happy · Given more past bookings than one page holds, when the customer pages through the history, then pages come from the server with cursors and the total count is shown. See AS-2. [KAN-153]
 - [x] **AC-KAN-153-03** · edge · Given a customer with no past bookings, when they open the history, then `customer:myBookings.history.empty` is shown. [KAN-153]
 - [x] **AC-KAN-153-04** · error · Given the history cannot be loaded because of the network, when the customer opens it, then an error state with `common:errors.network` and a retry action is shown. [KAN-153]
-- [ ] **AC-KAN-153-05** · edge · Given a business that is now `inactive` or `suspended`, when the customer views the history, then their past bookings at that business are still shown. [KAN-153]
+- [x] **AC-KAN-153-05** · edge · Given a business that is now `inactive` or `suspended`, when the customer views the history, then their past bookings at that business are still shown. [KAN-153]
 
 ### KAN-154 — Filter my bookings
-- [ ] **AC-KAN-154-01** · happy · Given the upcoming list or the history, when the customer filters by status, then only bookings with that status are listed and the count updates. The status options are those that can appear in that list. See AS-5. [KAN-154]
-- [ ] **AC-KAN-154-02** · happy · Given the history, when the customer filters by a date range, then only bookings whose `startsAt` falls in the range (dates in each business's `timeZone`) are listed. See AS-5. [KAN-154]
-- [ ] **AC-KAN-154-03** · happy · Given bookings at several businesses, when the customer filters by business, then only that business's bookings are listed. See AS-1, AS-5. [KAN-154]
-- [ ] **AC-KAN-154-04** · happy · Given filters are applied, when the customer reloads the page or shares its URL, then the same filters are applied (filters live in the URL), and clearing them shows the full list again; changing a filter returns to the first page. [KAN-154]
-- [ ] **AC-KAN-154-05** · edge · Given filters that match nothing, when they are applied, then `customer:myBookings.filters.noResultsEmpty` is shown with an action to clear the filters. [KAN-154]
-- [ ] **AC-KAN-154-06** · error · Given a date range whose end is before its start, when the customer applies it, then the list is not requested and `customer:myBookings.filters.invalidRangeError` is shown next to the range. [KAN-154]
-- [ ] **AC-KAN-154-07** · error · Given the filtered request fails because of the network, when the filter is applied, then `common:errors.network` is shown and the filter values are kept for a retry. [KAN-154]
+- [x] **AC-KAN-154-01** · happy · Given the upcoming list or the history, when the customer filters by status, then only bookings with that status are listed and the count updates. The status options are those that can appear in that list. See AS-5. [KAN-154]
+- [x] **AC-KAN-154-02** · happy · Given the history, when the customer filters by a date range, then only bookings whose `startsAt` falls in the range (dates in each business's `timeZone`) are listed. See AS-5. [KAN-154]
+- [x] **AC-KAN-154-03** · happy · Given bookings at several businesses, when the customer filters by business, then only that business's bookings are listed. See AS-1, AS-5. [KAN-154]
+- [x] **AC-KAN-154-04** · happy · Given filters are applied, when the customer reloads the page or shares its URL, then the same filters are applied (filters live in the URL), and clearing them shows the full list again; changing a filter returns to the first page. [KAN-154]
+- [x] **AC-KAN-154-05** · edge · Given filters that match nothing, when they are applied, then `customer:myBookings.filters.noResultsEmpty` is shown with an action to clear the filters. [KAN-154]
+- [x] **AC-KAN-154-06** · error · Given a date range whose end is before its start, when the customer applies it, then the list is not requested and `customer:myBookings.filters.invalidRangeError` is shown next to the range. [KAN-154]
+- [x] **AC-KAN-154-07** · error · Given the filtered request fails because of the network, when the filter is applied, then `common:errors.network` is shown and the filter values are kept for a retry. [KAN-154]
 
 ## BLOCKED
 None. Q1 was decided on 2026-09-28: the collaborator in the booking detail is specified (AC-KAN-152-07 … AC-KAN-152-09).
@@ -93,10 +93,11 @@ None. Q1 was decided on 2026-09-28: the collaborator in the booking detail is sp
 - KAN-151 says "citas que tengo pendientes" ("pending"): here it means upcoming, not only the `pending` status. Both `pending` and `confirmed` future bookings are listed.
 - KAN-154 does not say which filters; they are assumptions (AS-5).
 - KAN-108 (navbar, KAN-96) and KAN-150 both describe reaching the bookings; the navbar only links here.
-- AC-KAN-152-06 is covered by the adapter test (`bookingDocument.schema.test.ts`); AC-KAN-152-08 holds by construction (D-1: the name is a snapshot in the booking).
+- AC-KAN-152-06 is covered by the adapter test (`bookingDocument.schema.test.ts`); AC-KAN-152-08 holds by construction (D-1: the name is a snapshot in the booking) and has a component test that checks the detail reads nothing else.
 - **Open (from the PR #35 review):** the cancellation `note` (AS-4) is dropped when the browser validates the document, but the collection group rule of PR #34 lets the customer read the whole booking, so the note still travels to the browser. Rules cannot hide fields. When cancellation is built (KAN-72, KAN-159) the note must be stored outside the document the customer reads, for example in a private document of the business. Until then no real note exists (nothing writes it); the seed writes one only to test AS-4.
 - AC-KAN-152-03 waits for KAN-155 (reschedule and cancel do not exist yet). AC-KAN-152-09 no longer applies: with the snapshot (D-1) the collaborator name comes in the same read as the booking, so it cannot fail on its own.
-- AC-KAN-151-04 and AC-KAN-153-05 hold by the query design (`buildMyBookingsQuery`, checked against the emulator seed); they have no component test yet.
+- AC-KAN-151-04 and AC-KAN-153-05 hold by the query design (`buildMyBookingsQuery`) and are tested in `tests/buildMyBookingsQuery.test.ts`, which asks the built filters which bookings they let through.
+- The business filter options (AS-5) come from the customer's 100 most recent bookings (`BUSINESS_FILTER_SAMPLE_SIZE`): Firestore has no distinct query, so a business whose bookings are all older than that does not appear in the options. A date range across businesses is read in the browser time zone; with a business selected, in that business's.
 
 ## Non-functional
 - i18n keys: new prefix `customer:myBookings.*` (`upcoming.*`, `history.*`, `detail.*`, `filters.*`); reused `common:errors.network`, `common:errors.notFound`, status labels from `common`.
@@ -108,7 +109,7 @@ None. Q1 was decided on 2026-09-28: the collaborator in the booking detail is sp
 ## Traceability
 | Story | Criteria | Test file |
 | --- | --- | --- |
-| KAN-151 | AC-KAN-151-01 … AC-KAN-151-06 | `tests/MyBookingsPage.test.tsx` |
+| KAN-151 | AC-KAN-151-01 … AC-KAN-151-06 | `tests/MyBookingsPage.test.tsx`; `tests/buildMyBookingsQuery.test.ts` (AC-KAN-151-04) |
 | KAN-152 | AC-KAN-152-01 … AC-KAN-152-09 | `tests/BookingDetailPage.test.tsx` |
-| KAN-153 | AC-KAN-153-01 … AC-KAN-153-05 | `tests/MyBookingsPage.test.tsx` |
+| KAN-153 | AC-KAN-153-01 … AC-KAN-153-05 | `tests/MyBookingsPage.test.tsx`; `tests/buildMyBookingsQuery.test.ts` (AC-KAN-153-05) |
 | KAN-154 | AC-KAN-154-01 … AC-KAN-154-07 | `tests/MyBookingsPage.test.tsx` |

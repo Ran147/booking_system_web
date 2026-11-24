@@ -60,7 +60,7 @@ If another skill's example uses a name that contradicts this glossary, the gloss
 | Bloqueo de agenda / día bloqueado | `ScheduleBlock` | `businesses/{businessId}/scheduleBlocks/{scheduleBlockId}` | Partial (KAN-65) or full-day (KAN-66). `collaboratorId` `Nullable`: `null` blocks the whole business; set, it is that collaborator's absence (vacation, sick leave, KAN-66). |
 | Agenda | `Schedule` | — (view, not stored) | Bookings + schedule blocks in a calendar. |
 | Horario disponible | `TimeSlot` | — (computed) | KAN-141 |
-| Políticas de reservación | `BookingPolicy` | field on `Business` | Cancellation/reschedule window and penalty (KAN-147, KAN-160). |
+| Políticas de reservación | `BookingPolicy` | field on `Business` | Cancellation/reschedule window and penalty (KAN-147, KAN-160). Proposed shape (spec KAN-145, P-1): `bookingPolicy: { cancellationWindowHours, penaltyDescription }`; no screen sets it yet. |
 | Plan | `Plan` | `plans/{planId}` | Includes `limits`: `maxBookings`, `maxCollaborators` (KAN-181, KAN-85). |
 | Contratación de plan (checkout) | `PlanCheckout` | `planCheckouts/{planCheckoutId}` | Created by the simulated checkout from the landing when the payment succeeds (KAN-22, Q7), before any account exists: `planId`, `email`, `amountInCents`, `paidAt`, `termsAcceptedAt` (KAN-23), `signUpCompletedAt` (`Nullable`; single use, KAN-25). The KAN-24 email links to the sign-up with it. Written only by Cloud Functions. |
 | Suscripción | `Subscription` | `businesses/{businessId}/subscription/current` | One active subscription per business. Created `active` when the super admin approves the business (the period starts at approval, KAN-176); a `pending` or `rejected` business has none. |
@@ -324,7 +324,7 @@ The `TransitionMap<BookingStatus>` annotation makes `tsc` fail if a status is mi
 
 ## 5. Decisions (log)
 
-Source: `docs/decisions/open-questions.md`. **No question is open**: Q1–Q7 were decided on 2026-09-28. The table is kept as a decision log. If a new question opens, add it here as "Open" and, while it is open, **do not** invent names, statuses or fields for it; specs that depend on it are marked `BLOCKED` by `backlog-to-spec`.
+Source: `docs/decisions/open-questions.md`. Q1–Q7 were decided on 2026-09-28 and Q8 on 2026-10-24. **Q9 is open.** The table is kept as a decision log. If a new question opens, add it here as "Open" and, while it is open, **do not** invent names, statuses or fields for it; specs that depend on it are marked `BLOCKED` by `backlog-to-spec`.
 
 | Id | Question | Status | What it put in this glossary |
 | --- | --- | --- | --- |
@@ -335,6 +335,8 @@ Source: `docs/decisions/open-questions.md`. **No question is open**: Q1–Q7 wer
 | Q5 | What does the simulated gateway do on automatic renewals? (KAN-48) | Decided (2026-09-28): success or failure only; retries deferred (out of MVP) | Nothing in the MVP. Retry count, interval and per-attempt notifications are out of MVP, not blocked (§4.2). |
 | Q6 | Can a visitor book without an account? (KAN-116) | Decided (2026-09-28): no, a customer account is mandatory | `Booking` has no guest fields; the customer's `User` has `fullName` and `phone` (§3). |
 | Q7 | Does the MVP include checkout, or start with a business created by hand? | Decided (2026-09-28): plan checkout from the landing with the simulated gateway | `PlanCheckout` (§3); `[*] → pending` for `Business` (§4.3). |
+| Q8 | Where does the server code run without Cloud Functions? | Decided (2026-10-24): one Vercel Function dispatches to the callables of `functions/src` with `firebase-admin`; rules strict again | Nothing in the entities. "Cloud Function" in this glossary means a callable run by the Vercel dispatcher (`docs/decisions/2026-10-24-Q8-server-functions-on-vercel.md`). |
+| Q9 | How do scheduled jobs (reminders) and app emails run? (KAN-24, KAN-163 to KAN-166) | **Open** | Nothing until decided. `Reminder` (§3) stays a scheduled job with no stored entity; how it is scheduled is BLOCKED. |
 
 When a decision is recorded, update this section and the affected machine **in the same PR**. A partially decided question stays BLOCKED for everything not yet decided.
 

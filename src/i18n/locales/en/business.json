@@ -38,9 +38,170 @@
     },
     "title": "Business public profile"
   },
+  "businessStatus": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Under review",
+    "rejected": "Rejected",
+    "suspended": "Suspended"
+  },
   "collaborators": {
+    "create": {
+      "emailInUse": "An account or collaborator in this business already uses this email address.",
+      "noActiveServices": "You must have at least one active service before registering a collaborator.",
+      "noActiveServicesAction": "Go to services",
+      "submitAction": "Register collaborator",
+      "submittingLabel": "Registering…",
+      "success": "The collaborator was registered. Share the invitation link so they can activate their account.",
+      "title": "Register collaborator"
+    },
+    "deactivate": {
+      "action": "Deactivate",
+      "bookingsLoadWarning": "We could not verify whether {{name}} has upcoming active bookings before deactivating.",
+      "cancelAction": "Cancel",
+      "confirmAction": "Confirm deactivation",
+      "confirmLabel": "If you deactivate {{name}}, they will immediately lose access to the business portal.",
+      "confirmWithBookings": "{{name}} has {{count}} upcoming booking(s) that will remain on the schedule so you can reassign them.",
+      "confirmingLabel": "Deactivating…",
+      "disabledActionHint": "Only active collaborators can be deactivated.",
+      "success": "Collaborator deactivated successfully.",
+      "title": "Deactivate collaborator"
+    },
     "edit": {
-      "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned."
+      "bookingsLoadWarning": "We could not verify how many upcoming bookings are associated with the current services.",
+      "concurrentError": "Another user modified this collaborator while you were editing. Reload the data and try again.",
+      "emailLockedHint": "The email address cannot be modified after the collaborator accepts their invitation.",
+      "serviceHasBookingsWarning": "This collaborator has {{count}} upcoming booking(s) for this service that will remain assigned.",
+      "submitAction": "Save changes",
+      "submittingLabel": "Saving…",
+      "success": "Collaborator details updated successfully.",
+      "title": "Edit collaborator"
+    },
+    "form": {
+      "emailLabel": "Email address",
+      "emailPlaceholder": "collaborator@yourbusiness.com",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "e.g. Carlos Mendez",
+      "permissionsSectionTitle": "Initial permissions",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "+506 8888 9999",
+      "servicesRequiredHint": "Select at least one active service.",
+      "servicesSectionTitle": "Assigned services",
+      "specialtyLabel": "Specialty",
+      "specialtyPlaceholder": "e.g. Classic barbering",
+      "validation": {
+        "serviceRequired": "You must assign at least one active service."
+      }
+    },
+    "invitationLink": {
+      "closeAction": "Close",
+      "copiedSuccess": "Invitation link copied to clipboard.",
+      "copyAction": "Copy link",
+      "copyError": "Could not copy automatically. Please copy the link manually.",
+      "description": "Share this link with {{name}} so they can set their password and activate their account. It expires in 7 days.",
+      "linkLabel": "Invitation link",
+      "title": "Activation link"
+    },
+    "limit": {
+      "closeAction": "Close",
+      "countSummary": "{{used}} of {{limit}} collaborators",
+      "noHigherPlanNotice": "Your current plan already offers the highest collaborator limit in the catalog.",
+      "reached": "You have reached the limit of {{limit}} collaborator(s) allowed on your current plan.",
+      "title": "Collaborator limit reached",
+      "upgradeAction": "Upgrade plan"
+    },
+    "list": {
+      "actionsLabel": "Actions for {{name}}",
+      "addAction": "Add collaborator",
+      "clearFiltersAction": "Clear filters",
+      "description": "Manage your team of collaborators, their assigned services, and portal access permissions.",
+      "empty": "You have not registered any collaborators in your business yet.",
+      "emptyFiltered": "No collaborators match your search or status filter.",
+      "loadError": "Could not load the collaborators list.",
+      "readOnly": "Your business is in read-only mode. You cannot register or modify collaborators.",
+      "retryAction": "Retry",
+      "searchLabel": "Search collaborator",
+      "searchPlaceholder": "Search by name or email…",
+      "statusFilterAll": "All statuses",
+      "statusFilterLabel": "Status",
+      "tableColumns": {
+        "actions": "Actions",
+        "email": "Email",
+        "name": "Name",
+        "servicesCount": "Services",
+        "specialty": "Specialty",
+        "status": "Status"
+      },
+      "title": "Team"
+    },
+    "permissions": {
+      "action": "Edit permissions",
+      "description": "Choose which areas of the business portal {{name}} can manage. Team management, subscription, and business settings always remain exclusive to the subscriber.",
+      "items": {
+        "manage_bookings": {
+          "description": "View all business bookings and create, confirm, complete, cancel, or reschedule bookings.",
+          "label": "Manage bookings"
+        },
+        "manage_customers": {
+          "description": "Browse customers, block or unblock customer accounts, and send invitations.",
+          "label": "Manage customers"
+        },
+        "manage_schedule_blocks": {
+          "description": "Create and delete schedule blocks on the calendar.",
+          "label": "Manage schedule blocks"
+        },
+        "manage_services": {
+          "description": "Create, edit, and assign catalog services and discounts.",
+          "label": "Manage services"
+        },
+        "view_reports": {
+          "description": "Access business analytics and reports.",
+          "label": "View reports"
+        }
+      },
+      "noPermissionsNote": "With no additional permissions enabled, the collaborator can only view bookings assigned to them in the schedule.",
+      "saveAction": "Save permissions",
+      "savingLabel": "Saving permissions…",
+      "sectionTitle": "Business portal permissions",
+      "success": "Permissions updated successfully.",
+      "title": "Collaborator permissions"
+    },
+    "profile": {
+      "backAction": "Back to team",
+      "editAction": "Edit details",
+      "emailLabel": "Email address",
+      "loadError": "Could not load the collaborator profile.",
+      "neverSent": "Not sent yet",
+      "noServices": "No active services assigned.",
+      "noSpecialty": "No specialty specified",
+      "notFound": "We could not find the requested collaborator.",
+      "permissionsAction": "Configure permissions",
+      "phoneLabel": "Phone",
+      "retryAction": "Retry",
+      "servicesTitle": "Assigned services",
+      "specialtyLabel": "Specialty",
+      "statusLabel": "Status",
+      "title": "Collaborator profile"
+    },
+    "reactivate": {
+      "action": "Reactivate",
+      "cancelAction": "Cancel",
+      "confirmAction": "Confirm reactivation",
+      "confirmLabel": "When you reactivate {{name}}, they will regain portal access with their previous permissions and services.",
+      "confirmingLabel": "Reactivating…",
+      "success": "Collaborator reactivated successfully.",
+      "title": "Reactivate collaborator"
+    },
+    "resend": {
+      "activeAction": "Send password reset",
+      "cooldownError": "Please wait {{seconds}} s before sending another email.",
+      "cooldownLabel": "Resend in {{count}} s",
+      "dispatchError": "Could not send the email. Please try again later.",
+      "invitedAction": "Resend invitation",
+      "lastSentLabel": "Last email sent",
+      "sendingLabel": "Sending…",
+      "successInvited": "A new invitation link was generated. Share it with the collaborator so they can activate their account.",
+      "successReset": "Password reset email sent."
     }
   },
   "errors": {
@@ -75,8 +236,7 @@
       },
       "businessStatus": {
         "helper": "Tenant status",
-        "label": "Business status",
-        "value": "Active"
+        "label": "Business status"
       },
       "todayBookings": {
         "helper": "Upcoming bookings",
@@ -168,6 +328,10 @@
       "confirmTitle": "Unsaved changes",
       "unsavedChangesConfirm": "Do you want to sign out? You have unsaved changes that will be lost."
     },
+    "statusGate": {
+      "retryAction": "Retry",
+      "signOutAction": "Sign out"
+    },
     "subscriptionBanner": {
       "ariaLabel": "Subscription status",
       "endsOn": "Ends on {{date}}",
@@ -181,19 +345,187 @@
     },
     "title": "Business portal"
   },
+  "pendingApproval": {
+    "businessLabel": "Business",
+    "description": "We received your payment and your sign-up. A platform administrator is reviewing your business; once it is approved we will email you and you will have full access to your dashboard.",
+    "signUpDateLabel": "Sign-up date",
+    "title": "Your business is under review"
+  },
   "placeholder": {
     "description": "This is where you will manage your business's services, schedule and customers.",
     "title": "Business dashboard"
   },
-  "settings": {
-    "description": "Manage your personal account preferences.",
-    "language": {
-      "description": "Text, dates, times and prices will use the selected language.",
-      "label": "Interface language",
-      "saveError": "The language changed on this device, but it could not be saved to your account.",
-      "title": "Language"
+  "rejected": {
+    "businessLabel": "Business",
+    "contactLabel": "If you have questions, write to us at",
+    "description": "A platform administrator reviewed your business and did not approve it.",
+    "reasonLabel": "Reason",
+    "title": "Your request was rejected"
+  },
+  "schedule": {
+    "agenda": {
+      "allCollaborators": "All collaborators",
+      "availabilityError": "Could not calculate time slot availability.",
+      "businessResource": "General business resource",
+      "description": "View and manage appointments, slots and schedule blocks in real-time.",
+      "filterCollaborator": "Filter by collaborator",
+      "freeSlots": "Available slots",
+      "fullSlots": "Full slots",
+      "liveUpdateNotice": "Schedule updated live.",
+      "next": "Next",
+      "noBookings": "No bookings in this period.",
+      "previous": "Previous",
+      "title": "Schedule",
+      "today": "Today",
+      "viewDay": "Day",
+      "viewWeek": "Week"
     },
-    "title": "Settings"
+    "bookingList": {
+      "description": "View and manage upcoming scheduled appointments in your business.",
+      "emptyDescription": "No upcoming bookings recorded.",
+      "emptyTitle": "No upcoming bookings",
+      "newBookingAction": "Create booking",
+      "tableActions": "Actions",
+      "tableCollaborator": "Collaborator",
+      "tableCustomer": "Customer",
+      "tableDate": "Date & Time",
+      "tablePrice": "Price",
+      "tableService": "Service",
+      "tableStatus": "Status",
+      "title": "Upcoming bookings",
+      "viewDetail": "View detail"
+    },
+    "bookings": {
+      "cancellationNote": "Note: {{note}}",
+      "cancelAction": "Cancel booking",
+      "cancelSuccess": "Booking cancelled.",
+      "cancelTitle": "Cancel booking",
+      "cancelledBy": "Cancelled by: {{actor}}",
+      "cannotRescheduleError": "Only future pending or confirmed bookings can be rescheduled.",
+      "cannotReschedulePastError": "Cannot reschedule a booking that has already started.",
+      "collaborator": "Collaborator",
+      "collaboratorUnavailableError": "The selected collaborator is not available at this time.",
+      "completeAction": "Mark as completed",
+      "completeSuccess": "Booking marked as completed.",
+      "confirmAction": "Confirm booking",
+      "confirmSuccess": "Booking confirmed.",
+      "createDescription": "Create a manual appointment with slot and availability validation.",
+      "createSuccess": "Booking created successfully.",
+      "createTitle": "New manual booking",
+      "customer": "Customer",
+      "customerBlockedError": "The selected customer is currently blocked.",
+      "customerHelper": "Enter the customer name or identifier",
+      "customerPlaceholder": "E.g. John Doe or customer ID",
+      "date": "Date",
+      "durationMinutes": "{{minutes}} min",
+      "historyTitle": "Reschedule history",
+      "invalidTransitionError": "Cannot change booking status in its current state.",
+      "noBlocksForDate": "No blocks for this date.",
+      "noShowAction": "Mark as no-show",
+      "noShowSuccess": "Booking marked as no-show.",
+      "noteLabel": "Mandatory explanation note",
+      "notePlaceholder": "State the reason for cancellation...",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes or customer requests",
+      "notStartedError": "Can only complete or mark no-show for bookings whose time has already started.",
+      "penaltyDescription": "Check if cancellation carries a penalty under business policies.",
+      "penaltyLabel": "Apply penalty?",
+      "rescheduleAction": "Reschedule",
+      "rescheduledFrom": "Previously:",
+      "rescheduleSuccess": "Booking rescheduled successfully.",
+      "rescheduleTitle": "Reschedule booking",
+      "saveAction": "Save booking",
+      "selectServicePlaceholder": "Select a service",
+      "service": "Service",
+      "slotTakenError": "The selected time slot is already taken by another booking or block.",
+      "slotUnavailableError": "The selected time is outside business hours or in the past.",
+      "statusLabel": "Status",
+      "time": "Time",
+      "timeZoneNotice": "Times in {{timeZone}}",
+      "todayBookingsCount": "Day appointments ({{count}})",
+      "withPenalty": "With penalty"
+    },
+    "blocks": {
+      "allActiveBlocksTitle": "All active blocks",
+      "allBusiness": "Whole business",
+      "allDay": "Full day",
+      "allDayBlockedNotice": "Day blocked for bookings",
+      "blockedSlot": "Blocked schedule",
+      "collaborator": "Specific collaborator",
+      "createSuccess": "Schedule block created.",
+      "currentDayTitle": "Blocks for selected date",
+      "deleteAction": "Delete block",
+      "deleteConfirmDescription": "Do you want to delete this block and free the time slot?",
+      "deleteConfirmTitle": "Delete block",
+      "deleteSuccess": "Block deleted.",
+      "description": "Block time ranges or full days for breaks, holidays or absences.",
+      "endDate": "End date",
+      "endTime": "End time",
+      "goToDate": "View in calendar",
+      "invalidRangeError": "End date and time must be after the start.",
+      "newBlockAction": "New block",
+      "noBlocksRegistered": "No active schedule blocks registered.",
+      "overlapsBookingsConfirm": "There are confirmed or pending bookings in this range. Existing appointments will be kept, but the time will not be available for new bookings. Do you want to continue?",
+      "overlapsBookingsWarning": "Warning: The block overlaps existing bookings.",
+      "reason": "Reason for block (optional)",
+      "reasonPlaceholder": "E.g. Lunch break or holiday",
+      "saveAction": "Save block",
+      "startDate": "Start date",
+      "startTime": "Start time",
+      "title": "Schedule blocks"
+    },
+    "confirmation": {
+      "automaticDescription": "Bookings created by customers are confirmed automatically without manual approval.",
+      "automaticLabel": "Automatic confirmation (Recommended)",
+      "description": "Define whether new bookings are automatically confirmed or require manual approval.",
+      "manualDescription": "New bookings remain pending approval and must be confirmed manually.",
+      "manualLabel": "Manual confirmation",
+      "saveAction": "Save preference",
+      "saveSuccess": "Confirmation mode updated.",
+      "title": "Confirmation mode"
+    },
+    "history": {
+      "allCollaborators": "All collaborators",
+      "allServices": "All services",
+      "allStatuses": "All statuses",
+      "applyFilters": "Filter",
+      "clearFilters": "Clear filters",
+      "collaboratorFilter": "Collaborator",
+      "dateFilter": "Date",
+      "dateFrom": "From",
+      "dateRange": "Date range",
+      "dateTo": "To",
+      "description": "Review historical records and traceability of past appointments.",
+      "filtersTitle": "Search filters",
+      "invalidDateRangeError": "End date cannot be earlier than start date.",
+      "noResults": "No bookings found matching filters.",
+      "serviceFilter": "Service",
+      "statusFilter": "Status",
+      "title": "Booking history"
+    },
+    "hours": {
+      "addRange": "Add shift",
+      "bookingsOutsideWarning": "Warning: There are {{count}} existing appointments outside the new business hours.",
+      "closedDay": "Closed",
+      "description": "Define the days and hours your business is open to the public.",
+      "from": "From",
+      "invalidRangeError": "Closing time must be after opening time.",
+      "maxRangesError": "Maximum 2 shifts allowed per day.",
+      "notConfiguredNotice": "The business has not configured opening hours yet.",
+      "openDay": "Open",
+      "overlappingRangesError": "Shifts on the same day cannot overlap.",
+      "removeRange": "Remove shift",
+      "saveAction": "Save hours",
+      "saveSuccess": "Business hours updated successfully.",
+      "title": "Business hours",
+      "to": "To"
+    },
+    "tabs": {
+      "agenda": "Agenda",
+      "bookings": "Upcoming bookings",
+      "history": "History",
+      "hours": "Business hours"
+    }
   },
   "services": {
     "collaborators": {
