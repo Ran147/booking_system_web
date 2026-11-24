@@ -37,6 +37,13 @@ const DELIBERATE_REJECTION_CODES: ReadonlySet<string> = new Set([
 const isDeliberateRejection = (error: unknown): boolean =>
   error instanceof FirebaseError && DELIBERATE_REJECTION_CODES.has(error.code);
 
+interface CallFunctionErrorPayload {
+  readonly code?: string;
+  readonly details?: unknown;
+  readonly error?: string;
+  readonly message?: string;
+}
+
 export const callFunction = async <Payload, Response>(
   functionName: FunctionName,
   payload: Payload,
