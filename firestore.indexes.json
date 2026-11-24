@@ -101,6 +101,14 @@
         { "fieldPath": "searchName", "order": "ASCENDING" }
       ],
       "queryScope": "COLLECTION"
+    },
+    {
+      "collectionGroup": "collaborators",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "fullName", "order": "ASCENDING" }
+      ],
+      "queryScope": "COLLECTION"
     }
   ],
   "fieldOverrides": []

@@ -186,4 +186,51 @@ describe("firestore.rules: collaborators", () => {
 
     await assertFails(customer.firestore().doc(BARBER_RECORD_PATH).get());
   });
+
+  it("KAN-78 & KAN-81: denies direct client writes to collaborators by subscriber, collaborator, or customer", async () => {
+    const subscriberA = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+    const customer = testEnvironment.authenticatedContext("customer-1", {
+      role: "customer",
+    });
+
+    await assertFails(
+      subscriberA
+        .firestore()
+        .doc(BARBER_RECORD_PATH)
+        .update({ status: "inactive" }),
+    );
+    await assertFails(
+      subscriberA
+        .firestore()
+        .doc(`${BUSINESS_A_PATH}/collaborators/collab-new`)
+        .set({ email: "nuevo@example.com", status: "invited" }),
+    );
+    await assertFails(
+      signInAsManager().firestore().doc(MANAGER_RECORD_PATH).update({
+        fullName: "Editado directo",
+      }),
+    );
+    await assertFails(customer.firestore().doc(BARBER_RECORD_PATH).delete());
+  });
+
+  it("KAN-79: denies all client reads and writes to collaboratorInvitations", async () => {
+    const subscriberA = testEnvironment.authenticatedContext("subscriber-a", {
+      businessId: "business-a",
+      role: "subscriber",
+    });
+
+    await assertFails(
+      subscriberA.firestore().doc("collaboratorInvitations/token-hash-1").get(),
+    );
+    await assertFails(
+      testEnvironment
+        .unauthenticatedContext()
+        .firestore()
+        .doc("collaboratorInvitations/token-hash-1")
+        .set({ usedAt: null }),
+    );
+  });
 });

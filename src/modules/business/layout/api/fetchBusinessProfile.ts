@@ -43,10 +43,15 @@ export const fetchBusinessProfile = async (
     documentSnapshot.data() ?? {},
   );
 
+  const rawTimeZone = documentData.timeZone;
+  const timeZone = rawTimeZone.includes("Mexico")
+    ? "America/Costa_Rica"
+    : rawTimeZone;
+
   return {
     logoUrl: documentData.logoUrl,
     name: documentData.name,
     status: documentData.status,
-    timeZone: documentData.timeZone,
+    timeZone,
   };
 };

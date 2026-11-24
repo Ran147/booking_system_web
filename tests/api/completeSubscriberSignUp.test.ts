@@ -72,6 +72,20 @@ describe("api completeSubscriberSignUp", () => {
     expect(firebaseAdminFake.documents.get(BUSINESS_PATH)?.ownerUserId).toBe(
       "user-1",
     );
+    // Q10: claims, profile and business carry only the canonical names.
+    expect(firebaseAdminFake.accounts.get("user-1")?.customClaims).toEqual({
+      businessId: "business-barberia-centro",
+      role: "subscriber",
+    });
+    const profile = firebaseAdminFake.documents.get("users/user-1");
+    expect(profile).toMatchObject({
+      businessId: "business-barberia-centro",
+      role: "subscriber",
+    });
+    expect(profile).not.toHaveProperty("business_id");
+    expect(firebaseAdminFake.documents.get(BUSINESS_PATH)).not.toHaveProperty(
+      "owner_id",
+    );
   });
 
   it("AC-KAN-25-09: an email that already has an account is rejected and the account is left as it is", async () => {

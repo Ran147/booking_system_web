@@ -129,14 +129,27 @@ service cloud.firestore {
       allow update: if ownsBusiness(businessId)
         && businessIsWritable(businessId)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'bookingConfirmationMode',
+          'businessHours',
           'contactEmail',
           'contactPhone',
           'description',
           'logoUrl',
           'name',
-          'socialLinks'
+          'socialLinks',
+          'timeZone',
+          'updatedAt',
+          'updatedBy'
         ])
-        && hasValidPublicProfile(request.resource.data);
+        && hasValidPublicProfile(request.resource.data)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['bookingConfirmationMode'])
+          || request.resource.data.bookingConfirmationMode in ['automatic', 'manual']);
+
+      match /scheduleBlocks/{scheduleBlockId} {
+        allow read: if ownsBusiness(businessId) || isCollaboratorOf(businessId);
+        allow create, update, delete: if (ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_schedule_blocks'))
+          && businessIsWritable(businessId);
+      }
 
       match /services/{serviceId} {
         allow read: if resource.data.status == 'active' || ownsBusiness(businessId) || isSuperAdmin()
@@ -153,6 +166,11 @@ service cloud.firestore {
               && resource.data.collaboratorId == request.auth.token.collaboratorId)
           || collaboratorCan(businessId, 'manage_bookings');
         allow write: if false; // only via booking functions
+
+        match /internalNotes/{noteId} {
+          allow read: if ownsBusiness(businessId) || collaboratorCan(businessId, 'manage_bookings');
+          allow write: if false; // only via server functions
+        }
       }
 
       match /customers/{customerId} {
@@ -165,13 +183,11 @@ service cloud.firestore {
         allow read: if collaboratorCan(businessId, 'manage_customers');
       }
 
-      // Collaborator records can be read by owner or self, and created by owner on sign-up
+      // Collaborator records are managed exclusively by server handlers
       match /collaborators/{collaboratorId} {
         allow read: if ownsBusiness(businessId)
           || (isCollaboratorOf(businessId) && collaboratorId == request.auth.token.collaboratorId);
-        allow create, update: if isSignedIn()
-          && (collaboratorId == request.auth.uid || ownsBusiness(businessId));
-        allow delete: if false;
+        allow write: if false;
       }
 
       // Subscription can be read and initialized by the owner
@@ -251,6 +267,11 @@ service cloud.firestore {
     match /auditLog/{auditLogEntryId} {
       allow read: if isSuperAdmin();
       allow write: if false; // functions only
+    }
+
+    // Invitation tokens are hashed and handled exclusively by server handlers.
+    match /collaboratorInvitations/{tokenHash} {
+      allow read, write: if false;
     }
 
     // Deny by default.
