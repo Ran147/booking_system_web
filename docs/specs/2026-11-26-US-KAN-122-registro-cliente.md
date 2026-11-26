@@ -144,14 +144,20 @@ AC-KAN-127-06 (el servicio o el negocio ya no se pueden reservar al volver) ya l
 | D10 | Un cliente sin verificar **puede** iniciar sesión | AS-7. Si puede reservar o no, lo decide KAN-148 |
 | D11 | Los textos de la página del enlace van en `common:auth.emailVerification.*`, no en `customer:signUp.verification.*` | La página está en el módulo `auth`, compartido por todos los roles, y la reutiliza la verificación del suscriptor (paso 3 de KAN-25). Es el mismo criterio que `common:auth.passwordReset` |
 
-## 6. División en PRs (límite de ~2000 líneas)
+## 6. División en PRs: un PR por historia
 
-Todos salen de `develop` hacia `develop`, sin apilar.
+Regla: **un PR por historia (KAN)**. Nunca dos historias en el mismo PR. Una historia grande se puede partir en varios PRs, cada uno con sentido propio (límite de ~2000 líneas, `git-workflow` §5). Todos salen de `develop` hacia `develop`, sin apilar: cada rama se crea cuando el PR del que depende ya está en `develop`.
 
-| PR | Historia | Contenido | Revisores | Fusión |
+| PR | Historia | Contenido | Revisores | Se abre / fusiona |
 | --- | --- | --- | --- | --- |
-| 1 | KAN-126 | §3.3: `/auth/action`, la página de verificación y el slug `auth` + tests | José (US-36) | Cuando quieran |
-| 2 | KAN-123 | §3.2: el handler compartido, el `onCall`, la rama de Vercel y el correo de verificación + tests | Randy + José | **Después de #65** (reCAPTCHA) |
-| 3 | KAN-123, 124, 125, 127 (+ reenvío de KAN-126) | §3.4: el formulario, la ruta, el inicio de sesión y el aviso de pendiente + tests | José (inicio de sesión) + Ale (portal del cliente) | Después del PR 2 |
+| 1 (#106) | KAN-126 (parte 1) | §3.3: `/auth/action`, la página de verificación y el slug `auth` + tests | José (US-36) | Ya abierto |
+| 2 | KAN-123 (parte 1) | §3.2: el handler compartido, el `onCall`, la rama de Vercel y el primer correo de verificación + tests (AC-KAN-123-01, 05, 06, 09, 11; AC-KAN-126-01 y 04 del lado del servidor) | Randy + José | Se fusiona **después de #65** (reCAPTCHA) |
+| 3 | KAN-123 (parte 2) | La ruta `/<slug>/sign-up`, el formulario con `InputField`, `PasswordInput` y `RecaptchaField`, el envío y sus errores (AC-KAN-123-02 … 13) | José + Ale | Después del PR 2 |
+| 4 | KAN-124 | `PasswordStrengthMeter` en el formulario y sus pruebas (AC-KAN-124-01 … 04) | José | Después del PR 3 |
+| 5 | KAN-125 | Visibilidad controlada de la contraseña: se conserva si falla el envío y se oculta antes de salir (AC-KAN-125-01 … 04) | José | Después del PR 3 |
+| 6 | KAN-127 | Paso al inicio de sesión: correo precargado, `signUpRole`, `redirectTo` conservado y el enlace "Crear cuenta" en `SignInForm` (AC-KAN-127-01 … 06) | José | Después del PR 3 |
+| 7 | KAN-126 (parte 2) | Aviso "verifica tu correo" en `CustomerLayout`, reenvío y `sendFailed` (AC-KAN-126-04 … 06) | José + Ale | Después de los PR 1 y 2 |
 
-Después de fusionar los tres: el paso manual de D5 y una prueba de punta a punta en Vercel (registrarse, recibir el correo, verificar e iniciar sesión).
+En el PR 3, `PasswordInput` ya trae el botón de mostrar / ocultar porque es parte del componente común. El PR 5 agrega solo el comportamiento que pide KAN-125 y sus pruebas.
+
+Después de fusionar los siete: el paso manual de D5 y una prueba de punta a punta en Vercel (registrarse, recibir el correo, verificar e iniciar sesión).
