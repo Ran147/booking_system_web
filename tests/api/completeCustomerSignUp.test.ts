@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { callServerFunction } from "./bookingTestHelpers";
 import { CallableFailure } from "../../functions/src/shared/CallableFailure.js";
 
@@ -32,6 +32,9 @@ vi.mock("firebase-admin/firestore", () => ({
   Timestamp: { now: (): Date => new Date() },
 }));
 
+const RECAPTCHA_SECRET_KEY = "vercel-secret-key";
+const RECAPTCHA_TOKEN = "recaptcha-token";
+const RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 const VISITOR_TOKEN = "";
 const SIGN_UP_PAYLOAD = {
   continueUrl: "https://booking.test/barberia-centro",
@@ -40,18 +43,49 @@ const SIGN_UP_PAYLOAD = {
   language: "es",
   password: "Emulator-Only-123!",
   phone: "+506 8888-0000",
-  recaptchaToken: "recaptcha-token",
+  recaptchaToken: RECAPTCHA_TOKEN,
 };
 
 interface DispatchedInput {
-  readonly caller: unknown;
-  readonly payload: unknown;
   readonly verifyRecaptcha: (recaptchaToken: string) => Promise<void>;
 }
+
+// The handler checks the token before creating anything (AC-KAN-123-05), as
+// the real one does, and records whether it went on to create the account.
+const createAccountAfterRecaptcha = vi.fn();
+const checkRecaptchaThenCreateAccount = async ({
+  verifyRecaptcha,
+}: DispatchedInput): Promise<{ verificationEmail: string }> => {
+  await verifyRecaptcha(RECAPTCHA_TOKEN);
+  createAccountAfterRecaptcha();
+  return { verificationEmail: "sent" };
+};
+
+const answerGoogleWith = (verificationResult: unknown): void => {
+  vi.mocked(fetch).mockResolvedValue(Response.json(verificationResult));
+};
+
+const signUpWithRecaptchaCheck = (): ReturnType<typeof callServerFunction> => {
+  handlerFake.handleCompleteCustomerSignUp.mockImplementation(
+    checkRecaptchaThenCreateAccount,
+  );
+  return callServerFunction(
+    "completeCustomerSignUp",
+    SIGN_UP_PAYLOAD,
+    VISITOR_TOKEN,
+  );
+};
 
 describe("Vercel dispatcher: completeCustomerSignUp (KAN-123, Q8)", () => {
   beforeEach((): void => {
     handlerFake.handleCompleteCustomerSignUp.mockReset();
+    createAccountAfterRecaptcha.mockReset();
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  afterEach((): void => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("AC-KAN-123-01: a visitor reaches the shared handler with the payload and no caller", async () => {
@@ -74,21 +108,41 @@ describe("Vercel dispatcher: completeCustomerSignUp (KAN-123, Q8)", () => {
     );
   });
 
-  it("AC-KAN-123-05: until #65 the reCAPTCHA check in Vercel refuses every token (fail-closed)", async () => {
-    handlerFake.handleCompleteCustomerSignUp.mockResolvedValue({
-      verificationEmail: "sent",
-    });
-    await callServerFunction(
-      "completeCustomerSignUp",
-      SIGN_UP_PAYLOAD,
-      VISITOR_TOKEN,
-    );
-    const [dispatchedInput] = handlerFake.handleCompleteCustomerSignUp.mock
-      .calls[0] as [DispatchedInput];
+  it("AC-KAN-123-05: without RECAPTCHA_SECRET_KEY the sign-up answers unavailable, asks nobody and creates nothing", async () => {
+    vi.stubEnv("RECAPTCHA_SECRET_KEY", "");
 
-    await expect(
-      dispatchedInput.verifyRecaptcha("recaptcha-token"),
-    ).rejects.toMatchObject({ code: "permission-denied" });
+    const result = await signUpWithRecaptchaCheck();
+
+    expect(result.statusCode).toBe(503);
+    expect(result.body.code).toBe("unavailable");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(createAccountAfterRecaptcha).not.toHaveBeenCalled();
+  });
+
+  it("AC-KAN-123-05: with the key, Google checks the token with the key of Vercel before the account is created", async () => {
+    vi.stubEnv("RECAPTCHA_SECRET_KEY", RECAPTCHA_SECRET_KEY);
+    answerGoogleWith({ success: true });
+
+    const result = await signUpWithRecaptchaCheck();
+
+    expect(result.statusCode).toBe(200);
+    expect(createAccountAfterRecaptcha).toHaveBeenCalledOnce();
+    const [verifyUrl, requestInit] = vi.mocked(fetch).mock.calls[0] ?? [];
+    const requestBody = new URLSearchParams(String(requestInit?.body));
+    expect(verifyUrl).toBe(RECAPTCHA_VERIFY_URL);
+    expect(requestBody.get("response")).toBe(RECAPTCHA_TOKEN);
+    expect(requestBody.get("secret")).toBe(RECAPTCHA_SECRET_KEY);
+  });
+
+  it("AC-KAN-123-05: a token Google rejects answers permission-denied and creates nothing", async () => {
+    vi.stubEnv("RECAPTCHA_SECRET_KEY", RECAPTCHA_SECRET_KEY);
+    answerGoogleWith({ success: false });
+
+    const result = await signUpWithRecaptchaCheck();
+
+    expect(result.statusCode).toBe(403);
+    expect(result.body.code).toBe("permission-denied");
+    expect(createAccountAfterRecaptcha).not.toHaveBeenCalled();
   });
 
   it("answers a CallableFailure with its code, like a callable", async () => {

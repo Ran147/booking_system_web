@@ -913,16 +913,6 @@ const sendResetEmailIfAccountExists = async (
   }
 };
 
-// Placeholder of the Vercel reCAPTCHA check that #65 adds
-// (assertRecaptchaInVercel). Until then a customer sign-up is refused, never
-// accepted without the check (auth-and-roles §5).
-const rejectUntilRecaptchaIsVerifiedInVercel = async (): Promise<void> => {
-  throw new CallableFailure(
-    "permission-denied",
-    "reCAPTCHA is not verified in Vercel yet",
-  );
-};
-
 const waitForMinimumResponseTime = (): Promise<void> =>
   new Promise((resolve) => {
     setTimeout(resolve, PASSWORD_RESET.MINIMUM_RESPONSE_MS);
@@ -1254,7 +1244,7 @@ export default async function handler(
             auth,
             webApiKey: readWebApiKey(),
           }),
-          verifyRecaptcha: rejectUntilRecaptchaIsVerifiedInVercel,
+          verifyRecaptcha: assertRecaptchaInVercel,
         }),
       );
       return;
