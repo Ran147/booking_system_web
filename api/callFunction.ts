@@ -8,6 +8,8 @@ import {
   Timestamp,
   type Firestore,
 } from "firebase-admin/firestore";
+import { handleCompleteCustomerSignUp } from "../functions/src/auth/handlers/handleCompleteCustomerSignUp.js";
+import { createVerificationEmailSender } from "../functions/src/auth/sendVerificationEmail.js";
 import { handleCreateBooking } from "../functions/src/bookings/handlers/handleCreateBooking.js";
 import { handleGetAvailability } from "../functions/src/bookings/handlers/handleGetAvailability.js";
 import { CallableFailure } from "../functions/src/shared/CallableFailure.js";
@@ -38,6 +40,7 @@ const HTTP_STATUS = Object.freeze({
 const FUNCTION_NAME = Object.freeze({
   CANCEL_BOOKING: "cancelBooking",
   CHECK_BUSINESS_SLUG: "checkBusinessSlug",
+  COMPLETE_CUSTOMER_SIGN_UP: "completeCustomerSignUp",
   COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
   CREATE_BOOKING: "createBooking",
   CREATE_SCHEDULE_BLOCK: "createScheduleBlock",
@@ -179,6 +182,7 @@ type CallerAccess = (typeof CALLER_ACCESS)[keyof typeof CALLER_ACCESS];
 
 const PUBLIC_FUNCTION_NAMES: readonly string[] = Object.freeze([
   FUNCTION_NAME.CHECK_BUSINESS_SLUG,
+  FUNCTION_NAME.COMPLETE_CUSTOMER_SIGN_UP,
   FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP,
   FUNCTION_NAME.PAY_PLAN_CHECKOUT,
   FUNCTION_NAME.REQUEST_PASSWORD_RESET,
@@ -891,6 +895,16 @@ const sendResetEmailIfAccountExists = async (
   }
 };
 
+// Placeholder of the Vercel reCAPTCHA check that #65 adds
+// (assertRecaptchaInVercel). Until then a customer sign-up is refused, never
+// accepted without the check (auth-and-roles §5).
+const rejectUntilRecaptchaIsVerifiedInVercel = async (): Promise<void> => {
+  throw new CallableFailure(
+    "permission-denied",
+    "reCAPTCHA is not verified in Vercel yet",
+  );
+};
+
 const waitForMinimumResponseTime = (): Promise<void> =>
   new Promise((resolve) => {
     setTimeout(resolve, PASSWORD_RESET.MINIMUM_RESPONSE_MS);
@@ -1204,6 +1218,27 @@ export default async function handler(
       sendJsonResponse(response, HTTP_STATUS.OK, {
         serviceId,
       });
+      return;
+    }
+
+    // KAN-123: same handler as the emulator callable (Q8). The reCAPTCHA is
+    // fail-closed until #65 brings the real check to Vercel: no customer
+    // account is created here without it (spec §6, merge after #65).
+    if (functionName === FUNCTION_NAME.COMPLETE_CUSTOMER_SIGN_UP) {
+      await runSharedHandler(response, () =>
+        handleCompleteCustomerSignUp({
+          auth,
+          caller: null,
+          firestore,
+          now: new Date(),
+          payload,
+          sendVerificationEmail: createVerificationEmailSender({
+            auth,
+            webApiKey: readWebApiKey(),
+          }),
+          verifyRecaptcha: rejectUntilRecaptchaIsVerifiedInVercel,
+        }),
+      );
       return;
     }
 
