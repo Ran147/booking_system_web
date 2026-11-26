@@ -1,6 +1,7 @@
 // Cloud Functions entry point. Each domain folder (audit, auth, billing,
 // bookings, exports, notifications) exports its functions from here as its
 // spec is implemented.
+export { completeCustomerSignUp } from "./auth/completeCustomerSignUp.js";
 export { requestPasswordReset } from "./auth/requestPasswordReset.js";
 export { verifyRecaptcha } from "./auth/verifyRecaptcha.js";
 export { checkBusinessSlug } from "./billing/checkBusinessSlug.js";
