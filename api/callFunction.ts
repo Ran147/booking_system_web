@@ -10,6 +10,8 @@ import {
 } from "firebase-admin/firestore";
 import { handleCompleteCustomerSignUp } from "../functions/src/auth/handlers/handleCompleteCustomerSignUp.js";
 import { createVerificationEmailSender } from "../functions/src/auth/sendVerificationEmail.js";
+import { verifyRecaptchaToken } from "../functions/src/auth/verifyRecaptchaToken.js";
+import { handlePayPlanCheckout } from "../functions/src/billing/handlers/handlePayPlanCheckout.js";
 import { handleCreateBooking } from "../functions/src/bookings/handlers/handleCreateBooking.js";
 import { handleGetAvailability } from "../functions/src/bookings/handlers/handleGetAvailability.js";
 import { CallableFailure } from "../functions/src/shared/CallableFailure.js";
@@ -34,6 +36,7 @@ const HTTP_STATUS = Object.freeze({
   NOT_FOUND: 404,
   OK: 200,
   PRECONDITION_FAILED: 412,
+  SERVICE_UNAVAILABLE: 503,
   UNAUTHORIZED: 401,
 } as const);
 
@@ -103,10 +106,11 @@ const SERVICE_STATUS = Object.freeze({
   INACTIVE: "inactive",
 } as const);
 
-const CHECKOUT_SIMULATION = Object.freeze({
-  DECLINED_CARD_NUMBER: "4000000000000002",
-  DECLINED_CARD_SUFFIX: "0002",
-  PROCESSING_DELAY_MS: 600,
+// The reCAPTCHA secret key of the Vercel project (KAN-22 spec §3.3). Without
+// it the payment answers unavailable and charges nothing.
+const RECAPTCHA_SECRET = Object.freeze({
+  ENV_VAR: "RECAPTCHA_SECRET_KEY",
+  MISSING_MESSAGE: "RECAPTCHA_SECRET_KEY is not configured",
 } as const);
 
 // Error codes the Admin SDK reports: Auth as text, Firestore as a gRPC status.
@@ -580,7 +584,21 @@ const CALLABLE_FAILURE_HTTP_STATUS: Readonly<Record<string, number>> =
     "not-found": HTTP_STATUS.NOT_FOUND,
     "permission-denied": HTTP_STATUS.FORBIDDEN,
     unauthenticated: HTTP_STATUS.UNAUTHORIZED,
+    unavailable: HTTP_STATUS.SERVICE_UNAVAILABLE,
   });
+
+// The reCAPTCHA check of a shared handler in Vercel (Q8): the same Google
+// verification as the callables, with the key of the Vercel project. A missing
+// key fails closed, so a protected action never runs unchecked.
+const assertRecaptchaInVercel = async (
+  recaptchaToken: string,
+): Promise<void> => {
+  const secretKey = process.env[RECAPTCHA_SECRET.ENV_VAR]?.trim();
+  if (!secretKey) {
+    throw new CallableFailure("unavailable", RECAPTCHA_SECRET.MISSING_MESSAGE);
+  }
+  await verifyRecaptchaToken(recaptchaToken, secretKey);
+};
 
 // Runs a shared handler of functions/src (Q8) and answers like a callable:
 // the result on success, `{ code, message, details }` on a CallableFailure,
@@ -1426,39 +1444,18 @@ export default async function handler(
       return;
     }
 
+    // The visitor pays before having an account: the same handler as the
+    // callable, with the reCAPTCHA key of Vercel (KAN-22 spec §3.3).
     if (functionName === FUNCTION_NAME.PAY_PLAN_CHECKOUT) {
-      const cardNumber = String(payload.cardNumber || "");
-      if (cardNumber === CHECKOUT_SIMULATION.DECLINED_CARD_NUMBER) {
-        sendJsonResponse(response, HTTP_STATUS.PRECONDITION_FAILED, {
-          details: { reason: "paymentDeclined" },
-          error: "failed-precondition",
-          message: "The simulated gateway declined the card",
-        });
-        return;
-      }
-
-      const attemptId = String(payload.attemptId || `attempt-${Date.now()}`);
-      const email = String(payload.email || "checkout@demo.com");
-      const planId = String(payload.planId || "plan-pro");
-      const checkoutReference = firestore
-        .collection("planCheckouts")
-        .doc(attemptId);
-
-      await checkoutReference.set({
-        amountInCents: Number(payload.expectedPriceInCents || 2900),
-        email,
-        language: String(payload.language || "es"),
-        paidAt: Timestamp.now(),
-        paymentReference: `sim_${Date.now().toString(16)}`,
-        planId,
-        signUpCompletedAt: null,
-        signUpLinkExpiresAt: null,
-        signUpTokenHash: null,
-        termsAcceptedAt: Timestamp.now(),
-        termsVersion: "provisional-2026-10-17",
-      });
-
-      sendJsonResponse(response, HTTP_STATUS.OK, { email });
+      await runSharedHandler(response, () =>
+        handlePayPlanCheckout({
+          assertRecaptcha: assertRecaptchaInVercel,
+          caller: null,
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
       return;
     }
 
