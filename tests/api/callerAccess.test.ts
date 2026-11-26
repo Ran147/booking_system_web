@@ -62,11 +62,18 @@ const HTTP_STATUS = Object.freeze({
 const ID_TOKEN = Object.freeze({
   COLLABORATOR: "token-collaborator",
   CUSTOMER: "token-customer",
+  OTHER_BUSINESS_COLLABORATOR: "token-other-business-collaborator",
   OTHER_CUSTOMER: "token-other-customer",
   OTHER_OWNER: "token-other-owner",
   OWNER: "token-owner",
   OWNER_WITHOUT_CLAIMS: "token-owner-without-claims",
   UNKNOWN: "token-unknown",
+});
+
+// Far enough ahead that "cannot reschedule a past booking" never applies.
+const FUTURE_BOOKING = Object.freeze({
+  NEW_STARTS_AT: "2099-01-06T15:00:00.000Z",
+  STARTS_AT: "2099-01-05T15:00:00.000Z",
 });
 
 const FORM_VALUES = { durationMinutes: 30, name: "Corte", price: 10 };
@@ -109,7 +116,10 @@ const PROTECTED_CALLS = Object.freeze({
     businessId: BUSINESS_ID,
     targetStatus: "confirmed",
   },
-  updateBusinessHours: { businessHours: {}, businessId: BUSINESS_ID },
+  updateBusinessHours: {
+    businessHours: { monday: [{ closesAt: "17:00", opensAt: "09:00" }] },
+    businessId: BUSINESS_ID,
+  },
   updateConfirmationMode: { businessId: BUSINESS_ID, mode: "manual" },
   updateService: {
     businessId: BUSINESS_ID,
@@ -172,6 +182,12 @@ const seedBusiness = (): void => {
     collaboratorId: "collaborator-a",
     role: "collaborator",
     uid: "collaborator-user-a",
+  });
+  firebaseAdminFake.signIn(ID_TOKEN.OTHER_BUSINESS_COLLABORATOR, {
+    businessId: "business-b",
+    collaboratorId: "collaborator-a",
+    role: "collaborator",
+    uid: "collaborator-user-b",
   });
   firebaseAdminFake.signIn(ID_TOKEN.CUSTOMER, {
     role: "customer",
@@ -242,7 +258,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
       );
     });
 
-    it("KAN-59: an owner without claims is recognized by the ownerUserId of the business, as in firestore.rules", async () => {
+    it("KAN-59: an owner without claims is recognized by the ownerUserId of the business (spec D2)", async () => {
       const result = await callAs(
         "createService",
         ID_TOKEN.OWNER_WITHOUT_CLAIMS,
@@ -305,6 +321,15 @@ describe("api callFunction: caller access (KAN-59)", () => {
   });
 
   describe("business settings (owner only)", () => {
+    it("KAN-64: the owner changes the business hours of their business", async () => {
+      const result = await callAs("updateBusinessHours", ID_TOKEN.OWNER);
+
+      expect(result.statusCode).toBe(HTTP_STATUS.OK);
+      expect(
+        firebaseAdminFake.documents.get(BUSINESS_PATH)?.businessHours,
+      ).toEqual(PROTECTED_CALLS.updateBusinessHours.businessHours);
+    });
+
     it("KAN-70: the owner changes the confirmation mode of their business", async () => {
       const result = await callAs("updateConfirmationMode", ID_TOKEN.OWNER);
 
@@ -382,6 +407,26 @@ describe("api callFunction: caller access (KAN-59)", () => {
 
       expect(result.statusCode).toBe(HTTP_STATUS.FORBIDDEN);
     });
+
+    it("KAN-67: an inactive collaborator cannot read the blocks", async () => {
+      firebaseAdminFake.documents.set(COLLABORATOR_PATH, {
+        permissions: ["manage_schedule_blocks"],
+        status: "inactive",
+      });
+
+      const result = await callAs("fetchScheduleBlocks", ID_TOKEN.COLLABORATOR);
+
+      expect(result.statusCode).toBe(HTTP_STATUS.FORBIDDEN);
+    });
+
+    it("KAN-67: a collaborator whose businessId claim is another business cannot read the blocks", async () => {
+      const result = await callAs(
+        "fetchScheduleBlocks",
+        ID_TOKEN.OTHER_BUSINESS_COLLABORATOR,
+      );
+
+      expect(result.statusCode).toBe(HTTP_STATUS.FORBIDDEN);
+    });
   });
 
   describe("business bookings (manage_bookings)", () => {
@@ -445,6 +490,38 @@ describe("api callFunction: caller access (KAN-59)", () => {
       },
     );
 
+    it("KAN-72: the owner cancels a booking of their business", async () => {
+      const result = await callAs("cancelBooking", ID_TOKEN.OWNER);
+
+      expect(result.statusCode).toBe(HTTP_STATUS.OK);
+      expect(firebaseAdminFake.documents.get(BOOKING_PATH)?.status).toBe(
+        "cancelled",
+      );
+    });
+
+    it("KAN-71: a collaborator with manage_bookings reschedules a booking", async () => {
+      grantCollaborator(["manage_bookings"]);
+      firebaseAdminFake.documents.set(BOOKING_PATH, {
+        customerUserId: "customer-a",
+        startsAt: FUTURE_BOOKING.STARTS_AT,
+        status: "confirmed",
+      });
+
+      const result = await callApiFunction(
+        "rescheduleBooking",
+        {
+          ...PROTECTED_CALLS.rescheduleBooking,
+          newStartsAt: FUTURE_BOOKING.NEW_STARTS_AT,
+        },
+        ID_TOKEN.COLLABORATOR,
+      );
+
+      expect(result.statusCode).toBe(HTTP_STATUS.OK);
+      expect(firebaseAdminFake.documents.get(BOOKING_PATH)?.startsAt).toEqual(
+        new Date(FUTURE_BOOKING.NEW_STARTS_AT),
+      );
+    });
+
     it("KAN-72: a collaborator without manage_bookings cannot cancel a booking", async () => {
       const result = await callAs("cancelBooking", ID_TOKEN.COLLABORATOR);
 
@@ -453,7 +530,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
   });
 
   describe("availability and new bookings", () => {
-    it("KAN-144: a customer always books for themself, whatever customerId says", async () => {
+    it("KAN-144: a customer reaches the booking handler as the uid of their token, not the customerId of the payload", async () => {
       handlerFake.handleCreateBooking.mockResolvedValue({ bookingId: "new" });
 
       const result = await callApiFunction(
@@ -466,6 +543,7 @@ describe("api callFunction: caller access (KAN-59)", () => {
       expect(handlerFake.handleCreateBooking).toHaveBeenCalledWith(
         expect.objectContaining({
           caller: { role: "customer", uid: "customer-a" },
+          payload: expect.objectContaining({ customerId: "customer-b" }),
         }),
       );
     });
