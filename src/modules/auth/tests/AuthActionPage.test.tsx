@@ -192,7 +192,7 @@ describe("AuthActionPage", () => {
   });
 
   describe("US-36: the reset link goes on to its own page", () => {
-    it("AC-KAN-37-01: a resetPassword link opens /password-reset with the same query", async () => {
+    it("US-36 D-3 (spec KAN-122 D4): a resetPassword link opens /password-reset with the same query", async () => {
       const resetLinkSearch = new URLSearchParams({
         [SEARCH_PARAM.MODE]: AUTH_ACTION_MODE.RESET_PASSWORD,
         [SEARCH_PARAM.OOB_CODE]: OOB_CODE,
