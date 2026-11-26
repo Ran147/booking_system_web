@@ -2,6 +2,7 @@ export const FUNCTION_NAME = Object.freeze({
   ACCEPT_COLLABORATOR_INVITATION: "acceptCollaboratorInvitation",
   CANCEL_BOOKING: "cancelBooking",
   CHECK_BUSINESS_SLUG: "checkBusinessSlug",
+  COMPLETE_CUSTOMER_SIGN_UP: "completeCustomerSignUp",
   COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
   CREATE_BOOKING: "createBooking",
   CREATE_SCHEDULE_BLOCK: "createScheduleBlock",

@@ -177,5 +177,21 @@
     "serviceDetail": "{{minutes}} min · {{price}}",
     "subtitle": "Choose the service you want to book.",
     "title": "Book an appointment"
+  },
+  "signUp": {
+    "form": {
+      "emailLabel": "Email",
+      "fullNameLabel": "Full name",
+      "passwordLabel": "Password",
+      "phoneLabel": "Phone",
+      "recaptchaLabel": "Security check",
+      "submitAction": "Create account"
+    },
+    "subtitle": "Create your account to book and manage your appointments.",
+    "title": "Create account",
+    "verification": {
+      "sendFailed": "Your account was created, but we could not send the verification email. Sign in to request a new one.",
+      "sent": "We sent you an email to verify your account. Check your inbox."
+    }
   }
 }

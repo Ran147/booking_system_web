@@ -44,6 +44,7 @@ export const ROUTE_PATH = {
     BOOKING_DETAIL: "my-bookings/:bookingId",
     MY_BOOKINGS: "my-bookings",
     ROOT: "/:businessSlug",
+    SIGN_UP: "sign-up",
   },
   LANDING: {
     ABOUT: "/about",

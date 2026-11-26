@@ -1,14 +1,14 @@
 import type { RouteObject } from "react-router";
 import { ROUTE_PATH } from "@/constants";
 import { USER_ROLE } from "@/domain";
-import { RequireRole } from "@/modules/auth";
+import { GuestOnly, RequireRole } from "@/modules/auth";
 import { CustomerLayout } from "./layout/CustomerLayout";
 
 // The customer portal lives under the business slug: /:businessSlug/... (Q4).
 // Static top-level routes (landing, auth, business, admin) rank above this
 // dynamic segment in React Router, and their segments are reserved slugs
 // (RESERVED_BUSINESS_SLUG). Public business pages (home, catalog, service
-// details) have no guard. The booking flow, my bookings and profile go inside
+// details) have no guard; the sign-up is for visitors only. The booking flow, my bookings and profile go inside
 // the RequireRole branch: booking needs a customer account (Q6).
 export const customerRoutes: RouteObject[] = [
   {
@@ -20,6 +20,20 @@ export const customerRoutes: RouteObject[] = [
             await import("./placeholder/CustomerPlaceholderPage");
           return { Component: CustomerPlaceholderPage };
         },
+      },
+      {
+        // KAN-123: a signed-in user is sent to their own portal (GuestOnly).
+        children: [
+          {
+            lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+              const { CustomerSignUpPage } =
+                await import("./features/customer-sign-up");
+              return { Component: CustomerSignUpPage };
+            },
+            path: ROUTE_PATH.CUSTOMER.SIGN_UP,
+          },
+        ],
+        element: <GuestOnly />,
       },
       {
         children: [
