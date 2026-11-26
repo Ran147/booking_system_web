@@ -90,13 +90,16 @@ Correo de Firebase --> /auth/action?mode=verifyEmail&oobCode=…&continueUrl=…
 | --- | --- |
 | `src/constants/routes/RoutePath.constants.ts` | `AUTH.ACTION: "/auth/action"` |
 | `src/domain/business/BusinessSlug.constants.ts` + espejo en `functions/src/shared/constants/` | `AUTH: "auth"` en `RESERVED_BUSINESS_SLUG`, porque es un segmento nuevo de primer nivel |
-| `src/modules/auth/AuthActionPage.tsx` (nuevo) | Lee `mode`. Si es `resetPassword`, redirige a `/password-reset` con la misma query (US-36 no cambia). Si es `verifyEmail`, muestra `EmailVerificationResult`. Cualquier otro `mode` muestra el aviso de enlace inválido |
-| `src/modules/auth/components/EmailVerificationResult.tsx` (nuevo) | Estados: `checking` (spinner), `verified` (`customer:signUp.verification.success` + "Iniciar sesión"), `invalid` (`linkInvalid` + "Iniciar sesión para pedir otro correo") y `networkError` (`common:errors.network` + "Reintentar") |
-| `src/modules/auth/hooks/useEmailVerificationViewModel.ts` (nuevo) | `applyActionCode` con `useQuery` sin reintentos (el mismo patrón que `useResetCodeQuery`). Si hay sesión abierta, llama a `currentUser.reload()` para que el aviso de "pendiente" desaparezca |
-| `src/modules/auth/api/applyEmailVerificationCode.ts` (nuevo) + `mapEmailVerificationError.ts` | Envuelve `applyActionCode` y traduce `auth/expired-action-code`, `auth/invalid-action-code` y `auth/user-disabled` a `invalid`, y `auth/network-request-failed` a `networkError` |
+| `src/modules/auth/AuthActionPage.tsx` (nuevo) | Lee `mode`. Si es `resetPassword`, redirige a `/password-reset` con la misma query (US-36 no cambia). En cualquier otro caso muestra `EmailVerificationCard`, que solo aplica el código si `mode` es `verifyEmail`; con otro `mode` muestra el aviso de enlace inválido sin llamar a Firebase |
+| `src/modules/auth/components/EmailVerificationCard.tsx` + `EmailVerificationNotice.tsx` (nuevos) | El mismo marco que la página de US-36. Estados: `checking` (`Spinner`), `verified` (`common:auth.emailVerification.success` + "Ir a iniciar sesión"), `invalid` (`linkInvalid` + "Ir a iniciar sesión" para pedir otro correo) y `failed` (`common:errors.network` o `errors.unknown` + "Reintentar") |
+| `src/modules/auth/hooks/useEmailVerificationViewModel.ts` (nuevo) | Decide el estado y el destino del botón |
+| `src/modules/auth/api/useEmailVerificationQuery.ts` + `applyEmailVerificationCode.ts` + `mapEmailVerificationError.ts` (nuevos) | `applyActionCode` con `useQuery` (sin reintentos, `staleTime: Infinity` y sin volver a pedirlo al enfocar o reconectar, porque un código ya usado respondería "inválido"). Si hay sesión abierta, `currentUser.reload()` refresca `emailVerified`. `auth/expired-action-code`, `auth/invalid-action-code`, `auth/user-disabled` y `auth/user-not-found` → `invalid`; `auth/network-request-failed` → red; lo demás → desconocido |
+| `src/modules/auth/utils/readContinuePath.ts` (nuevo) | Toma la ruta de `continueUrl` solo si es de este sitio y pasa `resolveSafeRedirectPath` |
+| `src/constants/routes/SearchParam.constants.ts` | `CONTINUE_URL: "continueUrl"` |
+| `src/i18n/locales/{es,en}/common.json` | `auth.emailVerification.*` (D11) |
 | `src/modules/auth/auth.routes.tsx` | La ruta `/auth/action` va **fuera** de `GuestOnly`, porque el enlace se puede abrir con la sesión iniciada |
 
-El botón "Iniciar sesión" usa la ruta de `continueUrl` (por ejemplo `/sign-in?redirectTo=/<slug>`) solo si pasa `resolveSafeRedirectPath`. Si no, va a `/sign-in`.
+`continueUrl` es la página a la que se vuelve después de iniciar sesión (por ejemplo `https://<dominio>/<slug>`). El botón lleva a `buildSignInPath(<esa ruta>)` solo si es de este sitio y pasa `resolveSafeRedirectPath`. Si no, va a `/sign-in`.
 
 ### 3.4 Formulario de registro (PR 3)
 
@@ -110,7 +113,7 @@ El botón "Iniciar sesión" usa la ruta de `continueUrl` (por ejemplo `/sign-in?
 | `src/modules/auth/models/SignInLocationState.interface.ts` + `SignInPage.tsx` | El estado acepta `signUpRole` (`subscriber` o `customer`) para mostrar `landing:subscriberSignUp.success` o `customer:signUp.success`. Si `verificationEmail` es `sendFailed`, se muestra `customer:signUp.verification.sendFailed` (AC-KAN-126-04). El correo sigue precargado (AC-KAN-127-04) y `redirectTo` se conserva (AC-KAN-127-03, AC-KAN-127-05) |
 | `src/modules/auth/components/SignInForm.tsx` | Enlace "¿No tienes cuenta? Crear cuenta" **solo** cuando `redirectTo` apunta a las páginas de un negocio: lleva a `/<slug>/sign-up?redirectTo=…`. Hoy no hay ninguna forma de llegar al registro |
 | `src/modules/customer/layout/components/EmailVerificationPendingBanner.tsx` (nuevo) + hook | Si la sesión es de un `customer` con `emailVerified === false`, muestra `customer:signUp.verification.pending` con "Reenviar correo". El reenvío llama a `sendEmailVerification(currentUser, { url })` desde el cliente. `auth/too-many-requests` muestra `tooManyRequests` (AC-KAN-126-05, AS-6) |
-| `src/i18n/locales/{es,en}/customer.json` | `signUp.form.*`, `signUp.verification.*` (`sent`, `success`, `linkInvalid`, `sendFailed`, `tooManyRequests`, `pending`, `resendAction`) y `signUp.success` |
+| `src/i18n/locales/{es,en}/customer.json` | `signUp.form.*`, `signUp.verification.*` (`sent`, `sendFailed`, `tooManyRequests`, `pending`, `resendAction`) y `signUp.success`. Los mensajes de la página del enlace (`success`, `linkInvalid`) están en `common:auth.emailVerification` (D11) |
 
 ## 4. Tests
 
@@ -118,7 +121,7 @@ El botón "Iniciar sesión" usa la ruta de `continueUrl` (por ejemplo `/sign-in?
 | --- | --- |
 | `functions/src/auth/tests/completeCustomerSignUp.test.ts` (emulador) | AC-KAN-123-01 y 11 (cuenta, claims y `users/{uid}`), AC-KAN-123-05 (sin reCAPTCHA no hay cuenta), AC-KAN-123-06 (correo existente: misma respuesta y la cuenta queda igual), AC-KAN-123-09 (correo normalizado), el rollback cuando falla Firestore y AC-KAN-126-01 y 04 (`sent` o `sendFailed`) |
 | `tests/api/completeCustomerSignUp.test.ts` | La rama de Vercel ejecuta el handler compartido y traduce `CallableFailure` a HTTP |
-| `src/modules/auth/tests/AuthActionPage.test.tsx` (+ `.page.ts`) | `resetPassword` redirige con la misma query, AC-KAN-126-02 (verificado), AC-KAN-126-03 (vencido o inválido), error de red con "Reintentar", `mode` desconocido y `continueUrl` inseguro |
+| `src/modules/auth/tests/AuthActionPage.test.tsx` (+ `.page.ts`) + `mapEmailVerificationError.test.ts` | `resetPassword` redirige con la misma query, AC-KAN-126-02 (verificado, también con sesión abierta), AC-KAN-126-03 (vencido, usado, cuenta desactivada o borrada, sin código), error de red con "Reintentar", error desconocido, `mode` desconocido y `continueUrl` de otro sitio. El slug `auth` lo comprueba `isReservedBusinessSlug.test.ts` |
 | `features/customer-sign-up/tests/CustomerSignUpPage.test.tsx` (+ `.page.ts`) | AC-KAN-123-02 … 13, AC-KAN-124-01 … 04, AC-KAN-125-01 … 04 y AC-KAN-127-01 … 05 |
 | `src/modules/auth/tests/SignInPage.test.tsx` | El mensaje según `signUpRole`, `sendFailed` y el enlace "Crear cuenta" (solo con un `redirectTo` de negocio) |
 | `src/modules/customer/layout/tests/EmailVerificationPendingBanner.test.tsx` | AC-KAN-126-05 y 06 |
@@ -139,6 +142,7 @@ AC-KAN-127-06 (el servicio o el negocio ya no se pueden reservar al volver) ya l
 | D8 | El aviso de "pendiente" está en `CustomerLayout` | Un cliente sin `redirectTo` va a la landing (`PORTAL_HOME_BY_ROLE`, P-1 de US-33) y ahí no ve el aviso. Lo verá al entrar a cualquier página de un negocio. Se puede revisar cuando exista "mis reservas" global |
 | D9 | Las etiquetas de mostrar / ocultar son las de `PasswordInput` (`common`), no claves nuevas `customer:signUp.form.showPassword` / `hidePassword` | Evita duplicar textos. La SPEC pide que estas piezas se compartan (*Backlog issues*) |
 | D10 | Un cliente sin verificar **puede** iniciar sesión | AS-7. Si puede reservar o no, lo decide KAN-148 |
+| D11 | Los textos de la página del enlace van en `common:auth.emailVerification.*`, no en `customer:signUp.verification.*` | La página está en el módulo `auth`, compartido por todos los roles, y la reutiliza la verificación del suscriptor (paso 3 de KAN-25). Es el mismo criterio que `common:auth.passwordReset` |
 
 ## 6. División en PRs (límite de ~2000 líneas)
 
