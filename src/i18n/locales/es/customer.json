@@ -165,6 +165,27 @@
     "description": "Aquí podrás reservar servicios y gestionar tus reservas.",
     "title": "Tus reservas"
   },
+  "profile": {
+    "actions": {
+      "retry": "Reintentar"
+    },
+    "description": "Consulta los datos personales asociados a tu cuenta.",
+    "fields": {
+      "email": "Correo",
+      "fullName": "Nombre completo",
+      "notProvided": "No disponible",
+      "phone": "Teléfono"
+    },
+    "navigation": {
+      "back": "Volver al negocio",
+      "open": "Mi perfil"
+    },
+    "states": {
+      "loading": "Cargando tus datos personales…",
+      "notFound": "No se encontró tu perfil personal."
+    },
+    "title": "Mi perfil"
+  },
   "serviceSelection": {
     "continueAction": "Continuar",
     "errors": {

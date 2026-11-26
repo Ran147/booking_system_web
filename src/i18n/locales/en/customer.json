@@ -165,6 +165,27 @@
     "description": "This is where you will book services and manage your bookings.",
     "title": "Your bookings"
   },
+  "profile": {
+    "actions": {
+      "retry": "Retry"
+    },
+    "description": "View the personal data associated with your account.",
+    "fields": {
+      "email": "Email",
+      "fullName": "Full name",
+      "notProvided": "Not provided",
+      "phone": "Phone"
+    },
+    "navigation": {
+      "back": "Back to business",
+      "open": "My profile"
+    },
+    "states": {
+      "loading": "Loading your personal data…",
+      "notFound": "Your personal profile was not found."
+    },
+    "title": "My profile"
+  },
   "serviceSelection": {
     "continueAction": "Continue",
     "errors": {
