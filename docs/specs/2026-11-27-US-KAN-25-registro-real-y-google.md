@@ -51,8 +51,8 @@ En `functions/src/billing/handlers/`, sin `firebase-functions`, como `handlePayP
 - Las reglas no cambian: el orden, la transacción, el reintento de claims y el deshacer son los de la SPEC ("Order and rollback") y los de #63.
 - Los errores pasan de `HttpsError` a `CallableFailure`, con el mismo código y el mismo `details.reason`.
 - `findSignUpCheckout` recibe `firestore` y `now` en lugar de leer la instancia del módulo y `Timestamp.now()`, y falla con `CallableFailure`.
-- Las fechas que escribe el handler son `Date` (`now`) o `FieldValue.serverTimestamp()` de la instancia recibida, nunca un `Timestamp` de `functions/node_modules`. Vercel carga otra copia de `firebase-admin` (lo que se corrigió en #107).
-- `reportError(message, context)` reemplaza a `logger` de `firebase-functions`: la callable pasa `logger.error` / `logger.warn` y Vercel pasa `console.error`. Es lo único que el handler registra (claims que fallan, cuenta que no se pudo borrar, deshacer que falla).
+- Las fechas que escribe el handler son `Date` (`now`), nunca un `Timestamp` ni un `FieldValue.serverTimestamp()` de `functions/node_modules`: Vercel carga otra copia de `firebase-admin` y Firestore los rechaza (lo que se corrigió en #107). `createdAt` y `signUpCompletedAt` pasan de la hora del servidor de Firestore a `now`.
+- `reportError(message, context)` reemplaza a `logger` de `firebase-functions`: la callable pasa `logger.warn` y Vercel escribe una línea JSON en `stderr`, que guardan los logs de Vercel (el lint prohíbe `console` fuera de `scripts/`). Es lo único que el handler registra (claims que fallan, cuenta que no se pudo borrar, deshacer que falla).
 
 ### 3.2 Las callables (emulador)
 
