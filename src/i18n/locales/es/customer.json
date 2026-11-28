@@ -185,5 +185,21 @@
     "serviceDetail": "{{minutes}} min · {{price}}",
     "subtitle": "Elige el servicio que quieres reservar.",
     "title": "Reservar una cita"
+  },
+  "signUp": {
+    "form": {
+      "emailLabel": "Correo electrónico",
+      "fullNameLabel": "Nombre completo",
+      "passwordLabel": "Contraseña",
+      "phoneLabel": "Teléfono",
+      "recaptchaLabel": "Verificación de seguridad",
+      "submitAction": "Crear cuenta"
+    },
+    "subtitle": "Crea tu cuenta para reservar y gestionar tus citas.",
+    "title": "Crear cuenta",
+    "verification": {
+      "sendFailed": "Tu cuenta se creó, pero no pudimos enviarte el correo de verificación. Inicia sesión para pedir uno nuevo.",
+      "sent": "Te enviamos un correo para verificar tu cuenta. Revisa tu bandeja de entrada."
+    }
   }
 }

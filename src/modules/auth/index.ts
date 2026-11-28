@@ -8,6 +8,7 @@ export { SESSION_STATUS } from "./constants/SessionStatus.constants";
 export { useCurrentBusiness } from "./hooks/useCurrentBusiness";
 export { useSession } from "./hooks/useSession";
 export { useSignOut } from "./hooks/useSignOut";
+export { emailFieldSchema } from "./models/EmailField.schema";
 export { fullNameFieldSchema } from "./models/FullNameField.schema";
 export { passwordFieldSchema } from "./models/PasswordField.schema";
 export {
