@@ -8,8 +8,9 @@ import { CustomerLayout } from "./layout/CustomerLayout";
 // Static top-level routes (landing, auth, business, admin) rank above this
 // dynamic segment in React Router, and their segments are reserved slugs
 // (RESERVED_BUSINESS_SLUG). Public business pages (home, catalog, service
-// details) have no guard; the sign-up is for visitors only. The booking flow, my bookings and profile go inside
-// the RequireRole branch: booking needs a customer account (Q6).
+// details) have no guard; the sign-up is for visitors only. The booking flow,
+// my bookings and profile go inside the RequireRole branch: booking needs a
+// customer account (Q6).
 export const customerRoutes: RouteObject[] = [
   {
     children: [

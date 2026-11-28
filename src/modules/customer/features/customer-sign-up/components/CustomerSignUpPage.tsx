@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/common";
-import { I18N_NAMESPACE } from "@/constants";
+import { ARIA_ROLE, I18N_NAMESPACE } from "@/constants";
 import { CustomerSignUpForm } from "./CustomerSignUpForm";
 import { VERIFICATION_EMAIL_STATUS } from "../constants/CustomerSignUp.constants";
 import { useCustomerSignUpViewModel } from "../hooks/useCustomerSignUpViewModel";
@@ -22,7 +22,7 @@ export const CustomerSignUpPage = (): ReactElement => {
   const renderContent = (): ReactElement => {
     if (verificationEmail === VERIFICATION_EMAIL_STATUS.SENT) {
       return (
-        <p className="text-foreground" role="status">
+        <p className="text-foreground" role={ARIA_ROLE.STATUS}>
           {t("signUp.verification.sent")}
         </p>
       );

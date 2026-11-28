@@ -8,6 +8,7 @@ import {
   FIREBASE_ERROR_CODE,
   I18N_NAMESPACE,
   LANGUAGE,
+  STRING,
   type Language,
 } from "@/constants";
 import { recaptchaSiteKey } from "@/services/firebase";
@@ -85,7 +86,7 @@ export const useCustomerSignUpViewModel = (): CustomerSignUpViewModel => {
     completeSignUpMutation.mutate(
       {
         // The business page to return to after signing in (AC-KAN-127-03).
-        continueUrl: `${window.location.origin}/${businessSlug ?? ""}`,
+        continueUrl: `${window.location.origin}/${businessSlug ?? STRING.EMPTY}`,
         email: formValues.email,
         fullName: formValues.fullName,
         language,
