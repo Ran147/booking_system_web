@@ -4,7 +4,7 @@
 | --- | --- |
 | Portal | landing |
 | Feature folder | `src/modules/landing/features/subscriber-sign-up/` |
-| Stories | KAN-25, KAN-27 |
+| Stories | KAN-25, KAN-27, PROP-5 |
 | Status | Draft |
 | Depends on | Q7 decided 2026-09-28 (the form is reached from the KAN-24 payment email); Q4 decided 2026-09-28 (the business `slug` is set here); Q2 decided 2026-09-28 (the new business is `pending` until approval); KAN-20 plan checkout (`PlanCheckout`, KAN-24 email); KAN-28 sign-in (US-33, `src/modules/auth`); "under review" screen of a `pending` business (AC-KAN-33-09, built in `business/layout`, KAN-29); KAN-174 admin businesses (approval PROP-1, KAN-176); `cloud-functions-standards` (proposed in PR #17) for the three functions below |
 
@@ -14,7 +14,7 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 ## Actors and permissions
 | Actor | Can |
 | --- | --- |
-| visitor with a valid sign-up link (KAN-24) | Create a `User` account with the checkout email, and a `pending` `Business` with its name and `slug` |
+| visitor with a valid sign-up link (KAN-24) | Create a `User` account with the checkout email (with a password, or with the Google account of that email, PROP-5), and a `pending` `Business` with its name and `slug` |
 | visitor without a link | Nothing but a notice that sign-up starts by choosing a plan (AC-KAN-25-21) |
 | subscriber, collaborator, customer, super admin (signed in) | Nothing here: a signed-in user who opens the form is sent to their own portal |
 | system (Cloud Functions) | Validates the link, the slug and the reCAPTCHA, creates the account, the business and its payment record, and sets the claims |
@@ -24,6 +24,7 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 - Validating the sign-up link from the KAN-24 email.
 - Creating the `User` account, the `pending` `Business` and the claims `{ role: "subscriber", businessId }` in one server call. Existing owners with the legacy `subscriber` role remain supported.
 - Redirecting to sign-in after a successful sign-up (KAN-27).
+- Creating the account with the Google account of the checkout email instead of a password (PROP-5).
 
 ## Out of scope
 - Plan choice, terms and payment (KAN-21 to KAN-24, plan-checkout spec).
@@ -75,6 +76,15 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 - [ ] **AC-KAN-27-05** · edge · Given the visitor uses the browser's back button after the redirect, when they return to the sign-up form, then it is empty and does not submit again. [KAN-27]
 - [ ] **AC-KAN-27-06** · happy · Given the new subscriber signs in with the new credentials, when their business is still `pending`, then they land on the "under review" screen of the business portal (AC-KAN-33-09), not on the portal home. [KAN-27, KAN-33]
 
+### PROP-5 — Sign-up with the Google account of the checkout email (Proposed — not in Jira yet)
+- [ ] **AC-PROP-5-01** · happy · Given a valid sign-up link, when the visitor chooses "Continue with Google" (`landing:subscriberSignUp.google.continueAction`) and picks the Google account of the checkout email, then the password, its confirmation and the strength indicator are hidden and the connected account is shown (`landing:subscriberSignUp.google.connectedAccount`); and when the other fields are valid, the reCAPTCHA is solved and the form is submitted, then the account is created with that Google account and no password, with the same `pending` business, payment, claims and used link as AC-KAN-25-16, and the flow continues as in KAN-27. [PROP-5]
+- [ ] **AC-PROP-5-02** · error · Given the visitor picks a Google account whose email is not the checkout email, when the account is connected, then it is signed out, nothing is created, the password fields stay and `landing:subscriberSignUp.google.emailMismatch` names the checkout email; the server rejects that account too. [PROP-5]
+- [ ] **AC-PROP-5-03** · error · Given the Google window, when the visitor closes it, then nothing changes and no message is shown; and when the window is blocked or the network fails, then `landing:subscriberSignUp.google.popupBlocked` or `common:errors.network` is shown and the password fields stay. [PROP-5]
+- [ ] **AC-PROP-5-04** · error · Given the Google account already has a role or a `User` on the platform, when the form is submitted, then nothing is created, the link stays valid and the neutral message of AC-KAN-25-09 is shown (AS-5). [PROP-5]
+- [ ] **AC-PROP-5-05** · edge · Given a connected Google account, when the visitor chooses "Use a password instead" (`landing:subscriberSignUp.google.usePasswordAction`), then the Google session is closed and the password fields are shown again, empty. [PROP-5]
+- [ ] **AC-PROP-5-06** · edge · Given the server fails after the Google account was accepted but before the sign-up finished, when the error happens, then the business, its documents and the used mark of the link are undone, the Google account itself is kept without a role, the link stays valid and `common:errors.unknown` is shown. [PROP-5]
+- [ ] **AC-PROP-5-07** · edge · Given the Google session is no longer valid when the form is submitted, when the server answers, then nothing is created, the Google account is disconnected and `landing:subscriberSignUp.google.sessionExpired` asks to connect it again. [PROP-5]
+
 ## BLOCKED
 None. Q7 was decided on 2026-09-28: the form is reached from the KAN-24 payment email, and the sign-up creates the account and the `pending` business with its `slug`.
 
@@ -95,7 +105,7 @@ AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can stil
 | AS-3 | Limits: first and last name 2–60 characters each; phone 7–20 characters (digits, spaces, `+`, `-`); business name AS-9. | AC-KAN-25-11, AC-KAN-25-19 |
 | AS-4 | The `User.language` is set from the language active on the landing at sign-up. | Data |
 | AS-5 | Sign-up does not reveal whether an email is already registered; a neutral message is shown, consistent with `auth-and-roles` §5. | AC-KAN-25-09 |
-| AS-6 | After sign-up the new account is signed out and the email is passed to sign-in; the success message is shown once. | AC-KAN-27-01, AC-KAN-27-02 |
+| AS-6 | After sign-up the new account is signed out and the email is passed to sign-in; the success message is shown once. The same applies to a Google sign-up: the subscriber then signs in with "Continue with Google". | AC-KAN-27-01, AC-KAN-27-02, AC-PROP-5-01 |
 
 ## Backlog issues
 - The Jira epic title is "Registro del usuario una vez confirmado correo" ("sign-up once the email is confirmed"); the epic map calls it "Registro del usuario". The confirmed email is the KAN-24 payment email (Q7).
@@ -134,3 +144,5 @@ AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can stil
 | KAN-27 | AC-KAN-27-01 (sign-up side), AC-KAN-27-02 … AC-KAN-27-05 | `tests/SubscriberSignUpPage.test.tsx` |
 | KAN-27 | AC-KAN-27-01 (sign-in side: email filled in, message once) | `src/modules/auth/tests/SignInPage.test.tsx` |
 | KAN-27 | AC-KAN-27-06 | Not testable here: see BLOCKED (KAN-29) |
+| PROP-5 | AC-PROP-5-01, AC-PROP-5-02, AC-PROP-5-04, AC-PROP-5-06, AC-PROP-5-07 (server side) | `functions/src/billing/tests/completeSubscriberSignUpWithGoogle.test.ts` |
+| PROP-5 | AC-PROP-5-01 … AC-PROP-5-05, AC-PROP-5-07 (form) | `tests/SubscriberSignUpGoogle.test.tsx` |

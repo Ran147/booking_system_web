@@ -21,10 +21,11 @@ Q1–Q7 were decided by the team on 2026-09-28 (confirmed by Lorenzo), Q8 on 202
 
 ## Proposals for missing stories
 
-The decisions above need stories that are not in Jira yet. They are specified with the keys `PROP-1` … `PROP-4` and the criteria ids `AC-PROP-n-xx`, marked "Proposed — not in Jira yet". When a story is created in Jira, its spec adds the new KAN key next to the `PROP` key (heading, Stories row, the brackets of each criterion and Traceability); the `AC-PROP-n-xx` ids stay as published, because criterion ids never change (`backlog-to-spec` §3).
+The decisions above need stories that are not in Jira yet. They are specified with the keys `PROP-1` … `PROP-5` and the criteria ids `AC-PROP-n-xx`, marked "Proposed — not in Jira yet". When a story is created in Jira, its spec adds the new KAN key next to the `PROP` key (heading, Stories row, the brackets of each criterion and Traceability); the `AC-PROP-n-xx` ids stay as published, because criterion ids never change (`backlog-to-spec` §3).
 
 | Key | Story | Spec |
 | --- | --- | --- |
 | PROP-1 | Super admin approves or rejects a pending business | `src/portals/admin/features/businesses/specs/SPEC.md` |
 | PROP-2 | Super admin suspends a business (KAN-179 reactivates it) | `src/portals/admin/features/businesses/specs/SPEC.md` |
 | PROP-3 | Subscriber creates a support ticket and sees its replies and status | `src/portals/business/features/support/specs/SPEC.md` |
+| PROP-5 | Future subscriber creates the account with their Google account instead of a password | `src/modules/landing/features/subscriber-sign-up/specs/SPEC.md` |
