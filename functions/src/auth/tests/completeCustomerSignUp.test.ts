@@ -1,3 +1,6 @@
+import { createRequire } from "node:module";
+import type * as FirebaseAdminApp from "firebase-admin/app";
+import type * as FirebaseAdminFirestore from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import {
   afterEach,
@@ -25,6 +28,7 @@ import {
   CUSTOMER_SIGN_UP,
   VERIFICATION_EMAIL_STATUS,
 } from "../constants/CustomerSignUp.constants.js";
+import { handleCompleteCustomerSignUp } from "../handlers/handleCompleteCustomerSignUp.js";
 
 // Google is not called from tests: assertRecaptcha has its own test, and here
 // it accepts every token unless a test makes it reject one.
@@ -36,6 +40,8 @@ vi.mock("../assertRecaptcha.js", () => ({
 const TEST_PROJECT_ID = process.env.GCLOUD_PROJECT ?? "demo-booking-system";
 const NEW_EMAIL = "cliente.nuevo@demo.test";
 const CONTINUE_URL = "http://localhost:5173/barberia-centro";
+const DISPATCHER_APP_NAME = "vercel-dispatcher-copy";
+const REPOSITORY_ROOT_PACKAGE_JSON = "../../../../package.json";
 
 const callCompleteCustomerSignUp = functionsTestEnvironment.wrap(
   completeCustomerSignUp,
@@ -87,6 +93,25 @@ const readSentVerificationEmails = async (): Promise<OobCodeEntry[]> =>
 
 const countAuthUsers = async (): Promise<number> =>
   (await auth.listUsers()).users.length;
+
+// The Vercel dispatcher loads firebase-admin from the repository root, while
+// the handler is built with the copy in functions/node_modules (Q8). This
+// returns a Firestore of the root copy, connected to the same emulator.
+const readRepositoryRootFirestore = (): FirebaseAdminFirestore.Firestore => {
+  const requireFromRepositoryRoot = createRequire(
+    new URL(REPOSITORY_ROOT_PACKAGE_JSON, import.meta.url),
+  );
+  const rootApp = requireFromRepositoryRoot(
+    "firebase-admin/app",
+  ) as typeof FirebaseAdminApp;
+  const rootFirestore = requireFromRepositoryRoot(
+    "firebase-admin/firestore",
+  ) as typeof FirebaseAdminFirestore;
+  const dispatcherApp =
+    rootApp.getApps().find((app) => app.name === DISPATCHER_APP_NAME) ??
+    rootApp.initializeApp({ projectId: TEST_PROJECT_ID }, DISPATCHER_APP_NAME);
+  return rootFirestore.getFirestore(dispatcherApp);
+};
 
 describe("completeCustomerSignUp", () => {
   beforeAll(assertEmulatorsRunning);
@@ -243,6 +268,29 @@ describe("completeCustomerSignUp", () => {
       expect(await countAuthUsers()).toBe(0);
     },
   );
+
+  it("Q8: writes users/{uid} through the Firestore of another firebase-admin copy, as the Vercel dispatcher does", async () => {
+    const dispatcherFirestore = readRepositoryRootFirestore();
+
+    await expect(
+      handleCompleteCustomerSignUp({
+        auth,
+        caller: null,
+        firestore: dispatcherFirestore,
+        now: new Date(),
+        payload: buildPayload(),
+        sendVerificationEmail: vi.fn().mockResolvedValue(true),
+        verifyRecaptcha: vi.fn().mockResolvedValue(undefined),
+      }),
+    ).resolves.toEqual({ verificationEmail: VERIFICATION_EMAIL_STATUS.SENT });
+
+    const userRecord = await auth.getUserByEmail(NEW_EMAIL);
+    const userSnapshot = await firestore
+      .collection(FIRESTORE_COLLECTION.USERS)
+      .doc(userRecord.uid)
+      .get();
+    expect(userSnapshot.exists).toBe(true);
+  });
 
   it("rolls back the Auth user when users/{uid} cannot be written", async () => {
     vi.spyOn(auth, "setCustomUserClaims").mockRejectedValueOnce(

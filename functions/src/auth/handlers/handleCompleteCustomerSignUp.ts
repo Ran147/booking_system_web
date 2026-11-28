@@ -1,5 +1,4 @@
 import type { Auth } from "firebase-admin/auth";
-import { Timestamp } from "firebase-admin/firestore";
 import { FIREBASE_AUTH_ERROR_CODE } from "../../shared/constants/FirebaseAuthErrorCode.constants.js";
 import { FIRESTORE_COLLECTION } from "../../shared/constants/FirestoreCollection.constants.js";
 import { USER_ROLE } from "../../shared/constants/UserRole.constants.js";
@@ -82,19 +81,18 @@ export const handleCompleteCustomerSignUp = async ({
 
   try {
     await auth.setCustomUserClaims(userId, { role: USER_ROLE.CUSTOMER });
-    await firestore
-      .collection(FIRESTORE_COLLECTION.USERS)
-      .doc(userId)
-      .create({
-        createdAt: Timestamp.fromDate(now),
-        email: signUpPayload.email,
-        fullName: signUpPayload.fullName,
-        language: signUpPayload.language,
-        phone: signUpPayload.phone,
-        role: USER_ROLE.CUSTOMER,
-        theme: CUSTOMER_SIGN_UP.DEFAULT_THEME,
-        uid: userId,
-      });
+    await firestore.collection(FIRESTORE_COLLECTION.USERS).doc(userId).create({
+      // A `Date`, not a Timestamp of this package: the Vercel dispatcher
+      // may load another copy of firebase-admin (Q8).
+      createdAt: now,
+      email: signUpPayload.email,
+      fullName: signUpPayload.fullName,
+      language: signUpPayload.language,
+      phone: signUpPayload.phone,
+      role: USER_ROLE.CUSTOMER,
+      theme: CUSTOMER_SIGN_UP.DEFAULT_THEME,
+      uid: userId,
+    });
   } catch (error) {
     await auth.deleteUser(userId).catch(() => undefined);
     throw error;
