@@ -2,8 +2,6 @@ import { Check, CreditCard, ShieldCheck } from "lucide-react";
 import type { FormEvent, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
-  ALERT_VARIANT,
   AppLink,
   Button,
   Card,
@@ -13,41 +11,49 @@ import {
   CardTitle,
   CheckboxField,
   InputField,
+  RecaptchaField,
 } from "@/components/common";
 import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
 import type { Nullable } from "@/types";
-import type {
-  PlanCheckoutFieldErrors,
-  PlanCheckoutFields,
-} from "../hooks/usePlanCheckoutViewModel";
+import { ContractErrorAlert } from "./ContractErrorAlert";
 import {
   PLAN_CHECKOUT_STATE,
   type PlanCheckoutState,
 } from "../models/PlanCheckout.model";
+import type {
+  PlanCheckoutFieldErrors,
+  PlanCheckoutFields,
+  PlanCheckoutRecaptcha,
+} from "../models/PlanCheckoutViewModel.interface";
 import type { PlanDetail } from "../models/PlanDetail.interface";
+import type { ContractError } from "../models/PlanDetailViewModel.interface";
 
 export interface PlanCheckoutFormProps {
   readonly billingPeriodLabel: string;
   readonly checkoutState: PlanCheckoutState;
-  readonly errorMessage: Nullable<string>;
   readonly fieldErrors: PlanCheckoutFieldErrors;
   readonly fields: PlanCheckoutFields;
   readonly formattedPrice: string;
+  readonly isPayDisabled: boolean;
   readonly onBackToDetail: () => void;
   readonly onSubmit: (event?: FormEvent<HTMLFormElement>) => void;
   readonly plan: PlanDetail;
+  readonly recaptcha: PlanCheckoutRecaptcha;
+  readonly submitError: Nullable<ContractError>;
 }
 
 export const PlanCheckoutForm = ({
   billingPeriodLabel,
   checkoutState,
-  errorMessage,
   fieldErrors,
   fields,
   formattedPrice,
+  isPayDisabled,
   onBackToDetail,
   onSubmit,
   plan,
+  recaptcha,
+  submitError,
 }: PlanCheckoutFormProps): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
 
@@ -78,11 +84,9 @@ export const PlanCheckoutForm = ({
               <span>{t("planCheckout.checkout.simulationNotice")}</span>
             </div>
 
-            {errorMessage ? (
+            {submitError ? (
               <div className="mb-6">
-                <Alert variant={ALERT_VARIANT.DESTRUCTIVE}>
-                  {errorMessage}
-                </Alert>
+                <ContractErrorAlert contractError={submitError} />
               </div>
             ) : null}
 
@@ -169,9 +173,18 @@ export const PlanCheckoutForm = ({
                 />
               </div>
 
+              <RecaptchaField
+                label={t("planCheckout.checkout.recaptchaLabel")}
+                language={recaptcha.language}
+                onTokenChange={recaptcha.onTokenChange}
+                resetSignal={recaptcha.resetSignal}
+                siteKey={recaptcha.siteKey}
+              />
+
               {/* Acciones */}
               <div className="flex flex-col gap-3 pt-3">
                 <Button
+                  disabled={isPayDisabled}
                   fullWidth
                   isLoading={isProcessing}
                   size="lg"

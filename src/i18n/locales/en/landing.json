@@ -412,13 +412,13 @@
       "cardCvcLabel": "CVC / CVV",
       "cardExpiryHint": "MM/YY",
       "cardExpiryLabel": "Expiration date",
-      "cardNumberHint": "Use 4000 0000 0000 0001 to approve, or ending in 2 to decline",
+      "cardNumberHint": "Use 4000 0000 0000 0001 to approve or 4000 0000 0000 0002 to decline",
       "cardNumberLabel": "Card number",
       "cardholderNameHint": "As shown on card",
       "cardholderNameLabel": "Cardholder name",
       "contactEmailLabel": "Contact email:",
       "declinedError": "Payment was declined by the simulated gateway. Check your details or use another card.",
-      "emailHint": "Use the email address you want to use for your business account.",
+      "emailHint": "Use an email that has no account on the platform yet: it becomes your business account email.",
       "emailLabel": "Contact email address",
       "paidAmountLabel": "Amount paid:",
       "payAction": "Pay and continue to sign up",
@@ -431,8 +431,7 @@
       "stepTitle": "Subscription checkout",
       "subscriptionBadge": "Subscription",
       "subtitle": "You are one step away from managing your business with Booking System.",
-      "successAction": "Complete business sign up",
-      "successDescription": "We confirmed your payment for plan {{planName}}. Now finish setting up your business to activate your portal.",
+      "successDescription": "We confirmed your payment for plan {{planName}}.",
       "successTitle": "Payment processed successfully!",
       "termsAcceptance": "I have read and accept the",
       "termsLink": "Terms and conditions of service",
@@ -462,7 +461,12 @@
       "signedInNotice": "A new business is contracted signed out: each account has only one business. Sign out to continue."
     },
     "payment": {
-      "planUnavailableError": "This plan is no longer available. Choose another plan."
+      "attemptReusedError": "This payment was already made with other details. Reload the page to make a new payment.",
+      "cardInvalid": "Check this card detail.",
+      "planUnavailableError": "This plan is no longer available. Choose another plan.",
+      "priceChangedError": "The price of this plan changed to {{price}}. If you agree, pay again.",
+      "reviewNotice": "Once you create your account, we will review your business before activating it.",
+      "success": "We will send the link to create your account and business to {{email}}. Check your email."
     }
   },
   "subscriberSignUp": {

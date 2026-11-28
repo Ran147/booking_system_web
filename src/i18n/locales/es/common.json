@@ -3,6 +3,14 @@
     "cancel": "Cancelar"
   },
   "auth": {
+    "emailVerification": {
+      "linkInvalid": "El enlace venció, ya se usó o no es válido. Inicia sesión para pedir un correo nuevo.",
+      "retryAction": "Reintentar",
+      "signInAction": "Ir a iniciar sesión",
+      "subtitle": "Confirmamos que este correo es tuyo.",
+      "success": "¡Listo! Tu correo quedó verificado.",
+      "title": "Verificar correo"
+    },
     "idle": {
       "signOutAction": "Cerrar sesión",
       "signedOut": "Cerramos tu sesión por inactividad. Inicia sesión de nuevo para continuar.",

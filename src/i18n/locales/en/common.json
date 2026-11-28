@@ -3,6 +3,14 @@
     "cancel": "Cancel"
   },
   "auth": {
+    "emailVerification": {
+      "linkInvalid": "The link has expired, was already used or is not valid. Sign in to request a new email.",
+      "retryAction": "Try again",
+      "signInAction": "Go to sign in",
+      "subtitle": "We confirm that this email is yours.",
+      "success": "Done! Your email is verified.",
+      "title": "Verify email"
+    },
     "idle": {
       "signOutAction": "Sign out",
       "signedOut": "We signed you out because of inactivity. Sign in again to continue.",

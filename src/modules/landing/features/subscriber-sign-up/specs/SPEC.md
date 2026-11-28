@@ -22,7 +22,7 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 ## In scope
 - The sign-up form: personal data, email (pre-filled from the checkout, read-only), password with show / hide and strength feedback, business name and `slug`, reCAPTCHA (KAN-25).
 - Validating the sign-up link from the KAN-24 email.
-- Creating the `User` account, the `pending` `Business` and the claims `{ role: "subscriber", businessId }` in one server call.
+- Creating the `User` account, the `pending` `Business` and the claims `{ role: "subscriber", businessId }` in one server call. Existing owners with the legacy `subscriber` role remain supported.
 - Redirecting to sign-in after a successful sign-up (KAN-27).
 
 ## Out of scope
@@ -37,7 +37,7 @@ A future subscriber (business owner) who has paid a plan on the landing (KAN-22)
 - `Payment` (`businesses/{businessId}/payments/{paymentId}`): the checkout payment is copied here (amount, plan, date, result `succeeded`, reference) so it appears in the payment histories (KAN-46, KAN-178).
 - `PlanCheckout` (`planCheckouts/{planCheckoutId}`): found by `signUpTokenHash` (the SHA-256 hash of the link token, plan-checkout spec "Data"); valid while `signUpCompletedAt` is `null` and `signUpLinkExpiresAt` has not passed. Sign-up sets `signUpCompletedAt`; the link stops working.
 - `BusinessSlug` lock (`businessSlugs/{slug}`, decided 2026-10-10): `businessId`, `createdAt`. Created in the sign-up transaction; if the document already exists the slug is taken. It makes the slug unique even when two sign-ups run at the same time (AC-KAN-25-18). Written only by functions; denied to clients by the default rule of `firestore.rules`. New collection: to be added to `domain-glossary` §3 (proposed in PR #17).
-- Custom claims `{ role: "subscriber", businessId }` (`auth-and-roles` §1), set by the sign-up function.
+- Custom claims `{ role: "subscriber", businessId }` (`auth-and-roles` §1), set by the sign-up function. The legacy `subscriber` role remains valid for existing accounts.
 - `slug`: lowercase letters `a–z`, digits and single hyphens, 3–40 characters, not starting or ending with a hyphen (AS-7); never in `RESERVED_BUSINESS_SLUG` (`isReservedBusinessSlug`); unique across all businesses in any status.
 - Password rules: `PASSWORD_RULE` (minimum 8 characters, lowercase, uppercase, digit, symbol) from `forms-validation-standards` §5.
 
@@ -134,4 +134,3 @@ AS-1 to AS-9 were confirmed by the KAN-25 owner on 2026-10-10; the team can stil
 | KAN-27 | AC-KAN-27-01 (sign-up side), AC-KAN-27-02 … AC-KAN-27-05 | `tests/SubscriberSignUpPage.test.tsx` |
 | KAN-27 | AC-KAN-27-01 (sign-in side: email filled in, message once) | `src/modules/auth/tests/SignInPage.test.tsx` |
 | KAN-27 | AC-KAN-27-06 | Not testable here: see BLOCKED (KAN-29) |
-
