@@ -1230,8 +1230,7 @@ export default async function handler(
     }
 
     // KAN-123: same handler as the emulator callable (Q8). The reCAPTCHA is
-    // fail-closed until #65 brings the real check to Vercel: no customer
-    // account is created here without it (spec §6, merge after #65).
+    // checked with RECAPTCHA_SECRET_KEY, fail-closed without it.
     if (functionName === FUNCTION_NAME.COMPLETE_CUSTOMER_SIGN_UP) {
       await runSharedHandler(response, () =>
         handleCompleteCustomerSignUp({
