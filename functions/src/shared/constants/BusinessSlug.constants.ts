@@ -3,6 +3,7 @@
 export const RESERVED_BUSINESS_SLUG = Object.freeze({
   ABOUT: "about",
   ADMIN: "admin",
+  AUTH: "auth",
   BUSINESS: "business",
   CONTACT: "contact",
   FAQ: "faq",
