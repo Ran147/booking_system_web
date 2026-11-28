@@ -2,6 +2,7 @@
 // stay free of firebase-functions so the Vercel dispatcher (api/) can run the
 // same code; the onCall wrappers turn it into an HttpsError with toHttpsError.
 export type CallableFailureCode =
+  | "already-exists"
   | "failed-precondition"
   | "invalid-argument"
   | "not-found"

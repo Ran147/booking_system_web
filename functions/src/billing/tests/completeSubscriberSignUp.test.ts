@@ -27,6 +27,7 @@ import {
   functionsTestEnvironment,
   readErrorReason,
 } from "../../shared/tests/emulatorTestHelpers.js";
+import { readRepositoryRootFirestore } from "../../shared/tests/repositoryRootFirestore.js";
 import { wait } from "../../shared/wait.js";
 import { completeSubscriberSignUp } from "../completeSubscriberSignUp.js";
 import {
@@ -35,6 +36,7 @@ import {
   SIGN_UP_CLAIMS_RETRY_DELAY_MULTIPLIER,
   SIGN_UP_ERROR_REASON,
 } from "../constants/SubscriberSignUp.constants.js";
+import { handleCompleteSubscriberSignUp } from "../handlers/handleCompleteSubscriberSignUp.js";
 
 // Google is not called from tests: assertRecaptcha has its own test, and here
 // it accepts every token unless a test makes it reject one.
@@ -46,6 +48,8 @@ vi.mock("../../auth/assertRecaptcha.js", () => ({
 // The pauses between claims attempts are checked by their length, without
 // making the tests wait.
 vi.mock("../../shared/wait.js", () => ({ wait: vi.fn() }));
+
+const TEST_PROJECT_ID = process.env.GCLOUD_PROJECT ?? "demo-booking-system";
 
 const PROMISE_SETTLED_STATUS = {
   FULFILLED: "fulfilled",
@@ -153,6 +157,26 @@ describe("completeSubscriberSignUp", () => {
     expect(slugLockSnapshot.data()).toMatchObject({
       businessId: businessSnapshot?.id,
     });
+  });
+
+  it("Q8: stores the sign-up through the Firestore of another firebase-admin copy, as the Vercel dispatcher does", async () => {
+    const signUpResponse = await handleCompleteSubscriberSignUp({
+      assertRecaptcha: vi.fn().mockResolvedValue(undefined),
+      auth,
+      caller: null,
+      firestore: readRepositoryRootFirestore(TEST_PROJECT_ID),
+      now: new Date(),
+      payload: buildSignUpPayload(),
+      reportError: vi.fn(),
+    });
+
+    expect(signUpResponse).toEqual({ email: TEST_CHECKOUT_EMAIL });
+    expect(await countDocuments(FIRESTORE_COLLECTION.BUSINESSES)).toBe(1);
+    const checkoutSnapshot = await firestore
+      .collection(FIRESTORE_COLLECTION.PLAN_CHECKOUTS)
+      .doc(planCheckoutId)
+      .get();
+    expect(checkoutSnapshot.data()?.signUpCompletedAt).toBeTruthy();
   });
 
   it("KAN-25: verifies the reCAPTCHA token sent with the form (AC-KAN-25-08)", async () => {
