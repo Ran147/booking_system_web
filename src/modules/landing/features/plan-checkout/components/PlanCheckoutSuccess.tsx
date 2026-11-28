@@ -4,10 +4,8 @@ import { useTranslation } from "react-i18next";
 import {
   Badge,
   BADGE_VARIANT,
-  Button,
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/common";
@@ -17,14 +15,12 @@ import type { PlanDetail } from "../models/PlanDetail.interface";
 export interface PlanCheckoutSuccessProps {
   readonly confirmedEmail: string;
   readonly formattedPrice: string;
-  readonly onProceedToSignUp: () => void;
   readonly plan: PlanDetail;
 }
 
 export const PlanCheckoutSuccess = ({
   confirmedEmail,
   formattedPrice,
-  onProceedToSignUp,
   plan,
 }: PlanCheckoutSuccessProps): ReactElement => {
   const { t } = useTranslation(I18N_NAMESPACE.LANDING);
@@ -78,13 +74,15 @@ export const PlanCheckoutSuccess = ({
             </Badge>
           </div>
         </div>
+        {/* The account is created from the KAN-24 email link, never from
+            here (AC-KAN-22-03, spec D3). */}
+        <p className="text-sm text-foreground">
+          {t("planCheckout.payment.success", { email: confirmedEmail })}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {t("planCheckout.payment.reviewNotice")}
+        </p>
       </CardContent>
-
-      <CardFooter className="px-8 pb-8 pt-0">
-        <Button fullWidth onClick={onProceedToSignUp} size="lg">
-          {t("planCheckout.checkout.successAction")}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
