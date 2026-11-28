@@ -10,6 +10,7 @@ import {
 } from "@/constants";
 import { useSession } from "@/modules/auth";
 import { SESSION_STATUS } from "@/modules/auth/constants/SessionStatus.constants";
+import { canManageBusinessProfile } from "@/modules/business/businessProfileAccess";
 import { useSaveUserLanguageMutation } from "../api/useSaveUserLanguageMutation";
 import { useSaveUserThemeMutation } from "../api/useSaveUserThemeMutation";
 import type { SettingsPageViewModel } from "../models";
@@ -55,6 +56,9 @@ export const useSettingsPageViewModel = (): SettingsPageViewModel => {
   };
 
   return {
+    canManageBusinessProfile:
+      session.status === SESSION_STATUS.SIGNED_IN &&
+      canManageBusinessProfile(session.role),
     currentLanguage: resolveLanguage(i18n.resolvedLanguage ?? i18n.language),
     handleLanguageChange,
     handleThemeChange,

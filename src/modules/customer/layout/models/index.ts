@@ -7,7 +7,11 @@ export type {
   CustomerFooterSocialLinksProps,
   CustomerFooterViewModel,
 } from "./CustomerFooter.model";
-export type { CustomerLayoutViewModel } from "./CustomerLayout.model";
+export type {
+  CustomerLayoutViewModel,
+  CustomerNavbarProps,
+  CustomerNavbarViewModel,
+} from "./CustomerLayout.model";
 export type {
   EmailVerificationPendingBannerViewModel,
   ResendVerificationEmailVariables,

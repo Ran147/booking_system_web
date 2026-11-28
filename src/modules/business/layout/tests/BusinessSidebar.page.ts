@@ -29,6 +29,7 @@ export interface BusinessSidebarPageObject {
   readonly queryCollaboratorsItem: () => Nullable<HTMLElement>;
   readonly queryCustomersItem: () => Nullable<HTMLElement>;
   readonly queryPlaceholderModalHeading: () => Nullable<HTMLElement>;
+  readonly queryProfileItem: () => Nullable<HTMLElement>;
   readonly queryServicesItem: () => Nullable<HTMLElement>;
   readonly querySettingsItem: () => Nullable<HTMLElement>;
   readonly querySubscriptionItem: () => Nullable<HTMLElement>;
@@ -202,6 +203,11 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
       name: new RegExp(testI18n.t("business:layout.sidebar.settings"), "i"),
     });
 
+  const queryProfileItem = (): Nullable<HTMLElement> =>
+    screen.queryByRole("button", {
+      name: new RegExp(testI18n.t("business:layout.sidebar.profile"), "i"),
+    });
+
   const querySubscriptionItem = (): Nullable<HTMLElement> =>
     screen.queryByRole("button", {
       name: new RegExp(testI18n.t("business:layout.sidebar.subscription"), "i"),
@@ -233,6 +239,7 @@ export const createBusinessSidebarPage = (): BusinessSidebarPageObject => {
     queryCollaboratorsItem,
     queryCustomersItem,
     queryPlaceholderModalHeading,
+    queryProfileItem,
     queryServicesItem,
     querySettingsItem,
     querySubscriptionItem,

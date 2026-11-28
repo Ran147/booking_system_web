@@ -12,6 +12,7 @@ export const ROUTE_PATH = {
   },
   AUTH: {
     ACCEPT_INVITATION: "/accept-invitation",
+    ACTION: "/auth/action",
     PASSWORD_RECOVERY: "/password-recovery",
     PASSWORD_RESET: "/password-reset",
     SIGN_IN: "/sign-in",
@@ -33,6 +34,7 @@ export const ROUTE_PATH = {
     SERVICE_NEW: "services/new",
     SERVICES: "services",
     SETTINGS: "settings",
+    SETTINGS_PASSWORD: "settings/password",
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {
