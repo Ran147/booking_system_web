@@ -8,6 +8,8 @@ import {
   Timestamp,
   type Firestore,
 } from "firebase-admin/firestore";
+import { handleCompleteCustomerSignUp } from "../functions/src/auth/handlers/handleCompleteCustomerSignUp.js";
+import { createVerificationEmailSender } from "../functions/src/auth/sendVerificationEmail.js";
 import { verifyRecaptchaToken } from "../functions/src/auth/verifyRecaptchaToken.js";
 import { handlePayPlanCheckout } from "../functions/src/billing/handlers/handlePayPlanCheckout.js";
 import { handleCreateBooking } from "../functions/src/bookings/handlers/handleCreateBooking.js";
@@ -41,6 +43,7 @@ const HTTP_STATUS = Object.freeze({
 const FUNCTION_NAME = Object.freeze({
   CANCEL_BOOKING: "cancelBooking",
   CHECK_BUSINESS_SLUG: "checkBusinessSlug",
+  COMPLETE_CUSTOMER_SIGN_UP: "completeCustomerSignUp",
   COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
   CREATE_BOOKING: "createBooking",
   CREATE_SCHEDULE_BLOCK: "createScheduleBlock",
@@ -183,6 +186,7 @@ type CallerAccess = (typeof CALLER_ACCESS)[keyof typeof CALLER_ACCESS];
 
 const PUBLIC_FUNCTION_NAMES: readonly string[] = Object.freeze([
   FUNCTION_NAME.CHECK_BUSINESS_SLUG,
+  FUNCTION_NAME.COMPLETE_CUSTOMER_SIGN_UP,
   FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP,
   FUNCTION_NAME.PAY_PLAN_CHECKOUT,
   FUNCTION_NAME.REQUEST_PASSWORD_RESET,
@@ -1222,6 +1226,26 @@ export default async function handler(
       sendJsonResponse(response, HTTP_STATUS.OK, {
         serviceId,
       });
+      return;
+    }
+
+    // KAN-123: same handler as the emulator callable (Q8). The reCAPTCHA is
+    // checked with RECAPTCHA_SECRET_KEY, fail-closed without it.
+    if (functionName === FUNCTION_NAME.COMPLETE_CUSTOMER_SIGN_UP) {
+      await runSharedHandler(response, () =>
+        handleCompleteCustomerSignUp({
+          auth,
+          caller: null,
+          firestore,
+          now: new Date(),
+          payload,
+          sendVerificationEmail: createVerificationEmailSender({
+            auth,
+            webApiKey: readWebApiKey(),
+          }),
+          verifyRecaptcha: assertRecaptchaInVercel,
+        }),
+      );
       return;
     }
 
