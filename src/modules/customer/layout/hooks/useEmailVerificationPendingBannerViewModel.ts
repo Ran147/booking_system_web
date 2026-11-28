@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ALERT_VARIANT } from "@/components/common";
-import { DEFAULT_LANGUAGE, I18N_NAMESPACE } from "@/constants";
+import { DEFAULT_LANGUAGE, I18N_NAMESPACE, STRING } from "@/constants";
 import { USER_ROLE } from "@/domain";
 import { SESSION_STATUS, useSession } from "@/modules/auth";
 import { auth } from "@/services/firebase";
@@ -18,10 +18,10 @@ import type {
 } from "../models";
 
 // The roles the customer portal admits (customer.routes.tsx).
-const CUSTOMER_PORTAL_ROLES: readonly string[] = [
+const CUSTOMER_PORTAL_ROLES: readonly string[] = Object.freeze([
   USER_ROLE.CLIENT,
   USER_ROLE.CUSTOMER,
-];
+]);
 
 const toAlertVariant = (
   messageKey: ResendVerificationMessageKey,
@@ -46,7 +46,9 @@ export const useEmailVerificationPendingBannerViewModel =
       I18N_NAMESPACE.COMMON,
     ]);
     const session = useSession();
-    const { businessSlug = "" } = useParams<{ businessSlug: string }>();
+    const { businessSlug = STRING.EMPTY } = useParams<{
+      businessSlug: string;
+    }>();
     const resendMutation = useResendVerificationEmailMutation();
     const [resendMessageKey, setResendMessageKey] =
       useState<Nullable<ResendVerificationMessageKey>>(null);
