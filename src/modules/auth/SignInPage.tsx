@@ -46,6 +46,11 @@ export const SignInPage = (): ReactElement => {
               {t("auth.idle.signedOut")}
             </Alert>
           )}
+          {signInViewModel.shouldShowInvitationSuccess && (
+            <Alert role={ARIA_ROLE.STATUS} variant={ALERT_VARIANT.SUCCESS}>
+              {t("auth.invitation.success")}
+            </Alert>
+          )}
           {signInViewModel.shouldShowSignUpSuccess && (
             <Alert role={ARIA_ROLE.STATUS} variant={ALERT_VARIANT.SUCCESS}>
               {t("landing:subscriberSignUp.success")}

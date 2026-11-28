@@ -8,6 +8,14 @@ export const authRoutes: RouteObject[] = [
     children: [
       {
         lazy: async (): Promise<Pick<RouteObject, "Component">> => {
+          const { AcceptInvitationPage } =
+            await import("./AcceptInvitationPage");
+          return { Component: AcceptInvitationPage };
+        },
+        path: ROUTE_PATH.AUTH.ACCEPT_INVITATION,
+      },
+      {
+        lazy: async (): Promise<Pick<RouteObject, "Component">> => {
           const { SignInPage } = await import("./SignInPage");
           return { Component: SignInPage };
         },

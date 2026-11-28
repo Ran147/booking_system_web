@@ -3,7 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BOOKING_STATUS } from "@/domain";
 import { renderWithProviders } from "@/shared/test-utils/renderWithProviders";
-import { SUBSCRIBER_SESSION } from "@/shared/test-utils/sessionFixtures";
+import {
+  COLLABORATOR_SESSION,
+  SUBSCRIBER_SESSION,
+} from "@/shared/test-utils/sessionFixtures";
+import { fetchCollaboratorProfile } from "@/modules/business/layout/api";
 import { fetchBookingHistory } from "../api/fetchBookingHistory";
 import { fetchBookingList } from "../api/fetchBookingList";
 import { fetchBusinessHours } from "../api/fetchBusinessHours";
@@ -32,6 +36,16 @@ vi.mock("../api/useActiveServicesQuery", () => ({
     ["data"]: [],
   }),
 }));
+
+vi.mock("@/modules/business/layout/api", async () => {
+  const actual = await vi.importActual<Record<string, unknown>>(
+    "@/modules/business/layout/api",
+  );
+  return {
+    ...actual,
+    fetchCollaboratorProfile: vi.fn(),
+  };
+});
 
 describe("SchedulePage (KAN-67, KAN-68, KAN-75, KAN-76)", () => {
   const mockBooking = {
@@ -298,6 +312,35 @@ describe("SchedulePage (KAN-67, KAN-68, KAN-75, KAN-76)", () => {
     await waitFor((): void => {
       const elements = screen.queryAllByText("Cliente Demo");
       expect(elements.length).toBeLessThanOrEqual(1);
+    });
+  });
+
+  it("AC-KAN-86-02: scopes booking list and history queries to collaboratorId when collaborator lacks manage_bookings", async (): Promise<void> => {
+    vi.mocked(fetchCollaboratorProfile).mockResolvedValue({
+      fullName: "Carlos Barbero",
+      permissions: [],
+    });
+
+    renderWithProviders(<SchedulePage />, {
+      initialPath: "/business/schedule",
+      session: COLLABORATOR_SESSION,
+    });
+
+    await waitFor((): void => {
+      expect(fetchBookingList).toHaveBeenCalledWith(
+        COLLABORATOR_SESSION.businessId,
+        1,
+        20,
+        COLLABORATOR_SESSION.collaboratorId,
+      );
+      expect(fetchBookingHistory).toHaveBeenCalledWith(
+        COLLABORATOR_SESSION.businessId,
+        { status: "all" },
+        1,
+        20,
+        "America/Costa_Rica",
+        COLLABORATOR_SESSION.collaboratorId,
+      );
     });
   });
 });

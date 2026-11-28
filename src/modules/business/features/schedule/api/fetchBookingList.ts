@@ -10,6 +10,7 @@ import {
 import { PAGINATION } from "@/constants";
 import type { Booking } from "@/domain";
 import { firestore } from "@/services/firebase";
+import type { Nullable } from "@/types";
 import { mapBookingDocument } from "./bookingDocument.schema";
 
 export interface BookingListResult {
@@ -21,6 +22,7 @@ export const fetchBookingList = async (
   businessId: string,
   page = 1,
   pageSize: number = PAGINATION.DEFAULT_PAGE_SIZE,
+  restrictedCollaboratorId?: Nullable<string>,
 ): Promise<BookingListResult> => {
   if (!businessId) {
     return { bookings: [], totalCount: 0 };
@@ -34,11 +36,18 @@ export const fetchBookingList = async (
     "bookings",
   );
 
-  const baseQuery = query(
-    bookingsCollection,
-    where("startsAt", ">=", now),
-    orderBy("startsAt", "asc"),
-  );
+  const baseQuery = restrictedCollaboratorId
+    ? query(
+        bookingsCollection,
+        where("collaboratorId", "==", restrictedCollaboratorId),
+        where("startsAt", ">=", now),
+        orderBy("startsAt", "asc"),
+      )
+    : query(
+        bookingsCollection,
+        where("startsAt", ">=", now),
+        orderBy("startsAt", "asc"),
+      );
 
   const pageQuery = query(baseQuery, limit(page * pageSize));
 

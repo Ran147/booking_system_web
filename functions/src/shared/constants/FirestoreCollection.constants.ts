@@ -4,6 +4,7 @@ export const FIRESTORE_COLLECTION = Object.freeze({
   BOOKINGS: "bookings",
   BUSINESS_SLUGS: "businessSlugs",
   BUSINESSES: "businesses",
+  COLLABORATOR_INVITATIONS: "collaboratorInvitations",
   COLLABORATORS: "collaborators",
   CUSTOMERS: "customers",
   NOTIFICATIONS: "notifications",

@@ -109,6 +109,30 @@
         { "fieldPath": "fullName", "order": "ASCENDING" }
       ],
       "queryScope": "COLLECTION"
+    },
+    {
+      "collectionGroup": "bookings",
+      "fields": [
+        { "fieldPath": "collaboratorId", "order": "ASCENDING" },
+        { "fieldPath": "startsAt", "order": "ASCENDING" }
+      ],
+      "queryScope": "COLLECTION"
+    },
+    {
+      "collectionGroup": "bookings",
+      "fields": [
+        { "fieldPath": "collaboratorId", "order": "ASCENDING" },
+        { "fieldPath": "startsAt", "order": "DESCENDING" }
+      ],
+      "queryScope": "COLLECTION"
+    },
+    {
+      "collectionGroup": "bookings",
+      "fields": [
+        { "fieldPath": "collaboratorId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ],
+      "queryScope": "COLLECTION"
     }
   ],
   "fieldOverrides": []

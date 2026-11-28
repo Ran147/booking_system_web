@@ -25,15 +25,29 @@ export const scheduleQueryKeys = Object.freeze({
     businessId: string,
     filters: BookingHistoryFilterValues,
     page: number,
+    restrictedCollaboratorId?: Nullable<string>,
   ) =>
     [
       ...scheduleQueryKeys.all,
       "history",
       businessId,
-      { ...filters, page },
+      {
+        ...filters,
+        page,
+        restrictedCollaboratorId: restrictedCollaboratorId ?? null,
+      },
     ] as const,
   hours: (businessId: string) =>
     [...scheduleQueryKeys.all, "hours", businessId] as const,
-  upcoming: (businessId: string, page: number) =>
-    [...scheduleQueryKeys.all, "upcoming", businessId, { page }] as const,
+  upcoming: (
+    businessId: string,
+    page: number,
+    restrictedCollaboratorId?: Nullable<string>,
+  ) =>
+    [
+      ...scheduleQueryKeys.all,
+      "upcoming",
+      businessId,
+      { page, restrictedCollaboratorId: restrictedCollaboratorId ?? null },
+    ] as const,
 });

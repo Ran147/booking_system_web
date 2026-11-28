@@ -10,6 +10,13 @@ import {
 } from "firebase-admin/firestore";
 import { handleCreateBooking } from "../functions/src/bookings/handlers/handleCreateBooking.js";
 import { handleGetAvailability } from "../functions/src/bookings/handlers/handleGetAvailability.js";
+import { handleAcceptCollaboratorInvitation } from "../functions/src/collaborators/handlers/handleAcceptCollaboratorInvitation.js";
+import { handleRegisterCollaborator } from "../functions/src/collaborators/handlers/handleRegisterCollaborator.js";
+import { handleResendCollaboratorEmail } from "../functions/src/collaborators/handlers/handleResendCollaboratorEmail.js";
+import { handleUpdateCollaborator } from "../functions/src/collaborators/handlers/handleUpdateCollaborator.js";
+import { handleUpdateCollaboratorPermissions } from "../functions/src/collaborators/handlers/handleUpdateCollaboratorPermissions.js";
+import { handleUpdateCollaboratorStatus } from "../functions/src/collaborators/handlers/handleUpdateCollaboratorStatus.js";
+import { handleValidateCollaboratorInvitation } from "../functions/src/collaborators/handlers/handleValidateCollaboratorInvitation.js";
 import { CallableFailure } from "../functions/src/shared/CallableFailure.js";
 import type { Nullable } from "../src/types/Nullable";
 
@@ -32,10 +39,13 @@ const HTTP_STATUS = Object.freeze({
   NOT_FOUND: 404,
   OK: 200,
   PRECONDITION_FAILED: 412,
+  SERVICE_UNAVAILABLE: 503,
+  TOO_MANY_REQUESTS: 429,
   UNAUTHORIZED: 401,
 } as const);
 
 const FUNCTION_NAME = Object.freeze({
+  ACCEPT_COLLABORATOR_INVITATION: "acceptCollaboratorInvitation",
   CANCEL_BOOKING: "cancelBooking",
   CHECK_BUSINESS_SLUG: "checkBusinessSlug",
   COMPLETE_SUBSCRIBER_SIGN_UP: "completeSubscriberSignUp",
@@ -49,14 +59,20 @@ const FUNCTION_NAME = Object.freeze({
   FETCH_SCHEDULE_BLOCKS: "fetchScheduleBlocks",
   GET_AVAILABILITY: "getAvailability",
   PAY_PLAN_CHECKOUT: "payPlanCheckout",
+  REGISTER_COLLABORATOR: "registerCollaborator",
   REQUEST_PASSWORD_RESET: "requestPasswordReset",
   RESCHEDULE_BOOKING: "rescheduleBooking",
+  RESEND_COLLABORATOR_EMAIL: "resendCollaboratorEmail",
   SEND_CONTACT_MESSAGE: "sendContactMessage",
   UPDATE_BOOKING_STATUS: "updateBookingStatus",
   UPDATE_BUSINESS_HOURS: "updateBusinessHours",
+  UPDATE_COLLABORATOR: "updateCollaborator",
+  UPDATE_COLLABORATOR_PERMISSIONS: "updateCollaboratorPermissions",
+  UPDATE_COLLABORATOR_STATUS: "updateCollaboratorStatus",
   UPDATE_CONFIRMATION_MODE: "updateConfirmationMode",
   UPDATE_SERVICE: "updateService",
   UPDATE_SERVICE_COLLABORATORS: "updateServiceCollaborators",
+  VALIDATE_COLLABORATOR_INVITATION: "validateCollaboratorInvitation",
   VALIDATE_SIGN_UP_LINK: "validateSignUpLink",
   VERIFY_RECAPTCHA: "verifyRecaptcha",
 } as const);
@@ -178,11 +194,13 @@ const CALLER_ACCESS = Object.freeze({
 type CallerAccess = (typeof CALLER_ACCESS)[keyof typeof CALLER_ACCESS];
 
 const PUBLIC_FUNCTION_NAMES: readonly string[] = Object.freeze([
+  FUNCTION_NAME.ACCEPT_COLLABORATOR_INVITATION,
   FUNCTION_NAME.CHECK_BUSINESS_SLUG,
   FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP,
   FUNCTION_NAME.PAY_PLAN_CHECKOUT,
   FUNCTION_NAME.REQUEST_PASSWORD_RESET,
   FUNCTION_NAME.SEND_CONTACT_MESSAGE,
+  FUNCTION_NAME.VALIDATE_COLLABORATOR_INVITATION,
   FUNCTION_NAME.VALIDATE_SIGN_UP_LINK,
   FUNCTION_NAME.VERIFY_RECAPTCHA,
 ]);
@@ -571,11 +589,15 @@ const isCustomerCaller = (caller: Nullable<Caller>): caller is Caller =>
 // HTTP status of each code a shared handler of functions/src reports (Q8).
 const CALLABLE_FAILURE_HTTP_STATUS: Readonly<Record<string, number>> =
   Object.freeze({
+    aborted: HTTP_STATUS.CONFLICT,
+    "already-exists": HTTP_STATUS.CONFLICT,
     "failed-precondition": HTTP_STATUS.PRECONDITION_FAILED,
     "invalid-argument": HTTP_STATUS.BAD_REQUEST,
     "not-found": HTTP_STATUS.NOT_FOUND,
     "permission-denied": HTTP_STATUS.FORBIDDEN,
+    "resource-exhausted": HTTP_STATUS.TOO_MANY_REQUESTS,
     unauthenticated: HTTP_STATUS.UNAUTHORIZED,
+    unavailable: HTTP_STATUS.SERVICE_UNAVAILABLE,
   });
 
 // Runs a shared handler of functions/src (Q8) and answers like a callable:
@@ -633,11 +655,16 @@ const ownsBusiness = async (
   );
 };
 
-const getActiveCollaborator = async (
+interface ActiveCollaboratorRecord {
+  readonly data: Record<string, unknown>;
+  readonly id: string;
+}
+
+const getActiveCollaboratorRecord = async (
   firestore: Firestore,
   caller: Caller,
   businessId: string,
-): Promise<Nullable<Record<string, unknown>>> => {
+): Promise<Nullable<ActiveCollaboratorRecord>> => {
   if (!businessId || caller.claims.role !== USER_ROLE.COLLABORATOR) {
     return null;
   }
@@ -657,7 +684,10 @@ const getActiveCollaborator = async (
       docSnapshot.exists &&
       docSnapshot.data()?.status === COLLABORATOR_STATUS.ACTIVE
     ) {
-      return docSnapshot.data() ?? null;
+      return {
+        data: docSnapshot.data() ?? {},
+        id: docSnapshot.id,
+      };
     }
   }
   const collaboratorsSnapshot = await firestore
@@ -668,9 +698,44 @@ const getActiveCollaborator = async (
     .where("status", "==", COLLABORATOR_STATUS.ACTIVE)
     .get();
   if (!collaboratorsSnapshot.empty && collaboratorsSnapshot.docs[0]) {
-    return collaboratorsSnapshot.docs[0].data();
+    return {
+      data: collaboratorsSnapshot.docs[0].data(),
+      id: collaboratorsSnapshot.docs[0].id,
+    };
   }
   return null;
+};
+
+const getActiveCollaborator = async (
+  firestore: Firestore,
+  caller: Caller,
+  businessId: string,
+): Promise<Nullable<Record<string, unknown>>> => {
+  const activeRecord = await getActiveCollaboratorRecord(
+    firestore,
+    caller,
+    businessId,
+  );
+  return activeRecord?.data ?? null;
+};
+
+const hasPermissionInRecord = (
+  collaboratorData: Record<string, unknown>,
+  permission: string,
+): boolean => {
+  if (Array.isArray(collaboratorData.permissions)) {
+    return (collaboratorData.permissions as string[]).includes(permission);
+  }
+  if (
+    typeof collaboratorData.permissions === "object" &&
+    collaboratorData.permissions !== null
+  ) {
+    return (
+      (collaboratorData.permissions as Record<string, unknown>)[permission] ===
+      true
+    );
+  }
+  return false;
 };
 
 const hasCollaboratorPermission = async (
@@ -690,10 +755,7 @@ const hasCollaboratorPermission = async (
   if (!collaborator) {
     return false;
   }
-  const permissions = Array.isArray(collaborator.permissions)
-    ? (collaborator.permissions as string[])
-    : [];
-  return permissions.includes(permission);
+  return hasPermissionInRecord(collaborator, permission);
 };
 
 const checkCallerAccess = async (
@@ -717,7 +779,12 @@ const checkCallerAccess = async (
   if (
     functionName === FUNCTION_NAME.UPDATE_BUSINESS_HOURS ||
     functionName === FUNCTION_NAME.UPDATE_CONFIRMATION_MODE ||
-    functionName === FUNCTION_NAME.DELETE_SERVICE
+    functionName === FUNCTION_NAME.DELETE_SERVICE ||
+    functionName === FUNCTION_NAME.REGISTER_COLLABORATOR ||
+    functionName === FUNCTION_NAME.UPDATE_COLLABORATOR ||
+    functionName === FUNCTION_NAME.UPDATE_COLLABORATOR_STATUS ||
+    functionName === FUNCTION_NAME.UPDATE_COLLABORATOR_PERMISSIONS ||
+    functionName === FUNCTION_NAME.RESEND_COLLABORATOR_EMAIL
   ) {
     const isOwner = await ownsBusiness(firestore, caller, businessId);
     return isOwner ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
@@ -750,7 +817,10 @@ const checkCallerAccess = async (
     return isAllowed ? CALLER_ACCESS.ALLOWED : CALLER_ACCESS.PERMISSION_DENIED;
   }
 
-  if (functionName === FUNCTION_NAME.FETCH_SCHEDULE_BLOCKS) {
+  if (
+    functionName === FUNCTION_NAME.FETCH_SCHEDULE_BLOCKS ||
+    functionName === FUNCTION_NAME.FETCH_BOOKING_HISTORY
+  ) {
     const isOwner = await ownsBusiness(firestore, caller, businessId);
     if (isOwner) {
       return CALLER_ACCESS.ALLOWED;
@@ -765,10 +835,7 @@ const checkCallerAccess = async (
       : CALLER_ACCESS.PERMISSION_DENIED;
   }
 
-  if (
-    functionName === FUNCTION_NAME.UPDATE_BOOKING_STATUS ||
-    functionName === FUNCTION_NAME.FETCH_BOOKING_HISTORY
-  ) {
+  if (functionName === FUNCTION_NAME.UPDATE_BOOKING_STATUS) {
     const isAllowed = await hasCollaboratorPermission(
       firestore,
       caller,
@@ -888,6 +955,93 @@ const sendResetEmailIfAccountExists = async (
   } catch (error) {
     if (hasErrorCode(error, FIREBASE_ADMIN_ERROR_CODE.USER_NOT_FOUND)) return;
     // Infrastructure failures must not tell the visitor anything either.
+  }
+};
+
+const verifyRecaptchaTokenOnServer = async (
+  recaptchaToken: string,
+): Promise<void> => {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY?.trim();
+  if (!secretKey || process.env.VITEST) {
+    return;
+  }
+
+  if (!recaptchaToken) {
+    throw new CallableFailure(
+      "permission-denied",
+      "The reCAPTCHA token was rejected",
+    );
+  }
+
+  let verificationResponse: Response;
+  try {
+    verificationResponse = await fetch(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        body: new URLSearchParams({
+          response: recaptchaToken,
+          secret: secretKey,
+        }),
+        method: HTTP_METHOD.POST,
+      },
+    );
+  } catch {
+    throw new CallableFailure(
+      "unavailable",
+      "The reCAPTCHA verification service could not be reached",
+    );
+  }
+
+  if (!verificationResponse.ok) {
+    throw new CallableFailure(
+      "unavailable",
+      "The reCAPTCHA verification service could not be reached",
+    );
+  }
+
+  const verificationJson = (await verificationResponse.json()) as {
+    success?: boolean;
+  };
+  if (verificationJson.success !== true) {
+    throw new CallableFailure(
+      "permission-denied",
+      "The reCAPTCHA token was rejected",
+    );
+  }
+};
+
+const sendCollaboratorPasswordResetEmail = async (
+  auth: Auth,
+  firestore: Firestore,
+  email: string,
+  userId: Nullable<string>,
+): Promise<void> => {
+  const webApiKey = readWebApiKey();
+  if (!webApiKey) {
+    if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+      await auth.generatePasswordResetLink(email);
+      return;
+    }
+    throw new Error(PASSWORD_RESET.MISSING_WEB_API_KEY);
+  }
+
+  const language = userId
+    ? await readAccountLanguage(firestore, userId)
+    : PASSWORD_RESET.DEFAULT_LANGUAGE;
+  const query = new URLSearchParams({ key: webApiKey }).toString();
+  const resetResponse = await fetch(
+    `${PASSWORD_RESET.SEND_OOB_CODE_URL}?${query}`,
+    {
+      body: JSON.stringify({ email, requestType: PASSWORD_RESET.REQUEST_TYPE }),
+      headers: {
+        "Content-Type": "application/json",
+        [PASSWORD_RESET.LOCALE_HEADER]: language,
+      },
+      method: HTTP_METHOD.POST,
+    },
+  );
+  if (!resetResponse.ok) {
+    throw new Error(`Password reset failed with status ${resetResponse.status}`);
   }
 };
 
@@ -2314,11 +2468,34 @@ export default async function handler(
         sendJsonResponse(response, HTTP_STATUS.OK, { bookings: [] });
         return;
       }
-      const bookingsSnapshot = await firestore
+
+      let restrictedCollaboratorId: Nullable<string> = null;
+      if (caller && !(await ownsBusiness(firestore, caller, businessId))) {
+        const collaboratorRecord = await getActiveCollaboratorRecord(
+          firestore,
+          caller,
+          businessId,
+        );
+        if (
+          collaboratorRecord &&
+          !hasPermissionInRecord(
+            collaboratorRecord.data,
+            COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+          )
+        ) {
+          restrictedCollaboratorId = collaboratorRecord.id;
+        }
+      }
+
+      const bookingsCollection = firestore
         .collection("businesses")
         .doc(businessId)
-        .collection("bookings")
-        .get();
+        .collection("bookings");
+      const bookingsSnapshot = restrictedCollaboratorId
+        ? await bookingsCollection
+            .where("collaboratorId", "==", restrictedCollaboratorId)
+            .get()
+        : await bookingsCollection.get();
 
       const bookings = bookingsSnapshot.docs
         .map((documentSnapshot) => {
@@ -2365,6 +2542,93 @@ export default async function handler(
         );
 
       sendJsonResponse(response, HTTP_STATUS.OK, { bookings });
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.REGISTER_COLLABORATOR) {
+      await runSharedHandler(response, () =>
+        handleRegisterCollaborator({
+          auth,
+          callerUserId: caller?.userId ?? "",
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.UPDATE_COLLABORATOR) {
+      await runSharedHandler(response, () =>
+        handleUpdateCollaborator({
+          auth,
+          callerUserId: caller?.userId ?? "",
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.UPDATE_COLLABORATOR_STATUS) {
+      await runSharedHandler(response, () =>
+        handleUpdateCollaboratorStatus({
+          auth,
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.UPDATE_COLLABORATOR_PERMISSIONS) {
+      await runSharedHandler(response, () =>
+        handleUpdateCollaboratorPermissions({
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.RESEND_COLLABORATOR_EMAIL) {
+      await runSharedHandler(response, () =>
+        handleResendCollaboratorEmail({
+          callerUserId: caller?.userId ?? "",
+          firestore,
+          now: new Date(),
+          payload,
+          sendPasswordResetEmail: (email, userId) =>
+            sendCollaboratorPasswordResetEmail(auth, firestore, email, userId),
+        }),
+      );
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.VALIDATE_COLLABORATOR_INVITATION) {
+      await runSharedHandler(response, () =>
+        handleValidateCollaboratorInvitation({
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
+      return;
+    }
+
+    if (functionName === FUNCTION_NAME.ACCEPT_COLLABORATOR_INVITATION) {
+      await runSharedHandler(response, () =>
+        handleAcceptCollaboratorInvitation({
+          auth,
+          firestore,
+          now: new Date(),
+          payload,
+          verifyRecaptcha: verifyRecaptchaTokenOnServer,
+        }),
+      );
       return;
     }
 

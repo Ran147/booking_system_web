@@ -82,8 +82,12 @@ export interface ScheduleViewModelResult {
 
 export const useScheduleViewModel = (): ScheduleViewModelResult => {
   const { businessId } = useCurrentBusiness();
-  const { canManageBookings, canManageScheduleBlocks } =
-    useCollaboratorPermissionsQuery();
+  const {
+    canManageBookings,
+    canManageScheduleBlocks,
+    isPermissionsLoading = false,
+    restrictedCollaboratorId = null,
+  } = useCollaboratorPermissionsQuery();
 
   const [activeTab, setActiveTab] = useState<ScheduleTab>(SCHEDULE_TAB.AGENDA);
   const [selectedBooking, setSelectedBooking] =
@@ -113,6 +117,8 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     businessId,
     upcomingPage,
     PAGINATION.DEFAULT_PAGE_SIZE,
+    restrictedCollaboratorId,
+    !isPermissionsLoading,
   );
 
   const rawTimeZone = businessHoursQuery.data?.timeZone;
@@ -127,6 +133,8 @@ export const useScheduleViewModel = (): ScheduleViewModelResult => {
     historyPage,
     PAGINATION.DEFAULT_PAGE_SIZE,
     timeZone,
+    restrictedCollaboratorId,
+    !isPermissionsLoading,
   );
   const activeServicesQuery = useActiveServicesQuery(businessId);
 

@@ -6,10 +6,13 @@ import {
   fetchCollaboratorProfile,
   type CollaboratorProfileData,
 } from "@/modules/business/layout/api";
+import type { Nullable } from "@/types";
 
 export interface SchedulePermissions {
   readonly canManageBookings: boolean;
   readonly canManageScheduleBlocks: boolean;
+  readonly isPermissionsLoading?: boolean;
+  readonly restrictedCollaboratorId?: Nullable<string>;
 }
 
 /**
@@ -42,6 +45,8 @@ export const useCollaboratorPermissionsQuery = (): SchedulePermissions => {
     return {
       canManageBookings: true,
       canManageScheduleBlocks: true,
+      isPermissionsLoading: false,
+      restrictedCollaboratorId: null,
     };
   }
 
@@ -49,17 +54,27 @@ export const useCollaboratorPermissionsQuery = (): SchedulePermissions => {
     return {
       canManageBookings: false,
       canManageScheduleBlocks: false,
+      isPermissionsLoading: false,
+      restrictedCollaboratorId: null,
     };
   }
 
+  const isPermissionsLoading =
+    Boolean(businessId && collaboratorId) && collaboratorProfileQuery.isPending;
   const permissions = collaboratorProfileQuery.data?.permissions ?? [];
+  const canManageBookings = permissions.includes(
+    COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
+  );
 
   return {
-    canManageBookings: permissions.includes(
-      COLLABORATOR_PERMISSION.MANAGE_BOOKINGS,
-    ),
+    canManageBookings,
     canManageScheduleBlocks: permissions.includes(
       COLLABORATOR_PERMISSION.MANAGE_SCHEDULE_BLOCKS,
     ),
+    isPermissionsLoading,
+    restrictedCollaboratorId:
+      !isPermissionsLoading && !canManageBookings && collaboratorId
+        ? collaboratorId
+        : null,
   };
 };

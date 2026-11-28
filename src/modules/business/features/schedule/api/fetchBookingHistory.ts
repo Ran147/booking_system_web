@@ -1,4 +1,11 @@
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { FUNCTION_NAME, PAGINATION } from "@/constants";
 import type { Booking } from "@/domain";
 import { callFunction, firestore } from "@/services/firebase";
@@ -39,6 +46,7 @@ export const fetchBookingHistory = async (
   page = 1,
   pageSize: number = PAGINATION.DEFAULT_PAGE_SIZE,
   timeZone: string = SCHEDULE_CONSTANTS.DEFAULT_APP_TIME_ZONE,
+  restrictedCollaboratorId?: Nullable<string>,
 ): Promise<BookingHistoryResult> => {
   if (!businessId) {
     return { bookings: [], totalCount: 0 };
@@ -54,11 +62,18 @@ export const fetchBookingHistory = async (
       "bookings",
     );
 
-    const historyQuery = query(
-      bookingsCollection,
-      orderBy("startsAt", "desc"),
-      limit(SCHEDULE_CONSTANTS.MAX_HISTORY_FETCH_LIMIT),
-    );
+    const historyQuery = restrictedCollaboratorId
+      ? query(
+          bookingsCollection,
+          where("collaboratorId", "==", restrictedCollaboratorId),
+          orderBy("startsAt", "desc"),
+          limit(SCHEDULE_CONSTANTS.MAX_HISTORY_FETCH_LIMIT),
+        )
+      : query(
+          bookingsCollection,
+          orderBy("startsAt", "desc"),
+          limit(SCHEDULE_CONSTANTS.MAX_HISTORY_FETCH_LIMIT),
+        );
 
     const snapshot = await getDocs(historyQuery);
     results = snapshot.docs.map(mapBookingDocument);
@@ -70,23 +85,29 @@ export const fetchBookingHistory = async (
         FetchBookingHistoryResponse
       >(FUNCTION_NAME.FETCH_BOOKING_HISTORY, { businessId });
 
-      results = (response.bookings ?? []).map((rawBooking) => ({
-        businessId: rawBooking.businessId,
-        cancellation: rawBooking.cancellation ?? null,
-        collaboratorId: rawBooking.collaboratorId ?? null,
-        collaboratorName: rawBooking.collaboratorName ?? null,
-        createdAt: new Date(rawBooking.createdAt),
-        customerId: rawBooking.customerId,
-        customerUserId: rawBooking.customerUserId ?? null,
-        endsAt: new Date(rawBooking.endsAt),
-        id: rawBooking.id,
-        rescheduleHistory: rawBooking.rescheduleHistory ?? [],
-        serviceId: rawBooking.serviceId,
-        serviceSnapshot: rawBooking.serviceSnapshot,
-        startsAt: new Date(rawBooking.startsAt),
-        status: rawBooking.status,
-        updatedAt: new Date(rawBooking.updatedAt),
-      }));
+      results = (response.bookings ?? [])
+        .map((rawBooking) => ({
+          businessId: rawBooking.businessId,
+          cancellation: rawBooking.cancellation ?? null,
+          collaboratorId: rawBooking.collaboratorId ?? null,
+          collaboratorName: rawBooking.collaboratorName ?? null,
+          createdAt: new Date(rawBooking.createdAt),
+          customerId: rawBooking.customerId,
+          customerUserId: rawBooking.customerUserId ?? null,
+          endsAt: new Date(rawBooking.endsAt),
+          id: rawBooking.id,
+          rescheduleHistory: rawBooking.rescheduleHistory ?? [],
+          serviceId: rawBooking.serviceId,
+          serviceSnapshot: rawBooking.serviceSnapshot,
+          startsAt: new Date(rawBooking.startsAt),
+          status: rawBooking.status,
+          updatedAt: new Date(rawBooking.updatedAt),
+        }))
+        .filter(
+          (booking) =>
+            !restrictedCollaboratorId ||
+            booking.collaboratorId === restrictedCollaboratorId,
+        );
     } catch {
       return { bookings: [], totalCount: 0 };
     }

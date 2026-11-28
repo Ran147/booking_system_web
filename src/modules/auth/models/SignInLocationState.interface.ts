@@ -4,5 +4,6 @@
  * landing:subscriberSignUp.success once.
  */
 export interface SignInLocationState {
+  readonly invitationAccepted?: boolean;
   readonly signUpEmail: string;
 }

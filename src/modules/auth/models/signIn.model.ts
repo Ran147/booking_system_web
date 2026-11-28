@@ -62,6 +62,7 @@ export interface SignInViewModel {
   readonly recaptchaSiteKey: string;
   readonly serverErrorAlertReference: RefObject<NullableRef<HTMLDivElement>>;
   readonly serverErrorKey: Nullable<SignInErrorKey>;
+  readonly shouldShowInvitationSuccess?: boolean;
   readonly shouldShowPasswordRecoveryLink: boolean;
   readonly shouldShowSignUpSuccess: boolean;
 }

@@ -44,6 +44,12 @@ export const useSignInViewModel = (): SignInViewModel => {
     useState<Nullable<SignInErrorKey>>(null);
   // Read once: the email of a sign-up that just finished (AC-KAN-27-01).
   const [signUpEmail] = useState(() => readSignUpEmail(location.state));
+  const [isInvitationAccepted] = useState(
+    () =>
+      typeof location.state === "object" &&
+      location.state !== null &&
+      Reflect.get(location.state, "invitationAccepted") === true,
+  );
   const form = useForm<SignInFormValues>({
     defaultValues: {
       ...DEFAULT_SIGN_IN_FORM_VALUES,
@@ -142,8 +148,11 @@ export const useSignInViewModel = (): SignInViewModel => {
     recaptchaSiteKey,
     serverErrorAlertReference,
     serverErrorKey,
+    shouldShowInvitationSuccess:
+      isInvitationAccepted && serverErrorKey === null,
     shouldShowPasswordRecoveryLink:
       serverErrorKey === SIGN_IN_ERROR_KEY.TOO_MANY_ATTEMPTS,
-    shouldShowSignUpSuccess: signUpEmail !== null && serverErrorKey === null,
+    shouldShowSignUpSuccess:
+      !isInvitationAccepted && signUpEmail !== null && serverErrorKey === null,
   };
 };
