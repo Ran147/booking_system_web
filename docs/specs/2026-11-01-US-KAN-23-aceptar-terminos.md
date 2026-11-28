@@ -45,8 +45,7 @@ Mover el bloque a su propio componente también deja pequeño el choque con #66,
 | Archivo | Cambio |
 | --- | --- |
 | `functions/src/billing/constants/PlanCheckout.constants.ts` | `TERMS_VERSION.PROVISIONAL` → `TERMS_VERSION.CURRENT: "2026-10-12"`, con el comentario de mantenerlo igual que `landing:terms.lastUpdated` |
-| `functions/src/billing/payPlanCheckout.ts` | Usa `TERMS_VERSION.CURRENT` |
-| `api/callFunction.ts` | El mismo cambio en el espejo de `TERMS_VERSION` que agrega #65. **Se hace después de fusionar #65**, al integrar `develop` en esta rama, para no tocar el stub que #65 reemplaza |
+| `functions/src/billing/handlers/handlePayPlanCheckout.ts` | Usa `TERMS_VERSION.CURRENT`. Desde #65 el emulador y Vercel corren este mismo handler (Q8), así que `api/callFunction.ts` no tiene espejo que cambiar |
 
 ## 4. Tests
 
@@ -54,7 +53,6 @@ Mover el bloque a su propio componente también deja pequeño el choque con #66,
 | --- | --- |
 | `tests/PlanCheckoutTerms.test.tsx` (nuevo) | AC-KAN-23-01 el enlace apunta a `/terms`, abre otra pestaña y el email escrito sigue ahí; AS-11 la casilla está desactivada con `openFirst` hasta abrir el enlace; AC-KAN-23-03 "Pagar" desactivado y `termsRequired` visible mientras no se acepta, y el aviso desaparece al aceptar |
 | `functions/src/billing/tests/payPlanCheckout.test.ts` | AC-KAN-23-02 el `PlanCheckout` guarda `termsVersion: "2026-10-12"` |
-| `tests/api/payPlanCheckout.test.ts` (de #65) | Lo mismo en `api/`, después de fusionar #65 |
 
 Es un archivo de pruebas aparte de `PlanCheckoutPage.test.tsx` (#66) para que los dos PRs no creen el mismo archivo.
 
@@ -66,4 +64,4 @@ Es un archivo de pruebas aparte de `PlanCheckoutPage.test.tsx` (#66) para que lo
 | D2 | Hacer clic en el enlace cuenta como "abrir los términos una vez" (AS-11) | Es lo único que la pantalla puede saber de otra pestaña |
 | D3 | De AC-KAN-23-04 solo aplica la casilla desactivada. El error "no se pudo cargar el texto" no puede pasar aquí | El texto viene con la app (i18n), no se lee de la red. Si la pestaña nueva falla, la muestra la página de error normal de la app |
 | D4 | `TERMS_VERSION` es la fecha de la página de términos, `2026-10-12` | AS-10. Si Joshua cambia los términos, cambia `landing:terms.lastUpdated` y esta constante en el mismo PR |
-| D5 | Se fusiona después de #66 y #65 | Toca la misma pantalla que #66 y el mismo archivo `api/callFunction.ts` que #65. Al integrar `develop` se resuelve el choque (pocas líneas) y se hace el cambio de §3.2 en `api/` |
+| D5 | Se fusiona después de #66 y #65 (los dos ya en `develop`) | Toca la misma pantalla que #66. Al integrar `develop`, "Pagar" queda desactivado sin token de reCAPTCHA (AC-KAN-22-06) **o** sin aceptar los términos (AC-KAN-23-03), con un solo `isPayDisabled`, y el Page Object de #66 abre los términos antes de aceptarlos (AS-11). El cambio de §3.2 va en el handler compartido de #65 |
