@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useForm, type FieldError } from "react-hook-form";
+import { useForm, useWatch, type FieldError } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { generatePath, useNavigate, useParams } from "react-router";
 import {
@@ -57,6 +57,7 @@ export const usePlanCheckoutViewModel = (): PlanCheckoutViewModel => {
   // (AC-KAN-22-09, spec D1).
   const [attemptId] = useState<string>(() => crypto.randomUUID());
   const [confirmedEmail, setConfirmedEmail] = useState<string>(STRING.EMPTY);
+  const [hasOpenedTerms, setHasOpenedTerms] = useState(false);
   const [submitError, setSubmitError] = useState<Nullable<ContractError>>(null);
   const [recaptchaToken, setRecaptchaToken] = useState<Nullable<string>>(null);
   const [recaptchaResetSignal, setRecaptchaResetSignal] = useState(0);
@@ -164,6 +165,15 @@ export const usePlanCheckoutViewModel = (): PlanCheckoutViewModel => {
   };
 
   const { errors } = form.formState;
+  const isTermsAccepted = useWatch({
+    control: form.control,
+    name: "termsAccepted",
+  });
+
+  const handleTermsOpened = (): void => {
+    setHasOpenedTerms(true);
+  };
+
   const fieldErrors: PlanCheckoutFieldErrors = {
     cardCvc: translateFieldError(errors.cardCvc),
     cardExpiry: translateFieldError(errors.cardExpiry),
@@ -206,8 +216,12 @@ export const usePlanCheckoutViewModel = (): PlanCheckoutViewModel => {
       void navigate(generatePath(ROUTE_PATH.LANDING.PLAN_DETAIL, { planId }));
     },
     handleSubmit,
-    isPayDisabled: !recaptchaToken,
+    handleTermsOpened,
+    hasOpenedTerms,
+    // Pay waits for the reCAPTCHA (AC-KAN-22-06) and the terms (AC-KAN-23-03).
+    isPayDisabled: !recaptchaToken || !isTermsAccepted,
     isPlanLoading: activePlansQuery.isPending,
+    isTermsAccepted,
     plan: currentPlan,
     recaptcha: {
       language: i18n.language,

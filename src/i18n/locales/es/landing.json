@@ -467,6 +467,9 @@
       "priceChangedError": "El precio de este plan cambió a {{price}}. Si estás de acuerdo, vuelve a pagar.",
       "reviewNotice": "Cuando crees tu cuenta, revisaremos tu negocio antes de activarlo.",
       "success": "Te enviaremos a {{email}} el enlace para crear tu cuenta y tu negocio. Revisa tu correo."
+    },
+    "terms": {
+      "openFirst": "Abre los términos y condiciones para poder aceptarlos."
     }
   },
   "subscriberSignUp": {

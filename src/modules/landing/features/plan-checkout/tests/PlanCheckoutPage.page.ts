@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ARIA_ROLE } from "@/constants";
 import { testI18n } from "@/test-utils";
@@ -70,7 +70,15 @@ export const createPlanCheckoutPage = (): PlanCheckoutPageObject => {
   ): Promise<void> => {
     await user.type(getField(field), value);
   };
+  // The terms are opened once before they can be accepted (KAN-23 AS-11). A
+  // plain click on the link: user-event would also click the checkbox of the
+  // label that holds it, which a browser does not do.
   const acceptTerms = async (): Promise<void> => {
+    fireEvent.click(
+      screen.getByRole(ARIA_ROLE.LINK, {
+        name: testI18n.t("landing:planCheckout.checkout.termsLink"),
+      }),
+    );
     await user.click(getTermsCheckbox());
   };
   const solveRecaptcha = async (): Promise<void> => {

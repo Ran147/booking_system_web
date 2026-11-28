@@ -2,20 +2,19 @@ import { Check, CreditCard, ShieldCheck } from "lucide-react";
 import type { FormEvent, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  AppLink,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  CheckboxField,
   InputField,
   RecaptchaField,
 } from "@/components/common";
-import { I18N_NAMESPACE, ROUTE_PATH } from "@/constants";
+import { I18N_NAMESPACE } from "@/constants";
 import type { Nullable } from "@/types";
 import { ContractErrorAlert } from "./ContractErrorAlert";
+import { PlanCheckoutTermsField } from "./PlanCheckoutTermsField";
 import {
   PLAN_CHECKOUT_STATE,
   type PlanCheckoutState,
@@ -34,9 +33,12 @@ export interface PlanCheckoutFormProps {
   readonly fieldErrors: PlanCheckoutFieldErrors;
   readonly fields: PlanCheckoutFields;
   readonly formattedPrice: string;
+  readonly hasOpenedTerms: boolean;
   readonly isPayDisabled: boolean;
+  readonly isTermsAccepted: boolean;
   readonly onBackToDetail: () => void;
   readonly onSubmit: (event?: FormEvent<HTMLFormElement>) => void;
+  readonly onTermsOpened: () => void;
   readonly plan: PlanDetail;
   readonly recaptcha: PlanCheckoutRecaptcha;
   readonly submitError: Nullable<ContractError>;
@@ -48,9 +50,12 @@ export const PlanCheckoutForm = ({
   fieldErrors,
   fields,
   formattedPrice,
+  hasOpenedTerms,
   isPayDisabled,
+  isTermsAccepted,
   onBackToDetail,
   onSubmit,
+  onTermsOpened,
   plan,
   recaptcha,
   submitError,
@@ -153,23 +158,11 @@ export const PlanCheckoutForm = ({
 
               {/* Términos y condiciones */}
               <div className="pt-2">
-                <CheckboxField
-                  {...fields.termsAccepted}
-                  error={fieldErrors.termsAccepted}
-                  id="checkout-terms"
-                  label={
-                    <span>
-                      {t("planCheckout.checkout.termsAcceptance")}{" "}
-                      <AppLink
-                        className="font-medium underline hover:text-primary"
-                        target="_blank"
-                        to={ROUTE_PATH.LANDING.TERMS}
-                      >
-                        {t("planCheckout.checkout.termsLink")}
-                      </AppLink>
-                    </span>
-                  }
-                  required
+                <PlanCheckoutTermsField
+                  field={fields.termsAccepted}
+                  hasOpenedTerms={hasOpenedTerms}
+                  isTermsAccepted={isTermsAccepted}
+                  onTermsOpened={onTermsOpened}
                 />
               </div>
 

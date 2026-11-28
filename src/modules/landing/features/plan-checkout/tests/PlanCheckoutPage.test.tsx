@@ -178,6 +178,8 @@ describe("PlanCheckoutPage (KAN-22)", () => {
 
     await checkoutPage.typeInto("email", "no-es-un-correo");
     await checkoutPage.typeInto("cardExpiry", "1240");
+    // Pay is enabled only with the terms accepted (AC-KAN-23-03).
+    await checkoutPage.acceptTerms();
     await checkoutPage.solveRecaptcha();
     await checkoutPage.clickPay();
 

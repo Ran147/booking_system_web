@@ -45,7 +45,10 @@ export interface PlanCheckoutRecaptcha {
  * @property confirmedEmail - The email the server stored (AC-KAN-22-11).
  * @property formattedPrice - The price the next payment sends; after
  *   priceChanged it is the new one (AC-KAN-22-08).
- * @property isPayDisabled - No reCAPTCHA token yet (AC-KAN-22-06).
+ * @property hasOpenedTerms - The terms were opened once; until then they cannot
+ *   be accepted (AS-11).
+ * @property isPayDisabled - No reCAPTCHA token yet (AC-KAN-22-06) or the terms
+ *   are not accepted (AC-KAN-23-03).
  * @property submitError - Why the last payment failed, shown above the form.
  */
 export interface PlanCheckoutViewModel {
@@ -57,8 +60,11 @@ export interface PlanCheckoutViewModel {
   readonly formattedPrice: string;
   readonly handleBackToDetail: () => void;
   readonly handleSubmit: (event?: BaseSyntheticEvent) => Promise<void>;
+  readonly handleTermsOpened: () => void;
+  readonly hasOpenedTerms: boolean;
   readonly isPayDisabled: boolean;
   readonly isPlanLoading: boolean;
+  readonly isTermsAccepted: boolean;
   readonly plan: Nullable<PlanDetail>;
   readonly recaptcha: PlanCheckoutRecaptcha;
   readonly submitError: Nullable<ContractError>;

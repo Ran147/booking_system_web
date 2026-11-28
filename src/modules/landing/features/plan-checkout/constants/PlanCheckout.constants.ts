@@ -41,3 +41,10 @@ export const PLAN_CHECKOUT_MESSAGE_KEY = Object.freeze({
 
 export type PlanCheckoutMessageKey =
   (typeof PLAN_CHECKOUT_MESSAGE_KEY)[keyof typeof PLAN_CHECKOUT_MESSAGE_KEY];
+
+// The terms open in another tab, so the checkout keeps its values
+// (AC-KAN-23-01).
+export const TERMS_LINK = Object.freeze({
+  RELATION: "noopener noreferrer",
+  TARGET: "_blank",
+} as const);

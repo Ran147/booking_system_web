@@ -18,8 +18,11 @@ export const PlanCheckoutPage = (): ReactElement => {
     formattedPrice,
     handleBackToDetail,
     handleSubmit,
+    handleTermsOpened,
+    hasOpenedTerms,
     isPayDisabled,
     isPlanLoading,
+    isTermsAccepted,
     plan,
     recaptcha,
     submitError,
@@ -63,9 +66,12 @@ export const PlanCheckoutPage = (): ReactElement => {
           fieldErrors={fieldErrors}
           fields={fields}
           formattedPrice={formattedPrice}
+          hasOpenedTerms={hasOpenedTerms}
           isPayDisabled={isPayDisabled}
+          isTermsAccepted={isTermsAccepted}
           onBackToDetail={handleBackToDetail}
           onSubmit={handleSubmit}
+          onTermsOpened={handleTermsOpened}
           plan={plan}
           recaptcha={recaptcha}
           submitError={submitError}
