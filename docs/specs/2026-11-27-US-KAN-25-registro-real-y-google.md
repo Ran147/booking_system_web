@@ -164,13 +164,13 @@ Mientras la cuenta de Google está conectada, la sesión de Firebase existe pero
 
 ## 6. Prueba manual
 
-Hasta KAN-24 no hay enlace en producción, así que para probar en un despliegue de Preview hace falta preparar uno:
+Hasta KAN-24 no hay enlace en producción. `scripts/create-sign-up-link.ts` (PR 4a) hace lo que hará ese correo:
 
-1. Un script local (fuera del repo, con la cuenta de servicio) crea un token con `createSignUpToken()` y guarda su hash y una fecha de vencimiento en **un `planCheckout` de prueba**. Se le pregunta al equipo antes de escribir en la base real.
-2. Se abre `/sign-up?token=<token>` y se prueba el registro con contraseña (4a) y con Google (4c).
-3. Al terminar se borran el negocio, el usuario, el `slug` y la marca del enlace de prueba.
+1. Pagar un plan en la página (`/plans`) con un correo de prueba.
+2. `npx tsx scripts/create-sign-up-link.ts <correo-del-pago> [url-del-sitio]`. Con la cuenta de servicio, busca el pago más reciente de ese correo que no tenga cuenta, le guarda el hash de un token nuevo y el vencimiento (7 días, `SIGN_UP_LINK.VALID_MILLISECONDS`) e imprime el enlace. El token no se guarda.
+3. Abrir el enlace y registrarse con contraseña (4a) o con Google (4c).
 
-Con el emulador, los tests de §3.4 y §4.3 cubren lo mismo sin tocar la base real.
+Escribe en la base real, así que se usa solo con pagos de prueba. Con el emulador, los tests de §3.4 y §4.3 cubren lo mismo.
 
 ## 7. Decisiones
 
