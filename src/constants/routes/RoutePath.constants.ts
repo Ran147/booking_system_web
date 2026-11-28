@@ -34,6 +34,7 @@ export const ROUTE_PATH = {
     SERVICE_NEW: "services/new",
     SERVICES: "services",
     SETTINGS: "settings",
+    SETTINGS_PASSWORD: "settings/password",
     SUBSCRIPTION: "subscription",
   },
   CUSTOMER: {

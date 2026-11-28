@@ -2,13 +2,24 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Language } from "@/constants";
 import { testI18n } from "@/test-utils";
+import type { Nullable } from "@/types";
 
 /** Accessible actions and queries for the KAN-51 settings page. */
 export interface SettingsPageObject {
+  /** Opens the business-profile settings option. */
+  clickBusinessProfile: () => Promise<void>;
+  /** Opens the password settings option. */
+  clickPasswordSettings: () => Promise<void>;
+  /** Returns the subscriber-only business-profile option. */
+  getBusinessProfileLink: () => HTMLElement;
   /** Returns the current theme option by its translated label. */
   getThemeOption: (accessibleName: string) => HTMLInputElement;
   /** Returns the language selector by its translated label. */
   getLanguageSelector: () => HTMLSelectElement;
+  /** Returns the password settings option. */
+  getPasswordSettingsLink: () => HTMLElement;
+  /** Returns null when the business-profile option is hidden. */
+  queryBusinessProfileLink: () => Nullable<HTMLElement>;
   /** Selects one of the supported interface languages. */
   selectLanguage: (language: Language) => Promise<void>;
   /** Selects the dark theme. */
@@ -28,9 +39,37 @@ export const createSettingsPage = (): SettingsPageObject => {
     });
 
   return {
+    clickBusinessProfile: async (): Promise<void> => {
+      await user.click(
+        screen.getByRole("link", {
+          name: testI18n.t(
+            "business:settings.navigation.businessProfile.action",
+          ),
+        }),
+      );
+    },
+    clickPasswordSettings: async (): Promise<void> => {
+      await user.click(
+        screen.getByRole("link", {
+          name: testI18n.t("business:settings.navigation.password.action"),
+        }),
+      );
+    },
+    getBusinessProfileLink: (): HTMLElement =>
+      screen.getByRole("link", {
+        name: testI18n.t("business:settings.navigation.businessProfile.action"),
+      }),
     getThemeOption: (accessibleName): HTMLInputElement =>
       screen.getByRole("radio", { name: accessibleName }),
     getLanguageSelector,
+    getPasswordSettingsLink: (): HTMLElement =>
+      screen.getByRole("link", {
+        name: testI18n.t("business:settings.navigation.password.action"),
+      }),
+    queryBusinessProfileLink: (): Nullable<HTMLElement> =>
+      screen.queryByRole("link", {
+        name: testI18n.t("business:settings.navigation.businessProfile.action"),
+      }),
     selectLanguage: async (language): Promise<void> => {
       await user.selectOptions(getLanguageSelector(), language);
     },
