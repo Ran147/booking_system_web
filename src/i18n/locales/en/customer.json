@@ -185,5 +185,13 @@
     "serviceDetail": "{{minutes}} min · {{price}}",
     "subtitle": "Choose the service you want to book.",
     "title": "Book an appointment"
+  },
+  "signUp": {
+    "verification": {
+      "pending": "Your email is not verified yet. Check your inbox or request another email.",
+      "resendAction": "Resend email",
+      "sent": "We sent you an email to verify your account. Check your inbox.",
+      "tooManyRequests": "You requested several emails in a row. Wait a few minutes before trying again."
+    }
   }
 }

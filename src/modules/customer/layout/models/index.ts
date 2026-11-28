@@ -12,3 +12,8 @@ export type {
   CustomerNavbarProps,
   CustomerNavbarViewModel,
 } from "./CustomerLayout.model";
+export type {
+  EmailVerificationPendingBannerViewModel,
+  ResendVerificationEmailVariables,
+  ResendVerificationFeedback,
+} from "./EmailVerificationPendingBanner.model";

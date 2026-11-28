@@ -185,5 +185,13 @@
     "serviceDetail": "{{minutes}} min · {{price}}",
     "subtitle": "Elige el servicio que quieres reservar.",
     "title": "Reservar una cita"
+  },
+  "signUp": {
+    "verification": {
+      "pending": "Tu correo todavía no está verificado. Revisa tu bandeja de entrada o pide otro correo.",
+      "resendAction": "Reenviar correo",
+      "sent": "Te enviamos un correo para verificar tu cuenta. Revisa tu bandeja de entrada.",
+      "tooManyRequests": "Pediste varios correos seguidos. Espera unos minutos antes de intentarlo de nuevo."
+    }
   }
 }

@@ -3,7 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router";
 import { PortalShell, ViewStateSwitch } from "@/components";
 import { ERROR_MESSAGE_KEY, I18N_NAMESPACE } from "@/constants";
-import { CustomerFooter, CustomerNavbar } from "./components";
+import {
+  CustomerFooter,
+  CustomerNavbar,
+  EmailVerificationPendingBanner,
+} from "./components";
 import { useCustomerLayoutViewModel } from "./hooks/useCustomerLayoutViewModel";
 
 export const CustomerLayout = (): ReactElement => {
@@ -17,6 +21,7 @@ export const CustomerLayout = (): ReactElement => {
       header={<CustomerNavbar business={businessProfile} />}
       title={t("layout.title")}
     >
+      <EmailVerificationPendingBanner />
       <ViewStateSwitch
         emptyMessage={t("layout.businessNotFound")}
         errorMessageKey={ERROR_MESSAGE_KEY.NETWORK}
