@@ -9,7 +9,10 @@ import {
   type Firestore,
 } from "firebase-admin/firestore";
 import { verifyRecaptchaToken } from "../functions/src/auth/verifyRecaptchaToken.js";
+import { handleCheckBusinessSlug } from "../functions/src/billing/handlers/handleCheckBusinessSlug.js";
+import { handleCompleteSubscriberSignUp } from "../functions/src/billing/handlers/handleCompleteSubscriberSignUp.js";
 import { handlePayPlanCheckout } from "../functions/src/billing/handlers/handlePayPlanCheckout.js";
+import { handleValidateSignUpLink } from "../functions/src/billing/handlers/handleValidateSignUpLink.js";
 import { handleCreateBooking } from "../functions/src/bookings/handlers/handleCreateBooking.js";
 import { handleGetAvailability } from "../functions/src/bookings/handlers/handleGetAvailability.js";
 import { CallableFailure } from "../functions/src/shared/CallableFailure.js";
@@ -68,10 +71,6 @@ const MONEY = Object.freeze({
   CENTS_PER_UNIT: 100,
 } as const);
 
-const TIME_MS = Object.freeze({
-  THIRTY_DAYS: 2_592_000_000,
-} as const);
-
 const BOOKING_CONFIRMATION_MODE = Object.freeze({
   AUTOMATIC: "automatic",
   MANUAL: "manual",
@@ -110,10 +109,8 @@ const RECAPTCHA_SECRET = Object.freeze({
   MISSING_MESSAGE: "RECAPTCHA_SECRET_KEY is not configured",
 } as const);
 
-// Error codes the Admin SDK reports: Auth as text, Firestore as a gRPC status.
+// Error codes the Admin SDK reports.
 const FIREBASE_ADMIN_ERROR_CODE = Object.freeze({
-  EMAIL_ALREADY_EXISTS: "auth/email-already-exists",
-  FIRESTORE_ALREADY_EXISTS: 6,
   USER_NOT_FOUND: "auth/user-not-found",
 } as const);
 
@@ -138,13 +135,6 @@ const PASSWORD_RESET = Object.freeze({
     "FIREBASE_WEB_API_KEY",
     "VITE_FIREBASE_API_KEY",
   ]),
-} as const);
-
-// Mirror of SIGN_UP_ERROR_REASON in
-// functions/src/billing/constants/SubscriberSignUp.constants.ts — keep in sync.
-const SIGN_UP_ERROR_REASON = Object.freeze({
-  ACCOUNT_EXISTS: "accountExists",
-  SLUG_TAKEN: "slugTaken",
 } as const);
 
 const TEST_AUTH_FIXTURE = Object.freeze({
@@ -575,6 +565,7 @@ const isCustomerCaller = (caller: Nullable<Caller>): caller is Caller =>
 // HTTP status of each code a shared handler of functions/src reports (Q8).
 const CALLABLE_FAILURE_HTTP_STATUS: Readonly<Record<string, number>> =
   Object.freeze({
+    "already-exists": HTTP_STATUS.CONFLICT,
     "failed-precondition": HTTP_STATUS.PRECONDITION_FAILED,
     "invalid-argument": HTTP_STATUS.BAD_REQUEST,
     "not-found": HTTP_STATUS.NOT_FOUND,
@@ -594,6 +585,22 @@ const assertRecaptchaInVercel = async (
     throw new CallableFailure("unavailable", RECAPTCHA_SECRET.MISSING_MESSAGE);
   }
   await verifyRecaptchaToken(recaptchaToken, secretKey);
+};
+
+// Where the sign-up handler records a handled failure (claims retried, an
+// account or a sign-up that could not be undone): one JSON line on stderr,
+// which the Vercel logs keep.
+const reportSignUpErrorInVercel = (
+  message: string,
+  context: Readonly<Record<string, unknown>>,
+): void => {
+  const loggedContext = Object.fromEntries(
+    Object.entries(context).map(([key, value]) => [
+      key,
+      value instanceof Error ? value.message : value,
+    ]),
+  );
+  process.stderr.write(`${JSON.stringify({ message, ...loggedContext })}\n`);
 };
 
 // Runs a shared handler of functions/src (Q8) and answers like a callable:
@@ -1021,32 +1028,30 @@ export default async function handler(
       return;
     }
 
+    // KAN-25: the sign-up link, the slug check and the sign-up run the same
+    // handlers as the emulator callables (Q8). Public: the link token is the
+    // credential.
     if (functionName === FUNCTION_NAME.VALIDATE_SIGN_UP_LINK) {
-      const rawToken = String(payload.signUpToken || "");
-      const signUpToken = decodeURIComponent(rawToken);
-      const email = signUpToken.includes("@")
-        ? signUpToken
-        : "nuevo-negocio@demo.com";
-      sendJsonResponse(response, HTTP_STATUS.OK, {
-        amountInCents: 2900,
-        billingPeriod: "monthly",
-        checkoutEmail: email,
-        email,
-        planName: "Plan Profesional",
-      });
+      await runSharedHandler(response, () =>
+        handleValidateSignUpLink({
+          caller: null,
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
       return;
     }
 
     if (functionName === FUNCTION_NAME.CHECK_BUSINESS_SLUG) {
-      const slug = String(payload.slug || "").toLowerCase();
-      const slugDocument = await firestore
-        .collection("businessSlugs")
-        .doc(slug)
-        .get();
-
-      sendJsonResponse(response, HTTP_STATUS.OK, {
-        isAvailable: !slugDocument.exists,
-      });
+      await runSharedHandler(response, () =>
+        handleCheckBusinessSlug({
+          caller: null,
+          firestore,
+          now: new Date(),
+          payload,
+        }),
+      );
       return;
     }
 
@@ -1225,187 +1230,20 @@ export default async function handler(
       return;
     }
 
+    // The reCAPTCHA is checked with RECAPTCHA_SECRET_KEY, fail-closed
+    // without it: no account is created unchecked.
     if (functionName === FUNCTION_NAME.COMPLETE_SUBSCRIBER_SIGN_UP) {
-      const email = String(
-        payload.email || payload.signUpToken || "nuevo-negocio@demo.com",
+      await runSharedHandler(response, () =>
+        handleCompleteSubscriberSignUp({
+          assertRecaptcha: assertRecaptchaInVercel,
+          auth,
+          caller: null,
+          firestore,
+          now: new Date(),
+          payload,
+          reportError: reportSignUpErrorInVercel,
+        }),
       );
-      const password = String(payload.password || "Password123!");
-      const fullName = String(payload.fullName || "Nuevo Negocio");
-      const businessName = String(payload.businessName || "Mi Nuevo Negocio");
-      const businessSlug = String(
-        payload.businessSlug || "mi-nuevo-negocio",
-      ).toLowerCase();
-      const phone = payload.phone ? String(payload.phone) : null;
-      const businessId = `business-${businessSlug}`;
-
-      // A sign-up only creates: an email that already has an account is
-      // rejected and that account is left as it is (AC-KAN-25-09, AS-5).
-      let userId: string;
-      try {
-        const newUser = await auth.createUser({
-          displayName: fullName,
-          email,
-          emailVerified: true,
-          password,
-        });
-        userId = newUser.uid;
-      } catch (error) {
-        if (
-          hasErrorCode(error, FIREBASE_ADMIN_ERROR_CODE.EMAIL_ALREADY_EXISTS)
-        ) {
-          sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
-            details: { reason: SIGN_UP_ERROR_REASON.ACCOUNT_EXISTS },
-            error: "already-exists",
-            message: "An account already exists for the checkout email",
-          });
-          return;
-        }
-        throw error;
-      }
-
-      const slugReference = firestore
-        .collection("businessSlugs")
-        .doc(businessSlug);
-      const userReference = firestore.collection("users").doc(userId);
-      const businessReference = firestore
-        .collection("businesses")
-        .doc(businessId);
-      let isSlugReserved = false;
-      let isBusinessCreated = false;
-
-      try {
-        // create() fails when the document exists, so two sign-ups never get
-        // the same slug and an existing business is never rewritten
-        // (AC-KAN-25-18).
-        await slugReference.create({
-          businessId,
-          createdAt: Timestamp.now(),
-        });
-        isSlugReserved = true;
-
-        await auth.setCustomUserClaims(userId, {
-          businessId,
-          role: USER_ROLE.SUBSCRIBER,
-        });
-
-        await userReference.set(
-          {
-            businessId,
-            email,
-            fullName,
-            language: "en",
-            phone,
-            role: USER_ROLE.SUBSCRIBER,
-            theme: "system",
-            uid: userId,
-          },
-          { merge: true },
-        );
-
-        const currentPeriodEndsAt = Timestamp.fromMillis(
-          Date.now() + TIME_MS.THIRTY_DAYS,
-        );
-
-        await businessReference.create({
-          businessHours: {
-            friday: [{ closesAt: "19:00", opensAt: "09:00" }],
-            monday: [{ closesAt: "19:00", opensAt: "09:00" }],
-            saturday: [{ closesAt: "19:00", opensAt: "09:00" }],
-            sunday: [],
-            thursday: [{ closesAt: "19:00", opensAt: "09:00" }],
-            tuesday: [{ closesAt: "19:00", opensAt: "09:00" }],
-            wednesday: [{ closesAt: "19:00", opensAt: "09:00" }],
-          },
-          contactEmail: email,
-          contactPhone: phone,
-          currency: "CRC",
-          description: `Welcome to ${businessName}.`,
-          id: businessId,
-          logoUrl: null,
-          name: businessName,
-          ownerUserId: userId,
-          plan_id: "plan-pro",
-          reviewed_by: null,
-          slug: businessSlug,
-          socialLinks: [],
-          status: BUSINESS_STATUS.ACTIVE,
-          subscription: {
-            cancelAtPeriodEnd: false,
-            currentPeriodEndsAt,
-            planId: "plan-pro",
-            status: "active",
-          },
-          timeZone: "America/Costa_Rica",
-        });
-        isBusinessCreated = true;
-
-        await businessReference.collection("subscription").doc("current").set({
-          cancelAtPeriodEnd: false,
-          currentPeriodEndsAt,
-          planId: "plan-pro",
-          status: "active",
-        });
-
-        await businessReference
-          .collection("collaborators")
-          .doc(userId)
-          .set({
-            email,
-            fullName,
-            is_owner: true,
-            permissions: {
-              manage_bookings: true,
-              manage_customers: true,
-              manage_schedule_blocks: true,
-              manage_services: true,
-              view_reports: true,
-            },
-            phone,
-            serviceIds: ["service-default"],
-            status: "active",
-            uid: userId,
-          });
-
-        const serviceReference = businessReference
-          .collection("services")
-          .doc("service-default");
-        await serviceReference.set({
-          description: "Standard service",
-          discounts: [],
-          durationMinutes: 30,
-          name: "Standard Service",
-          priceInCents: 20000,
-          status: SERVICE_STATUS.ACTIVE,
-        });
-      } catch (error) {
-        // Undo only what this call created, so the visitor can try again
-        // with the same email (cloud-functions-standards §6).
-        await Promise.allSettled([
-          ...(isBusinessCreated
-            ? [firestore.recursiveDelete(businessReference)]
-            : []),
-          ...(isSlugReserved ? [slugReference.delete()] : []),
-          userReference.delete(),
-          auth.deleteUser(userId),
-        ]);
-
-        if (
-          hasErrorCode(
-            error,
-            FIREBASE_ADMIN_ERROR_CODE.FIRESTORE_ALREADY_EXISTS,
-          )
-        ) {
-          sendJsonResponse(response, HTTP_STATUS.CONFLICT, {
-            details: { reason: SIGN_UP_ERROR_REASON.SLUG_TAKEN },
-            error: "already-exists",
-            message: "The business slug is already taken",
-          });
-          return;
-        }
-        throw error;
-      }
-
-      sendJsonResponse(response, HTTP_STATUS.OK, { email });
       return;
     }
 

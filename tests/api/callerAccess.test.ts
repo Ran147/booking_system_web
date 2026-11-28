@@ -7,6 +7,7 @@ import { firebaseAdminFake } from "./firebaseAdminFake";
 // functions/ and firestore.rules. The shared booking handlers of functions/src
 // have their own tests; here they are replaced to check only who reaches them.
 const handlerFake = vi.hoisted(() => ({
+  handleCheckBusinessSlug: vi.fn(),
   handleCreateBooking: vi.fn(),
   handleGetAvailability: vi.fn(),
 }));
@@ -14,6 +15,13 @@ const handlerFake = vi.hoisted(() => ({
 vi.mock(
   "../../functions/src/bookings/handlers/handleGetAvailability.js",
   () => ({ handleGetAvailability: handlerFake.handleGetAvailability }),
+);
+
+vi.mock(
+  "../../functions/src/billing/handlers/handleCheckBusinessSlug.js",
+  () => ({
+    handleCheckBusinessSlug: handlerFake.handleCheckBusinessSlug,
+  }),
 );
 
 vi.mock("../../functions/src/bookings/handlers/handleCreateBooking.js", () => ({
@@ -575,14 +583,22 @@ describe("api callFunction: caller access (KAN-59)", () => {
   });
 
   it("KAN-59: a public action still works without a session", async () => {
+    handlerFake.handleCheckBusinessSlug.mockResolvedValue({
+      availability: "available",
+    });
+
     const result = await callApiFunction("checkBusinessSlug", {
-      slug: "libre",
+      businessSlug: "libre",
+      signUpToken: "sign-up-token",
     });
 
     expect(result).toEqual({
-      body: { isAvailable: true },
+      body: { availability: "available" },
       statusCode: HTTP_STATUS.OK,
     });
+    expect(handlerFake.handleCheckBusinessSlug).toHaveBeenCalledWith(
+      expect.objectContaining({ caller: null }),
+    );
   });
 
   it("KAN-59: an action that is not declared is denied by default", async () => {
